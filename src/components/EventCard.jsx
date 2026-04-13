@@ -22,13 +22,25 @@ export default function EventCard({ event, expanded = false, onToggle }) {
         >
           {venue?.short ?? '?'}
         </span>
-        <span className="event-title">{event.title}</span>
-        {shiftBadge && (
-          <span className="shift-badge" style={{ background: shiftBadge.color }}>
-            {shiftBadge.short}
-          </span>
-        )}
-        {event.time && <span className="event-time">{formatTime(event.time)}</span>}
+
+        <div className="event-card-stack">
+          <span className="event-title">{event.title}</span>
+          <div className="event-card-meta">
+            {event.time && (
+              <span className="event-time">{formatTime(event.time)}</span>
+            )}
+            {shiftBadge && (
+              <span className="shift-badge" style={{ background: shiftBadge.color }}>
+                {shiftBadge.short}
+              </span>
+            )}
+            {event.pax && <span className="event-pax">{event.pax}pax</span>}
+            {event.menu_cat && (
+              <span className="menu-cat-badge">{event.menu_cat}</span>
+            )}
+          </div>
+        </div>
+
         <span
           className={`source-dot ${event.source}`}
           aria-label={event.source === 'crm' ? 'CRM' : 'Manual'}

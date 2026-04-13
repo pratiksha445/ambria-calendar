@@ -499,17 +499,33 @@
   border: none;
   background: transparent;
   width: 100%;
-  height: 44px;
-  padding: 0 10px;
+  min-height: 48px;
+  padding: 6px 10px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   color: inherit;
   font: inherit;
   text-align: left;
   cursor: pointer;
 }
 .event-card-row:active { background: rgba(0, 0, 0, 0.02); }
+
+.event-card-stack {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.event-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
 
 .event-venue-badge {
   color: #fff;
@@ -524,8 +540,7 @@
 }
 
 .event-title {
-  flex: 1;
-  min-width: 0;
+  display: block;
   font-weight: 700;
   font-size: 0.85rem;
   color: var(--ambria-ink);
@@ -537,10 +552,32 @@
 
 .event-time {
   flex-shrink: 0;
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   color: var(--ambria-muted);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.event-pax {
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  color: var(--ambria-muted);
+  font-weight: 600;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.menu-cat-badge {
+  flex-shrink: 0;
+  background: var(--ambria-chip);
+  color: var(--ambria-muted);
+  font-size: 0.6rem;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
 }
 
 .shift-badge {
