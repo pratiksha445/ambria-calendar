@@ -1,31 +1,42 @@
 :root {
   --ambria-bg: #FAFAF8;
+  --ambria-card: #FFFFFF;
+  --ambria-border: #E5E3DE;
   --ambria-accent: #E85D75;
-  --ambria-ink: #2A2A2A;
-  --ambria-muted: #6B6B6B;
+  --ambria-accent-bg: #FEF0F2;
+  --ambria-accent-border: #FAD6DD;
+  --ambria-ink: #1A1A1A;
+  --ambria-muted: #6E6E6E;
+  --ambria-faint: #A8A8A8;
+  --ambria-chip: #F4F2ED;
+  --radius: 10px;
 
   font-family: 'Nunito', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--ambria-ink);
+  background: var(--ambria-bg);
   line-height: 1.5;
   font-weight: 400;
-  color: var(--ambria-ink);
-  background-color: var(--ambria-bg);
-
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
-html,
-body,
-#root {
+html, body, #root {
   margin: 0;
   padding: 0;
   min-height: 100vh;
 }
 
 body {
-  background-color: var(--ambria-bg);
+  background: var(--ambria-bg);
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+input {
+  font-family: inherit;
 }
