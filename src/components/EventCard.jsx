@@ -1,6 +1,6 @@
 import { VENUE_BY_ID, SHIFT_BADGE } from '../config/venues.js'
 
-export default function EventCard({ event, expanded = false, onToggle }) {
+export default function EventCard({ event, expanded = false, onToggle, onEdit }) {
   const venue = VENUE_BY_ID[event.venue_id]
   const shiftBadge = event.shift ? SHIFT_BADGE[event.shift] : null
   const guest = event.guest_name || event.tender_name
@@ -66,6 +66,17 @@ export default function EventCard({ event, expanded = false, onToggle }) {
           )}
           {event.status && (
             <div><span className="k">Status</span> {event.status}</div>
+          )}
+          {event.source === 'manual' && onEdit && (
+            <div className="event-card-actions">
+              <button
+                type="button"
+                className="event-edit-btn"
+                onClick={(e) => { e.stopPropagation(); onEdit(event) }}
+              >
+                Edit
+              </button>
+            </div>
           )}
         </div>
       </div>

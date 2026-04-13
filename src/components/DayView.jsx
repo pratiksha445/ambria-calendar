@@ -3,7 +3,7 @@ import { formatDayHeader, toIsoDate } from '../lib/dates.js'
 import { VENUES } from '../config/venues.js'
 import EventCard from './EventCard.jsx'
 
-export default function DayView({ selectedDate, events }) {
+export default function DayView({ selectedDate, events, onEdit }) {
   const [expandedId, setExpandedId] = useState(null)
   const iso = toIsoDate(selectedDate)
   const dayEvents = events.filter((e) => e.date === iso)
@@ -34,6 +34,7 @@ export default function DayView({ selectedDate, events }) {
                 event={ev}
                 expanded={expandedId === ev.id}
                 onToggle={() => toggle(ev.id)}
+                onEdit={onEdit}
               />
             ))}
           </section>

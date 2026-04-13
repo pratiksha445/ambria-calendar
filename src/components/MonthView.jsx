@@ -5,7 +5,7 @@ import EventCard from './EventCard.jsx'
 
 const DOW = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
 
-export default function MonthView({ currentDate, selectedDate, onSelectDate, events }) {
+export default function MonthView({ currentDate, selectedDate, onSelectDate, events, onEdit }) {
   const [expandedId, setExpandedId] = useState(null)
   const today = new Date()
   const days = buildMonthGrid(currentDate)
@@ -72,6 +72,7 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, eve
               event={ev}
               expanded={expandedId === ev.id}
               onToggle={() => toggle(ev.id)}
+              onEdit={onEdit}
             />
           ))
         )}

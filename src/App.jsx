@@ -4,6 +4,7 @@ import Sidebar from './components/Sidebar.jsx'
 import MonthView from './components/MonthView.jsx'
 import WeekView from './components/WeekView.jsx'
 import DayView from './components/DayView.jsx'
+import BookingModal from './components/BookingModal.jsx'
 import { fetchEvents } from './lib/events.js'
 import { seedIfEmpty } from './lib/seedEvents.js'
 import { startOfMonth, endOfMonth, toIsoDate, addDays } from './lib/dates.js'
@@ -24,6 +25,8 @@ export default function App() {
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [modal, setModal] = useState(null) // null | { mode: 'new'|'edit', event? }
+  const [reloadKey, setReloadKey] = useState(0)
 
   useEffect(() => {
     let cancelled = false
@@ -46,7 +49,7 @@ export default function App() {
     load()
     return () => { cancelled = true }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentDate.getFullYear(), currentDate.getMonth()])
+  }, [currentDate.getFullYear(), currentDate.getMonth(), reloadKey])
 
   const filteredEvents = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -127,6 +130,33 @@ export default function App() {
 
   const filtersHideEverything = !loading && events.length > 0 && filteredEvents.length === 0
 
+  const openNew = () => {
+    const iso = toIsoDate(selectedDate)
+    setModal({ mode: 'new', event: { date: iso } })
+  }
+  const openEdit = (ev) => {
+    if (!ev || ev.source !== 'manual') return
+    setModal({ mode: 'edit', event: ev })
+  }
+  const closeModal = () => setModal(null)
+  const handleSaved = (row) => {
+    setModal(null)
+    if (row?.date) {
+      const d = new Date(row.date)
+      setSelectedDate(d)
+      if (d.getMonth() !== currentDate.getMonth() ||
+          d.getFullYear() !== currentDate.getFullYear()) {
+        setCurrentDate(d)
+        return // useEffect will refetch for the new month
+      }
+    }
+    setReloadKey((k) => k + 1)
+  }
+  const handleDeleted = () => {
+    setModal(null)
+    setReloadKey((k) => k + 1)
+  }
+
   return (
     <div className="app">
       <Sidebar
@@ -153,7 +183,7 @@ export default function App() {
           onNext={handleNext}
           onToday={handleToday}
           onMenu={() => setSidebarOpen(true)}
-          onAdd={() => alert('Booking form arrives in Phase 5')}
+          onAdd={openNew}
         />
         <main className="app-body">
           {error && <div className="error-banner">{error}</div>}
@@ -167,6 +197,7 @@ export default function App() {
               selectedDate={selectedDate}
               onSelectDate={handleSelectDate}
               events={filteredEvents}
+              onEdit={openEdit}
             />
           )}
           {view === 'week' && (
@@ -175,16 +206,25 @@ export default function App() {
               selectedDate={selectedDate}
               onSelectDate={handleSelectDate}
               events={filteredEvents}
+              onEdit={openEdit}
             />
           )}
           {view === 'day' && (
             <DayView
               selectedDate={selectedDate}
               events={filteredEvents}
+              onEdit={openEdit}
             />
           )}
         </main>
       </div>
+      <BookingModal
+        open={!!modal}
+        initial={modal?.event}
+        onClose={closeModal}
+        onSaved={handleSaved}
+        onDeleted={handleDeleted}
+      />
     </div>
   )
 }
