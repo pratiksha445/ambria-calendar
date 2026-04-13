@@ -1,0 +1,51 @@
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  text-align: center;
+  background-color: var(--ambria-bg);
+}
+
+.logo-mark {
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--ambria-accent);
+  color: #fff;
+  font-weight: 800;
+  font-size: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 6px 16px rgba(232, 93, 117, 0.25);
+  letter-spacing: -0.02em;
+}
+
+.title {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--ambria-ink);
+  letter-spacing: -0.01em;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--ambria-muted);
+  font-weight: 500;
+}
+
+@media (min-width: 640px) {
+  .title {
+    font-size: 2.5rem;
+  }
+
+  .subtitle {
+    font-size: 1.125rem;
+  }
+}

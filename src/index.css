@@ -1,0 +1,31 @@
+:root {
+  --ambria-bg: #FAFAF8;
+  --ambria-accent: #E85D75;
+  --ambria-ink: #2A2A2A;
+  --ambria-muted: #6B6B6B;
+
+  font-family: 'Nunito', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: var(--ambria-ink);
+  background-color: var(--ambria-bg);
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+body {
+  background-color: var(--ambria-bg);
+}
