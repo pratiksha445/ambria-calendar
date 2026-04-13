@@ -1,22 +1,21 @@
-import { useState } from 'react'
 import { VENUE_BY_ID, SHIFT_BADGE } from '../config/venues.js'
 
-export default function EventCard({ event, detailed = false }) {
-  const [open, setOpen] = useState(false)
+export default function EventCard({ event, expanded = false, onToggle }) {
   const venue = VENUE_BY_ID[event.venue_id]
   const shiftBadge = event.shift ? SHIFT_BADGE[event.shift] : null
-  const showDetails = detailed || open
-
   const guest = event.guest_name || event.tender_name
-  const subVenueOrVenue = event.sub_venue || event.venue_name
 
   return (
     <article
-      className="event-card"
+      className={`event-card ${expanded ? 'expanded' : ''}`}
       style={{ borderLeftColor: venue?.color ?? '#ccc' }}
-      onClick={() => !detailed && setOpen((v) => !v)}
     >
-      <div className="event-card-head">
+      <button
+        type="button"
+        className="event-card-row"
+        onClick={onToggle}
+        aria-expanded={expanded}
+      >
         <span
           className="event-venue-badge"
           style={{ background: venue?.color ?? '#ccc' }}
@@ -24,25 +23,21 @@ export default function EventCard({ event, detailed = false }) {
           {venue?.short ?? '?'}
         </span>
         <span className="event-title">{event.title}</span>
-      </div>
-
-      <div className="event-card-meta">
-        {event.time && <span className="event-time">{formatTime(event.time)}</span>}
         {shiftBadge && (
           <span className="shift-badge" style={{ background: shiftBadge.color }}>
             {shiftBadge.short}
           </span>
         )}
-        {subVenueOrVenue && !showDetails && (
-          <span className="event-subvenue">{subVenueOrVenue}</span>
-        )}
-        <span className={`source-badge ${event.source}`}>
-          {event.source === 'crm' ? 'CRM' : 'Manual'}
-        </span>
-      </div>
+        {event.time && <span className="event-time">{formatTime(event.time)}</span>}
+        <span
+          className={`source-dot ${event.source}`}
+          aria-label={event.source === 'crm' ? 'CRM' : 'Manual'}
+          title={event.source === 'crm' ? 'CRM' : 'Manual'}
+        />
+      </button>
 
-      {showDetails && (
-        <div className="event-card-details">
+      <div className="event-card-details" aria-hidden={!expanded}>
+        <div className="event-card-details-inner">
           {event.sub_venue && (
             <div><span className="k">Sub-venue</span> {event.sub_venue}</div>
           )}
@@ -62,12 +57,11 @@ export default function EventCard({ event, detailed = false }) {
             <div><span className="k">Status</span> {event.status}</div>
           )}
         </div>
-      )}
+      </div>
     </article>
   )
 }
 
 function formatTime(t) {
-  // Supabase returns time as "HH:MM:SS" — trim to HH:MM
   return typeof t === 'string' ? t.slice(0, 5) : t
 }

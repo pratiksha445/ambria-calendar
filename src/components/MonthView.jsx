@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { buildMonthGrid, isSameDay, toIsoDate } from '../lib/dates.js'
 import { VENUE_BY_ID } from '../config/venues.js'
 import EventCard from './EventCard.jsx'
@@ -5,12 +6,15 @@ import EventCard from './EventCard.jsx'
 const DOW = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
 
 export default function MonthView({ currentDate, selectedDate, onSelectDate, events }) {
+  const [expandedId, setExpandedId] = useState(null)
   const today = new Date()
   const days = buildMonthGrid(currentDate)
   const monthIndex = currentDate.getMonth()
   const eventsByDay = groupByDate(events)
   const selIso = toIsoDate(selectedDate)
   const selectedEvents = eventsByDay[selIso] ?? []
+
+  const toggle = (id) => setExpandedId((prev) => (prev === id ? null : id))
 
   return (
     <div className="month-view">
@@ -62,7 +66,14 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, eve
         {selectedEvents.length === 0 ? (
           <div className="empty-state">No bookings</div>
         ) : (
-          selectedEvents.map((ev) => <EventCard key={ev.id} event={ev} />)
+          selectedEvents.map((ev) => (
+            <EventCard
+              key={ev.id}
+              event={ev}
+              expanded={expandedId === ev.id}
+              onToggle={() => toggle(ev.id)}
+            />
+          ))
         )}
       </div>
     </div>

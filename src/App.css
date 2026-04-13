@@ -363,10 +363,10 @@
 /* ---------- Event list (shared by month/week) ---------- */
 
 .event-list {
-  margin-top: 18px;
+  margin-top: 16px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 6px;
 }
 
 .event-list-header {
@@ -452,54 +452,64 @@
 }
 
 .day-group {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 4px;
 }
 
 .day-group-title {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-weight: 700;
+  gap: 6px;
+  padding: 2px 0 4px;
+  font-size: 0.7rem;
+}
+
+.day-group-short {
+  font-weight: 800;
+  color: var(--ambria-ink);
+  letter-spacing: 0.04em;
   font-size: 0.72rem;
-  color: var(--ambria-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
 }
 
 .day-group-count {
   background: var(--ambria-chip);
   color: var(--ambria-muted);
-  font-size: 0.65rem;
-  padding: 2px 8px;
+  font-size: 0.62rem;
+  padding: 1px 7px;
   border-radius: 999px;
   font-weight: 700;
 }
 
-/* ---------- Event card ---------- */
+/* ---------- Event card (compact, tap-to-expand) ---------- */
 
 .event-card {
   background: var(--ambria-card);
   border: 1px solid var(--ambria-border);
-  border-left-width: 4px;
-  border-radius: var(--radius);
-  padding: 10px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  cursor: pointer;
-  transition: box-shadow .15s ease, transform .1s ease;
+  border-left-width: 3px;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: box-shadow .15s ease;
 }
-.event-card:hover { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); }
-.event-card:active { transform: translateY(1px); }
+.event-card:hover { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); }
 
-.event-card-head {
+.event-card-row {
+  appearance: none;
+  border: none;
+  background: transparent;
+  width: 100%;
+  height: 44px;
+  padding: 0 10px;
   display: flex;
   align-items: center;
   gap: 8px;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
 }
+.event-card-row:active { background: rgba(0, 0, 0, 0.02); }
 
 .event-venue-badge {
   color: #fff;
@@ -510,38 +520,33 @@
   letter-spacing: 0.04em;
   flex-shrink: 0;
   text-transform: uppercase;
+  line-height: 1.1;
 }
 
 .event-title {
+  flex: 1;
+  min-width: 0;
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: var(--ambria-ink);
-  line-height: 1.25;
-  word-break: break-word;
-}
-
-.event-card-meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .event-time {
-  font-size: 0.8rem;
+  flex-shrink: 0;
+  font-size: 0.78rem;
   color: var(--ambria-muted);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
 
-.event-subvenue {
-  font-size: 0.78rem;
-  color: var(--ambria-muted);
-}
-
 .shift-badge {
+  flex-shrink: 0;
   color: #fff;
-  font-size: 0.62rem;
+  font-size: 0.6rem;
   font-weight: 800;
   padding: 2px 6px;
   border-radius: 4px;
@@ -549,41 +554,47 @@
   line-height: 1.1;
 }
 
-.source-badge {
-  font-size: 0.58rem;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  padding: 2px 6px;
-  border-radius: 4px;
-  text-transform: uppercase;
-  border: 1px solid transparent;
-  line-height: 1.1;
+.source-dot {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  box-sizing: border-box;
 }
-.source-badge.crm {
-  background: var(--ambria-chip);
-  color: var(--ambria-muted);
+.source-dot.crm {
+  background: #22C55E;
 }
-.source-badge.manual {
-  background: var(--ambria-accent-bg);
-  color: var(--ambria-accent);
-  border-color: var(--ambria-accent-border);
+.source-dot.manual {
+  background: transparent;
+  border: 1.5px solid var(--ambria-accent);
 }
 
+/* Expanded details — smooth 200ms max-height transition */
 .event-card-details {
-  margin-top: 4px;
-  padding-top: 8px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 200ms ease;
+}
+.event-card.expanded .event-card-details {
+  max-height: 400px;
+}
+
+.event-card-details-inner {
+  padding: 4px 12px 12px;
   border-top: 1px dashed var(--ambria-border);
   display: grid;
   gap: 4px;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   color: var(--ambria-ink);
+  margin-top: 2px;
+  padding-top: 10px;
 }
-.event-card-details .k {
+.event-card-details-inner .k {
   display: inline-block;
   min-width: 74px;
   color: var(--ambria-muted);
   font-weight: 700;
-  font-size: 0.65rem;
+  font-size: 0.64rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
@@ -596,8 +607,8 @@
   .day-cell { min-height: 86px; }
   .day-num { font-size: 0.95rem; }
   .day-dot { width: 7px; height: 7px; }
-  .event-list { margin-top: 24px; gap: 12px; }
-  .event-title { font-size: 1rem; }
+  .event-list { margin-top: 24px; gap: 8px; }
+  .event-title { font-size: 0.95rem; }
   .event-list,
   .day-view { max-width: 720px; margin-left: auto; margin-right: auto; }
 }
