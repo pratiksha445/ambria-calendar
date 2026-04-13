@@ -15,7 +15,7 @@ export default function Header({
   return (
     <header className="app-header">
       <div className="header-row">
-        <button className="icon-btn" onClick={onMenu} aria-label="Open menu">
+        <button className="icon-btn header-menu" onClick={onMenu} aria-label="Open menu">
           <MenuIcon />
         </button>
 

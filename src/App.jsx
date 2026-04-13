@@ -11,6 +11,7 @@ import { VENUES } from './config/venues.js'
 import './App.css'
 
 const ALL_VENUE_IDS = VENUES.map((v) => v.id)
+const ALL_SOURCES = ['crm', 'manual']
 
 export default function App() {
   const [currentDate, setCurrentDate] = useState(() => new Date())
@@ -19,11 +20,11 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [events, setEvents] = useState([])
   const [activeFilters, setActiveFilters] = useState(() => new Set(ALL_VENUE_IDS))
+  const [activeSources, setActiveSources] = useState(() => new Set(ALL_SOURCES))
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
-  // Fetch events for the currently-viewed month. Seeds sample data on first load.
   useEffect(() => {
     let cancelled = false
     async function load() {
@@ -44,7 +45,6 @@ export default function App() {
     }
     load()
     return () => { cancelled = true }
-    // Refetch only when the month actually changes, not on every day navigation
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentDate.getFullYear(), currentDate.getMonth()])
 
@@ -52,13 +52,15 @@ export default function App() {
     const q = search.trim().toLowerCase()
     return events.filter((ev) => {
       if (!activeFilters.has(ev.venue_id)) return false
+      if (!activeSources.has(ev.source)) return false
       if (!q) return true
       const hay = [
-        ev.title, ev.guest_name, ev.sales_person, ev.venue_name, ev.tender_name,
+        ev.guest_name, ev.tender_name, ev.title, ev.venue_name,
+        ev.sales_person, ev.phone,
       ].filter(Boolean).join(' ').toLowerCase()
       return hay.includes(q)
     })
-  }, [events, activeFilters, search])
+  }, [events, activeFilters, activeSources, search])
 
   const handlePrev = () => {
     if (view === 'month') {
@@ -103,6 +105,18 @@ export default function App() {
     })
   }
 
+  const toggleSource = (src) => {
+    setActiveSources((prev) => {
+      const next = new Set(prev)
+      if (next.has(src)) next.delete(src)
+      else next.add(src)
+      return next
+    })
+  }
+
+  const selectAllVenues = () => setActiveFilters(new Set(ALL_VENUE_IDS))
+  const selectNoVenues = () => setActiveFilters(new Set())
+
   const handleSelectDate = (d) => {
     setSelectedDate(d)
     if (d.getMonth() !== currentDate.getMonth() ||
@@ -110,6 +124,8 @@ export default function App() {
       setCurrentDate(d)
     }
   }
+
+  const filtersHideEverything = !loading && events.length > 0 && filteredEvents.length === 0
 
   return (
     <div className="app">
@@ -120,7 +136,13 @@ export default function App() {
         onSearch={setSearch}
         activeFilters={activeFilters}
         onToggleFilter={toggleFilter}
+        onSelectAllVenues={selectAllVenues}
+        onSelectNoVenues={selectNoVenues}
+        activeSources={activeSources}
+        onToggleSource={toggleSource}
         events={events}
+        totalCount={events.length}
+        shownCount={filteredEvents.length}
       />
       <div className="app-main">
         <Header
@@ -136,6 +158,9 @@ export default function App() {
         <main className="app-body">
           {error && <div className="error-banner">{error}</div>}
           {loading && <div className="loading">Loading…</div>}
+          {filtersHideEverything && (
+            <div className="filter-empty-banner">No events match your filters</div>
+          )}
           {view === 'month' && (
             <MonthView
               currentDate={currentDate}
