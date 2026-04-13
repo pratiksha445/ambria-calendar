@@ -4,6 +4,7 @@ export default function EventCard({ event, expanded = false, onToggle }) {
   const venue = VENUE_BY_ID[event.venue_id]
   const shiftBadge = event.shift ? SHIFT_BADGE[event.shift] : null
   const guest = event.guest_name || event.tender_name
+  const primary = buildPrimary(event)
 
   return (
     <article
@@ -24,7 +25,7 @@ export default function EventCard({ event, expanded = false, onToggle }) {
         </span>
 
         <div className="event-card-stack">
-          <span className="event-title">{event.title}</span>
+          <span className="event-primary">{primary}</span>
           <div className="event-card-meta">
             {event.time && (
               <span className="event-time">{formatTime(event.time)}</span>
@@ -34,18 +35,16 @@ export default function EventCard({ event, expanded = false, onToggle }) {
                 {shiftBadge.short}
               </span>
             )}
-            {event.pax && <span className="event-pax">{event.pax}pax</span>}
-            {event.menu_cat && (
-              <span className="menu-cat-badge">{event.menu_cat}</span>
+            {event.sales_person && (
+              <span className="event-sales">{event.sales_person}</span>
             )}
+            <span
+              className={`source-dot ${event.source}`}
+              aria-label={event.source === 'crm' ? 'CRM' : 'Manual'}
+              title={event.source === 'crm' ? 'CRM' : 'Manual'}
+            />
           </div>
         </div>
-
-        <span
-          className={`source-dot ${event.source}`}
-          aria-label={event.source === 'crm' ? 'CRM' : 'Manual'}
-          title={event.source === 'crm' ? 'CRM' : 'Manual'}
-        />
       </button>
 
       <div className="event-card-details" aria-hidden={!expanded}>
@@ -74,6 +73,42 @@ export default function EventCard({ event, expanded = false, onToggle }) {
   )
 }
 
+// Build the pipe-separated primary line from raw event fields (not the stored
+// title), so the UI layout is stable even when titles are manually overridden.
+function buildPrimary(event) {
+  if (event.venue_id === 'tender') {
+    return joinPipes([event.tender_name, event.event_type_text, event.venue_name])
+  }
+  if (event.venue_id === 'villa') {
+    return joinPipes([
+      event.guest_name,
+      event.sub_venue,
+      formatShortDate(event.check_in_date),
+    ])
+  }
+  return joinPipes([
+    event.guest_name,
+    event.event_type === 'Other' ? event.event_type_other : event.event_type,
+    event.pax ? `${event.pax}pax` : null,
+    event.menu_cat,
+    event.venue_name,
+  ])
+}
+
+function joinPipes(parts) {
+  return parts.filter(Boolean).join(' | ')
+}
+
 function formatTime(t) {
   return typeof t === 'string' ? t.slice(0, 5) : t
+}
+
+const SHORT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+function formatShortDate(iso) {
+  if (!iso || typeof iso !== 'string') return null
+  const [, m, d] = iso.split('-').map(Number)
+  if (!m || !d) return null
+  return `${d} ${SHORT_MONTHS[m - 1]}`
 }
