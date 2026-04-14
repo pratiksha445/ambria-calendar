@@ -6,7 +6,7 @@ import {
 } from '../config/formFields.js'
 import { autoTitle } from '../lib/autoTitle.js'
 import { sanitizeText, sanitizePhone, sanitizePax } from '../lib/sanitize.js'
-import { createEvent, updateEvent, deleteEvent, softDeleteEvent } from '../lib/events.js'
+import { createEvent, updateEvent, deleteEvent } from '../lib/events.js'
 import Field from './Field.jsx'
 
 function blankForm(venueId, defaults = {}) {
@@ -172,11 +172,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose }) {
     setSubmitError(null)
     setDeleting(true)
     try {
-      if (initial.source === 'manual') {
-        await deleteEvent(initial.id)
-      } else {
-        await softDeleteEvent(initial.id)
-      }
+      await deleteEvent(initial.id)
       onDeleted?.(initial.id)
     } catch (err) {
       console.error('[ambria] delete failed', err)

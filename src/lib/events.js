@@ -57,22 +57,6 @@ export async function updateEvent(id, eventData) {
 }
 
 /**
- * Soft-delete a CRM event — sets deleted_at so the row stays in the DB
- * (preventing re-creation on next sync) but disappears from the calendar.
- */
-export async function softDeleteEvent(id) {
-  const { data, error } = await supabase
-    .from('events')
-    .update({ deleted_at: new Date().toISOString() })
-    .eq('id', id)
-    .select()
-    .single()
-
-  if (error) throw error
-  return data
-}
-
-/**
  * Bulk-delete all events in a date range.
  * Manual events are hard-deleted; CRM events are soft-deleted (deleted_at).
  */
@@ -100,20 +84,33 @@ export async function bulkDeleteMonth(startDate, endDate) {
 }
 
 /**
- * Delete a manual event only — same guard as updateEvent.
+ * Delete any event by id.
+ * Manual events are hard-deleted; CRM events are soft-deleted (deleted_at).
  */
 export async function deleteEvent(id) {
-  const { data, error } = await supabase
+  // Fetch the event first to determine its source
+  const { data: event, error: fetchErr } = await supabase
     .from('events')
-    .delete()
+    .select('id, source')
     .eq('id', id)
-    .eq('source', 'manual')
-    .select()
     .maybeSingle()
 
-  if (error) throw error
-  if (!data) {
-    throw new Error(`Event ${id} is not a manual event or does not exist`)
+  if (fetchErr) throw fetchErr
+  if (!event) throw new Error(`Event ${id} not found`)
+
+  if (event.source === 'manual') {
+    const { error } = await supabase
+      .from('events')
+      .delete()
+      .eq('id', id)
+    if (error) throw error
+  } else {
+    const { error } = await supabase
+      .from('events')
+      .update({ deleted_at: new Date().toISOString() })
+      .eq('id', id)
+    if (error) throw error
   }
-  return data
+
+  return event
 }

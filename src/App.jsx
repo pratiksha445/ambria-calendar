@@ -5,7 +5,7 @@ import MonthView from './components/MonthView.jsx'
 import WeekView from './components/WeekView.jsx'
 import DayView from './components/DayView.jsx'
 import BookingModal from './components/BookingModal.jsx'
-import { fetchEvents, deleteEvent, softDeleteEvent, bulkDeleteMonth } from './lib/events.js'
+import { fetchEvents, deleteEvent, bulkDeleteMonth } from './lib/events.js'
 import { seedIfEmpty } from './lib/seedEvents.js'
 import { startOfMonth, endOfMonth, toIsoDate, addDays, formatMonthYear } from './lib/dates.js'
 import { VENUES } from './config/venues.js'
@@ -167,11 +167,7 @@ export default function App() {
   }
   const handleCardDelete = async (ev) => {
     try {
-      if (ev.source === 'manual') {
-        await deleteEvent(ev.id)
-      } else {
-        await softDeleteEvent(ev.id)
-      }
+      await deleteEvent(ev.id)
       showToast('Event deleted')
       setReloadKey((k) => k + 1)
     } catch (err) {
