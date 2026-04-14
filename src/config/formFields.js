@@ -184,7 +184,7 @@ function addSections() {
       fields: [
         venueNameField(),
         S('Venue Type', 'venue_type', VENUE_TYPES),
-        T('Location', 'location', false, { placeholder: 'Google Maps link or address' }),
+        T('Location', 'location', false, { placeholder: 'Google Maps link or address', mapLink: true }),
       ],
     },
     {
@@ -221,7 +221,7 @@ function acSections() {
       fields: [
         venueNameField(),
         S('Venue Type', 'venue_type', VENUE_TYPES),
-        T('Location', 'location', false, { placeholder: 'Google Maps link or address' }),
+        T('Location', 'location', false, { placeholder: 'Google Maps link or address', mapLink: true }),
       ],
     },
     {
@@ -262,7 +262,7 @@ function aeeSections() {
       fields: [
         venueNameField(),
         S('Venue Type', 'venue_type', VENUE_TYPES),
-        T('Location', 'location', false, { placeholder: 'Google Maps link or address' }),
+        T('Location', 'location', false, { placeholder: 'Google Maps link or address', mapLink: true }),
       ],
     },
     {
@@ -294,7 +294,7 @@ function tenderSections() {
       title: 'Tender',
       fields: [
         venueNameField(),
-        T('Location', 'location', false, { placeholder: 'Google Maps link or address' }),
+        T('Location', 'location', false, { placeholder: 'Google Maps link or address', mapLink: true }),
         T('Event Type', 'event_type_text', true, { placeholder: 'e.g. Wedding Catering' }),
         statusField,
       ],

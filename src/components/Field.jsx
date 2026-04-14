@@ -66,6 +66,29 @@ export default function Field({ field, form, value, onChange, error, readOnly })
     control = <input type="date" {...commonProps} />
   } else if (field.type === 'time') {
     control = <input type="time" {...commonProps} />
+  } else if (field.mapLink) {
+    control = (
+      <div className="field-with-pin">
+        <input
+          type="text"
+          {...commonProps}
+          placeholder={field.placeholder ?? ''}
+          inputMode={field.inputMode}
+        />
+        {effectiveValue && (
+          <a
+            href={getMapsUrl(effectiveValue)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="map-pin-btn"
+            aria-label="Open in Google Maps"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <MapPinIcon />
+          </a>
+        )}
+      </div>
+    )
   } else {
     control = (
       <input
@@ -86,5 +109,20 @@ export default function Field({ field, form, value, onChange, error, readOnly })
       {control}
       {displayError && <div className="field-error">{displayError}</div>}
     </div>
+  )
+}
+
+function getMapsUrl(location) {
+  if (!location) return '#'
+  if (location.startsWith('http')) return location
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`
+}
+
+function MapPinIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E85D75" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+      <circle cx="12" cy="10" r="3" />
+    </svg>
   )
 }

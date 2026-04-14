@@ -99,6 +99,25 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
           {event.venue_type && (
             <div><span className="k">Type</span> {event.venue_type}</div>
           )}
+          {event.location && (
+            <div className="event-detail-location">
+              <span className="k">Location</span>
+              <span>{event.location}</span>
+              <a
+                href={getMapsUrl(event.location)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="map-pin-btn inline"
+                aria-label="Open in Google Maps"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E85D75" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
+              </a>
+            </div>
+          )}
           {(event.guest_name || event.tender_name) && (
             <div><span className="k">Guest</span> {event.guest_name || event.tender_name}</div>
           )}
@@ -163,4 +182,10 @@ function formatShortDate(iso) {
   const [, m, d] = iso.split('-').map(Number)
   if (!m || !d) return null
   return `${d} ${SHORT_MONTHS[m - 1]}`
+}
+
+function getMapsUrl(location) {
+  if (!location) return '#'
+  if (location.startsWith('http')) return location
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`
 }
