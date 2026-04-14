@@ -1061,6 +1061,7 @@
   margin-top: 6px;
   display: flex;
   justify-content: flex-end;
+  gap: 6px;
 }
 .event-edit-btn {
   padding: 6px 12px;
@@ -1074,6 +1075,51 @@
   font-family: inherit;
 }
 .event-edit-btn:hover { background: #FEF0F2; }
+
+.event-delete-btn {
+  padding: 6px 12px;
+  background: #fff;
+  color: var(--ambria-muted);
+  border: 1px solid var(--ambria-border);
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+}
+.event-delete-btn:hover {
+  color: var(--ambria-accent);
+  border-color: var(--ambria-accent);
+}
+
+.card-confirm-delete {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: var(--ambria-ink);
+  width: 100%;
+}
+
+/* ---------- Toast ---------- */
+
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1A1A1A;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  z-index: 300;
+  animation: fadeIn 180ms ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  pointer-events: none;
+}
 
 /* Desktop modal — center card, two-column grid, disable drag handle */
 @media (min-width: 768px) {

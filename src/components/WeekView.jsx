@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { startOfWeek, addDays, isSameDay, toIsoDate, dayLabel } from '../lib/dates.js'
 import EventCard from './EventCard.jsx'
 
-export default function WeekView({ currentDate, selectedDate, onSelectDate, events, onEdit }) {
+export default function WeekView({ currentDate, selectedDate, onSelectDate, events, onEdit, onDelete }) {
   const [expandedId, setExpandedId] = useState(null)
   const weekStart = startOfWeek(currentDate)
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
@@ -50,6 +50,7 @@ export default function WeekView({ currentDate, selectedDate, onSelectDate, even
               expanded={expandedId === ev.id}
               onToggle={() => toggle(ev.id)}
               onEdit={onEdit}
+              onDelete={onDelete}
             />
           ))
         )}

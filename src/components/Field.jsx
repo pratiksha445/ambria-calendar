@@ -1,10 +1,10 @@
 // Single form field renderer. Reads config from src/config/formFields.js
 // and handles showWhen / disabledWhen visibility + disabled states.
 
-export default function Field({ field, form, value, onChange, error }) {
+export default function Field({ field, form, value, onChange, error, readOnly }) {
   if (field.showWhen && !field.showWhen(form)) return null
 
-  const disabled = !!(field.disabledWhen && field.disabledWhen(form))
+  const disabled = readOnly || !!(field.disabledWhen && field.disabledWhen(form))
   const id = `field-${field.key}`
   const effectiveValue = value ?? ''
 

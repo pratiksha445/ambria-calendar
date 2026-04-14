@@ -287,6 +287,56 @@ function tenderSections() {
   ]
 }
 
+// ---------- Field parity: valid keys per category ----------
+
+const VENUE_FIELD_KEYS = [
+  'sub_venue', 'event_type', 'event_type_other', 'shift', 'date', 'time',
+  'booking_status', 'menu_type', 'menu_cat', 'fp_status',
+  'guest_name', 'phone', 'pax', 'sales_person', 'notes',
+]
+
+export const FIELD_MAP = {
+  ap: VENUE_FIELD_KEYS,
+  am: VENUE_FIELD_KEYS,
+  ae: VENUE_FIELD_KEYS,
+  ar: VENUE_FIELD_KEYS,
+  villa: [
+    'sub_venue', 'check_in_date', 'check_out_date', 'check_in_time', 'check_out_time',
+    'pool_included', 'meal_included', 'added_service',
+    'guest_name', 'phone', 'pax', 'sales_person', 'notes',
+  ],
+  add: [
+    'venue_name', 'venue_type', 'location', 'event_type', 'event_type_other',
+    'shift', 'date', 'time', 'decor_type',
+    'guest_name', 'phone', 'sales_person', 'notes',
+  ],
+  ac: [
+    'venue_name', 'venue_type', 'location', 'event_type', 'event_type_other',
+    'shift', 'date', 'time', 'menu_type', 'menu_cat',
+    'guest_name', 'phone', 'pax', 'sales_person', 'notes',
+  ],
+  aee: [
+    'venue_name', 'venue_type', 'location', 'event_type', 'event_type_other',
+    'shift', 'date', 'time',
+    'guest_name', 'phone', 'sales_person', 'notes',
+  ],
+  tender: [
+    'venue_name', 'location', 'event_type_text', 'date', 'end_date',
+    'tender_name', 'phone', 'notes',
+  ],
+}
+
+// Union of every saveable field key — used to null-out irrelevant columns.
+export const ALL_SAVEABLE_KEYS = [
+  'sub_venue', 'event_type', 'event_type_other', 'shift', 'date', 'time',
+  'booking_status', 'menu_type', 'menu_cat', 'fp_status',
+  'guest_name', 'phone', 'pax', 'sales_person', 'notes',
+  'check_in_date', 'check_out_date', 'check_in_time', 'check_out_time',
+  'pool_included', 'meal_included', 'added_service',
+  'venue_name', 'venue_type', 'location', 'decor_type',
+  'tender_name', 'event_type_text', 'end_date',
+]
+
 // ---------- Public API ----------
 
 const BUILDERS = {

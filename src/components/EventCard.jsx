@@ -1,10 +1,22 @@
+import { useEffect, useState } from 'react'
 import { VENUE_BY_ID, SHIFT_BADGE } from '../config/venues.js'
 
-export default function EventCard({ event, expanded = false, onToggle, onEdit }) {
+export default function EventCard({ event, expanded = false, onToggle, onEdit, onDelete }) {
   const venue = VENUE_BY_ID[event.venue_id]
   const shiftBadge = event.shift ? SHIFT_BADGE[event.shift] : null
-  const guest = event.guest_name || event.tender_name
   const primary = buildPrimary(event)
+  const [confirmDel, setConfirmDel] = useState(false)
+
+  // Reset confirm state when card collapses
+  useEffect(() => {
+    if (!expanded) setConfirmDel(false)
+  }, [expanded])
+
+  const handleDelete = (e) => {
+    e.stopPropagation()
+    onDelete?.(event)
+    setConfirmDel(false)
+  }
 
   return (
     <article
@@ -58,7 +70,9 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit })
           {event.venue_type && (
             <div><span className="k">Type</span> {event.venue_type}</div>
           )}
-          {guest && <div><span className="k">Guest</span> {guest}</div>}
+          {(event.guest_name || event.tender_name) && (
+            <div><span className="k">Guest</span> {event.guest_name || event.tender_name}</div>
+          )}
           {event.phone && <div><span className="k">Phone</span> {event.phone}</div>}
           {event.pax && <div><span className="k">Pax</span> {event.pax}</div>}
           {event.sales_person && (
@@ -67,25 +81,54 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit })
           {event.status && (
             <div><span className="k">Status</span> {event.status}</div>
           )}
-          {event.source === 'manual' && onEdit && (
-            <div className="event-card-actions">
-              <button
-                type="button"
-                className="event-edit-btn"
-                onClick={(e) => { e.stopPropagation(); onEdit(event) }}
-              >
-                Edit
-              </button>
-            </div>
-          )}
+          <div className="event-card-actions">
+            {confirmDel ? (
+              <div className="card-confirm-delete">
+                <span>Delete this event?</span>
+                <button
+                  type="button"
+                  className="btn-danger"
+                  onClick={handleDelete}
+                >
+                  Delete
+                </button>
+                <button
+                  type="button"
+                  className="btn-ghost"
+                  onClick={(e) => { e.stopPropagation(); setConfirmDel(false) }}
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <>
+                {onEdit && (
+                  <button
+                    type="button"
+                    className="event-edit-btn"
+                    onClick={(e) => { e.stopPropagation(); onEdit(event) }}
+                  >
+                    {event.source === 'manual' ? 'Edit' : 'View'}
+                  </button>
+                )}
+                {onDelete && (
+                  <button
+                    type="button"
+                    className="event-delete-btn"
+                    onClick={(e) => { e.stopPropagation(); setConfirmDel(true) }}
+                  >
+                    Delete
+                  </button>
+                )}
+              </>
+            )}
+          </div>
         </div>
       </div>
     </article>
   )
 }
 
-// Build the pipe-separated primary line from raw event fields (not the stored
-// title), so the UI layout is stable even when titles are manually overridden.
 function buildPrimary(event) {
   if (event.venue_id === 'tender') {
     return joinPipes([event.tender_name, event.event_type_text, event.venue_name])

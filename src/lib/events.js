@@ -10,6 +10,7 @@ export async function fetchEvents(startDate, endDate) {
     .select('*')
     .gte('date', startDate)
     .lte('date', endDate)
+    .is('deleted_at', null)
     .order('date', { ascending: true })
     .order('time', { ascending: true, nullsFirst: true })
 
@@ -52,6 +53,22 @@ export async function updateEvent(id, eventData) {
   if (!data) {
     throw new Error(`Event ${id} is not a manual event or does not exist`)
   }
+  return data
+}
+
+/**
+ * Soft-delete a CRM event — sets deleted_at so the row stays in the DB
+ * (preventing re-creation on next sync) but disappears from the calendar.
+ */
+export async function softDeleteEvent(id) {
+  const { data, error } = await supabase
+    .from('events')
+    .update({ deleted_at: new Date().toISOString() })
+    .eq('id', id)
+    .select()
+    .single()
+
+  if (error) throw error
   return data
 }
 

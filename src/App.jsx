@@ -5,7 +5,7 @@ import MonthView from './components/MonthView.jsx'
 import WeekView from './components/WeekView.jsx'
 import DayView from './components/DayView.jsx'
 import BookingModal from './components/BookingModal.jsx'
-import { fetchEvents } from './lib/events.js'
+import { fetchEvents, deleteEvent, softDeleteEvent } from './lib/events.js'
 import { seedIfEmpty } from './lib/seedEvents.js'
 import { startOfMonth, endOfMonth, toIsoDate, addDays } from './lib/dates.js'
 import { VENUES } from './config/venues.js'
@@ -27,6 +27,7 @@ export default function App() {
   const [error, setError] = useState(null)
   const [modal, setModal] = useState(null) // null | { mode: 'new'|'edit', event? }
   const [reloadKey, setReloadKey] = useState(0)
+  const [toast, setToast] = useState(null)
 
   useEffect(() => {
     let cancelled = false
@@ -130,17 +131,23 @@ export default function App() {
 
   const filtersHideEverything = !loading && events.length > 0 && filteredEvents.length === 0
 
+  const showToast = (msg) => {
+    setToast(msg)
+    setTimeout(() => setToast(null), 2000)
+  }
+
   const openNew = () => {
     const iso = toIsoDate(selectedDate)
     setModal({ mode: 'new', event: { date: iso } })
   }
   const openEdit = (ev) => {
-    if (!ev || ev.source !== 'manual') return
+    if (!ev) return
     setModal({ mode: 'edit', event: ev })
   }
   const closeModal = () => setModal(null)
   const handleSaved = (row) => {
     setModal(null)
+    showToast('Booking saved')
     if (row?.date) {
       const d = new Date(row.date)
       setSelectedDate(d)
@@ -154,7 +161,21 @@ export default function App() {
   }
   const handleDeleted = () => {
     setModal(null)
+    showToast('Booking deleted')
     setReloadKey((k) => k + 1)
+  }
+  const handleCardDelete = async (ev) => {
+    try {
+      if (ev.source === 'manual') {
+        await deleteEvent(ev.id)
+      } else {
+        await softDeleteEvent(ev.id)
+      }
+      showToast('Booking deleted')
+      setReloadKey((k) => k + 1)
+    } catch (err) {
+      console.error('[ambria] card delete failed', err)
+    }
   }
 
   return (
@@ -198,6 +219,7 @@ export default function App() {
               onSelectDate={handleSelectDate}
               events={filteredEvents}
               onEdit={openEdit}
+              onDelete={handleCardDelete}
             />
           )}
           {view === 'week' && (
@@ -207,6 +229,7 @@ export default function App() {
               onSelectDate={handleSelectDate}
               events={filteredEvents}
               onEdit={openEdit}
+              onDelete={handleCardDelete}
             />
           )}
           {view === 'day' && (
@@ -214,6 +237,7 @@ export default function App() {
               selectedDate={selectedDate}
               events={filteredEvents}
               onEdit={openEdit}
+              onDelete={handleCardDelete}
             />
           )}
         </main>
@@ -225,6 +249,7 @@ export default function App() {
         onSaved={handleSaved}
         onDeleted={handleDeleted}
       />
+      {toast && <div className="toast">{toast}</div>}
     </div>
   )
 }
