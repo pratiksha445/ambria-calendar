@@ -73,6 +73,33 @@ export async function softDeleteEvent(id) {
 }
 
 /**
+ * Bulk-delete all events in a date range.
+ * Manual events are hard-deleted; CRM events are soft-deleted (deleted_at).
+ */
+export async function bulkDeleteMonth(startDate, endDate) {
+  // Hard delete manual events
+  const { error: manualErr } = await supabase
+    .from('events')
+    .delete()
+    .eq('source', 'manual')
+    .gte('date', startDate)
+    .lte('date', endDate)
+
+  if (manualErr) throw manualErr
+
+  // Soft delete CRM events
+  const { error: crmErr } = await supabase
+    .from('events')
+    .update({ deleted_at: new Date().toISOString() })
+    .neq('source', 'manual')
+    .gte('date', startDate)
+    .lte('date', endDate)
+    .is('deleted_at', null)
+
+  if (crmErr) throw crmErr
+}
+
+/**
  * Delete a manual event only — same guard as updateEvent.
  */
 export async function deleteEvent(id) {

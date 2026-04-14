@@ -5,9 +5,9 @@ import MonthView from './components/MonthView.jsx'
 import WeekView from './components/WeekView.jsx'
 import DayView from './components/DayView.jsx'
 import BookingModal from './components/BookingModal.jsx'
-import { fetchEvents, deleteEvent, softDeleteEvent } from './lib/events.js'
+import { fetchEvents, deleteEvent, softDeleteEvent, bulkDeleteMonth } from './lib/events.js'
 import { seedIfEmpty } from './lib/seedEvents.js'
-import { startOfMonth, endOfMonth, toIsoDate, addDays } from './lib/dates.js'
+import { startOfMonth, endOfMonth, toIsoDate, addDays, formatMonthYear } from './lib/dates.js'
 import { VENUES } from './config/venues.js'
 import './App.css'
 
@@ -28,6 +28,7 @@ export default function App() {
   const [modal, setModal] = useState(null) // null | { mode: 'new'|'edit', event? }
   const [reloadKey, setReloadKey] = useState(0)
   const [toast, setToast] = useState(null)
+  const [confirmBulk, setConfirmBulk] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -171,12 +172,29 @@ export default function App() {
       } else {
         await softDeleteEvent(ev.id)
       }
-      showToast('Booking deleted')
+      showToast('Event deleted')
       setReloadKey((k) => k + 1)
     } catch (err) {
       console.error('[ambria] card delete failed', err)
     }
   }
+
+  const handleClearMonth = () => setConfirmBulk(true)
+  const executeBulkDelete = async () => {
+    const start = toIsoDate(startOfMonth(currentDate))
+    const end = toIsoDate(endOfMonth(currentDate))
+    try {
+      await bulkDeleteMonth(start, end)
+      setConfirmBulk(false)
+      showToast(`All events in ${formatMonthYear(currentDate)} cleared`)
+      setReloadKey((k) => k + 1)
+    } catch (err) {
+      console.error('[ambria] bulk delete failed', err)
+    }
+  }
+
+  const manualCount = events.filter((e) => e.source === 'manual').length
+  const crmCount = events.filter((e) => e.source !== 'manual').length
 
   return (
     <div className="app">
@@ -205,6 +223,7 @@ export default function App() {
           onToday={handleToday}
           onMenu={() => setSidebarOpen(true)}
           onAdd={openNew}
+          onClearMonth={handleClearMonth}
         />
         <main className="app-body">
           {error && <div className="error-banner">{error}</div>}
@@ -249,6 +268,22 @@ export default function App() {
         onSaved={handleSaved}
         onDeleted={handleDeleted}
       />
+      {confirmBulk && (
+        <div className="modal-root" role="dialog" aria-modal="true">
+          <div className="modal-backdrop" onClick={() => setConfirmBulk(false)} />
+          <div className="bulk-delete-card">
+            <h3>Delete all events in {formatMonthYear(currentDate)}?</h3>
+            <p>
+              This will delete {manualCount} manual {manualCount === 1 ? 'event' : 'events'}
+              {crmCount > 0 && ` and hide ${crmCount} CRM ${crmCount === 1 ? 'event' : 'events'}`}
+            </p>
+            <div className="bulk-delete-actions">
+              <button className="btn-ghost" onClick={() => setConfirmBulk(false)}>Cancel</button>
+              <button className="btn-danger" onClick={executeBulkDelete}>Delete All</button>
+            </div>
+          </div>
+        </div>
+      )}
       {toast && <div className="toast">{toast}</div>}
     </div>
   )

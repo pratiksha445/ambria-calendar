@@ -46,6 +46,13 @@ const TM = (label, key, required = true, extra = {}) =>
 const TA = (label, key, required = false, extra = {}) =>
   ({ type: 'textarea', label, key, required, ...extra })
 
+// ---------- Input filters — strip invalid characters on keystroke ----------
+
+const nameFilter = (v) => v.replace(/[^a-zA-Z\s.']/g, '')
+const phoneFilter = (v) => v.replace(/[^\d\s+\-]/g, '')
+const paxFilter = (v) => v.replace(/\D/g, '')
+const venueNameFilter = (v) => v.replace(/[^a-zA-Z0-9\s.,\-'&()#]/g, '')
+
 // ---------- Conditional helpers ----------
 
 const notVMD = (f) => f.booking_status && f.booking_status !== 'VMD'
@@ -55,6 +62,29 @@ const isOther = (f) => f.event_type === 'Other'
 
 const statusField = S('Status', 'status', STATUSES)
 const notesField = TA('Notes', 'notes', false, { placeholder: 'Optional…' })
+
+// Reusable validated field builders
+const guestName = () => T('Guest Name', 'guest_name', true, {
+  placeholder: 'e.g. Mr. Sharma', filterFn: nameFilter, filterError: 'Only letters allowed',
+})
+const phoneReq = () => T('Phone', 'phone', true, {
+  filterFn: phoneFilter, filterError: 'Only numbers allowed', inputMode: 'tel',
+})
+const phoneOpt = () => T('Phone', 'phone', false, {
+  placeholder: 'Optional', filterFn: phoneFilter, filterError: 'Only numbers allowed', inputMode: 'tel',
+})
+const paxField = () => T('Pax', 'pax', true, {
+  filterFn: paxFilter, filterError: 'Only numbers allowed', inputMode: 'numeric',
+})
+const salesPersonField = () => T('Sales Person', 'sales_person', true, {
+  filterFn: nameFilter, filterError: 'Only letters allowed',
+})
+const venueNameField = (placeholder) => T('Venue Name', 'venue_name', true, {
+  placeholder: placeholder || 'Hotel Taj, Farmhouse…', filterFn: venueNameFilter,
+})
+const tenderNameField = () => T('Tender Name', 'tender_name', true, {
+  filterFn: nameFilter, filterError: 'Only letters allowed',
+})
 
 const eventTypeFields = [
   S('Event Type', 'event_type', EVENT_TYPES),
@@ -94,10 +124,10 @@ function ownVenueSections(venue) {
     {
       title: 'Guest',
       fields: [
-        T('Guest Name', 'guest_name', true, { placeholder: 'e.g. Mr. Sharma' }),
-        T('Phone', 'phone'),
-        T('Pax', 'pax'),
-        T('Sales Person', 'sales_person'),
+        guestName(),
+        phoneReq(),
+        paxField(),
+        salesPersonField(),
         notesField,
       ],
     },
@@ -136,10 +166,10 @@ function villaSections(venue) {
     {
       title: 'Guest',
       fields: [
-        T('Guest Name', 'guest_name'),
-        T('Phone', 'phone'),
-        T('Pax', 'pax'),
-        T('Sales Person', 'sales_person'),
+        guestName(),
+        phoneReq(),
+        paxField(),
+        salesPersonField(),
         notesField,
       ],
     },
@@ -152,7 +182,7 @@ function addSections() {
     {
       title: 'Venue',
       fields: [
-        T('Venue Name', 'venue_name', true, { placeholder: 'Hotel Taj, Farmhouse…' }),
+        venueNameField(),
         S('Venue Type', 'venue_type', VENUE_TYPES),
         T('Location', 'location', false, { placeholder: 'Google Maps link or address' }),
       ],
@@ -174,9 +204,9 @@ function addSections() {
     {
       title: 'Guest',
       fields: [
-        T('Guest Name', 'guest_name'),
-        T('Phone', 'phone'),
-        T('Sales Person', 'sales_person'),
+        guestName(),
+        phoneReq(),
+        salesPersonField(),
         notesField,
       ],
     },
@@ -189,7 +219,7 @@ function acSections() {
     {
       title: 'Venue',
       fields: [
-        T('Venue Name', 'venue_name'),
+        venueNameField(),
         S('Venue Type', 'venue_type', VENUE_TYPES),
         T('Location', 'location', false, { placeholder: 'Google Maps link or address' }),
       ],
@@ -214,10 +244,10 @@ function acSections() {
     {
       title: 'Guest',
       fields: [
-        T('Guest Name', 'guest_name'),
-        T('Phone', 'phone'),
-        T('Pax', 'pax'),
-        T('Sales Person', 'sales_person'),
+        guestName(),
+        phoneReq(),
+        paxField(),
+        salesPersonField(),
         notesField,
       ],
     },
@@ -230,7 +260,7 @@ function aeeSections() {
     {
       title: 'Venue',
       fields: [
-        T('Venue Name', 'venue_name'),
+        venueNameField(),
         S('Venue Type', 'venue_type', VENUE_TYPES),
         T('Location', 'location', false, { placeholder: 'Google Maps link or address' }),
       ],
@@ -248,9 +278,9 @@ function aeeSections() {
     {
       title: 'Guest',
       fields: [
-        T('Guest Name', 'guest_name'),
-        T('Phone', 'phone'),
-        T('Sales Person', 'sales_person'),
+        guestName(),
+        phoneReq(),
+        salesPersonField(),
         notesField,
       ],
     },
@@ -263,7 +293,7 @@ function tenderSections() {
     {
       title: 'Tender',
       fields: [
-        T('Venue Name', 'venue_name'),
+        venueNameField(),
         T('Location', 'location', false, { placeholder: 'Google Maps link or address' }),
         T('Event Type', 'event_type_text', true, { placeholder: 'e.g. Wedding Catering' }),
         statusField,
@@ -279,8 +309,8 @@ function tenderSections() {
     {
       title: 'Contact',
       fields: [
-        T('Tender Name', 'tender_name'),
-        T('Phone', 'phone', false, { placeholder: 'Optional' }),
+        tenderNameField(),
+        phoneOpt(),
         notesField,
       ],
     },

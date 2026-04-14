@@ -72,6 +72,12 @@
 .icon-btn:hover { background: rgba(0, 0, 0, 0.04); }
 .icon-btn.sm { padding: 6px; }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .book-btn {
   appearance: none;
   border: none;
@@ -86,6 +92,44 @@
   white-space: nowrap;
 }
 .book-btn:active { transform: translateY(1px); }
+
+.header-more-wrap {
+  position: relative;
+}
+.header-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+}
+.header-menu-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  background: #fff;
+  border: 1px solid var(--ambria-border);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 6;
+  padding: 4px;
+  min-width: 140px;
+}
+.header-menu-item {
+  appearance: none;
+  border: none;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  color: var(--ambria-ink);
+}
+.header-menu-item:hover { background: rgba(0, 0, 0, 0.04); }
+.header-menu-item.danger { color: var(--ambria-accent); }
+.header-menu-item.danger:hover { background: var(--ambria-accent-bg); }
 
 .view-tabs {
   display: inline-flex;
@@ -573,11 +617,17 @@
 }
 .event-card:hover { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); }
 
+.event-card-compact {
+  display: flex;
+  align-items: center;
+}
+
 .event-card-row {
   appearance: none;
   border: none;
   background: transparent;
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   min-height: 56px;
   padding: 8px 10px;
   display: flex;
@@ -589,6 +639,38 @@
   cursor: pointer;
 }
 .event-card-row:active { background: rgba(0, 0, 0, 0.02); }
+
+.card-trash-btn {
+  flex-shrink: 0;
+  padding: 8px 10px;
+  background: none;
+  border: none;
+  color: var(--ambria-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  opacity: 0.4;
+  transition: opacity 0.15s ease, color 0.15s ease;
+}
+.card-trash-btn:hover {
+  opacity: 1;
+  color: var(--ambria-accent);
+}
+
+.event-card-confirm {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ambria-ink);
+  min-height: 56px;
+}
+.event-card-confirm-actions {
+  display: flex;
+  gap: 6px;
+}
 
 .event-card-stack {
   flex: 1;
@@ -1119,6 +1201,37 @@
   animation: fadeIn 180ms ease;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   pointer-events: none;
+}
+
+/* ---------- Bulk delete confirmation ---------- */
+
+.bulk-delete-card {
+  position: relative;
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 380px;
+  width: calc(100% - 32px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  animation: fadeIn 180ms ease;
+  margin: auto;
+}
+.bulk-delete-card h3 {
+  margin: 0 0 8px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ambria-ink);
+}
+.bulk-delete-card p {
+  margin: 0 0 18px;
+  font-size: 0.875rem;
+  color: var(--ambria-muted);
+  line-height: 1.45;
+}
+.bulk-delete-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
 }
 
 /* Desktop modal — center card, two-column grid, disable drag handle */

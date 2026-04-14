@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { formatMonthYear } from '../lib/dates.js'
 
 const VIEWS = ['day', 'week', 'month']
@@ -11,7 +12,10 @@ export default function Header({
   onToday,
   onMenu,
   onAdd,
+  onClearMonth,
 }) {
+  const [menuOpen, setMenuOpen] = useState(false)
+
   return (
     <header className="app-header">
       <div className="header-row">
@@ -29,7 +33,34 @@ export default function Header({
           </button>
         </div>
 
-        <button className="book-btn" onClick={onAdd}>+ Book</button>
+        <div className="header-actions">
+          <button className="book-btn" onClick={onAdd}>+ Book</button>
+          <div className="header-more-wrap">
+            <button
+              className="icon-btn sm"
+              onClick={() => setMenuOpen((p) => !p)}
+              aria-label="More options"
+            >
+              <MoreIcon />
+            </button>
+            {menuOpen && (
+              <>
+                <div
+                  className="header-menu-backdrop"
+                  onClick={() => setMenuOpen(false)}
+                />
+                <div className="header-menu-dropdown">
+                  <button
+                    className="header-menu-item danger"
+                    onClick={() => { setMenuOpen(false); onClearMonth?.() }}
+                  >
+                    Clear Month
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
       </div>
 
       <div className="header-row sub">
@@ -67,6 +98,16 @@ function ChevronIcon({ dir }) {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <polyline points={points} />
+    </svg>
+  )
+}
+
+function MoreIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="5" r="1" />
+      <circle cx="12" cy="12" r="1" />
+      <circle cx="12" cy="19" r="1" />
     </svg>
   )
 }

@@ -7,12 +7,13 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
   const primary = buildPrimary(event)
   const [confirmDel, setConfirmDel] = useState(false)
 
-  // Reset confirm state when card collapses
   useEffect(() => {
     if (!expanded) setConfirmDel(false)
   }, [expanded])
 
-  const handleDelete = (e) => {
+  const startDel = (e) => { e.stopPropagation(); setConfirmDel(true) }
+  const cancelDel = (e) => { e.stopPropagation(); setConfirmDel(false) }
+  const doDelete = (e) => {
     e.stopPropagation()
     onDelete?.(event)
     setConfirmDel(false)
@@ -23,41 +24,69 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
       className={`event-card ${expanded ? 'expanded' : ''}`}
       style={{ borderLeftColor: venue?.color ?? '#ccc' }}
     >
-      <button
-        type="button"
-        className="event-card-row"
-        onClick={onToggle}
-        aria-expanded={expanded}
-      >
-        <span
-          className="event-venue-badge"
-          style={{ background: venue?.color ?? '#ccc' }}
-        >
-          {venue?.short ?? '?'}
-        </span>
-
-        <div className="event-card-stack">
-          <span className="event-primary">{primary}</span>
-          <div className="event-card-meta">
-            {event.time && (
-              <span className="event-time">{formatTime(event.time)}</span>
-            )}
-            {shiftBadge && (
-              <span className="shift-badge" style={{ background: shiftBadge.color }}>
-                {shiftBadge.short}
-              </span>
-            )}
-            {event.sales_person && (
-              <span className="event-sales">{event.sales_person}</span>
-            )}
-            <span
-              className={`source-dot ${event.source}`}
-              aria-label={event.source === 'crm' ? 'CRM' : 'Manual'}
-              title={event.source === 'crm' ? 'CRM' : 'Manual'}
-            />
+      {confirmDel ? (
+        <div className="event-card-confirm">
+          <span>Delete?</span>
+          <div className="event-card-confirm-actions">
+            <button type="button" className="btn-ghost" onClick={cancelDel}>Cancel</button>
+            <button type="button" className="btn-danger" onClick={doDelete}>Delete</button>
           </div>
         </div>
-      </button>
+      ) : (
+        <div className="event-card-compact">
+          <button
+            type="button"
+            className="event-card-row"
+            onClick={onToggle}
+            aria-expanded={expanded}
+          >
+            <span
+              className="event-venue-badge"
+              style={{ background: venue?.color ?? '#ccc' }}
+            >
+              {venue?.short ?? '?'}
+            </span>
+
+            <div className="event-card-stack">
+              <span className="event-primary">{primary}</span>
+              <div className="event-card-meta">
+                {event.time && (
+                  <span className="event-time">{formatTime(event.time)}</span>
+                )}
+                {shiftBadge && (
+                  <span className="shift-badge" style={{ background: shiftBadge.color }}>
+                    {shiftBadge.short}
+                  </span>
+                )}
+                {event.sales_person && (
+                  <span className="event-sales">{event.sales_person}</span>
+                )}
+                <span
+                  className={`source-dot ${event.source}`}
+                  aria-label={event.source === 'crm' ? 'CRM' : 'Manual'}
+                  title={event.source === 'crm' ? 'CRM' : 'Manual'}
+                />
+              </div>
+            </div>
+          </button>
+          {onDelete && (
+            <button
+              type="button"
+              className="card-trash-btn"
+              onClick={startDel}
+              aria-label="Delete event"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                <path d="M10 11v6" />
+                <path d="M14 11v6" />
+                <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+              </svg>
+            </button>
+          )}
+        </div>
+      )}
 
       <div className="event-card-details" aria-hidden={!expanded}>
         <div className="event-card-details-inner">
@@ -81,48 +110,17 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
           {event.status && (
             <div><span className="k">Status</span> {event.status}</div>
           )}
-          <div className="event-card-actions">
-            {confirmDel ? (
-              <div className="card-confirm-delete">
-                <span>Delete this event?</span>
-                <button
-                  type="button"
-                  className="btn-danger"
-                  onClick={handleDelete}
-                >
-                  Delete
-                </button>
-                <button
-                  type="button"
-                  className="btn-ghost"
-                  onClick={(e) => { e.stopPropagation(); setConfirmDel(false) }}
-                >
-                  Cancel
-                </button>
-              </div>
-            ) : (
-              <>
-                {onEdit && (
-                  <button
-                    type="button"
-                    className="event-edit-btn"
-                    onClick={(e) => { e.stopPropagation(); onEdit(event) }}
-                  >
-                    {event.source === 'manual' ? 'Edit' : 'View'}
-                  </button>
-                )}
-                {onDelete && (
-                  <button
-                    type="button"
-                    className="event-delete-btn"
-                    onClick={(e) => { e.stopPropagation(); setConfirmDel(true) }}
-                  >
-                    Delete
-                  </button>
-                )}
-              </>
-            )}
-          </div>
+          {onEdit && (
+            <div className="event-card-actions">
+              <button
+                type="button"
+                className="event-edit-btn"
+                onClick={(e) => { e.stopPropagation(); onEdit(event) }}
+              >
+                {event.source === 'manual' ? 'Edit' : 'View'}
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </article>
