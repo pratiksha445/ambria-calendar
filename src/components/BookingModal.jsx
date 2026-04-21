@@ -4,7 +4,7 @@ import BookingForm from './BookingForm.jsx'
 // Bottom-sheet modal with drag-down-to-close on mobile, centered card on desktop.
 // The form lives inside; this component just owns the shell and close behavior.
 
-export default function BookingModal({ open, initial, onClose, onSaved, onDeleted }) {
+export default function BookingModal({ open, initial, onClose, onSaved, onDeleted, user }) {
   const sheetRef = useRef(null)
   const [dragY, setDragY] = useState(0)
   const dragRef = useRef({ startY: 0, tracking: false })
@@ -72,6 +72,7 @@ export default function BookingModal({ open, initial, onClose, onSaved, onDelete
           onClose={onClose}
           onSaved={onSaved}
           onDeleted={onDeleted}
+          user={user}
         />
       </div>
     </div>

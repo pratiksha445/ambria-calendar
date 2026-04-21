@@ -19,9 +19,9 @@ function blankForm(venueId, defaults = {}) {
   }
 }
 
-export default function BookingForm({ initial, onSaved, onDeleted, onClose }) {
+export default function BookingForm({ initial, onSaved, onDeleted, onClose, user }) {
   const editing = !!(initial && initial.id)
-  const readOnly = editing && initial?.source !== 'manual'
+  const readOnly = editing && (initial?.source !== 'manual' || user?.role === 'staff')
 
   const [venueId, setVenueId] = useState(() => initial?.venue_id ?? 'ap')
   const [form, setForm] = useState(() => {
@@ -169,8 +169,8 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose }) {
     try {
       const payload = buildPayload()
       const row = editing
-        ? await updateEvent(initial.id, payload)
-        : await createEvent(payload)
+        ? await updateEvent(initial.id, payload, user)
+        : await createEvent(payload, user)
       onSaved?.(row)
     } catch (err) {
       console.error('[ambria] save failed', err)
@@ -185,7 +185,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose }) {
     setSubmitError(null)
     setDeleting(true)
     try {
-      await deleteEvent(initial.id)
+      await deleteEvent(initial.id, user)
       onDeleted?.(initial.id)
     } catch (err) {
       console.error('[ambria] delete failed', err)
@@ -294,7 +294,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose }) {
 
       <div className="form-footer">
         {submitError && <div className="form-error-banner">{submitError}</div>}
-        {editing && (
+        {editing && user?.role !== 'staff' && (
           confirmDelete ? (
             <div className="confirm-delete">
               <span>Delete this booking?</span>

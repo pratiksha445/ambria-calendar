@@ -5,16 +5,29 @@ import MonthView from './components/MonthView.jsx'
 import WeekView from './components/WeekView.jsx'
 import DayView from './components/DayView.jsx'
 import BookingModal from './components/BookingModal.jsx'
+import LoginScreen from './components/LoginScreen.jsx'
+import UserManagement from './components/UserManagement.jsx'
+import AuditLog from './components/AuditLog.jsx'
 import { fetchEvents, deleteEvent, bulkDeleteMonth } from './lib/events.js'
 import { seedIfEmpty } from './lib/seedEvents.js'
 import { startOfMonth, endOfMonth, toIsoDate, addDays, formatMonthYear } from './lib/dates.js'
 import { VENUES } from './config/venues.js'
+import { logAction } from './lib/audit.js'
 import './App.css'
 
 const ALL_VENUE_IDS = VENUES.map((v) => v.id)
 const ALL_SOURCES = ['crm', 'manual']
 
+function getStoredUser() {
+  try {
+    const s = localStorage.getItem('ambria_user')
+    return s ? JSON.parse(s) : null
+  } catch { return null }
+}
+
 export default function App() {
+  const [user, setUser] = useState(getStoredUser)
+  const [currentView, setCurrentView] = useState('calendar')
   const [currentDate, setCurrentDate] = useState(() => new Date())
   const [selectedDate, setSelectedDate] = useState(() => new Date())
   const [view, setView] = useState('month')
@@ -31,6 +44,7 @@ export default function App() {
   const [confirmBulk, setConfirmBulk] = useState(false)
 
   useEffect(() => {
+    if (!user) return
     let cancelled = false
     async function load() {
       setLoading(true)
@@ -51,7 +65,7 @@ export default function App() {
     load()
     return () => { cancelled = true }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentDate.getFullYear(), currentDate.getMonth(), reloadKey])
+  }, [currentDate.getFullYear(), currentDate.getMonth(), reloadKey, user])
 
   const filteredEvents = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -167,7 +181,7 @@ export default function App() {
   }
   const handleCardDelete = async (ev) => {
     try {
-      await deleteEvent(ev.id)
+      await deleteEvent(ev.id, user)
       showToast('Event deleted')
       setReloadKey((k) => k + 1)
     } catch (err) {
@@ -180,7 +194,7 @@ export default function App() {
     const start = toIsoDate(startOfMonth(currentDate))
     const end = toIsoDate(endOfMonth(currentDate))
     try {
-      await bulkDeleteMonth(start, end)
+      await bulkDeleteMonth(start, end, user)
       setConfirmBulk(false)
       showToast(`All events in ${formatMonthYear(currentDate)} cleared`)
       setReloadKey((k) => k + 1)
@@ -188,6 +202,30 @@ export default function App() {
       console.error('[ambria] bulk delete failed', err)
     }
   }
+
+  // Auth handlers
+  const handleLogin = (u) => setUser(u)
+
+  const handleLogout = async () => {
+    if (user) {
+      await logAction(user.id, user.name, 'logout', 'session', null, null)
+    }
+    localStorage.removeItem('ambria_user')
+    setUser(null)
+    setCurrentView('calendar')
+  }
+
+  const handleNavigate = (v) => {
+    setCurrentView(v)
+    setSidebarOpen(false)
+  }
+
+  // Show login screen if not authenticated
+  if (!user) return <LoginScreen onLogin={handleLogin} />
+
+  // Role-based access
+  const canEditDelete = user.role === 'admin' || user.role === 'manager'
+  const canClearMonth = canEditDelete
 
   const manualCount = events.filter((e) => e.source === 'manual').length
   const crmCount = events.filter((e) => e.source !== 'manual').length
@@ -208,54 +246,68 @@ export default function App() {
         events={events}
         totalCount={events.length}
         shownCount={filteredEvents.length}
+        user={user}
+        currentView={currentView}
+        onNavigate={handleNavigate}
+        onLogout={handleLogout}
       />
       <div className="app-main">
-        <Header
-          currentDate={currentDate}
-          view={view}
-          onViewChange={setView}
-          onPrev={handlePrev}
-          onNext={handleNext}
-          onToday={handleToday}
-          onMenu={() => setSidebarOpen(true)}
-          onAdd={openNew}
-          onClearMonth={handleClearMonth}
-        />
-        <main className="app-body">
-          {error && <div className="error-banner">{error}</div>}
-          {loading && <div className="loading">Loading…</div>}
-          {filtersHideEverything && (
-            <div className="filter-empty-banner">No events match your filters</div>
-          )}
-          {view === 'month' && (
-            <MonthView
+        {currentView === 'calendar' && (
+          <>
+            <Header
               currentDate={currentDate}
-              selectedDate={selectedDate}
-              onSelectDate={handleSelectDate}
-              events={filteredEvents}
-              onEdit={openEdit}
-              onDelete={handleCardDelete}
+              view={view}
+              onViewChange={setView}
+              onPrev={handlePrev}
+              onNext={handleNext}
+              onToday={handleToday}
+              onMenu={() => setSidebarOpen(true)}
+              onAdd={openNew}
+              onClearMonth={canClearMonth ? handleClearMonth : null}
             />
-          )}
-          {view === 'week' && (
-            <WeekView
-              currentDate={currentDate}
-              selectedDate={selectedDate}
-              onSelectDate={handleSelectDate}
-              events={filteredEvents}
-              onEdit={openEdit}
-              onDelete={handleCardDelete}
-            />
-          )}
-          {view === 'day' && (
-            <DayView
-              selectedDate={selectedDate}
-              events={filteredEvents}
-              onEdit={openEdit}
-              onDelete={handleCardDelete}
-            />
-          )}
-        </main>
+            <main className="app-body">
+              {error && <div className="error-banner">{error}</div>}
+              {loading && <div className="loading">Loading\u2026</div>}
+              {filtersHideEverything && (
+                <div className="filter-empty-banner">No events match your filters</div>
+              )}
+              {view === 'month' && (
+                <MonthView
+                  currentDate={currentDate}
+                  selectedDate={selectedDate}
+                  onSelectDate={handleSelectDate}
+                  events={filteredEvents}
+                  onEdit={openEdit}
+                  onDelete={canEditDelete ? handleCardDelete : null}
+                />
+              )}
+              {view === 'week' && (
+                <WeekView
+                  currentDate={currentDate}
+                  selectedDate={selectedDate}
+                  onSelectDate={handleSelectDate}
+                  events={filteredEvents}
+                  onEdit={openEdit}
+                  onDelete={canEditDelete ? handleCardDelete : null}
+                />
+              )}
+              {view === 'day' && (
+                <DayView
+                  selectedDate={selectedDate}
+                  events={filteredEvents}
+                  onEdit={openEdit}
+                  onDelete={canEditDelete ? handleCardDelete : null}
+                />
+              )}
+            </main>
+          </>
+        )}
+        {currentView === 'users' && user.role === 'admin' && (
+          <UserManagement currentUser={user} />
+        )}
+        {currentView === 'audit' && (user.role === 'admin' || user.role === 'manager') && (
+          <AuditLog />
+        )}
       </div>
       <BookingModal
         open={!!modal}
@@ -263,6 +315,7 @@ export default function App() {
         onClose={closeModal}
         onSaved={handleSaved}
         onDeleted={handleDeleted}
+        user={user}
       />
       {confirmBulk && (
         <div className="modal-root" role="dialog" aria-modal="true">

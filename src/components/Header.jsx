@@ -35,31 +35,33 @@ export default function Header({
 
         <div className="header-actions">
           <button className="book-btn" onClick={onAdd}>+ Book</button>
-          <div className="header-more-wrap">
-            <button
-              className="icon-btn sm"
-              onClick={() => setMenuOpen((p) => !p)}
-              aria-label="More options"
-            >
-              <MoreIcon />
-            </button>
-            {menuOpen && (
-              <>
-                <div
-                  className="header-menu-backdrop"
-                  onClick={() => setMenuOpen(false)}
-                />
-                <div className="header-menu-dropdown">
-                  <button
-                    className="header-menu-item danger"
-                    onClick={() => { setMenuOpen(false); onClearMonth?.() }}
-                  >
-                    Clear Month
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
+          {onClearMonth && (
+            <div className="header-more-wrap">
+              <button
+                className="icon-btn sm"
+                onClick={() => setMenuOpen((p) => !p)}
+                aria-label="More options"
+              >
+                <MoreIcon />
+              </button>
+              {menuOpen && (
+                <>
+                  <div
+                    className="header-menu-backdrop"
+                    onClick={() => setMenuOpen(false)}
+                  />
+                  <div className="header-menu-dropdown">
+                    <button
+                      className="header-menu-item danger"
+                      onClick={() => { setMenuOpen(false); onClearMonth() }}
+                    >
+                      Clear Month
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
