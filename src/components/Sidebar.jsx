@@ -199,7 +199,7 @@ export default function Sidebar({
         {/* User info + Change PIN + Logout */}
         <div className="sidebar-user">
           <div className="sidebar-user-info">
-            <span className="sidebar-user-name">{user?.name}</span>
+            <span className="sidebar-user-name">{(user?.name || '').split(/\s+/)[0]}</span>
             {user?.role && (
               <span className="role-badge" style={{ background: ROLE_COLORS[user.role] }}>
                 {user.role}

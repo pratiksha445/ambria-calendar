@@ -102,7 +102,7 @@ export default function SetPinScreen({ user, onComplete }) {
         </div>
 
         <div className="set-pin-message">
-          Welcome, {user.name}! Please set a 4-digit PIN for your account.
+          Welcome, {(user.name || '').split(/\s+/)[0]}! Please set a 4-digit PIN for your account.
         </div>
 
         <PinBoxes value={newPin} onChange={setNewPin} shake={shake} label="New PIN" />

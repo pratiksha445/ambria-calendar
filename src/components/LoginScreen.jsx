@@ -8,7 +8,8 @@ export default function LoginScreen({ onLogin }) {
   const [phoneCode, setPhoneCode] = useState('+91')
   const [phone, setPhone] = useState('')
   const [pin, setPin] = useState(['', '', '', ''])
-  const [name, setName] = useState('')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
   const [shake, setShake] = useState(false)
@@ -95,7 +96,8 @@ export default function LoginScreen({ onLogin }) {
   const handleSignup = async (e) => {
     e.preventDefault()
     setError(null)
-    if (!name.trim()) { setError('Enter your name'); return }
+    if (!firstName.trim()) { setError('Enter your first name'); return }
+    if (!lastName.trim()) { setError('Enter your last name'); return }
     if (!phone.trim()) { setError('Enter your phone number'); return }
     setLoading(true)
     try {
@@ -115,7 +117,7 @@ export default function LoginScreen({ onLogin }) {
         return
       }
 
-      await requestAccess(name.trim(), fullPhone)
+      await requestAccess(firstName.trim() + ' ' + lastName.trim(), fullPhone)
       setMode('success')
     } catch (err) {
       const msg = err?.message ?? String(err)
@@ -138,7 +140,8 @@ export default function LoginScreen({ onLogin }) {
   const switchToLogin = () => {
     setMode('login')
     setError(null)
-    setName('')
+    setFirstName('')
+    setLastName('')
   }
 
   if (mode === 'success') {
@@ -176,16 +179,29 @@ export default function LoginScreen({ onLogin }) {
         </div>
 
         {mode === 'signup' && (
-          <div className="login-field">
-            <label className="field-label">Name</label>
-            <input
-              type="text"
-              className="login-input"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Your full name"
-              autoComplete="name"
-            />
+          <div className="name-row">
+            <div className="login-field">
+              <label className="field-label">First Name <span className="required-star">*</span></label>
+              <input
+                type="text"
+                className="login-input"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value.replace(/[^a-zA-Z\s]/g, ''))}
+                placeholder="First name"
+                autoComplete="given-name"
+              />
+            </div>
+            <div className="login-field">
+              <label className="field-label">Last Name <span className="required-star">*</span></label>
+              <input
+                type="text"
+                className="login-input"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value.replace(/[^a-zA-Z\s]/g, ''))}
+                placeholder="Last name"
+                autoComplete="family-name"
+              />
+            </div>
           </div>
         )}
 

@@ -2199,3 +2199,17 @@
   background: rgba(232, 93, 117, 0.06);
   color: var(--ambria-accent);
 }
+
+/* ============================================================
+ * Name row — first + last name side by side
+ * ============================================================ */
+
+.name-row {
+  display: flex;
+  gap: 10px;
+}
+.name-row > .login-field,
+.name-row > .pf-field {
+  flex: 1;
+  min-width: 0;
+}

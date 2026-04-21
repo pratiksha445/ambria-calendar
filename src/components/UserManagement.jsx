@@ -53,16 +53,22 @@ export default function UserManagement({ currentUser, showToast }) {
   const approvedUsers = filtered.filter((u) => u.approval_status === 'approved')
   const rejectedUsers = filtered.filter((u) => u.approval_status === 'rejected')
 
+  function splitName(fullName) {
+    const parts = (fullName || '').trim().split(/\s+/)
+    return { firstName: parts[0] || '', lastName: parts.slice(1).join(' ') || '' }
+  }
+
   const openNew = () => {
     setEditing('new')
-    setForm({ name: '', phone_code: '+91', phone: '', role: 'staff' })
+    setForm({ firstName: '', lastName: '', phone_code: '+91', phone: '', role: 'staff' })
     setFormError(null)
   }
 
   const openEdit = (user) => {
     const parsed = parsePhoneCode(user.phone)
+    const { firstName, lastName } = splitName(user.name)
     setEditing(user)
-    setForm({ name: user.name, phone_code: parsed.value, phone: parsed.number, pin: '', role: user.role })
+    setForm({ firstName, lastName, phone_code: parsed.value, phone: parsed.number, pin: '', role: user.role })
     setShowPin(false)
     setFormError(null)
   }
@@ -70,7 +76,8 @@ export default function UserManagement({ currentUser, showToast }) {
   const handleSave = async (e) => {
     e.preventDefault()
     setFormError(null)
-    if (!form.name.trim()) { setFormError('Name is required'); return }
+    if (!form.firstName.trim()) { setFormError('First name is required'); return }
+    if (!form.lastName.trim()) { setFormError('Last name is required'); return }
     if (!form.phone.trim()) { setFormError('Phone is required'); return }
     const isNew = editing === 'new'
     if (!isNew && form.pin && !/^\d{4}$/.test(form.pin)) {
@@ -79,19 +86,20 @@ export default function UserManagement({ currentUser, showToast }) {
 
     const code = getCodeFromValue(form.phone_code || '+91')
     const fullPhone = code + ' ' + form.phone.replace(/[^\d\s]/g, '').trim()
+    const fullName = form.firstName.trim() + ' ' + form.lastName.trim()
 
     setSaving(true)
     try {
       if (isNew) {
         const row = await createUser({
-          name: form.name.trim(), phone: fullPhone, role: form.role,
+          name: fullName, phone: fullPhone, role: form.role,
         })
         await logAction(currentUser.id, currentUser.name, 'create', 'user', row.id, {
           name: row.name, role: row.role,
         })
         showToast?.('User created')
       } else {
-        const patch = { name: form.name.trim(), phone: fullPhone, role: form.role }
+        const patch = { name: fullName, phone: fullPhone, role: form.role }
         if (form.pin) patch.pin = form.pin
         const row = await updateUser(editing.id, patch)
         await logAction(currentUser.id, currentUser.name, 'update', 'user', row.id, {
@@ -408,13 +416,25 @@ export default function UserManagement({ currentUser, showToast }) {
           <div className="panel-form-card">
             <h3>{editing === 'new' ? 'Add User' : 'Edit User'}</h3>
             <form onSubmit={handleSave} noValidate>
-              <div className="pf-field">
-                <label className="field-label">Name <span className="required-star">*</span></label>
-                <input
-                  type="text"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                />
+              <div className="name-row">
+                <div className="pf-field">
+                  <label className="field-label">First Name <span className="required-star">*</span></label>
+                  <input
+                    type="text"
+                    value={form.firstName}
+                    onChange={(e) => setForm({ ...form, firstName: e.target.value.replace(/[^a-zA-Z\s]/g, '') })}
+                    placeholder="First name"
+                  />
+                </div>
+                <div className="pf-field">
+                  <label className="field-label">Last Name <span className="required-star">*</span></label>
+                  <input
+                    type="text"
+                    value={form.lastName}
+                    onChange={(e) => setForm({ ...form, lastName: e.target.value.replace(/[^a-zA-Z\s]/g, '') })}
+                    placeholder="Last name"
+                  />
+                </div>
               </div>
               <div className="pf-field">
                 <label className="field-label">Phone <span className="required-star">*</span></label>
