@@ -33,6 +33,35 @@ export const VENUE_TYPES = ['Lawn', 'Banquet', 'Lawn + Bqt', 'Poolside']
 export const POOL_OPTIONS = ['Yes', 'No']
 export const MEAL_OPTIONS = ['Breakfast', 'Lunch', 'Dinner', 'All Meals', 'None']
 
+export const COUNTRY_CODES = [
+  { value: '+91', code: '+91', flag: '\u{1F1EE}\u{1F1F3}', label: 'India' },
+  { value: '+1_US', code: '+1', flag: '\u{1F1FA}\u{1F1F8}', label: 'USA' },
+  { value: '+1_CA', code: '+1', flag: '\u{1F1E8}\u{1F1E6}', label: 'Canada' },
+  { value: '+44', code: '+44', flag: '\u{1F1EC}\u{1F1E7}', label: 'UK' },
+  { value: '+61', code: '+61', flag: '\u{1F1E6}\u{1F1FA}', label: 'Australia' },
+  { value: '+971', code: '+971', flag: '\u{1F1E6}\u{1F1EA}', label: 'UAE' },
+  { value: '+65', code: '+65', flag: '\u{1F1F8}\u{1F1EC}', label: 'Singapore' },
+  { value: '+60', code: '+60', flag: '\u{1F1F2}\u{1F1FE}', label: 'Malaysia' },
+]
+
+export function getCodeFromValue(val) {
+  const entry = COUNTRY_CODES.find((c) => c.value === val)
+  return entry ? entry.code : '+91'
+}
+
+export function parsePhoneCode(storedPhone) {
+  if (!storedPhone) return { value: '+91', number: '' }
+  const s = String(storedPhone).trim()
+  // Match longest code first (e.g. +971 before +9)
+  const sorted = [...COUNTRY_CODES].sort((a, b) => b.code.length - a.code.length)
+  for (const entry of sorted) {
+    if (s.startsWith(entry.code)) {
+      return { value: entry.value, number: s.slice(entry.code.length).trim() }
+    }
+  }
+  return { value: '+91', number: s }
+}
+
 // ---------- Field builders (keeps configs terse) ----------
 
 const S = (label, key, options, required = true, extra = {}) =>
@@ -49,7 +78,7 @@ const TA = (label, key, required = false, extra = {}) =>
 // ---------- Input filters — strip invalid characters on keystroke ----------
 
 const nameFilter = (v) => v.replace(/[^a-zA-Z\s.']/g, '')
-const phoneFilter = (v) => v.replace(/[^\d\s+\-]/g, '')
+const phoneFilter = (v) => v.replace(/[^\d\s]/g, '')
 const paxFilter = (v) => v.replace(/\D/g, '')
 const venueNameFilter = (v) => v.replace(/[^a-zA-Z0-9\s.,\-'&()#]/g, '')
 
@@ -67,11 +96,15 @@ const notesField = TA('Notes', 'notes', false, { placeholder: 'Optional…' })
 const guestName = () => T('Guest Name', 'guest_name', true, {
   placeholder: 'e.g. Mr. Sharma', filterFn: nameFilter, filterError: 'Only letters allowed',
 })
-const phoneReq = () => T('Phone', 'phone', true, {
-  filterFn: phoneFilter, filterError: 'Only numbers, +, and - allowed', inputMode: 'tel',
+const phoneReq = () => ({
+  type: 'phone', label: 'Phone', key: 'phone', required: true,
+  filterFn: phoneFilter, filterError: 'Only numbers allowed',
+  placeholder: '98765 43210', inputMode: 'tel',
 })
-const phoneOpt = () => T('Phone', 'phone', false, {
-  placeholder: 'Optional', filterFn: phoneFilter, filterError: 'Only numbers, +, and - allowed', inputMode: 'tel',
+const phoneOpt = () => ({
+  type: 'phone', label: 'Phone', key: 'phone', required: false,
+  filterFn: phoneFilter, filterError: 'Only numbers allowed',
+  placeholder: '98765 43210', inputMode: 'tel',
 })
 const paxField = () => T('Pax', 'pax', true, {
   filterFn: paxFilter, filterError: 'Only numbers allowed', inputMode: 'numeric',

@@ -3,6 +3,7 @@
 // Supports filterFn for live input validation (strips invalid chars + shows error).
 
 import { useEffect, useRef, useState } from 'react'
+import { COUNTRY_CODES } from '../config/formFields.js'
 
 export default function Field({ field, form, value, onChange, error, readOnly }) {
   const [filterErr, setFilterErr] = useState(null)
@@ -87,6 +88,44 @@ export default function Field({ field, form, value, onChange, error, readOnly })
             <MapPinIcon />
           </a>
         )}
+      </div>
+    )
+  } else if (field.type === 'phone') {
+    const handleCode = (e) => onChange('phone_code', e.target.value)
+    const handleNum = (e) => {
+      let val = e.target.value
+      if (field.filterFn && !disabled) {
+        const filtered = field.filterFn(val)
+        if (filtered !== val) {
+          setFilterErr(field.filterError || 'Invalid input')
+          val = filtered
+        }
+      }
+      onChange(field.key, val)
+    }
+    control = (
+      <div className="phone-combo">
+        <select
+          className="phone-code-select"
+          value={form.phone_code || '+91'}
+          onChange={handleCode}
+          disabled={disabled}
+        >
+          {COUNTRY_CODES.map((c) => (
+            <option key={c.value} value={c.value}>{c.flag} {c.code}</option>
+          ))}
+        </select>
+        <input
+          type="text"
+          id={id}
+          name={field.key}
+          value={effectiveValue}
+          disabled={disabled}
+          onChange={handleNum}
+          placeholder={field.placeholder ?? ''}
+          inputMode="tel"
+          aria-invalid={!!displayError}
+        />
       </div>
     )
   } else {

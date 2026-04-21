@@ -3,6 +3,7 @@ import { VENUES, VENUE_BY_ID } from '../config/venues.js'
 import {
   getFormConfig, getAllFields, isFieldRequired,
   FIELD_MAP, ALL_SAVEABLE_KEYS, STATUSES,
+  parsePhoneCode, getCodeFromValue,
 } from '../config/formFields.js'
 import { autoTitle } from '../lib/autoTitle.js'
 import { sanitizeText, sanitizePhone, sanitizePax } from '../lib/sanitize.js'
@@ -13,6 +14,7 @@ function blankForm(venueId, defaults = {}) {
   return {
     venue_id: venueId,
     status: 'Confirmed',
+    phone_code: '+91',
     ...defaults,
   }
 }
@@ -22,9 +24,13 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose }) {
   const readOnly = editing && initial?.source !== 'manual'
 
   const [venueId, setVenueId] = useState(() => initial?.venue_id ?? 'ap')
-  const [form, setForm] = useState(() =>
-    editing ? { ...initial } : blankForm(venueId)
-  )
+  const [form, setForm] = useState(() => {
+    if (editing) {
+      const parsed = parsePhoneCode(initial.phone)
+      return { ...initial, phone: parsed.number, phone_code: parsed.value }
+    }
+    return blankForm(venueId)
+  })
   const [manualTitle, setManualTitle] = useState(() =>
     editing && initial.title && initial.title !== autoTitle(initial) ? initial.title : null
   )
@@ -44,6 +50,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose }) {
     setForm((prev) => blankForm(venueId, {
       guest_name: prev.guest_name,
       phone: prev.phone,
+      phone_code: prev.phone_code,
       notes: prev.notes,
     }))
     setErrors({})
@@ -129,7 +136,13 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose }) {
 
       const raw = form[key]
       if (key === 'phone') {
-        payload[key] = sanitizePhone(raw)
+        const num = raw ? String(raw).replace(/[^\d\s]/g, '').trim() : ''
+        if (num) {
+          const code = getCodeFromValue(form.phone_code || '+91')
+          payload[key] = sanitizePhone(code + ' ' + num)
+        } else {
+          payload[key] = null
+        }
       } else if (key === 'pax') {
         payload[key] = sanitizePax(raw)
       } else if (fieldDef && (fieldDef.type === 'date' || fieldDef.type === 'time' || fieldDef.type === 'select')) {
