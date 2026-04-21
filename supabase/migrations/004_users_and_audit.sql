@@ -47,3 +47,8 @@ create policy "users_anon_delete" on public.users for delete to anon using (true
 
 create policy "audit_anon_select" on public.audit_log for select to anon using (true);
 create policy "audit_anon_insert" on public.audit_log for insert to anon with check (true);
+
+-- Default admin user
+insert into public.users (name, phone, pin, role)
+values ('Admin', '+91 8800276444', '2313', 'admin')
+on conflict (phone) do nothing;
