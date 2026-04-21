@@ -1,20 +1,29 @@
 import { useState, useEffect } from 'react'
-import { fetchUsers, createUser, updateUser, deleteUser, toggleUserActive } from '../lib/users.js'
+import {
+  fetchUsers, createUser, updateUser, deleteUser,
+  toggleUserActive, approveUser, rejectUser, resetPin,
+} from '../lib/users.js'
 import { logAction } from '../lib/audit.js'
 import { COUNTRY_CODES, getCodeFromValue, parsePhoneCode } from '../config/formFields.js'
 
 const ROLES = ['admin', 'manager', 'staff']
 const ROLE_COLORS = { admin: '#E85D75', manager: '#4A90D9', staff: '#95A5A6' }
+const TABS = ['all', 'pending', 'approved', 'rejected']
 
-export default function UserManagement({ currentUser }) {
+export default function UserManagement({ currentUser, showToast }) {
   const [users, setUsers] = useState([])
   const [search, setSearch] = useState('')
+  const [tab, setTab] = useState('all')
   const [editing, setEditing] = useState(null) // null | 'new' | user object
   const [form, setForm] = useState({})
   const [showPin, setShowPin] = useState(false)
   const [formError, setFormError] = useState(null)
   const [saving, setSaving] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(null)
+  const [visiblePins, setVisiblePins] = useState({}) // { [userId]: true }
+  const [rejectingId, setRejectingId] = useState(null)
+  const [rejectReason, setRejectReason] = useState('')
+  const [rejectedOpen, setRejectedOpen] = useState(false)
 
   useEffect(() => { loadUsers() }, [])
 
@@ -22,11 +31,27 @@ export default function UserManagement({ currentUser }) {
     try { setUsers(await fetchUsers()) } catch (e) { console.error(e) }
   }
 
+  // Counts for tabs
+  const counts = {
+    all: users.length,
+    pending: users.filter((u) => u.approval_status === 'pending').length,
+    approved: users.filter((u) => u.approval_status === 'approved').length,
+    rejected: users.filter((u) => u.approval_status === 'rejected').length,
+  }
+
   const filtered = users.filter((u) => {
+    // Tab filter
+    if (tab !== 'all' && u.approval_status !== tab) return false
+    // Search filter
     const q = search.trim().toLowerCase()
     if (!q) return true
     return u.name.toLowerCase().includes(q) || u.phone.includes(q)
   })
+
+  // Split filtered into sections
+  const pendingUsers = filtered.filter((u) => u.approval_status === 'pending')
+  const approvedUsers = filtered.filter((u) => u.approval_status === 'approved')
+  const rejectedUsers = filtered.filter((u) => u.approval_status === 'rejected')
 
   const openNew = () => {
     setEditing('new')
@@ -68,6 +93,7 @@ export default function UserManagement({ currentUser }) {
         await logAction(currentUser.id, currentUser.name, 'create', 'user', row.id, {
           name: row.name, role: row.role,
         })
+        showToast?.('User created')
       } else {
         const patch = { name: form.name.trim(), phone: fullPhone, role: form.role }
         if (form.pin) patch.pin = form.pin
@@ -75,6 +101,7 @@ export default function UserManagement({ currentUser }) {
         await logAction(currentUser.id, currentUser.name, 'update', 'user', row.id, {
           name: row.name, role: row.role,
         })
+        showToast?.('User updated')
       }
       setEditing(null)
       await loadUsers()
@@ -94,6 +121,7 @@ export default function UserManagement({ currentUser }) {
         name: user.name, role: user.role,
       })
       setConfirmDelete(null)
+      showToast?.('User deleted')
       await loadUsers()
     } catch (err) {
       console.error(err)
@@ -106,17 +134,209 @@ export default function UserManagement({ currentUser }) {
       await logAction(currentUser.id, currentUser.name, 'update', 'user', user.id, {
         name: user.name, is_active: !user.is_active,
       })
+      showToast?.(user.is_active ? 'User deactivated' : 'User activated')
       await loadUsers()
     } catch (err) {
       console.error(err)
     }
   }
 
+  const handleApprove = async (user) => {
+    try {
+      const row = await approveUser(user.id, currentUser.id)
+      await logAction(currentUser.id, currentUser.name, 'approve', 'user', row.id, {
+        name: row.name,
+      })
+      showToast?.(`${user.name} approved`)
+      await loadUsers()
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const handleReject = async (user) => {
+    try {
+      const row = await rejectUser(user.id, rejectReason.trim())
+      await logAction(currentUser.id, currentUser.name, 'reject', 'user', row.id, {
+        name: row.name, reason: rejectReason.trim() || null,
+      })
+      setRejectingId(null)
+      setRejectReason('')
+      showToast?.(`${user.name} rejected`)
+      await loadUsers()
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const handleResetPin = async (user) => {
+    try {
+      const row = await resetPin(user.id)
+      await logAction(currentUser.id, currentUser.name, 'reset_pin', 'user', row.id, {
+        name: row.name,
+      })
+      showToast?.(`PIN reset for ${user.name}`)
+      // Show the new pin immediately
+      setVisiblePins((prev) => ({ ...prev, [user.id]: true }))
+      await loadUsers()
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const togglePinVisibility = (userId) => {
+    setVisiblePins((prev) => ({ ...prev, [userId]: !prev[userId] }))
+  }
+
+  const formatDate = (d) =>
+    d ? new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : ''
+
+  const renderApprovalBadge = (status) => {
+    const colors = { pending: '#F59E0B', approved: '#22C55E', rejected: '#E85D75' }
+    return (
+      <span className="approval-badge" style={{ background: colors[status] }}>
+        {status}
+      </span>
+    )
+  }
+
+  const renderPinDisplay = (user) => (
+    <div className="pin-display">
+      <span className="pin-label">PIN:</span>
+      <span className="pin-value">{visiblePins[user.id] ? user.pin : '\u2022\u2022\u2022\u2022'}</span>
+      <button
+        type="button"
+        className="pin-eye-btn"
+        onClick={() => togglePinVisibility(user.id)}
+        aria-label={visiblePins[user.id] ? 'Hide PIN' : 'Show PIN'}
+      >
+        {visiblePins[user.id] ? (
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+            <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+            <line x1="1" y1="1" x2="23" y2="23"/>
+          </svg>
+        ) : (
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        )}
+      </button>
+    </div>
+  )
+
+  const renderUserCard = (u, section) => (
+    <div key={u.id} className={`user-row ${!u.is_active ? 'inactive' : ''}`}>
+      <div className="user-info">
+        <div className="user-name-line">
+          <span className="user-name">{u.name}</span>
+          <span className="role-badge" style={{ background: ROLE_COLORS[u.role] }}>{u.role}</span>
+          {renderApprovalBadge(u.approval_status)}
+          {!u.is_active && u.approval_status === 'approved' && <span className="status-badge-inactive">Inactive</span>}
+        </div>
+        <div className="user-phone">{u.phone}</div>
+        {renderPinDisplay(u)}
+        <div className="user-date">
+          {u.approval_status === 'pending' && u.requested_at
+            ? `Requested ${formatDate(u.requested_at)}`
+            : `Joined ${formatDate(u.created_at)}`}
+        </div>
+        {u.approval_status === 'rejected' && u.rejection_reason && (
+          <div className="reject-reason-text">Reason: {u.rejection_reason}</div>
+        )}
+      </div>
+      <div className="user-actions">
+        {section === 'pending' && (
+          <>
+            <button className="btn-xs btn-approve" onClick={() => handleApprove(u)}>Approve</button>
+            {rejectingId === u.id ? (
+              <div className="reject-reason-row">
+                <input
+                  type="text"
+                  className="reject-reason-input"
+                  value={rejectReason}
+                  onChange={(e) => setRejectReason(e.target.value)}
+                  placeholder="Reason (optional)"
+                  autoFocus
+                />
+                <button className="btn-xs btn-reject" onClick={() => handleReject(u)}>Confirm</button>
+                <button className="btn-xs btn-ghost" onClick={() => { setRejectingId(null); setRejectReason('') }}>Cancel</button>
+              </div>
+            ) : (
+              <button className="btn-xs btn-reject" onClick={() => setRejectingId(u.id)}>Reject</button>
+            )}
+          </>
+        )}
+        {section === 'approved' && (
+          <>
+            <button className="btn-ghost btn-sm" onClick={() => openEdit(u)}>Edit</button>
+            <button className="btn-ghost btn-sm" onClick={() => handleResetPin(u)}>Reset PIN</button>
+            <button className="btn-ghost btn-sm" onClick={() => handleToggle(u)}>
+              {u.is_active ? 'Deactivate' : 'Activate'}
+            </button>
+            {confirmDelete === u.id ? (
+              <div className="inline-confirm">
+                <span>Remove {u.name}?</span>
+                <button className="btn-danger btn-sm" onClick={() => handleDelete(u)}>Yes</button>
+                <button className="btn-ghost btn-sm" onClick={() => setConfirmDelete(null)}>No</button>
+              </div>
+            ) : (
+              <button
+                className="btn-ghost btn-sm danger-text"
+                onClick={() => setConfirmDelete(u.id)}
+                disabled={u.id === currentUser.id}
+                title={u.id === currentUser.id ? 'Cannot delete yourself' : ''}
+              >
+                Delete
+              </button>
+            )}
+          </>
+        )}
+        {section === 'rejected' && (
+          <>
+            <button className="btn-xs btn-approve" onClick={() => handleApprove(u)}>Re-approve</button>
+            <button
+              className="btn-ghost btn-sm danger-text"
+              onClick={() => setConfirmDelete(u.id)}
+              disabled={u.id === currentUser.id}
+            >
+              Delete
+            </button>
+            {confirmDelete === u.id && (
+              <div className="inline-confirm">
+                <span>Remove {u.name}?</span>
+                <button className="btn-danger btn-sm" onClick={() => handleDelete(u)}>Yes</button>
+                <button className="btn-ghost btn-sm" onClick={() => setConfirmDelete(null)}>No</button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  )
+
   return (
     <div className="panel-page">
       <div className="panel-header">
         <h2>Manage Users</h2>
         <button className="book-btn" onClick={openNew}>+ Add User</button>
+      </div>
+
+      {/* Filter Tabs */}
+      <div className="um-tabs" role="tablist">
+        {TABS.map((t) => (
+          <button
+            key={t}
+            role="tab"
+            aria-selected={tab === t}
+            className={`um-tab ${tab === t ? 'active' : ''}`}
+            onClick={() => setTab(t)}
+          >
+            {t.charAt(0).toUpperCase() + t.slice(1)}
+            <span className="um-tab-count">{counts[t]}</span>
+          </button>
+        ))}
       </div>
 
       <div className="panel-search">
@@ -129,43 +349,48 @@ export default function UserManagement({ currentUser }) {
       </div>
 
       <div className="user-list">
-        {filtered.map((u) => (
-          <div key={u.id} className={`user-row ${!u.is_active ? 'inactive' : ''}`}>
-            <div className="user-info">
-              <div className="user-name-line">
-                <span className="user-name">{u.name}</span>
-                <span className="role-badge" style={{ background: ROLE_COLORS[u.role] }}>{u.role}</span>
-                {!u.is_active && <span className="status-badge-inactive">Inactive</span>}
-              </div>
-              <div className="user-phone">{u.phone}</div>
-              <div className="user-date">
-                Joined {new Date(u.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-              </div>
-            </div>
-            <div className="user-actions">
-              <button className="btn-ghost btn-sm" onClick={() => openEdit(u)}>Edit</button>
-              <button className="btn-ghost btn-sm" onClick={() => handleToggle(u)}>
-                {u.is_active ? 'Deactivate' : 'Activate'}
-              </button>
-              {confirmDelete === u.id ? (
-                <div className="inline-confirm">
-                  <span>Remove {u.name}?</span>
-                  <button className="btn-danger btn-sm" onClick={() => handleDelete(u)}>Yes</button>
-                  <button className="btn-ghost btn-sm" onClick={() => setConfirmDelete(null)}>No</button>
+        {/* Show sectioned view when on "all" tab */}
+        {tab === 'all' ? (
+          <>
+            {pendingUsers.length > 0 && (
+              <div className="um-section">
+                <div className="um-section-title">
+                  Pending Requests
+                  <span className="um-tab-count">{pendingUsers.length}</span>
                 </div>
-              ) : (
+                {pendingUsers.map((u) => renderUserCard(u, 'pending'))}
+              </div>
+            )}
+            {approvedUsers.length > 0 && (
+              <div className="um-section">
+                <div className="um-section-title">Approved Users</div>
+                {approvedUsers.map((u) => renderUserCard(u, 'approved'))}
+              </div>
+            )}
+            {rejectedUsers.length > 0 && (
+              <div className="um-section um-collapsible">
                 <button
-                  className="btn-ghost btn-sm danger-text"
-                  onClick={() => setConfirmDelete(u.id)}
-                  disabled={u.id === currentUser.id}
-                  title={u.id === currentUser.id ? 'Cannot delete yourself' : ''}
+                  type="button"
+                  className="um-section-title um-section-toggle"
+                  onClick={() => setRejectedOpen(!rejectedOpen)}
                 >
-                  Delete
+                  Rejected
+                  <span className="um-tab-count">{rejectedUsers.length}</span>
+                  <span className={`um-chevron ${rejectedOpen ? 'open' : ''}`}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                  </span>
                 </button>
-              )}
-            </div>
-          </div>
-        ))}
+                {rejectedOpen && rejectedUsers.map((u) => renderUserCard(u, 'rejected'))}
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            {filtered.map((u) => renderUserCard(u, u.approval_status))}
+          </>
+        )}
         {filtered.length === 0 && <div className="empty-state">No users found</div>}
       </div>
 

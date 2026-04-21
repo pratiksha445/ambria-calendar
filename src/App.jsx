@@ -303,7 +303,7 @@ export default function App() {
           </>
         )}
         {currentView === 'users' && user.role === 'admin' && (
-          <UserManagement currentUser={user} />
+          <UserManagement currentUser={user} showToast={showToast} />
         )}
         {currentView === 'audit' && (user.role === 'admin' || user.role === 'manager') && (
           <AuditLog />

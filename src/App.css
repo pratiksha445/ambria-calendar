@@ -1846,3 +1846,264 @@
   .audit-filters select,
   .audit-filters input[type="date"] { flex: 0 0 auto; }
 }
+
+/* ============================================================
+ * Login — link toggle & signup success
+ * ============================================================ */
+
+.login-link {
+  text-align: center;
+  margin-top: 12px;
+  font-size: 0.82rem;
+  color: var(--ambria-muted);
+}
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--ambria-accent);
+  font-weight: 700;
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
+  padding: 0;
+  text-decoration: underline;
+}
+.link-btn:hover {
+  opacity: 0.8;
+}
+
+.login-input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--ambria-border);
+  border-radius: 12px;
+  font-size: 1rem;
+  font-family: inherit;
+  color: var(--ambria-ink);
+  background: #fff;
+  box-sizing: border-box;
+}
+.login-input:focus {
+  outline: none;
+  border-color: var(--ambria-accent);
+  box-shadow: 0 0 0 3px rgba(232, 93, 117, 0.12);
+}
+
+.signup-success {
+  text-align: center;
+  padding: 40px 28px;
+}
+.signup-success h2 {
+  margin: 16px 0 8px;
+  font-size: 1.25rem;
+  color: var(--ambria-ink);
+}
+.success-text {
+  font-size: 0.88rem;
+  color: var(--ambria-muted);
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+.success-icon {
+  display: flex;
+  justify-content: center;
+}
+
+/* ============================================================
+ * User Management — tabs
+ * ============================================================ */
+
+.um-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 8px 0 4px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.um-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid var(--ambria-border);
+  border-radius: 999px;
+  background: #fff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--ambria-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+.um-tab:hover {
+  border-color: var(--ambria-accent);
+  color: var(--ambria-accent);
+}
+.um-tab.active {
+  background: var(--ambria-accent);
+  border-color: var(--ambria-accent);
+  color: #fff;
+}
+.um-tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  background: rgba(0, 0, 0, 0.06);
+  color: inherit;
+}
+.um-tab.active .um-tab-count {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* ============================================================
+ * User Management — sections
+ * ============================================================ */
+
+.um-section {
+  margin-bottom: 20px;
+}
+.um-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--ambria-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 8px 0;
+  border: none;
+  background: none;
+  font-family: inherit;
+  width: 100%;
+  text-align: left;
+}
+.um-section-toggle {
+  cursor: pointer;
+}
+.um-section-toggle:hover {
+  color: var(--ambria-ink);
+}
+.um-chevron {
+  display: inline-flex;
+  transition: transform 0.2s ease;
+}
+.um-chevron.open {
+  transform: rotate(180deg);
+}
+
+/* ============================================================
+ * User Management — approval badges
+ * ============================================================ */
+
+.approval-badge {
+  display: inline-block;
+  color: #fff;
+  font-size: 0.58rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ============================================================
+ * User Management — PIN display
+ * ============================================================ */
+
+.pin-display {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+.pin-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--ambria-faint);
+}
+.pin-value {
+  font-family: 'Menlo', 'Consolas', 'SF Mono', monospace;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ambria-ink);
+  letter-spacing: 0.1em;
+}
+.pin-eye-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: none;
+  color: var(--ambria-muted);
+  cursor: pointer;
+  padding: 0;
+  border-radius: 4px;
+}
+.pin-eye-btn:hover {
+  color: var(--ambria-accent);
+  background: rgba(232, 93, 117, 0.06);
+}
+
+/* ============================================================
+ * User Management — approve / reject buttons
+ * ============================================================ */
+
+.btn-xs {
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-family: inherit;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+.btn-xs:hover { opacity: 0.85; }
+
+.btn-approve {
+  background: #22C55E;
+  color: #fff;
+}
+.btn-reject {
+  background: #E85D75;
+  color: #fff;
+}
+
+.reject-reason-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+.reject-reason-input {
+  flex: 1;
+  min-width: 120px;
+  padding: 5px 10px;
+  border: 1px solid var(--ambria-border);
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-family: inherit;
+  color: var(--ambria-ink);
+}
+.reject-reason-input:focus {
+  outline: none;
+  border-color: var(--ambria-accent);
+}
+
+.reject-reason-text {
+  font-size: 0.72rem;
+  color: #E85D75;
+  margin-top: 2px;
+  font-style: italic;
+}
