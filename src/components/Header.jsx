@@ -34,7 +34,7 @@ export default function Header({
         </div>
 
         <div className="header-actions">
-          <button className="book-btn" onClick={onAdd}>+ Book</button>
+          <button className="book-btn" onClick={onAdd}>+<span className="book-btn-label"> Book</span></button>
           {onClearMonth && (
             <div className="header-more-wrap">
               <button

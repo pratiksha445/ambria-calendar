@@ -26,6 +26,20 @@ export function dayLabel(d) {
   return DAY_NAMES[d.getDay()]
 }
 
+/** Convert "HH:MM" or "HH:MM:SS" to "h:mm AM/PM" */
+export function formatTime12(timeStr) {
+  if (!timeStr || typeof timeStr !== 'string') return timeStr
+  const parts = timeStr.slice(0, 5).split(':')
+  if (parts.length < 2) return timeStr
+  let h = parseInt(parts[0], 10)
+  const m = parts[1]
+  if (isNaN(h)) return timeStr
+  const ampm = h >= 12 ? 'PM' : 'AM'
+  if (h === 0) h = 12
+  else if (h > 12) h -= 12
+  return `${h}:${m} ${ampm}`
+}
+
 export function startOfMonth(d) {
   return new Date(d.getFullYear(), d.getMonth(), 1)
 }

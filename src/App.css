@@ -2288,3 +2288,77 @@
   flex: 1;
   min-width: 0;
 }
+
+/* ============================================================
+ * Mobile responsive — small phones (320–420px)
+ * ============================================================ */
+
+/* Minimum 16px on all inputs/selects to prevent iOS auto-zoom */
+input, select, textarea {
+  font-size: max(16px, inherit);
+}
+
+/* Header: hide "+ Book" label on narrow screens, keep "+" */
+@media (max-width: 420px) {
+  .book-btn-label { display: none; }
+  .book-btn { padding: 8px 12px; }
+  .header-row { gap: 4px; }
+  .month-label { font-size: 0.95rem; min-width: 120px; }
+  .icon-btn.sm { padding: 4px; }
+  .app-main { padding: 0 8px 24px; }
+  .app-header { padding: 8px 0 6px; }
+  .view-tab { padding: 5px 10px; font-size: 0.78rem; }
+  .today-pill { padding: 5px 10px; font-size: 0.78rem; }
+}
+
+/* Login: phone combo + PIN boxes on very small screens */
+@media (max-width: 400px) {
+  .login-field .phone-combo select,
+  .field .phone-combo select {
+    width: 70px;
+    padding: 10px 2px 10px 6px;
+    font-size: 0.85rem;
+  }
+  .phone-combo {
+    max-width: 100%;
+    overflow: hidden;
+  }
+  .login-card { padding: 24px 16px; }
+}
+
+@media (max-width: 380px) {
+  .pin-box {
+    width: 42px;
+    height: 44px;
+    font-size: 1.15rem;
+  }
+  .pin-boxes { gap: 8px; }
+  .login-card { padding: 20px 14px; }
+  .name-row { gap: 6px; }
+}
+
+/* Modal / bottom-sheet on small screens */
+@media (max-width: 480px) {
+  .modal-sheet { max-width: 100vw; }
+  .form-header { padding: 4px 12px 10px; }
+  .form-body { padding: 10px 12px 14px; }
+  .form-footer { padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px)); }
+  .category-pills {
+    -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+  .category-pill { font-size: 0.78rem; padding: 5px 10px; }
+}
+
+/* Event card text truncation */
+.event-card-meta > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Sidebar — cap at 85vw so it never exceeds narrow screens */
+@media (max-width: 380px) {
+  .sidebar { width: min(85vw, 300px); }
+}

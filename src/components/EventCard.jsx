@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { VENUE_BY_ID, SHIFT_BADGE } from '../config/venues.js'
+import { formatTime12 } from '../lib/dates.js'
 
 export default function EventCard({ event, expanded = false, onToggle, onEdit, onDelete }) {
   const venue = VENUE_BY_ID[event.venue_id]
@@ -51,7 +52,7 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
               <span className="event-primary">{primary}</span>
               <div className="event-card-meta">
                 {event.time && (
-                  <span className="event-time">{formatTime(event.time)}</span>
+                  <span className="event-time">{formatTime12(event.time)}</span>
                 )}
                 {shiftBadge && (
                   <span className="shift-badge" style={{ background: shiftBadge.color }}>
@@ -168,10 +169,6 @@ function buildPrimary(event) {
 
 function joinPipes(parts) {
   return parts.filter(Boolean).join(' | ')
-}
-
-function formatTime(t) {
-  return typeof t === 'string' ? t.slice(0, 5) : t
 }
 
 const SHORT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
