@@ -49,8 +49,7 @@ export default function Sidebar({
       >
         <div className="sidebar-header">
           <div className="brand">
-            <div className="brand-mark" aria-hidden="true">A</div>
-            <div className="brand-text">Ambria</div>
+            <img src={import.meta.env.BASE_URL + 'logo.png'} alt="Ambria" className="sidebar-logo" />
           </div>
           <button className="icon-btn sidebar-close" onClick={onClose} aria-label="Close menu">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

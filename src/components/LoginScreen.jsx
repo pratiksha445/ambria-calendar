@@ -174,8 +174,7 @@ export default function LoginScreen({ onLogin }) {
         noValidate
       >
         <div className="login-brand">
-          <div className="brand-mark" aria-hidden="true">A</div>
-          <div className="login-brand-text">Ambria Calendar</div>
+          <img src={import.meta.env.BASE_URL + 'logo.png'} alt="Ambria" className="login-logo" />
         </div>
 
         {mode === 'signup' && (
