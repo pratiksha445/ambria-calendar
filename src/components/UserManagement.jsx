@@ -55,8 +55,7 @@ export default function UserManagement({ currentUser, showToast }) {
 
   const openNew = () => {
     setEditing('new')
-    setForm({ name: '', phone_code: '+91', phone: '', pin: '', role: 'staff' })
-    setShowPin(false)
+    setForm({ name: '', phone_code: '+91', phone: '', role: 'staff' })
     setFormError(null)
   }
 
@@ -74,9 +73,6 @@ export default function UserManagement({ currentUser, showToast }) {
     if (!form.name.trim()) { setFormError('Name is required'); return }
     if (!form.phone.trim()) { setFormError('Phone is required'); return }
     const isNew = editing === 'new'
-    if (isNew && (!/^\d{4}$/.test(form.pin))) {
-      setFormError('PIN must be exactly 4 digits'); return
-    }
     if (!isNew && form.pin && !/^\d{4}$/.test(form.pin)) {
       setFormError('PIN must be exactly 4 digits'); return
     }
@@ -88,7 +84,7 @@ export default function UserManagement({ currentUser, showToast }) {
     try {
       if (isNew) {
         const row = await createUser({
-          name: form.name.trim(), phone: fullPhone, pin: form.pin, role: form.role,
+          name: form.name.trim(), phone: fullPhone, role: form.role,
         })
         await logAction(currentUser.id, currentUser.name, 'create', 'user', row.id, {
           name: row.name, role: row.role,
@@ -175,9 +171,7 @@ export default function UserManagement({ currentUser, showToast }) {
       await logAction(currentUser.id, currentUser.name, 'reset_pin', 'user', row.id, {
         name: row.name,
       })
-      showToast?.(`PIN reset for ${user.name}`)
-      // Show the new pin immediately
-      setVisiblePins((prev) => ({ ...prev, [user.id]: true }))
+      showToast?.('PIN reset to default \u2014 user will be asked to set a new PIN on next login')
       await loadUsers()
     } catch (err) {
       console.error(err)
@@ -200,31 +194,45 @@ export default function UserManagement({ currentUser, showToast }) {
     )
   }
 
-  const renderPinDisplay = (user) => (
-    <div className="pin-display">
-      <span className="pin-label">PIN:</span>
-      <span className="pin-value">{visiblePins[user.id] ? user.pin : '\u2022\u2022\u2022\u2022'}</span>
-      <button
-        type="button"
-        className="pin-eye-btn"
-        onClick={() => togglePinVisibility(user.id)}
-        aria-label={visiblePins[user.id] ? 'Hide PIN' : 'Show PIN'}
-      >
-        {visiblePins[user.id] ? (
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
-            <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
-            <line x1="1" y1="1" x2="23" y2="23"/>
-          </svg>
-        ) : (
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-            <circle cx="12" cy="12" r="3"/>
-          </svg>
-        )}
-      </button>
-    </div>
-  )
+  const renderPinDisplay = (u) => {
+    // Admin users: full PIN display with eye toggle
+    if (u.role === 'admin') {
+      return (
+        <div className="pin-display">
+          <span className="pin-label">PIN:</span>
+          <span className="pin-value">{visiblePins[u.id] ? u.pin : '\u2022\u2022\u2022\u2022'}</span>
+          <button
+            type="button"
+            className="pin-eye-btn"
+            onClick={() => togglePinVisibility(u.id)}
+            aria-label={visiblePins[u.id] ? 'Hide PIN' : 'Show PIN'}
+          >
+            {visiblePins[u.id] ? (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                <line x1="1" y1="1" x2="23" y2="23"/>
+              </svg>
+            ) : (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            )}
+          </button>
+        </div>
+      )
+    }
+    // Non-admin users: show status text only
+    return (
+      <div className="pin-display">
+        <span className="pin-label">PIN:</span>
+        <span className={`pin-status ${u.pin === '0000' ? 'default' : 'custom'}`}>
+          {u.pin === '0000' ? 'Default (0000)' : 'Custom'}
+        </span>
+      </div>
+    )
+  }
 
   const renderUserCard = (u, section) => (
     <div key={u.id} className={`user-row ${!u.is_active ? 'inactive' : ''}`}>
@@ -429,25 +437,31 @@ export default function UserManagement({ currentUser, showToast }) {
                   />
                 </div>
               </div>
-              <div className="pf-field">
-                <label className="field-label">
-                  PIN <span className="required-star">*</span>
-                  {editing !== 'new' && <span className="pin-hint"> (leave blank to keep current)</span>}
-                </label>
-                <div className="pin-input-row">
-                  <input
-                    type={showPin ? 'text' : 'password'}
-                    value={form.pin}
-                    onChange={(e) => setForm({ ...form, pin: e.target.value.replace(/\D/g, '').slice(0, 4) })}
-                    placeholder={editing === 'new' ? '4-digit PIN' : '\u2022\u2022\u2022\u2022'}
-                    inputMode="numeric"
-                    maxLength={4}
-                  />
-                  <button type="button" className="pin-toggle" onClick={() => setShowPin(!showPin)}>
-                    {showPin ? 'Hide' : 'Show'}
-                  </button>
+              {editing === 'new' ? (
+                <div className="pf-field">
+                  <label className="field-label">PIN</label>
+                  <div className="pin-default-note">Default PIN is 0000 — user will set their own on first login</div>
                 </div>
-              </div>
+              ) : (
+                <div className="pf-field">
+                  <label className="field-label">
+                    PIN <span className="pin-hint">(leave blank to keep current)</span>
+                  </label>
+                  <div className="pin-input-row">
+                    <input
+                      type={showPin ? 'text' : 'password'}
+                      value={form.pin}
+                      onChange={(e) => setForm({ ...form, pin: e.target.value.replace(/\D/g, '').slice(0, 4) })}
+                      placeholder={'\u2022\u2022\u2022\u2022'}
+                      inputMode="numeric"
+                      maxLength={4}
+                    />
+                    <button type="button" className="pin-toggle" onClick={() => setShowPin(!showPin)}>
+                      {showPin ? 'Hide' : 'Show'}
+                    </button>
+                  </div>
+                </div>
+              )}
               <div className="pf-field">
                 <label className="field-label">Role</label>
                 <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}>

@@ -58,7 +58,7 @@ export default function LoginScreen({ onLogin }) {
         case 'ok':
           await logAction(result.user.id, result.user.name, 'login', 'session', null, null)
           localStorage.setItem('ambria_user', JSON.stringify(result.user))
-          onLogin(result.user)
+          onLogin(result.user, result.needsPinChange)
           return
         case 'pending':
           setShake(true)

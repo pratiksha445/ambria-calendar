@@ -6,6 +6,8 @@ import WeekView from './components/WeekView.jsx'
 import DayView from './components/DayView.jsx'
 import BookingModal from './components/BookingModal.jsx'
 import LoginScreen from './components/LoginScreen.jsx'
+import SetPinScreen from './components/SetPinScreen.jsx'
+import ChangePinModal from './components/ChangePinModal.jsx'
 import UserManagement from './components/UserManagement.jsx'
 import AuditLog from './components/AuditLog.jsx'
 import { fetchEvents, deleteEvent, bulkDeleteMonth } from './lib/events.js'
@@ -42,6 +44,8 @@ export default function App() {
   const [reloadKey, setReloadKey] = useState(0)
   const [toast, setToast] = useState(null)
   const [confirmBulk, setConfirmBulk] = useState(false)
+  const [needsPinChange, setNeedsPinChange] = useState(false)
+  const [changePinOpen, setChangePinOpen] = useState(false)
 
   useEffect(() => {
     if (!user) return
@@ -204,7 +208,10 @@ export default function App() {
   }
 
   // Auth handlers
-  const handleLogin = (u) => setUser(u)
+  const handleLogin = (u, pinChange) => {
+    setUser(u)
+    setNeedsPinChange(!!pinChange)
+  }
 
   const handleLogout = async () => {
     if (user) {
@@ -222,6 +229,11 @@ export default function App() {
 
   // Show login screen if not authenticated
   if (!user) return <LoginScreen onLogin={handleLogin} />
+
+  // Forced PIN change on first login with default PIN
+  if (needsPinChange) {
+    return <SetPinScreen user={user} onComplete={() => setNeedsPinChange(false)} />
+  }
 
   // Role-based access
   const canEditDelete = user.role === 'admin' || user.role === 'manager'
@@ -250,6 +262,7 @@ export default function App() {
         currentView={currentView}
         onNavigate={handleNavigate}
         onLogout={handleLogout}
+        onChangePin={() => { setSidebarOpen(false); setChangePinOpen(true) }}
       />
       <div className="app-main">
         {currentView === 'calendar' && (
@@ -332,6 +345,13 @@ export default function App() {
             </div>
           </div>
         </div>
+      )}
+      {changePinOpen && (
+        <ChangePinModal
+          user={user}
+          onClose={() => setChangePinOpen(false)}
+          showToast={showToast}
+        />
       )}
       {toast && <div className="toast">{toast}</div>}
     </div>

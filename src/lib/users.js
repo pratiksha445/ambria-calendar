@@ -1,11 +1,12 @@
 import { supabase } from './supabase.js'
 
+const DEFAULT_PIN = '0000'
+
 /**
- * Login — returns { status, user } where status is one of:
- * 'ok' | 'pending' | 'rejected' | 'deactivated' | 'not_found' | 'wrong_pin'
+ * Login — returns { status, user, needsPinChange?, reason? }
+ * status: 'ok' | 'pending' | 'rejected' | 'deactivated' | 'not_found' | 'wrong_pin'
  */
 export async function loginUser(phone, pin) {
-  // First find by phone (any status)
   const { data: row, error } = await supabase
     .from('users')
     .select('id, name, phone, role, pin, is_active, approval_status, rejection_reason')
@@ -20,7 +21,7 @@ export async function loginUser(phone, pin) {
   if (row.pin !== pin) return { status: 'wrong_pin', user: null }
 
   const user = { id: row.id, name: row.name, phone: row.phone, role: row.role }
-  return { status: 'ok', user }
+  return { status: 'ok', user, needsPinChange: row.pin === DEFAULT_PIN }
 }
 
 export async function fetchUsers() {
@@ -35,7 +36,12 @@ export async function fetchUsers() {
 export async function createUser(userData) {
   const { data, error } = await supabase
     .from('users')
-    .insert({ ...userData, approval_status: 'approved', approved_at: new Date().toISOString() })
+    .insert({
+      ...userData,
+      pin: userData.pin || DEFAULT_PIN,
+      approval_status: 'approved',
+      approved_at: new Date().toISOString(),
+    })
     .select()
     .single()
   if (error) throw error
@@ -80,23 +86,17 @@ export async function checkPhoneStatus(phone) {
     .eq('phone', phone)
     .maybeSingle()
   if (error) throw error
-  return data // null if not found
+  return data
 }
 
-/** Generate a random 4-digit PIN */
-function generatePin() {
-  return String(Math.floor(1000 + Math.random() * 9000))
-}
-
-/** Request access — creates a pending user with auto-generated PIN */
+/** Request access — creates a pending user with default PIN 0000 */
 export async function requestAccess(name, phone) {
-  const pin = generatePin()
   const { data, error } = await supabase
     .from('users')
     .insert({
       name,
       phone,
-      pin,
+      pin: DEFAULT_PIN,
       role: 'staff',
       is_active: true,
       approval_status: 'pending',
@@ -140,15 +140,41 @@ export async function rejectUser(id, reason) {
   return data
 }
 
-/** Reset a user's PIN to a new random 4-digit PIN */
+/** Admin reset — sets user's PIN back to default 0000 */
 export async function resetPin(id) {
-  const pin = generatePin()
   const { data, error } = await supabase
     .from('users')
-    .update({ pin })
+    .update({ pin: DEFAULT_PIN })
     .eq('id', id)
     .select()
     .single()
   if (error) throw error
-  return { ...data, pin }
+  return data
+}
+
+/** Set PIN on first login (forced change from 0000) */
+export async function setInitialPin(userId, newPin) {
+  const { error } = await supabase
+    .from('users')
+    .update({ pin: newPin })
+    .eq('id', userId)
+  if (error) throw error
+}
+
+/** Self-service PIN change — verifies current PIN first */
+export async function changeSelfPin(userId, currentPin, newPin) {
+  const { data: row, error: fetchErr } = await supabase
+    .from('users')
+    .select('pin')
+    .eq('id', userId)
+    .single()
+  if (fetchErr) throw fetchErr
+  if (row.pin !== currentPin) return { success: false, error: 'Current PIN is incorrect' }
+
+  const { error: updateErr } = await supabase
+    .from('users')
+    .update({ pin: newPin })
+    .eq('id', userId)
+  if (updateErr) throw updateErr
+  return { success: true }
 }

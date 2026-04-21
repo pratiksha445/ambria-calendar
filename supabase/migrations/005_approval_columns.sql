@@ -7,11 +7,11 @@ alter table public.users
   add column if not exists requested_at timestamptz,
   add column if not exists rejection_reason text;
 
--- Mark the existing default admin as approved
+-- Mark the existing default admins as approved
 update public.users
   set approval_status = 'approved',
       approved_at = now()
-  where phone = '+91 8800276444'
+  where role = 'admin'
     and approval_status = 'approved';
 
 -- Index for filtering by approval status
