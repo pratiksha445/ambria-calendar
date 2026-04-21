@@ -68,10 +68,10 @@ const guestName = () => T('Guest Name', 'guest_name', true, {
   placeholder: 'e.g. Mr. Sharma', filterFn: nameFilter, filterError: 'Only letters allowed',
 })
 const phoneReq = () => T('Phone', 'phone', true, {
-  filterFn: phoneFilter, filterError: 'Only numbers allowed', inputMode: 'tel',
+  filterFn: phoneFilter, filterError: 'Only numbers, +, and - allowed', inputMode: 'tel',
 })
 const phoneOpt = () => T('Phone', 'phone', false, {
-  placeholder: 'Optional', filterFn: phoneFilter, filterError: 'Only numbers allowed', inputMode: 'tel',
+  placeholder: 'Optional', filterFn: phoneFilter, filterError: 'Only numbers, +, and - allowed', inputMode: 'tel',
 })
 const paxField = () => T('Pax', 'pax', true, {
   filterFn: paxFilter, filterError: 'Only numbers allowed', inputMode: 'numeric',
