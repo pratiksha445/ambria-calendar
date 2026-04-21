@@ -316,10 +316,10 @@ export default function App() {
           </>
         )}
         {currentView === 'users' && user.role === 'admin' && (
-          <UserManagement currentUser={user} showToast={showToast} />
+          <UserManagement currentUser={user} showToast={showToast} onMenu={() => setSidebarOpen(true)} />
         )}
         {currentView === 'audit' && (user.role === 'admin' || user.role === 'manager') && (
-          <AuditLog />
+          <AuditLog onMenu={() => setSidebarOpen(true)} />
         )}
       </div>
       <BookingModal

@@ -1525,7 +1525,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 0 12px;
+  gap: 8px;
+  padding: 10px 0 8px;
   border-bottom: 1px solid var(--ambria-border);
   position: sticky;
   top: 0;
@@ -1534,8 +1535,14 @@
 }
 .panel-header h2 {
   margin: 0;
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   font-weight: 800;
+  flex: 1;
+  text-align: center;
+}
+.panel-header-spacer {
+  width: 40px;
+  flex-shrink: 0;
 }
 
 .panel-search {
