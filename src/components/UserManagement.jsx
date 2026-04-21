@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   fetchUsers, createUser, updateUser, deleteUser,
-  toggleUserActive, approveUser, rejectUser, resetPin,
+  toggleUserActive, approveUser, rejectUser, resetPin, adminSetPin,
 } from '../lib/users.js'
 import { logAction } from '../lib/audit.js'
 import { COUNTRY_CODES, getCodeFromValue, parsePhoneCode } from '../config/formFields.js'
@@ -20,17 +20,69 @@ function MenuIcon() {
   )
 }
 
+function InlinePinInput({ onSave, onCancel }) {
+  const [digits, setDigits] = useState(['', '', '', ''])
+  const refs = [useRef(), useRef(), useRef(), useRef()]
+
+  const handleChange = (i, val) => {
+    if (!/^\d?$/.test(val)) return
+    const next = [...digits]
+    next[i] = val
+    setDigits(next)
+    if (val && i < 3) refs[i + 1].current?.focus()
+  }
+  const handleKeyDown = (i, e) => {
+    if (e.key === 'Backspace' && !digits[i] && i > 0) refs[i - 1].current?.focus()
+  }
+  const handlePaste = (e) => {
+    const text = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 4)
+    if (!text) return
+    e.preventDefault()
+    const next = ['', '', '', '']
+    for (let j = 0; j < text.length; j++) next[j] = text[j]
+    setDigits(next)
+    refs[Math.min(text.length, 3)].current?.focus()
+  }
+  const pin = digits.join('')
+  const valid = /^\d{4}$/.test(pin)
+
+  return (
+    <div className="inline-set-pin">
+      <div className="pin-boxes pin-boxes-sm">
+        {digits.map((d, i) => (
+          <input
+            key={i}
+            ref={refs[i]}
+            type="text"
+            inputMode="numeric"
+            maxLength={1}
+            value={d}
+            onChange={(e) => handleChange(i, e.target.value)}
+            onKeyDown={(e) => handleKeyDown(i, e)}
+            onPaste={i === 0 ? handlePaste : undefined}
+            className="pin-box pin-box-sm"
+            autoComplete="off"
+            autoFocus={i === 0}
+          />
+        ))}
+      </div>
+      <button className="btn-xs btn-approve" onClick={() => onSave(pin)} disabled={!valid}>Save</button>
+      <button className="btn-xs btn-ghost" onClick={onCancel}>Cancel</button>
+    </div>
+  )
+}
+
 export default function UserManagement({ currentUser, showToast, onMenu }) {
   const [users, setUsers] = useState([])
   const [search, setSearch] = useState('')
   const [tab, setTab] = useState('all')
-  const [editing, setEditing] = useState(null) // null | 'new' | user object
+  const [editing, setEditing] = useState(null)
   const [form, setForm] = useState({})
-  const [showPin, setShowPin] = useState(false)
   const [formError, setFormError] = useState(null)
   const [saving, setSaving] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(null)
-  const [visiblePins, setVisiblePins] = useState({}) // { [userId]: true }
+  const [confirmResetPin, setConfirmResetPin] = useState(null)
+  const [settingPinFor, setSettingPinFor] = useState(null)
   const [rejectingId, setRejectingId] = useState(null)
   const [rejectReason, setRejectReason] = useState('')
   const [rejectedOpen, setRejectedOpen] = useState(false)
@@ -41,7 +93,6 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
     try { setUsers(await fetchUsers()) } catch (e) { console.error(e) }
   }
 
-  // Counts for tabs
   const counts = {
     all: users.length,
     pending: users.filter((u) => u.approval_status === 'pending').length,
@@ -50,15 +101,12 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
   }
 
   const filtered = users.filter((u) => {
-    // Tab filter
     if (tab !== 'all' && u.approval_status !== tab) return false
-    // Search filter
     const q = search.trim().toLowerCase()
     if (!q) return true
     return u.name.toLowerCase().includes(q) || u.phone.includes(q)
   })
 
-  // Split filtered into sections
   const pendingUsers = filtered.filter((u) => u.approval_status === 'pending')
   const approvedUsers = filtered.filter((u) => u.approval_status === 'approved')
   const rejectedUsers = filtered.filter((u) => u.approval_status === 'rejected')
@@ -78,8 +126,7 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
     const parsed = parsePhoneCode(user.phone)
     const { firstName, lastName } = splitName(user.name)
     setEditing(user)
-    setForm({ firstName, lastName, phone_code: parsed.value, phone: parsed.number, pin: '', role: user.role })
-    setShowPin(false)
+    setForm({ firstName, lastName, phone_code: parsed.value, phone: parsed.number, role: user.role })
     setFormError(null)
   }
 
@@ -89,10 +136,6 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
     if (!form.firstName.trim()) { setFormError('First name is required'); return }
     if (!form.lastName.trim()) { setFormError('Last name is required'); return }
     if (!form.phone.trim()) { setFormError('Phone is required'); return }
-    const isNew = editing === 'new'
-    if (!isNew && form.pin && !/^\d{4}$/.test(form.pin)) {
-      setFormError('PIN must be exactly 4 digits'); return
-    }
 
     const code = getCodeFromValue(form.phone_code || '+91')
     const fullPhone = code + ' ' + form.phone.replace(/[^\d\s]/g, '').trim()
@@ -100,17 +143,14 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
 
     setSaving(true)
     try {
-      if (isNew) {
-        const row = await createUser({
-          name: fullName, phone: fullPhone, role: form.role,
-        })
+      if (editing === 'new') {
+        const row = await createUser({ name: fullName, phone: fullPhone, role: form.role })
         await logAction(currentUser.id, currentUser.name, 'create', 'user', row.id, {
           name: row.name, role: row.role,
         })
         showToast?.('User created')
       } else {
         const patch = { name: fullName, phone: fullPhone, role: form.role }
-        if (form.pin) patch.pin = form.pin
         const row = await updateUser(editing.id, patch)
         await logAction(currentUser.id, currentUser.name, 'update', 'user', row.id, {
           name: row.name, role: row.role,
@@ -137,9 +177,7 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
       setConfirmDelete(null)
       showToast?.('User deleted')
       await loadUsers()
-    } catch (err) {
-      console.error(err)
-    }
+    } catch (err) { console.error(err) }
   }
 
   const handleToggle = async (user) => {
@@ -150,22 +188,16 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
       })
       showToast?.(user.is_active ? 'User deactivated' : 'User activated')
       await loadUsers()
-    } catch (err) {
-      console.error(err)
-    }
+    } catch (err) { console.error(err) }
   }
 
   const handleApprove = async (user) => {
     try {
       const row = await approveUser(user.id, currentUser.id)
-      await logAction(currentUser.id, currentUser.name, 'approve', 'user', row.id, {
-        name: row.name,
-      })
+      await logAction(currentUser.id, currentUser.name, 'approve', 'user', row.id, { name: row.name })
       showToast?.(`${user.name} approved`)
       await loadUsers()
-    } catch (err) {
-      console.error(err)
-    }
+    } catch (err) { console.error(err) }
   }
 
   const handleReject = async (user) => {
@@ -178,26 +210,60 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
       setRejectReason('')
       showToast?.(`${user.name} rejected`)
       await loadUsers()
-    } catch (err) {
-      console.error(err)
-    }
+    } catch (err) { console.error(err) }
   }
 
   const handleResetPin = async (user) => {
     try {
-      const row = await resetPin(user.id)
-      await logAction(currentUser.id, currentUser.name, 'reset_pin', 'user', row.id, {
-        name: row.name,
+      await resetPin(user.id)
+      await logAction(currentUser.id, currentUser.name, 'update', 'user', user.id, {
+        action: 'pin_reset', user_name: user.name, reset_to: 'default',
       })
-      showToast?.('PIN reset to default \u2014 user will be asked to set a new PIN on next login')
+      setConfirmResetPin(null)
+      showToast?.('PIN reset to 0000 \u2014 user will set new PIN on next login')
       await loadUsers()
-    } catch (err) {
-      console.error(err)
-    }
+    } catch (err) { console.error(err) }
   }
 
-  const togglePinVisibility = (userId) => {
-    setVisiblePins((prev) => ({ ...prev, [userId]: !prev[userId] }))
+  const handleSetPin = async (user, pin) => {
+    try {
+      await adminSetPin(user.id, pin)
+      await logAction(currentUser.id, currentUser.name, 'update', 'user', user.id, {
+        action: 'pin_set', user_name: user.name,
+      })
+      setSettingPinFor(null)
+      showToast?.('PIN updated')
+      await loadUsers()
+    } catch (err) { console.error(err) }
+  }
+
+  const handleEditFormResetPin = async () => {
+    if (!editing || editing === 'new') return
+    try {
+      await resetPin(editing.id)
+      await logAction(currentUser.id, currentUser.name, 'update', 'user', editing.id, {
+        action: 'pin_reset', user_name: editing.name, reset_to: 'default',
+      })
+      showToast?.('PIN reset to 0000')
+      await loadUsers()
+      // Refresh the editing object
+      const refreshed = (await fetchUsers()).find((u) => u.id === editing.id)
+      if (refreshed) setEditing(refreshed)
+    } catch (err) { console.error(err) }
+  }
+
+  const handleEditFormSetPin = async (pin) => {
+    if (!editing || editing === 'new') return
+    try {
+      await adminSetPin(editing.id, pin)
+      await logAction(currentUser.id, currentUser.name, 'update', 'user', editing.id, {
+        action: 'pin_set', user_name: editing.name,
+      })
+      showToast?.('PIN updated')
+      await loadUsers()
+      const refreshed = (await fetchUsers()).find((u) => u.id === editing.id)
+      if (refreshed) setEditing(refreshed)
+    } catch (err) { console.error(err) }
   }
 
   const formatDate = (d) =>
@@ -206,49 +272,7 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
   const renderApprovalBadge = (status) => {
     const colors = { pending: '#F59E0B', approved: '#22C55E', rejected: '#E85D75' }
     return (
-      <span className="approval-badge" style={{ background: colors[status] }}>
-        {status}
-      </span>
-    )
-  }
-
-  const renderPinDisplay = (u) => {
-    // Admin users: full PIN display with eye toggle
-    if (u.role === 'admin') {
-      return (
-        <div className="pin-display">
-          <span className="pin-label">PIN:</span>
-          <span className="pin-value">{visiblePins[u.id] ? u.pin : '\u2022\u2022\u2022\u2022'}</span>
-          <button
-            type="button"
-            className="pin-eye-btn"
-            onClick={() => togglePinVisibility(u.id)}
-            aria-label={visiblePins[u.id] ? 'Hide PIN' : 'Show PIN'}
-          >
-            {visiblePins[u.id] ? (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
-                <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
-                <line x1="1" y1="1" x2="23" y2="23"/>
-              </svg>
-            ) : (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                <circle cx="12" cy="12" r="3"/>
-              </svg>
-            )}
-          </button>
-        </div>
-      )
-    }
-    // Non-admin users: show status text only
-    return (
-      <div className="pin-display">
-        <span className="pin-label">PIN:</span>
-        <span className={`pin-status ${u.pin === '0000' ? 'default' : 'custom'}`}>
-          {u.pin === '0000' ? 'Default (0000)' : 'Custom'}
-        </span>
-      </div>
+      <span className="approval-badge" style={{ background: colors[status] }}>{status}</span>
     )
   }
 
@@ -262,7 +286,10 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
           {!u.is_active && u.approval_status === 'approved' && <span className="status-badge-inactive">Inactive</span>}
         </div>
         <div className="user-phone">{u.phone}</div>
-        {renderPinDisplay(u)}
+        <div className="pin-display-box">
+          <span className="pin-display-label">PIN:</span>
+          <span className="pin-display-value">{u.pin}</span>
+        </div>
         <div className="user-date">
           {u.approval_status === 'pending' && u.requested_at
             ? `Requested ${formatDate(u.requested_at)}`
@@ -273,6 +300,26 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
         )}
       </div>
       <div className="user-actions">
+        {/* PIN actions — all sections */}
+        {confirmResetPin === u.id ? (
+          <div className="inline-confirm">
+            <span>Reset PIN to 0000?</span>
+            <button className="btn-danger btn-sm" onClick={() => handleResetPin(u)}>Yes</button>
+            <button className="btn-ghost btn-sm" onClick={() => setConfirmResetPin(null)}>No</button>
+          </div>
+        ) : settingPinFor === u.id ? (
+          <InlinePinInput
+            onSave={(pin) => handleSetPin(u, pin)}
+            onCancel={() => setSettingPinFor(null)}
+          />
+        ) : (
+          <div className="pin-action-row">
+            <button className="btn-outline btn-sm" onClick={() => { setConfirmResetPin(u.id); setSettingPinFor(null) }}>Reset PIN</button>
+            <button className="btn-outline btn-sm" onClick={() => { setSettingPinFor(u.id); setConfirmResetPin(null) }}>Set PIN</button>
+          </div>
+        )}
+
+        {/* Section-specific actions */}
         {section === 'pending' && (
           <>
             <button className="btn-xs btn-approve" onClick={() => handleApprove(u)}>Approve</button>
@@ -297,7 +344,6 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
         {section === 'approved' && (
           <>
             <button className="btn-ghost btn-sm" onClick={() => openEdit(u)}>Edit</button>
-            <button className="btn-ghost btn-sm" onClick={() => handleResetPin(u)}>Reset PIN</button>
             <button className="btn-ghost btn-sm" onClick={() => handleToggle(u)}>
               {u.is_active ? 'Deactivate' : 'Activate'}
             </button>
@@ -322,19 +368,20 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
         {section === 'rejected' && (
           <>
             <button className="btn-xs btn-approve" onClick={() => handleApprove(u)}>Re-approve</button>
-            <button
-              className="btn-ghost btn-sm danger-text"
-              onClick={() => setConfirmDelete(u.id)}
-              disabled={u.id === currentUser.id}
-            >
-              Delete
-            </button>
-            {confirmDelete === u.id && (
+            {confirmDelete === u.id ? (
               <div className="inline-confirm">
                 <span>Remove {u.name}?</span>
                 <button className="btn-danger btn-sm" onClick={() => handleDelete(u)}>Yes</button>
                 <button className="btn-ghost btn-sm" onClick={() => setConfirmDelete(null)}>No</button>
               </div>
+            ) : (
+              <button
+                className="btn-ghost btn-sm danger-text"
+                onClick={() => setConfirmDelete(u.id)}
+                disabled={u.id === currentUser.id}
+              >
+                Delete
+              </button>
             )}
           </>
         )}
@@ -352,7 +399,6 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
         <button className="book-btn" onClick={openNew}>+ Add User</button>
       </div>
 
-      {/* Filter Tabs */}
       <div className="um-tabs" role="tablist">
         {TABS.map((t) => (
           <button
@@ -378,7 +424,6 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
       </div>
 
       <div className="user-list">
-        {/* Show sectioned view when on "all" tab */}
         {tab === 'all' ? (
           <>
             {pendingUsers.length > 0 && (
@@ -416,9 +461,7 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
             )}
           </>
         ) : (
-          <>
-            {filtered.map((u) => renderUserCard(u, u.approval_status))}
-          </>
+          <>{filtered.map((u) => renderUserCard(u, u.approval_status))}</>
         )}
         {filtered.length === 0 && <div className="empty-state">No users found</div>}
       </div>
@@ -470,6 +513,8 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
                   />
                 </div>
               </div>
+
+              {/* PIN section */}
               {editing === 'new' ? (
                 <div className="pf-field">
                   <label className="field-label">PIN</label>
@@ -477,24 +522,38 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
                 </div>
               ) : (
                 <div className="pf-field">
-                  <label className="field-label">
-                    PIN <span className="pin-hint">(leave blank to keep current)</span>
-                  </label>
-                  <div className="pin-input-row">
-                    <input
-                      type={showPin ? 'text' : 'password'}
-                      value={form.pin}
-                      onChange={(e) => setForm({ ...form, pin: e.target.value.replace(/\D/g, '').slice(0, 4) })}
-                      placeholder={'\u2022\u2022\u2022\u2022'}
-                      inputMode="numeric"
-                      maxLength={4}
-                    />
-                    <button type="button" className="pin-toggle" onClick={() => setShowPin(!showPin)}>
-                      {showPin ? 'Hide' : 'Show'}
-                    </button>
+                  <label className="field-label">PIN</label>
+                  <div className="edit-pin-section">
+                    <div className="pin-display-box">
+                      <span className="pin-display-label">Current:</span>
+                      <span className="pin-display-value">{editing.pin}</span>
+                    </div>
+                    <div className="edit-pin-actions">
+                      <button type="button" className="btn-outline btn-sm" onClick={handleEditFormResetPin}>
+                        Reset to 0000
+                      </button>
+                      {form._settingCustomPin ? (
+                        <InlinePinInput
+                          onSave={(pin) => {
+                            handleEditFormSetPin(pin)
+                            setForm((f) => ({ ...f, _settingCustomPin: false }))
+                          }}
+                          onCancel={() => setForm((f) => ({ ...f, _settingCustomPin: false }))}
+                        />
+                      ) : (
+                        <button
+                          type="button"
+                          className="btn-outline btn-sm"
+                          onClick={() => setForm((f) => ({ ...f, _settingCustomPin: true }))}
+                        >
+                          Set custom PIN
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               )}
+
               <div className="pf-field">
                 <label className="field-label">Role</label>
                 <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}>

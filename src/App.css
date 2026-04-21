@@ -2130,6 +2130,82 @@
 }
 
 /* ============================================================
+ * Admin PIN display + inline actions
+ * ============================================================ */
+
+.pin-display-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+.pin-display-label {
+  font-size: 0.76rem;
+  color: var(--ambria-faint);
+  font-weight: 600;
+}
+.pin-display-value {
+  font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--ambria-text);
+  letter-spacing: 2px;
+}
+
+.pin-action-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.btn-outline {
+  background: none;
+  border: 1.5px solid var(--ambria-border);
+  color: var(--ambria-muted);
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.72rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+.btn-outline:hover {
+  border-color: var(--ambria-accent);
+  color: var(--ambria-accent);
+  background: rgba(232, 93, 117, 0.04);
+}
+
+.inline-set-pin {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.pin-boxes-sm {
+  gap: 4px;
+}
+.pin-box-sm {
+  width: 34px !important;
+  height: 38px !important;
+  font-size: 0.9rem !important;
+  border-radius: 6px !important;
+}
+
+/* Edit form PIN section */
+.edit-pin-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.edit-pin-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* ============================================================
  * Set PIN screen (forced first-login)
  * ============================================================ */
 

@@ -152,6 +152,18 @@ export async function resetPin(id) {
   return data
 }
 
+/** Admin sets a custom PIN for any user */
+export async function adminSetPin(id, newPin) {
+  const { data, error } = await supabase
+    .from('users')
+    .update({ pin: newPin })
+    .eq('id', id)
+    .select()
+    .single()
+  if (error) throw error
+  return data
+}
+
 /** Set PIN on first login (forced change from 0000) */
 export async function setInitialPin(userId, newPin) {
   const { error } = await supabase
