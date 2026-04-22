@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { formatMonthYear } from '../lib/dates.js'
+import { useLanguage } from '../i18n/LanguageContext.jsx'
 
 const VIEWS = ['day', 'week', 'month']
 
@@ -15,6 +15,7 @@ export default function Header({
   onClearMonth,
 }) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const { t, formatMonthYear } = useLanguage()
 
   return (
     <header className="app-header">
@@ -34,7 +35,7 @@ export default function Header({
         </div>
 
         <div className="header-actions">
-          <button className="book-btn" onClick={onAdd}>+<span className="book-btn-label"> Book</span></button>
+          <button className="book-btn" onClick={onAdd}>+<span className="book-btn-label"> {t('Book')}</span></button>
           {onClearMonth && (
             <div className="header-more-wrap">
               <button
@@ -55,7 +56,7 @@ export default function Header({
                       className="header-menu-item danger"
                       onClick={() => { setMenuOpen(false); onClearMonth() }}
                     >
-                      Clear Month
+                      {t('Clear Month')}
                     </button>
                   </div>
                 </>
@@ -75,11 +76,11 @@ export default function Header({
               className={`view-tab ${view === v ? 'active' : ''}`}
               onClick={() => onViewChange(v)}
             >
-              {v.charAt(0).toUpperCase() + v.slice(1)}
+              {t(v.charAt(0).toUpperCase() + v.slice(1))}
             </button>
           ))}
         </div>
-        <button className="today-pill" onClick={onToday}>Today</button>
+        <button className="today-pill" onClick={onToday}>{t('Today')}</button>
       </div>
     </header>
   )

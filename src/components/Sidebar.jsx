@@ -1,8 +1,9 @@
 import { VENUES } from '../config/venues.js'
+import { useLanguage } from '../i18n/LanguageContext.jsx'
 
 const SOURCES = [
-  { id: 'crm', label: 'CRM', color: '#22C55E' },
-  { id: 'manual', label: 'Manual', color: '#E85D75' },
+  { id: 'crm', labelKey: 'CRM', color: '#22C55E' },
+  { id: 'manual', labelKey: 'Manual', color: '#E85D75' },
 ]
 
 const ROLE_COLORS = { admin: '#E85D75', staff: '#95A5A6' }
@@ -27,6 +28,7 @@ export default function Sidebar({
   onLogout,
   onChangePin,
 }) {
+  const { t, lang, setLang } = useLanguage()
   const venueCounts = events.reduce((acc, ev) => {
     acc[ev.venue_id] = (acc[ev.venue_id] ?? 0) + 1
     return acc
@@ -50,6 +52,11 @@ export default function Sidebar({
         <div className="sidebar-header">
           <div className="brand">
             <img src={import.meta.env.BASE_URL + 'logo.png'} alt="Ambria" className="sidebar-logo" />
+            <div className="lang-toggle">
+              <button className={`lang-btn ${lang === 'en' ? 'active' : ''}`} onClick={() => setLang('en')}>EN</button>
+              <span className="lang-sep">|</span>
+              <button className={`lang-btn ${lang === 'hi' ? 'active' : ''}`} onClick={() => setLang('hi')}>हि</button>
+            </div>
           </div>
           <button className="icon-btn sidebar-close" onClick={onClose} aria-label="Close menu">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -71,7 +78,7 @@ export default function Sidebar({
               <line x1="8" y1="2" x2="8" y2="6" />
               <line x1="3" y1="10" x2="21" y2="10" />
             </svg>
-            Calendar
+            {t('Calendar')}
           </button>
           {user?.role === 'admin' && (
             <button
@@ -84,7 +91,7 @@ export default function Sidebar({
                 <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
                 <path d="M16 3.13a4 4 0 0 1 0 7.75" />
               </svg>
-              Manage Users
+              {t('Manage Users')}
             </button>
           )}
           {user?.role === 'admin' && (
@@ -100,7 +107,7 @@ export default function Sidebar({
                 <line x1="3" y1="12" x2="3.01" y2="12" />
                 <line x1="3" y1="18" x2="3.01" y2="18" />
               </svg>
-              Event Types
+              {t('Event Types')}
             </button>
           )}
           {user?.role === 'admin' && (
@@ -112,7 +119,7 @@ export default function Sidebar({
                 <circle cx="12" cy="12" r="10" />
                 <polyline points="12 6 12 12 16 14" />
               </svg>
-              Audit Log
+              {t('Audit Log')}
             </button>
           )}
         </div>
@@ -126,7 +133,7 @@ export default function Sidebar({
                   type="search"
                   value={search}
                   onChange={(e) => onSearch(e.target.value)}
-                  placeholder="Search events\u2026"
+                  placeholder={t('Search events…')}
                 />
                 {search && (
                   <button
@@ -141,11 +148,11 @@ export default function Sidebar({
             </div>
 
             <div className="sidebar-section-head">
-              <span className="sidebar-section-title">Categories</span>
+              <span className="sidebar-section-title">{t('Categories')}</span>
               <div className="filter-quick">
-                <button type="button" onClick={onSelectAllVenues}>All</button>
+                <button type="button" onClick={onSelectAllVenues}>{t('All')}</button>
                 <span className="filter-quick-sep">\u00b7</span>
-                <button type="button" onClick={onSelectNoVenues}>None</button>
+                <button type="button" onClick={onSelectNoVenues}>{t('None')}</button>
               </div>
             </div>
             <ul className="filter-list">
@@ -175,7 +182,7 @@ export default function Sidebar({
             </ul>
 
             <div className="sidebar-section-head">
-              <span className="sidebar-section-title">Source</span>
+              <span className="sidebar-section-title">{t('Source')}</span>
             </div>
             <ul className="filter-list">
               {SOURCES.map((s) => {
@@ -195,7 +202,7 @@ export default function Sidebar({
                             : { background: 'transparent', borderColor: s.color }
                         }
                       />
-                      <span className="filter-name">{s.label}</span>
+                      <span className="filter-name">{t(s.labelKey)}</span>
                       <span className="filter-count">{sourceCounts[s.id] ?? 0}</span>
                     </button>
                   </li>
@@ -205,8 +212,10 @@ export default function Sidebar({
 
             <div className="sidebar-events-count">
               {shownCount === totalCount
-                ? `${totalCount} ${totalCount === 1 ? 'event' : 'events'} this month`
-                : `${shownCount} of ${totalCount} events shown`}
+                ? (totalCount === 1
+                  ? t('{count} event this month', { count: totalCount })
+                  : t('{count} events this month', { count: totalCount }))
+                : t('{shown} of {total} events shown', { shown: shownCount, total: totalCount })}
             </div>
           </>
         )}
@@ -217,7 +226,7 @@ export default function Sidebar({
             <span className="sidebar-user-name">{(user?.name || '').split(/\s+/)[0]}</span>
             {user?.role && (
               <span className="role-badge" style={{ background: ROLE_COLORS[user.role] || '#95A5A6' }}>
-                {user.role}
+                {t(user.role)}
               </span>
             )}
           </div>
@@ -226,7 +235,7 @@ export default function Sidebar({
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
               <path d="M7 11V7a5 5 0 0 1 10 0v4" />
             </svg>
-            Change PIN
+            {t('Change PIN')}
           </button>
           <button className="sidebar-action-row" onClick={onLogout}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -234,7 +243,7 @@ export default function Sidebar({
               <polyline points="16 17 21 12 16 7" />
               <line x1="21" y1="12" x2="9" y2="12" />
             </svg>
-            Sign Out
+            {t('Sign Out')}
           </button>
         </div>
       </aside>

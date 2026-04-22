@@ -2496,6 +2496,113 @@ input, select, textarea {
   white-space: nowrap;
 }
 
+/* ---------- Language toggle ---------- */
+
+.lang-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 10px;
+}
+
+.lang-btn {
+  background: none;
+  border: none;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 3px 7px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--ambria-text-muted);
+  transition: all 0.15s;
+}
+
+.lang-btn.active {
+  background: var(--ambria-accent);
+  color: #fff;
+}
+
+.lang-sep {
+  color: var(--ambria-text-muted);
+  font-size: 0.8rem;
+  user-select: none;
+}
+
+.login-brand .lang-toggle {
+  margin-left: 0;
+  margin-top: 6px;
+  justify-content: center;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+}
+
+/* ---------- Export modal ---------- */
+
+.export-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.export-card {
+  max-width: 400px;
+  width: 92vw;
+}
+
+.export-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.export-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.export-row select,
+.export-row input[type="date"] {
+  padding: 8px 10px;
+  border: 1px solid var(--ambria-border);
+  border-radius: 8px;
+  font-size: 0.88rem;
+  background: var(--ambria-card);
+}
+
+.export-format-toggle {
+  display: flex;
+  gap: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--ambria-border);
+}
+
+.format-btn {
+  flex: 1;
+  padding: 8px 16px;
+  border: none;
+  background: var(--ambria-card);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--ambria-text-muted);
+  transition: all 0.15s;
+}
+
+.format-btn.active {
+  background: var(--ambria-accent);
+  color: #fff;
+}
+
+.format-btn:not(:last-child) {
+  border-right: 1px solid var(--ambria-border);
+}
+
 /* Sidebar — cap at 85vw so it never exceeds narrow screens */
 @media (max-width: 380px) {
   .sidebar { width: min(85vw, 300px); }

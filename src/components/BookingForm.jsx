@@ -9,6 +9,7 @@ import { autoTitle } from '../lib/autoTitle.js'
 import { sanitizeText, sanitizePhone, sanitizePax } from '../lib/sanitize.js'
 import { createEvent, updateEvent, deleteEvent } from '../lib/events.js'
 import { fetchActiveEventTypes } from '../lib/eventTypes.js'
+import { useLanguage } from '../i18n/LanguageContext.jsx'
 import Field from './Field.jsx'
 
 function blankForm(venueId, defaults = {}) {
@@ -21,6 +22,7 @@ function blankForm(venueId, defaults = {}) {
 }
 
 export default function BookingForm({ initial, onSaved, onDeleted, onClose, user }) {
+  const { t } = useLanguage()
   const editing = !!(initial && initial.id)
   const readOnly = editing && initial?.source !== 'manual'
 
@@ -173,7 +175,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
     e.preventDefault()
     if (readOnly) return
     setSubmitError(null)
-    if (!venueId) { setSubmitError('Please select a category'); return }
+    if (!venueId) { setSubmitError(t('Please select a category')); return }
     if (!validate()) return
     setSaving(true)
     try {
@@ -205,7 +207,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
     }
   }
 
-  const heading = readOnly ? 'View booking' : editing ? 'Edit booking' : 'New booking'
+  const heading = readOnly ? t('View booking') : editing ? t('Edit booking') : t('New booking')
 
   return (
     <form className="booking-form" onSubmit={onSave} noValidate>
@@ -222,14 +224,14 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
 
         {!editing ? (
           <div className="field category-field">
-            <label htmlFor="booking-category" className="field-label">Category <span className="required-star">*</span></label>
+            <label htmlFor="booking-category" className="field-label">{t('Category')} <span className="required-star">*</span></label>
             <select
               id="booking-category"
               value={venueId}
               onChange={(e) => setVenueId(e.target.value)}
               className={!venueId ? 'placeholder-select' : ''}
             >
-              <option value="" disabled>Select a category…</option>
+              <option value="" disabled>{t('Select a category…')}</option>
               {VENUES.map((v) => (
                 <option key={v.id} value={v.id}>
                   {v.short} — {v.name}
@@ -248,14 +250,14 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
         )}
 
         <div className="field title-field">
-          <label htmlFor="booking-title" className="field-label">Title</label>
+          <label htmlFor="booking-title" className="field-label">{t('Title')}</label>
           <div className="title-input-row">
             <input
               id="booking-title"
               type="text"
               value={displayTitle}
               onChange={onTitleChange}
-              placeholder="Auto-generated as you fill in fields"
+              placeholder={t('Auto-generated as you fill in fields')}
               disabled={readOnly}
             />
             {manualTitle !== null && !readOnly && (
@@ -276,7 +278,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
       <div className="form-body">
         {sections.map((section) => (
           <div key={section.title} className="form-section">
-            <div className="form-section-title">{section.title}</div>
+            <div className="form-section-title">{t(section.title)}</div>
             <div className="form-grid">
               {section.fields.map((field) => (
                 <Field
@@ -295,18 +297,18 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
       </div>
 
       <div className="form-footer">
-        {submitError && <div className="form-error-banner">{submitError}</div>}
+        {submitError && <div className="form-error-banner">{t(submitError)}</div>}
         {editing && !readOnly && (
           confirmDelete ? (
             <div className="confirm-delete">
-              <span>Delete this booking?</span>
+              <span>{t('Delete this booking?')}</span>
               <button
                 type="button"
                 className="btn-danger"
                 onClick={onDelete}
                 disabled={deleting}
               >
-                {deleting ? 'Deleting…' : 'Yes, delete'}
+                {deleting ? t('Deleting…') : t('Yes, delete')}
               </button>
               <button
                 type="button"
@@ -314,7 +316,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
                 onClick={() => setConfirmDelete(false)}
                 disabled={deleting}
               >
-                Cancel
+                {t('Cancel')}
               </button>
             </div>
           ) : (
@@ -323,7 +325,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
               className="btn-delete"
               onClick={() => setConfirmDelete(true)}
             >
-              Delete booking
+              {t('Delete booking')}
             </button>
           )
         )}
@@ -333,7 +335,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
             className="btn-save"
             disabled={saving}
           >
-            {saving ? 'Saving…' : editing ? 'Save changes' : 'Save booking'}
+            {saving ? t('Saving…') : editing ? t('Save changes') : t('Save booking')}
           </button>
         )}
       </div>

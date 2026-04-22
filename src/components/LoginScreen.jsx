@@ -2,8 +2,10 @@ import { useState, useRef } from 'react'
 import { COUNTRY_CODES, getCodeFromValue } from '../config/formFields.js'
 import { loginUser, checkPhoneStatus, requestAccess } from '../lib/users.js'
 import { logAction } from '../lib/audit.js'
+import { useLanguage } from '../i18n/LanguageContext.jsx'
 
 export default function LoginScreen({ onLogin }) {
+  const { t, lang, setLang } = useLanguage()
   const [mode, setMode] = useState('login') // 'login' | 'signup' | 'success'
   const [phoneCode, setPhoneCode] = useState('+91')
   const [phone, setPhone] = useState('')
@@ -50,8 +52,8 @@ export default function LoginScreen({ onLogin }) {
     const code = getCodeFromValue(phoneCode)
     const fullPhone = code + ' ' + phone.trim()
     const fullPin = pin.join('')
-    if (!phone.trim()) { setError('Enter your phone number'); return }
-    if (fullPin.length < 4) { setError('Enter your 4-digit PIN'); return }
+    if (!phone.trim()) { setError(t('Enter your phone number')); return }
+    if (fullPin.length < 4) { setError(t('Enter your 4-digit PIN')); return }
     setLoading(true)
     try {
       const result = await loginUser(fullPhone, fullPin)
@@ -64,24 +66,24 @@ export default function LoginScreen({ onLogin }) {
         case 'pending':
           setShake(true)
           setTimeout(() => setShake(false), 500)
-          setError('Your access request is pending approval. Please wait for an admin to approve your account.')
+          setError(t('Your access request is pending approval. Please wait for an admin to approve your account.'))
           break
         case 'rejected':
           setShake(true)
           setTimeout(() => setShake(false), 500)
-          setError('Your access request was declined.' + (result.reason ? ' Reason: ' + result.reason : ''))
+          setError(t('Your access request was declined.') + (result.reason ? ' ' + t('Reason:') + ' ' + result.reason : ''))
           break
         case 'deactivated':
           setShake(true)
           setTimeout(() => setShake(false), 500)
-          setError('Your account has been deactivated. Contact an admin.')
+          setError(t('Your account has been deactivated. Contact an admin.'))
           break
         case 'not_found':
         case 'wrong_pin':
         default:
           setShake(true)
           setTimeout(() => setShake(false), 500)
-          setError('Invalid phone or PIN')
+          setError(t('Invalid phone or PIN'))
           break
       }
       setPin(['', '', '', ''])
@@ -96,9 +98,9 @@ export default function LoginScreen({ onLogin }) {
   const handleSignup = async (e) => {
     e.preventDefault()
     setError(null)
-    if (!firstName.trim()) { setError('Enter your first name'); return }
-    if (!lastName.trim()) { setError('Enter your last name'); return }
-    if (!phone.trim()) { setError('Enter your phone number'); return }
+    if (!firstName.trim()) { setError(t('First name is required')); return }
+    if (!lastName.trim()) { setError(t('Last name is required')); return }
+    if (!phone.trim()) { setError(t('Enter your phone number')); return }
     setLoading(true)
     try {
       const code = getCodeFromValue(phoneCode)
@@ -108,11 +110,11 @@ export default function LoginScreen({ onLogin }) {
       const existing = await checkPhoneStatus(fullPhone)
       if (existing) {
         if (existing.approval_status === 'pending') {
-          setError('A request with this phone number is already pending.')
+          setError(t('A request with this phone number is already pending.'))
         } else if (existing.approval_status === 'rejected') {
-          setError('This phone number was previously declined. Contact an admin.')
+          setError(t('This phone number was previously declined. Contact an admin.'))
         } else {
-          setError('This phone number is already registered. Try signing in.')
+          setError(t('This phone number is already registered. Try signing in.'))
         }
         return
       }
@@ -122,7 +124,7 @@ export default function LoginScreen({ onLogin }) {
     } catch (err) {
       const msg = err?.message ?? String(err)
       if (msg.includes('duplicate') || msg.includes('unique')) {
-        setError('This phone number is already registered.')
+        setError(t('This phone number is already registered.'))
       } else {
         setError(msg)
       }
@@ -154,12 +156,12 @@ export default function LoginScreen({ onLogin }) {
               <polyline points="9 12 11.5 14.5 16 9.5" />
             </svg>
           </div>
-          <h2>Request Submitted</h2>
+          <h2>{t('Request Submitted')}</h2>
           <p className="success-text">
-            Your access request has been sent. An admin will review and approve your account. You'll be able to sign in once approved.
+            {t("Your access request has been sent. An admin will review and approve your account. You'll be able to sign in once approved.")}
           </p>
           <button type="button" className="btn-save login-btn" onClick={switchToLogin}>
-            Back to Sign In
+            {t('Back to Sign In')}
           </button>
         </div>
       </div>
@@ -175,29 +177,34 @@ export default function LoginScreen({ onLogin }) {
       >
         <div className="login-brand">
           <img src={import.meta.env.BASE_URL + 'logo.png'} alt="Ambria" className="login-logo" />
+          <div className="lang-toggle">
+            <button className={`lang-btn ${lang === 'en' ? 'active' : ''}`} onClick={() => setLang('en')}>EN</button>
+            <span className="lang-sep">|</span>
+            <button className={`lang-btn ${lang === 'hi' ? 'active' : ''}`} onClick={() => setLang('hi')}>हि</button>
+          </div>
         </div>
 
         {mode === 'signup' && (
           <div className="name-row">
             <div className="login-field">
-              <label className="field-label">First Name <span className="required-star">*</span></label>
+              <label className="field-label">{t('First Name')} <span className="required-star">*</span></label>
               <input
                 type="text"
                 className="login-input"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value.replace(/[^a-zA-Z\s]/g, ''))}
-                placeholder="First name"
+                placeholder={t('First name')}
                 autoComplete="given-name"
               />
             </div>
             <div className="login-field">
-              <label className="field-label">Last Name <span className="required-star">*</span></label>
+              <label className="field-label">{t('Last Name')} <span className="required-star">*</span></label>
               <input
                 type="text"
                 className="login-input"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value.replace(/[^a-zA-Z\s]/g, ''))}
-                placeholder="Last name"
+                placeholder={t('Last name')}
                 autoComplete="family-name"
               />
             </div>
@@ -205,7 +212,7 @@ export default function LoginScreen({ onLogin }) {
         )}
 
         <div className="login-field">
-          <label className="field-label">Phone</label>
+          <label className="field-label">{t('Phone')}</label>
           <div className="phone-combo">
             <select
               className="phone-code-select"
@@ -229,7 +236,7 @@ export default function LoginScreen({ onLogin }) {
 
         {mode === 'login' && (
           <div className="login-field">
-            <label className="field-label">PIN</label>
+            <label className="field-label">{t('PIN')}</label>
             <div className={`pin-boxes ${shake ? 'shake' : ''}`}>
               {pin.map((d, i) => (
                 <input
@@ -254,24 +261,24 @@ export default function LoginScreen({ onLogin }) {
 
         <button type="submit" className="btn-save login-btn" disabled={loading}>
           {loading
-            ? (mode === 'login' ? 'Signing in\u2026' : 'Submitting\u2026')
-            : (mode === 'login' ? 'Sign In' : 'Request Access')
+            ? (mode === 'login' ? t('Signing in…') : t('Submitting…'))
+            : (mode === 'login' ? t('Sign In') : t('Request Access'))
           }
         </button>
 
         <div className="login-link">
           {mode === 'login' ? (
             <span>
-              Don't have an account?{' '}
+              {t("Don't have an account?")}{' '}
               <button type="button" className="link-btn" onClick={switchToSignup}>
-                Request Access
+                {t('Request Access')}
               </button>
             </span>
           ) : (
             <span>
-              Already have an account?{' '}
+              {t('Already have an account?')}{' '}
               <button type="button" className="link-btn" onClick={switchToLogin}>
-                Sign In
+                {t('Sign In')}
               </button>
             </span>
           )}

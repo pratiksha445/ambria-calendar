@@ -5,6 +5,7 @@ import {
 } from '../lib/users.js'
 import { logAction } from '../lib/audit.js'
 import { COUNTRY_CODES, getCodeFromValue, parsePhoneCode } from '../config/formFields.js'
+import { useLanguage } from '../i18n/LanguageContext.jsx'
 
 const ROLES = ['admin', 'staff']
 const ROLE_COLORS = { admin: '#E85D75', staff: '#95A5A6' }
@@ -21,6 +22,7 @@ function MenuIcon() {
 }
 
 function InlinePinInput({ onSave, onCancel }) {
+  const { t } = useLanguage()
   const [digits, setDigits] = useState(['', '', '', ''])
   const refs = [useRef(), useRef(), useRef(), useRef()]
 
@@ -66,13 +68,14 @@ function InlinePinInput({ onSave, onCancel }) {
           />
         ))}
       </div>
-      <button className="btn-xs btn-approve" onClick={() => onSave(pin)} disabled={!valid}>Save</button>
-      <button className="btn-xs btn-ghost" onClick={onCancel}>Cancel</button>
+      <button className="btn-xs btn-approve" onClick={() => onSave(pin)} disabled={!valid}>{t('Save')}</button>
+      <button className="btn-xs btn-ghost" onClick={onCancel}>{t('Cancel')}</button>
     </div>
   )
 }
 
 export default function UserManagement({ currentUser, showToast, onMenu }) {
+  const { t } = useLanguage()
   const [users, setUsers] = useState([])
   const [search, setSearch] = useState('')
   const [tab, setTab] = useState('all')
@@ -135,9 +138,9 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
   const handleSave = async (e) => {
     e.preventDefault()
     setFormError(null)
-    if (!form.firstName.trim()) { setFormError('First name is required'); return }
-    if (!form.lastName.trim()) { setFormError('Last name is required'); return }
-    if (!form.phone.trim()) { setFormError('Phone is required'); return }
+    if (!form.firstName.trim()) { setFormError(t('First name is required')); return }
+    if (!form.lastName.trim()) { setFormError(t('Last name is required')); return }
+    if (!form.phone.trim()) { setFormError(t('Phone is required')); return }
 
     const code = getCodeFromValue(form.phone_code || '+91')
     const fullPhone = code + ' ' + form.phone.replace(/[^\d\s]/g, '').trim()
@@ -150,20 +153,20 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
         await logAction(currentUser.id, currentUser.name, 'create', 'user', row.id, {
           name: row.name, role: row.role,
         })
-        showToast?.('User created')
+        showToast?.(t('User created'))
       } else {
         const patch = { name: fullName, phone: fullPhone, role: form.role }
         const row = await updateUser(editing.id, patch)
         await logAction(currentUser.id, currentUser.name, 'update', 'user', row.id, {
           name: row.name, role: row.role,
         })
-        showToast?.('User updated')
+        showToast?.(t('User updated'))
       }
       setEditing(null)
       await loadUsers()
     } catch (err) {
       const msg = err?.message ?? String(err)
-      if (msg.includes('duplicate') || msg.includes('unique')) setFormError('Phone number already exists')
+      if (msg.includes('duplicate') || msg.includes('unique')) setFormError(t('Phone number already exists'))
       else setFormError(msg)
     } finally {
       setSaving(false)
@@ -177,7 +180,7 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
         name: user.name, role: user.role,
       })
       setConfirmDelete(null)
-      showToast?.('User deleted')
+      showToast?.(t('User deleted'))
       await loadUsers()
     } catch (err) { console.error(err) }
   }
@@ -188,7 +191,7 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
       await logAction(currentUser.id, currentUser.name, 'update', 'user', user.id, {
         name: user.name, is_active: !user.is_active,
       })
-      showToast?.(user.is_active ? 'User deactivated' : 'User activated')
+      showToast?.(t(user.is_active ? 'User deactivated' : 'User activated'))
       await loadUsers()
     } catch (err) { console.error(err) }
   }
@@ -197,7 +200,7 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
     try {
       const row = await approveUser(user.id, currentUser.id)
       await logAction(currentUser.id, currentUser.name, 'approve', 'user', row.id, { name: row.name })
-      showToast?.(`${user.name} approved`)
+      showToast?.(t('{name} approved', { name: user.name }))
       await loadUsers()
     } catch (err) { console.error(err) }
   }
@@ -210,7 +213,7 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
       })
       setRejectingId(null)
       setRejectReason('')
-      showToast?.(`${user.name} rejected`)
+      showToast?.(t('{name} rejected', { name: user.name }))
       await loadUsers()
     } catch (err) { console.error(err) }
   }
@@ -222,7 +225,7 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
         action: 'pin_reset', user_name: user.name, reset_to: 'default',
       })
       setConfirmResetPin(null)
-      showToast?.('PIN reset to 0000 \u2014 user will set new PIN on next login')
+      showToast?.(t('PIN reset to 0000 \u2014 user will set new PIN on next login'))
       await loadUsers()
     } catch (err) { console.error(err) }
   }
@@ -234,7 +237,7 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
         action: 'pin_set', user_name: user.name,
       })
       setSettingPinFor(null)
-      showToast?.('PIN updated')
+      showToast?.(t('PIN updated'))
       await loadUsers()
     } catch (err) { console.error(err) }
   }
@@ -246,7 +249,7 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
       await logAction(currentUser.id, currentUser.name, 'update', 'user', editing.id, {
         action: 'pin_reset', user_name: editing.name, reset_to: 'default',
       })
-      showToast?.('PIN reset to 0000')
+      showToast?.(t('PIN reset to 0000 \u2014 user will set new PIN on next login'))
       await loadUsers()
       // Refresh the editing object
       const refreshed = (await fetchUsers()).find((u) => u.id === editing.id)
@@ -261,7 +264,7 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
       await logAction(currentUser.id, currentUser.name, 'update', 'user', editing.id, {
         action: 'pin_set', user_name: editing.name,
       })
-      showToast?.('PIN updated')
+      showToast?.(t('PIN updated'))
       await loadUsers()
       const refreshed = (await fetchUsers()).find((u) => u.id === editing.id)
       if (refreshed) setEditing(refreshed)
@@ -274,7 +277,7 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
   const renderApprovalBadge = (status) => {
     const colors = { pending: '#F59E0B', approved: '#22C55E', rejected: '#E85D75' }
     return (
-      <span className="approval-badge" style={{ background: colors[status] }}>{status}</span>
+      <span className="approval-badge" style={{ background: colors[status] }}>{t(status)}</span>
     )
   }
 
@@ -283,30 +286,30 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
       <div className="user-info">
         <div className="user-name-line">
           <span className="user-name">{u.name}</span>
-          <span className="role-badge" style={{ background: ROLE_COLORS[u.role] }}>{u.role}</span>
+          <span className="role-badge" style={{ background: ROLE_COLORS[u.role] }}>{t(u.role)}</span>
           {renderApprovalBadge(u.approval_status)}
-          {!u.is_active && u.approval_status === 'approved' && <span className="status-badge-inactive">Inactive</span>}
+          {!u.is_active && u.approval_status === 'approved' && <span className="status-badge-inactive">{t('Inactive')}</span>}
         </div>
         <div className="user-phone">{u.phone}</div>
         <div className="pin-display-box">
-          <span className="pin-display-label">PIN:</span>
+          <span className="pin-display-label">{t('PIN:')}</span>
           <span className="pin-display-value">{u.pin}</span>
         </div>
         <div className="user-date">
           {u.approval_status === 'pending' && u.requested_at
-            ? `Requested ${formatDate(u.requested_at)}`
-            : `Joined ${formatDate(u.created_at)}`}
+            ? t('Requested {date}', { date: formatDate(u.requested_at) })
+            : t('Joined {date}', { date: formatDate(u.created_at) })}
         </div>
         {u.approval_status === 'rejected' && u.rejection_reason && (
-          <div className="reject-reason-text">Reason: {u.rejection_reason}</div>
+          <div className="reject-reason-text">{t('Reason: {reason}', { reason: u.rejection_reason })}</div>
         )}
       </div>
       <div className="user-actions">
         {/* PIN actions — single Reset PIN with inline options */}
         {confirmResetPin === u.id ? (
           <div className="reset-pin-panel">
-            <button className="btn-outline btn-sm" onClick={() => handleResetPin(u)}>Reset to default (0000)</button>
-            <div className="reset-pin-or">or set custom:</div>
+            <button className="btn-outline btn-sm" onClick={() => handleResetPin(u)}>{t('Reset to default (0000)')}</button>
+            <div className="reset-pin-or">{t('or set custom:')}</div>
             <InlinePinInput
               onSave={(pin) => handleSetPin(u, pin)}
               onCancel={() => setConfirmResetPin(null)}
@@ -314,14 +317,14 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
           </div>
         ) : (
           <div className="pin-action-row">
-            <button className="btn-outline btn-sm" onClick={() => { setConfirmResetPin(u.id); setSettingPinFor(null) }}>Reset PIN</button>
+            <button className="btn-outline btn-sm" onClick={() => { setConfirmResetPin(u.id); setSettingPinFor(null) }}>{t('Reset PIN')}</button>
           </div>
         )}
 
         {/* Section-specific actions */}
         {section === 'pending' && (
           <>
-            <button className="btn-xs btn-approve" onClick={() => handleApprove(u)}>Approve</button>
+            <button className="btn-xs btn-approve" onClick={() => handleApprove(u)}>{t('Approve')}</button>
             {rejectingId === u.id ? (
               <div className="reject-reason-row">
                 <input
@@ -329,49 +332,49 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
                   className="reject-reason-input"
                   value={rejectReason}
                   onChange={(e) => setRejectReason(e.target.value)}
-                  placeholder="Reason (optional)"
+                  placeholder={t('Reason (optional)')}
                   autoFocus
                 />
-                <button className="btn-xs btn-reject" onClick={() => handleReject(u)}>Confirm</button>
-                <button className="btn-xs btn-ghost" onClick={() => { setRejectingId(null); setRejectReason('') }}>Cancel</button>
+                <button className="btn-xs btn-reject" onClick={() => handleReject(u)}>{t('Confirm')}</button>
+                <button className="btn-xs btn-ghost" onClick={() => { setRejectingId(null); setRejectReason('') }}>{t('Cancel')}</button>
               </div>
             ) : (
-              <button className="btn-xs btn-reject" onClick={() => setRejectingId(u.id)}>Reject</button>
+              <button className="btn-xs btn-reject" onClick={() => setRejectingId(u.id)}>{t('Reject')}</button>
             )}
           </>
         )}
         {section === 'approved' && (
           <>
-            <button className="btn-ghost btn-sm" onClick={() => openEdit(u)}>Edit</button>
+            <button className="btn-ghost btn-sm" onClick={() => openEdit(u)}>{t('Edit')}</button>
             <button className="btn-ghost btn-sm" onClick={() => handleToggle(u)}>
-              {u.is_active ? 'Deactivate' : 'Activate'}
+              {t(u.is_active ? 'Deactivate' : 'Activate')}
             </button>
             {confirmDelete === u.id ? (
               <div className="inline-confirm">
-                <span>Remove {u.name}?</span>
-                <button className="btn-danger btn-sm" onClick={() => handleDelete(u)}>Yes</button>
-                <button className="btn-ghost btn-sm" onClick={() => setConfirmDelete(null)}>No</button>
+                <span>{t('Remove {name}?', { name: u.name })}</span>
+                <button className="btn-danger btn-sm" onClick={() => handleDelete(u)}>{t('Yes')}</button>
+                <button className="btn-ghost btn-sm" onClick={() => setConfirmDelete(null)}>{t('No')}</button>
               </div>
             ) : (
               <button
                 className="btn-ghost btn-sm danger-text"
                 onClick={() => setConfirmDelete(u.id)}
                 disabled={u.id === currentUser.id}
-                title={u.id === currentUser.id ? 'Cannot delete yourself' : ''}
+                title={u.id === currentUser.id ? t('Cannot delete yourself') : ''}
               >
-                Delete
+                {t('Delete')}
               </button>
             )}
           </>
         )}
         {section === 'rejected' && (
           <>
-            <button className="btn-xs btn-approve" onClick={() => handleApprove(u)}>Re-approve</button>
+            <button className="btn-xs btn-approve" onClick={() => handleApprove(u)}>{t('Re-approve')}</button>
             {confirmDelete === u.id ? (
               <div className="inline-confirm">
-                <span>Remove {u.name}?</span>
-                <button className="btn-danger btn-sm" onClick={() => handleDelete(u)}>Yes</button>
-                <button className="btn-ghost btn-sm" onClick={() => setConfirmDelete(null)}>No</button>
+                <span>{t('Remove {name}?', { name: u.name })}</span>
+                <button className="btn-danger btn-sm" onClick={() => handleDelete(u)}>{t('Yes')}</button>
+                <button className="btn-ghost btn-sm" onClick={() => setConfirmDelete(null)}>{t('No')}</button>
               </div>
             ) : (
               <button
@@ -379,7 +382,7 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
                 onClick={() => setConfirmDelete(u.id)}
                 disabled={u.id === currentUser.id}
               >
-                Delete
+                {t('Delete')}
               </button>
             )}
           </>
@@ -394,21 +397,21 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
         <button className="icon-btn header-menu" onClick={onMenu} aria-label="Open menu">
           <MenuIcon />
         </button>
-        <h2>Manage Users</h2>
-        <button className="book-btn" onClick={openNew}>+ Add User</button>
+        <h2>{t('Manage Users')}</h2>
+        <button className="book-btn" onClick={openNew}>{t('+ Add User')}</button>
       </div>
 
       <div className="um-tabs" role="tablist">
-        {TABS.map((t) => (
+        {TABS.map((tabKey) => (
           <button
-            key={t}
+            key={tabKey}
             role="tab"
-            aria-selected={tab === t}
-            className={`um-tab ${tab === t ? 'active' : ''}`}
-            onClick={() => setTab(t)}
+            aria-selected={tab === tabKey}
+            className={`um-tab ${tab === tabKey ? 'active' : ''}`}
+            onClick={() => setTab(tabKey)}
           >
-            {t.charAt(0).toUpperCase() + t.slice(1)}
-            <span className="um-tab-count">{counts[t]}</span>
+            {t(tabKey.charAt(0).toUpperCase() + tabKey.slice(1))}
+            <span className="um-tab-count">{counts[tabKey]}</span>
           </button>
         ))}
       </div>
@@ -416,7 +419,7 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
       <div className="panel-search">
         <input
           type="search"
-          placeholder="Search by name or phone\u2026"
+          placeholder={t('Search by name or phone\u2026')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -428,7 +431,7 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
             {pendingUsers.length > 0 && (
               <div className="um-section">
                 <div className="um-section-title">
-                  Pending Requests
+                  {t('Pending Requests')}
                   <span className="um-tab-count">{pendingUsers.length}</span>
                 </div>
                 {pendingUsers.map((u) => renderUserCard(u, 'pending'))}
@@ -436,7 +439,7 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
             )}
             {approvedUsers.length > 0 && (
               <div className="um-section">
-                <div className="um-section-title">Approved Users</div>
+                <div className="um-section-title">{t('Approved Users')}</div>
                 {approvedUsers.map((u) => renderUserCard(u, 'approved'))}
               </div>
             )}
@@ -447,7 +450,7 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
                   className="um-section-title um-section-toggle"
                   onClick={() => setRejectedOpen(!rejectedOpen)}
                 >
-                  Rejected
+                  {t('Rejected')}
                   <span className="um-tab-count">{rejectedUsers.length}</span>
                   <span className={`um-chevron ${rejectedOpen ? 'open' : ''}`}>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -462,37 +465,37 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
         ) : (
           <>{filtered.map((u) => renderUserCard(u, u.approval_status))}</>
         )}
-        {filtered.length === 0 && <div className="empty-state">No users found</div>}
+        {filtered.length === 0 && <div className="empty-state">{t('No users found')}</div>}
       </div>
 
       {editing && (
         <div className="modal-root" role="dialog" aria-modal="true">
           <div className="modal-backdrop" onClick={() => setEditing(null)} />
           <div className="panel-form-card">
-            <h3>{editing === 'new' ? 'Add User' : 'Edit User'}</h3>
+            <h3>{t(editing === 'new' ? 'Add User' : 'Edit User')}</h3>
             <form onSubmit={handleSave} noValidate>
               <div className="name-row">
                 <div className="pf-field">
-                  <label className="field-label">First Name <span className="required-star">*</span></label>
+                  <label className="field-label">{t('First Name')} <span className="required-star">*</span></label>
                   <input
                     type="text"
                     value={form.firstName}
                     onChange={(e) => setForm({ ...form, firstName: e.target.value.replace(/[^a-zA-Z\s]/g, '') })}
-                    placeholder="First name"
+                    placeholder={t('First name')}
                   />
                 </div>
                 <div className="pf-field">
-                  <label className="field-label">Last Name <span className="required-star">*</span></label>
+                  <label className="field-label">{t('Last Name')} <span className="required-star">*</span></label>
                   <input
                     type="text"
                     value={form.lastName}
                     onChange={(e) => setForm({ ...form, lastName: e.target.value.replace(/[^a-zA-Z\s]/g, '') })}
-                    placeholder="Last name"
+                    placeholder={t('Last name')}
                   />
                 </div>
               </div>
               <div className="pf-field">
-                <label className="field-label">Phone <span className="required-star">*</span></label>
+                <label className="field-label">{t('Phone')} <span className="required-star">*</span></label>
                 <div className="phone-combo">
                   <select
                     className="phone-code-select"
@@ -516,23 +519,23 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
               {/* PIN section */}
               {editing === 'new' ? (
                 <div className="pf-field">
-                  <label className="field-label">PIN</label>
-                  <div className="pin-default-note">Default PIN is 0000 — user will set their own on first login</div>
+                  <label className="field-label">{t('PIN')}</label>
+                  <div className="pin-default-note">{t('Default PIN is 0000 \u2014 user will set their own on first login')}</div>
                 </div>
               ) : (
                 <div className="pf-field">
-                  <label className="field-label">PIN</label>
+                  <label className="field-label">{t('PIN')}</label>
                   <div className="edit-pin-section">
                     <div className="pin-display-box">
-                      <span className="pin-display-label">Current:</span>
+                      <span className="pin-display-label">{t('Current:')}</span>
                       <span className="pin-display-value">{editing.pin}</span>
                     </div>
                     {form._resetPinOpen ? (
                       <div className="reset-pin-panel">
                         <button type="button" className="btn-outline btn-sm" onClick={handleEditFormResetPin}>
-                          Reset to default (0000)
+                          {t('Reset to default (0000)')}
                         </button>
-                        <div className="reset-pin-or">or set custom:</div>
+                        <div className="reset-pin-or">{t('or set custom:')}</div>
                         <InlinePinInput
                           onSave={(pin) => {
                             handleEditFormSetPin(pin)
@@ -548,7 +551,7 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
                           className="btn-outline btn-sm"
                           onClick={() => setForm((f) => ({ ...f, _resetPinOpen: true }))}
                         >
-                          Reset PIN
+                          {t('Reset PIN')}
                         </button>
                       </div>
                     )}
@@ -557,18 +560,18 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
               )}
 
               <div className="pf-field">
-                <label className="field-label">Role</label>
+                <label className="field-label">{t('Role')}</label>
                 <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}>
                   {ROLES.map((r) => (
-                    <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>
+                    <option key={r} value={r}>{t(r.charAt(0).toUpperCase() + r.slice(1))}</option>
                   ))}
                 </select>
               </div>
               {formError && <div className="login-error">{formError}</div>}
               <div className="panel-form-actions">
-                <button type="button" className="btn-ghost" onClick={() => setEditing(null)}>Cancel</button>
+                <button type="button" className="btn-ghost" onClick={() => setEditing(null)}>{t('Cancel')}</button>
                 <button type="submit" className="btn-save" disabled={saving}>
-                  {saving ? 'Saving\u2026' : editing === 'new' ? 'Create User' : 'Save Changes'}
+                  {saving ? t('Saving\u2026') : t(editing === 'new' ? 'Create User' : 'Save Changes')}
                 </button>
               </div>
             </form>

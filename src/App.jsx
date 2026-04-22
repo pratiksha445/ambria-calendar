@@ -13,9 +13,10 @@ import AuditLog from './components/AuditLog.jsx'
 import EventTypeManagement from './components/EventTypeManagement.jsx'
 import { fetchEvents, deleteEvent, bulkDeleteMonth } from './lib/events.js'
 import { seedIfEmpty } from './lib/seedEvents.js'
-import { startOfMonth, endOfMonth, toIsoDate, addDays, formatMonthYear } from './lib/dates.js'
+import { startOfMonth, endOfMonth, toIsoDate, addDays } from './lib/dates.js'
 import { VENUES } from './config/venues.js'
 import { logAction } from './lib/audit.js'
+import { useLanguage } from './i18n/LanguageContext.jsx'
 import './App.css'
 
 const ALL_VENUE_IDS = VENUES.map((v) => v.id)
@@ -29,6 +30,7 @@ function getStoredUser() {
 }
 
 export default function App() {
+  const { t, formatMonthYear } = useLanguage()
   const [user, setUser] = useState(getStoredUser)
   const [currentView, setCurrentView] = useState('calendar')
   const [currentDate, setCurrentDate] = useState(() => new Date())
@@ -168,7 +170,7 @@ export default function App() {
   const closeModal = () => setModal(null)
   const handleSaved = (row) => {
     setModal(null)
-    showToast('Booking saved')
+    showToast(t('Booking saved'))
     if (row?.date) {
       const d = new Date(row.date)
       setSelectedDate(d)
@@ -182,13 +184,13 @@ export default function App() {
   }
   const handleDeleted = () => {
     setModal(null)
-    showToast('Booking deleted')
+    showToast(t('Booking deleted'))
     setReloadKey((k) => k + 1)
   }
   const handleCardDelete = async (ev) => {
     try {
       await deleteEvent(ev.id, user)
-      showToast('Event deleted')
+      showToast(t('Event deleted'))
       setReloadKey((k) => k + 1)
     } catch (err) {
       console.error('[ambria] card delete failed', err)
@@ -202,7 +204,7 @@ export default function App() {
     try {
       await bulkDeleteMonth(start, end, user)
       setConfirmBulk(false)
-      showToast(`All events in ${formatMonthYear(currentDate)} cleared`)
+      showToast(t('All events in {month} cleared', { month: formatMonthYear(currentDate) }))
       setReloadKey((k) => k + 1)
     } catch (err) {
       console.error('[ambria] bulk delete failed', err)
@@ -282,9 +284,9 @@ export default function App() {
             />
             <main className="app-body">
               {error && <div className="error-banner">{error}</div>}
-              {loading && <div className="loading">Loading\u2026</div>}
+              {loading && <div className="loading">{t('Loading…')}</div>}
               {filtersHideEverything && (
-                <div className="filter-empty-banner">No events match your filters</div>
+                <div className="filter-empty-banner">{t('No events match your filters')}</div>
               )}
               {view === 'month' && (
                 <MonthView
@@ -339,14 +341,14 @@ export default function App() {
         <div className="modal-root" role="dialog" aria-modal="true">
           <div className="modal-backdrop" onClick={() => setConfirmBulk(false)} />
           <div className="bulk-delete-card">
-            <h3>Delete all events in {formatMonthYear(currentDate)}?</h3>
+            <h3>{t('Delete all events in {month}?', { month: formatMonthYear(currentDate) })}</h3>
             <p>
-              This will delete {manualCount} manual {manualCount === 1 ? 'event' : 'events'}
-              {crmCount > 0 && ` and hide ${crmCount} CRM ${crmCount === 1 ? 'event' : 'events'}`}
+              {t('This will delete {count} manual events', { count: manualCount })}
+              {crmCount > 0 && ' ' + t('and hide {count} CRM events', { count: crmCount })}
             </p>
             <div className="bulk-delete-actions">
-              <button className="btn-ghost" onClick={() => setConfirmBulk(false)}>Cancel</button>
-              <button className="btn-danger" onClick={executeBulkDelete}>Delete All</button>
+              <button className="btn-ghost" onClick={() => setConfirmBulk(false)}>{t('Cancel')}</button>
+              <button className="btn-danger" onClick={executeBulkDelete}>{t('Delete All')}</button>
             </div>
           </div>
         </div>

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { changeSelfPin } from '../lib/users.js'
 import { logAction } from '../lib/audit.js'
+import { useLanguage } from '../i18n/LanguageContext.jsx'
 
 function PinBoxes({ value, onChange, label }) {
   const refs = [useRef(), useRef(), useRef(), useRef()]
@@ -54,6 +55,7 @@ function PinBoxes({ value, onChange, label }) {
 }
 
 export default function ChangePinModal({ user, onClose, showToast }) {
+  const { t } = useLanguage()
   const [currentPin, setCurrentPin] = useState(['', '', '', ''])
   const [newPin, setNewPin] = useState(['', '', '', ''])
   const [confirmPin, setConfirmPin] = useState(['', '', '', ''])
@@ -73,11 +75,11 @@ export default function ChangePinModal({ user, onClose, showToast }) {
     const pin = newPin.join('')
     const confirm = confirmPin.join('')
 
-    if (cur.length < 4) { setError('Enter your current PIN'); return }
-    if (pin.length < 4) { setError('Enter a 4-digit new PIN'); return }
-    if (pin === '0000') { setError('PIN cannot be 0000'); return }
+    if (cur.length < 4) { setError(t('Enter your current PIN')); return }
+    if (pin.length < 4) { setError(t('Enter a 4-digit new PIN')); return }
+    if (pin === '0000') { setError(t('PIN cannot be 0000')); return }
     if (pin !== confirm) {
-      setError('New PINs do not match')
+      setError(t('New PINs do not match'))
       setConfirmPin(['', '', '', ''])
       return
     }
@@ -91,7 +93,7 @@ export default function ChangePinModal({ user, onClose, showToast }) {
         return
       }
       await logAction(user.id, user.name, 'change_pin', 'user', user.id, null)
-      showToast?.('PIN updated')
+      showToast?.(t('PIN updated'))
       onClose()
     } catch (err) {
       setError(err?.message ?? String(err))
@@ -104,18 +106,18 @@ export default function ChangePinModal({ user, onClose, showToast }) {
     <div className="modal-root" role="dialog" aria-modal="true">
       <div className="modal-backdrop" onClick={onClose} />
       <div className="panel-form-card cp-card">
-        <h3>Change PIN</h3>
+        <h3>{t('Change PIN')}</h3>
         <form onSubmit={handleSubmit} noValidate>
-          <PinBoxes value={currentPin} onChange={setCurrentPin} label="Current PIN" />
-          <PinBoxes value={newPin} onChange={setNewPin} label="New PIN" />
-          <PinBoxes value={confirmPin} onChange={setConfirmPin} label="Confirm New PIN" />
+          <PinBoxes value={currentPin} onChange={setCurrentPin} label={t('Current PIN')} />
+          <PinBoxes value={newPin} onChange={setNewPin} label={t('New PIN')} />
+          <PinBoxes value={confirmPin} onChange={setConfirmPin} label={t('Confirm New PIN')} />
 
           {error && <div className="login-error">{error}</div>}
 
           <div className="panel-form-actions">
-            <button type="button" className="btn-ghost" onClick={onClose}>Cancel</button>
+            <button type="button" className="btn-ghost" onClick={onClose}>{t('Cancel')}</button>
             <button type="submit" className="btn-save" disabled={saving}>
-              {saving ? 'Updating\u2026' : 'Update PIN'}
+              {saving ? t('Updating…') : t('Update PIN')}
             </button>
           </div>
         </form>

@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import { VENUE_BY_ID, SHIFT_BADGE } from '../config/venues.js'
 import { formatTime12 } from '../lib/dates.js'
+import { useLanguage } from '../i18n/LanguageContext.jsx'
 
 export default function EventCard({ event, expanded = false, onToggle, onEdit, onDelete }) {
+  const { t, formatShortDate } = useLanguage()
   const venue = VENUE_BY_ID[event.venue_id]
   const shiftBadge = event.shift ? SHIFT_BADGE[event.shift] : null
-  const primary = buildPrimary(event)
+  const primary = buildPrimary(event, formatShortDate)
   const [confirmDel, setConfirmDel] = useState(false)
 
   useEffect(() => {
@@ -27,10 +29,10 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
     >
       {confirmDel ? (
         <div className="event-card-confirm">
-          <span>Delete?</span>
+          <span>{t('Delete?')}</span>
           <div className="event-card-confirm-actions">
-            <button type="button" className="btn-ghost" onClick={cancelDel}>Cancel</button>
-            <button type="button" className="btn-danger" onClick={doDelete}>Delete</button>
+            <button type="button" className="btn-ghost" onClick={cancelDel}>{t('Cancel')}</button>
+            <button type="button" className="btn-danger" onClick={doDelete}>{t('Delete')}</button>
           </div>
         </div>
       ) : (
@@ -64,8 +66,8 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
                 )}
                 <span
                   className={`source-dot ${event.source}`}
-                  aria-label={event.source === 'crm' ? 'CRM' : 'Manual'}
-                  title={event.source === 'crm' ? 'CRM' : 'Manual'}
+                  aria-label={event.source === 'crm' ? t('CRM') : t('Manual')}
+                  title={event.source === 'crm' ? t('CRM') : t('Manual')}
                 />
               </div>
             </div>
@@ -92,17 +94,17 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
       <div className="event-card-details" aria-hidden={!expanded}>
         <div className="event-card-details-inner">
           {event.sub_venue && (
-            <div><span className="k">Sub-venue</span> {event.sub_venue}</div>
+            <div><span className="k">{t('Sub-venue')}</span> {event.sub_venue}</div>
           )}
           {event.venue_name && (
-            <div><span className="k">Venue</span> {event.venue_name}</div>
+            <div><span className="k">{t('Venue')}</span> {event.venue_name}</div>
           )}
           {event.venue_type && (
-            <div><span className="k">Type</span> {event.venue_type}</div>
+            <div><span className="k">{t('Type')}</span> {t(event.venue_type)}</div>
           )}
           {event.location && (
             <div className="event-detail-location">
-              <span className="k">Location</span>
+              <span className="k">{t('Location')}</span>
               <span>{event.location}</span>
               <a
                 href={getMapsUrl(event.location)}
@@ -120,15 +122,15 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
             </div>
           )}
           {(event.guest_name || event.tender_name) && (
-            <div><span className="k">Guest</span> {event.guest_name || event.tender_name}</div>
+            <div><span className="k">{t('Guest')}</span> {event.guest_name || event.tender_name}</div>
           )}
-          {event.phone && <div><span className="k">Phone</span> {event.phone}</div>}
-          {event.pax && <div><span className="k">Pax</span> {event.pax}</div>}
+          {event.phone && <div><span className="k">{t('Phone')}</span> {event.phone}</div>}
+          {event.pax && <div><span className="k">{t('Pax')}</span> {event.pax}</div>}
           {event.sales_person && (
-            <div><span className="k">Sales</span> {event.sales_person}</div>
+            <div><span className="k">{t('Sales')}</span> {event.sales_person}</div>
           )}
           {event.status && (
-            <div><span className="k">Status</span> {event.status}</div>
+            <div><span className="k">{t('Status')}</span> {t(event.status)}</div>
           )}
           {onEdit && (
             <div className="event-card-actions">
@@ -137,7 +139,7 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
                 className="event-edit-btn"
                 onClick={(e) => { e.stopPropagation(); onEdit(event) }}
               >
-                {event.source === 'manual' ? 'Edit' : 'View'}
+                {event.source === 'manual' ? t('Edit') : t('View')}
               </button>
             </div>
           )}
@@ -147,7 +149,7 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
   )
 }
 
-function buildPrimary(event) {
+function buildPrimary(event, formatShortDate) {
   if (event.venue_id === 'tender') {
     return joinPipes([event.tender_name, event.event_type_text, event.venue_name])
   }
@@ -169,16 +171,6 @@ function buildPrimary(event) {
 
 function joinPipes(parts) {
   return parts.filter(Boolean).join(' | ')
-}
-
-const SHORT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-
-function formatShortDate(iso) {
-  if (!iso || typeof iso !== 'string') return null
-  const [, m, d] = iso.split('-').map(Number)
-  if (!m || !d) return null
-  return `${d} ${SHORT_MONTHS[m - 1]}`
 }
 
 function getMapsUrl(location) {

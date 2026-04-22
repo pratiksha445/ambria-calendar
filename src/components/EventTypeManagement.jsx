@@ -3,6 +3,7 @@ import {
   fetchEventTypes, createEventType, updateEventType,
   deleteEventType, reorderEventTypes,
 } from '../lib/eventTypes.js'
+import { useLanguage } from '../i18n/LanguageContext.jsx'
 
 function MenuIcon() {
   return (
@@ -15,6 +16,7 @@ function MenuIcon() {
 }
 
 export default function EventTypeManagement({ currentUser, showToast, onMenu }) {
+  const { t } = useLanguage()
   const [types, setTypes] = useState([])
   const [newName, setNewName] = useState('')
   const [editingId, setEditingId] = useState(null)
@@ -36,12 +38,12 @@ export default function EventTypeManagement({ currentUser, showToast, onMenu }) 
     try {
       await createEventType(name, currentUser)
       setNewName('')
-      showToast?.('Event type added')
+      showToast?.(t('Event type added'))
       await load()
     } catch (err) {
       const msg = err?.message ?? String(err)
-      if (msg.includes('duplicate') || msg.includes('unique')) showToast?.('Event type already exists')
-      else showToast?.('Error: ' + msg)
+      if (msg.includes('duplicate') || msg.includes('unique')) showToast?.(t('Event type already exists'))
+      else showToast?.(t('Error:') + ' ' + msg)
     } finally {
       setSaving(false)
     }
@@ -54,7 +56,7 @@ export default function EventTypeManagement({ currentUser, showToast, onMenu }) 
       await updateEventType(id, { name }, currentUser)
       setEditingId(null)
       setEditName('')
-      showToast?.('Event type renamed')
+      showToast?.(t('Event type renamed'))
       await load()
     } catch (err) { console.error(err) }
   }
@@ -63,7 +65,7 @@ export default function EventTypeManagement({ currentUser, showToast, onMenu }) 
     if (item.name === 'Other') return
     try {
       await updateEventType(item.id, { is_active: !item.is_active }, currentUser)
-      showToast?.(item.is_active ? 'Deactivated' : 'Activated')
+      showToast?.(t(item.is_active ? 'Deactivated' : 'Activated'))
       await load()
     } catch (err) { console.error(err) }
   }
@@ -73,7 +75,7 @@ export default function EventTypeManagement({ currentUser, showToast, onMenu }) 
     try {
       await deleteEventType(item.id, currentUser)
       setConfirmDeleteId(null)
-      showToast?.('Event type deleted')
+      showToast?.(t('Event type deleted'))
       await load()
     } catch (err) { console.error(err) }
   }
@@ -100,7 +102,7 @@ export default function EventTypeManagement({ currentUser, showToast, onMenu }) 
         <button className="icon-btn header-menu" onClick={onMenu} aria-label="Open menu">
           <MenuIcon />
         </button>
-        <h2>Event Types</h2>
+        <h2>{t('Event Types')}</h2>
         <div className="panel-header-spacer" />
       </div>
 
@@ -109,11 +111,11 @@ export default function EventTypeManagement({ currentUser, showToast, onMenu }) 
           type="text"
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
-          placeholder="New event type name…"
+          placeholder={t('New event type name…')}
           className="et-add-input"
         />
         <button type="submit" className="btn-save et-add-btn" disabled={saving || !newName.trim()}>
-          {saving ? 'Adding…' : 'Add'}
+          {saving ? t('Adding…') : t('Add')}
         </button>
       </form>
 
@@ -157,13 +159,13 @@ export default function EventTypeManagement({ currentUser, showToast, onMenu }) 
                       autoFocus
                       onKeyDown={(e) => { if (e.key === 'Enter') handleRename(item.id) }}
                     />
-                    <button className="btn-xs btn-approve" onClick={() => handleRename(item.id)}>Save</button>
-                    <button className="btn-xs btn-ghost" onClick={() => setEditingId(null)}>Cancel</button>
+                    <button className="btn-xs btn-approve" onClick={() => handleRename(item.id)}>{t('Save')}</button>
+                    <button className="btn-xs btn-ghost" onClick={() => setEditingId(null)}>{t('Cancel')}</button>
                   </div>
                 ) : (
                   <span className="et-name">{item.name}</span>
                 )}
-                {!item.is_active && <span className="status-badge-inactive">Inactive</span>}
+                {!item.is_active && <span className="status-badge-inactive">{t('Inactive')}</span>}
               </div>
 
               <div className="et-actions">
@@ -173,7 +175,7 @@ export default function EventTypeManagement({ currentUser, showToast, onMenu }) 
                     className="btn-outline btn-sm"
                     onClick={() => handleToggleActive(item)}
                   >
-                    {item.is_active ? 'Deactivate' : 'Activate'}
+                    {t(item.is_active ? 'Deactivate' : 'Activate')}
                   </button>
                 )}
                 {!isOther && editingId !== item.id && (
@@ -182,15 +184,15 @@ export default function EventTypeManagement({ currentUser, showToast, onMenu }) 
                     className="btn-ghost btn-sm"
                     onClick={() => { setEditingId(item.id); setEditName(item.name) }}
                   >
-                    Edit
+                    {t('Edit')}
                   </button>
                 )}
                 {!isOther && (
                   confirmDeleteId === item.id ? (
                     <div className="inline-confirm">
-                      <span>Delete?</span>
-                      <button className="btn-danger btn-sm" onClick={() => handleDelete(item)}>Yes</button>
-                      <button className="btn-ghost btn-sm" onClick={() => setConfirmDeleteId(null)}>No</button>
+                      <span>{t('Delete?')}</span>
+                      <button className="btn-danger btn-sm" onClick={() => handleDelete(item)}>{t('Yes')}</button>
+                      <button className="btn-ghost btn-sm" onClick={() => setConfirmDeleteId(null)}>{t('No')}</button>
                     </div>
                   ) : (
                     <button
@@ -198,7 +200,7 @@ export default function EventTypeManagement({ currentUser, showToast, onMenu }) 
                       className="btn-ghost btn-sm danger-text"
                       onClick={() => setConfirmDeleteId(item.id)}
                     >
-                      Delete
+                      {t('Delete')}
                     </button>
                   )
                 )}
@@ -206,7 +208,7 @@ export default function EventTypeManagement({ currentUser, showToast, onMenu }) 
             </div>
           )
         })}
-        {types.length === 0 && <div className="empty-state">No event types found</div>}
+        {types.length === 0 && <div className="empty-state">{t('No event types found')}</div>}
       </div>
     </div>
   )

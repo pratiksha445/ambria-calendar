@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { buildMonthGrid, isSameDay, toIsoDate } from '../lib/dates.js'
 import { VENUE_BY_ID } from '../config/venues.js'
+import { useLanguage } from '../i18n/LanguageContext.jsx'
 import EventCard from './EventCard.jsx'
-
-const DOW = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
 
 export default function MonthView({ currentDate, selectedDate, onSelectDate, events, onEdit, onDelete }) {
   const [expandedId, setExpandedId] = useState(null)
+  const { t, dowHeaders } = useLanguage()
   const today = new Date()
   const days = buildMonthGrid(currentDate)
   const monthIndex = currentDate.getMonth()
@@ -19,7 +19,7 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, eve
   return (
     <div className="month-view">
       <div className="dow-row">
-        {DOW.map((d, i) => (
+        {dowHeaders.map((d, i) => (
           <div key={i} className="dow-cell">{d}</div>
         ))}
       </div>
@@ -61,10 +61,12 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, eve
 
       <div className="event-list">
         <div className="event-list-header">
-          {selectedEvents.length} {selectedEvents.length === 1 ? 'booking' : 'bookings'}
+          {selectedEvents.length === 1
+            ? t('{count} booking', { count: selectedEvents.length })
+            : t('{count} bookings', { count: selectedEvents.length })}
         </div>
         {selectedEvents.length === 0 ? (
-          <div className="empty-state">No bookings</div>
+          <div className="empty-state">{t('No bookings')}</div>
         ) : (
           selectedEvents.map((ev) => (
             <EventCard

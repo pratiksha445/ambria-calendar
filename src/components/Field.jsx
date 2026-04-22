@@ -4,8 +4,10 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { COUNTRY_CODES } from '../config/formFields.js'
+import { useLanguage } from '../i18n/LanguageContext.jsx'
 
 export default function Field({ field, form, value, onChange, error, readOnly }) {
+  const { t } = useLanguage()
   const [filterErr, setFilterErr] = useState(null)
   const timerRef = useRef(null)
 
@@ -49,9 +51,9 @@ export default function Field({ field, form, value, onChange, error, readOnly })
   if (field.type === 'select') {
     control = (
       <select {...commonProps}>
-        <option value="">— Select —</option>
+        <option value="">{t('— Select —')}</option>
         {field.options.map((opt) => (
-          <option key={opt} value={opt}>{opt}</option>
+          <option key={opt} value={opt}>{t(opt)}</option>
         ))}
       </select>
     )
@@ -60,7 +62,7 @@ export default function Field({ field, form, value, onChange, error, readOnly })
       <textarea
         {...commonProps}
         rows={3}
-        placeholder={field.placeholder ?? ''}
+        placeholder={field.placeholder ? t(field.placeholder) : ''}
       />
     )
   } else if (field.type === 'date') {
@@ -73,7 +75,7 @@ export default function Field({ field, form, value, onChange, error, readOnly })
         <input
           type="text"
           {...commonProps}
-          placeholder={field.placeholder ?? ''}
+          placeholder={field.placeholder ? t(field.placeholder) : ''}
           inputMode={field.inputMode}
         />
         {effectiveValue && (
@@ -122,7 +124,7 @@ export default function Field({ field, form, value, onChange, error, readOnly })
           value={effectiveValue}
           disabled={disabled}
           onChange={handleNum}
-          placeholder={field.placeholder ?? ''}
+          placeholder={field.placeholder ? t(field.placeholder) : ''}
           inputMode="tel"
           aria-invalid={!!displayError}
         />
@@ -133,7 +135,7 @@ export default function Field({ field, form, value, onChange, error, readOnly })
       <input
         type="text"
         {...commonProps}
-        placeholder={field.placeholder ?? ''}
+        placeholder={field.placeholder ? t(field.placeholder) : ''}
         inputMode={field.inputMode}
       />
     )
@@ -142,11 +144,11 @@ export default function Field({ field, form, value, onChange, error, readOnly })
   return (
     <div className={`field ${displayError ? 'has-error' : ''} ${disabled ? 'is-disabled' : ''}`}>
       <label htmlFor={id} className="field-label">
-        {field.label}
+        {t(field.label)}
         {field.required && !disabled && <span className="required-star"> *</span>}
       </label>
       {control}
-      {displayError && <div className="field-error">{displayError}</div>}
+      {displayError && <div className="field-error">{t(displayError)}</div>}
     </div>
   )
 }

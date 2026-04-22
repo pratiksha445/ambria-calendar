@@ -1,9 +1,11 @@
 import { useState } from 'react'
-import { startOfWeek, addDays, isSameDay, toIsoDate, dayLabel } from '../lib/dates.js'
+import { startOfWeek, addDays, isSameDay, toIsoDate } from '../lib/dates.js'
+import { useLanguage } from '../i18n/LanguageContext.jsx'
 import EventCard from './EventCard.jsx'
 
 export default function WeekView({ currentDate, selectedDate, onSelectDate, events, onEdit, onDelete }) {
   const [expandedId, setExpandedId] = useState(null)
+  const { t, dayLabel } = useLanguage()
   const weekStart = startOfWeek(currentDate)
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
   const eventsByDay = events.reduce((acc, ev) => {
@@ -38,10 +40,12 @@ export default function WeekView({ currentDate, selectedDate, onSelectDate, even
 
       <div className="event-list">
         <div className="event-list-header">
-          {selectedEvents.length} {selectedEvents.length === 1 ? 'booking' : 'bookings'}
+          {selectedEvents.length === 1
+            ? t('{count} booking', { count: selectedEvents.length })
+            : t('{count} bookings', { count: selectedEvents.length })}
         </div>
         {selectedEvents.length === 0 ? (
-          <div className="empty-state">No bookings</div>
+          <div className="empty-state">{t('No bookings')}</div>
         ) : (
           selectedEvents.map((ev) => (
             <EventCard
