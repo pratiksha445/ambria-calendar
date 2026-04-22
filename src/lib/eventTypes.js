@@ -1,0 +1,98 @@
+import { supabase } from './supabase.js'
+import { logAction } from './audit.js'
+
+/** Fetch all event types, sorted by sort_order */
+export async function fetchEventTypes() {
+  const { data, error } = await supabase
+    .from('event_types')
+    .select('*')
+    .order('sort_order', { ascending: true })
+  if (error) throw error
+  return data ?? []
+}
+
+/** Fetch only active event types for dropdown use */
+export async function fetchActiveEventTypes() {
+  const { data, error } = await supabase
+    .from('event_types')
+    .select('*')
+    .eq('is_active', true)
+    .order('sort_order', { ascending: true })
+  if (error) throw error
+  return data ?? []
+}
+
+/** Create a new event type */
+export async function createEventType(name, user) {
+  // Get max sort_order
+  const { data: existing } = await supabase
+    .from('event_types')
+    .select('sort_order')
+    .order('sort_order', { ascending: false })
+    .limit(1)
+  const nextOrder = (existing?.[0]?.sort_order ?? 0) + 1
+
+  const { data, error } = await supabase
+    .from('event_types')
+    .insert({ name, is_active: true, sort_order: nextOrder })
+    .select()
+    .single()
+  if (error) throw error
+
+  if (user) {
+    await logAction(user.id, user.name, 'create', 'event_type', data.id, { name })
+  }
+  return data
+}
+
+/** Update an event type (name, is_active) */
+export async function updateEventType(id, updates, user) {
+  const { data, error } = await supabase
+    .from('event_types')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single()
+  if (error) throw error
+
+  if (user) {
+    await logAction(user.id, user.name, 'update', 'event_type', data.id, {
+      name: data.name, ...updates,
+    })
+  }
+  return data
+}
+
+/** Delete an event type */
+export async function deleteEventType(id, user) {
+  // Fetch name for audit
+  const { data: existing } = await supabase
+    .from('event_types')
+    .select('name')
+    .eq('id', id)
+    .maybeSingle()
+
+  const { error } = await supabase
+    .from('event_types')
+    .delete()
+    .eq('id', id)
+  if (error) throw error
+
+  if (user && existing) {
+    await logAction(user.id, user.name, 'delete', 'event_type', id, { name: existing.name })
+  }
+}
+
+/** Reorder event types by passing ordered array of ids */
+export async function reorderEventTypes(orderedIds, user) {
+  const updates = orderedIds.map((id, i) =>
+    supabase.from('event_types').update({ sort_order: i + 1 }).eq('id', id)
+  )
+  await Promise.all(updates)
+
+  if (user) {
+    await logAction(user.id, user.name, 'update', 'event_type', null, {
+      action: 'reorder', count: orderedIds.length,
+    })
+  }
+}

@@ -10,6 +10,7 @@ import SetPinScreen from './components/SetPinScreen.jsx'
 import ChangePinModal from './components/ChangePinModal.jsx'
 import UserManagement from './components/UserManagement.jsx'
 import AuditLog from './components/AuditLog.jsx'
+import EventTypeManagement from './components/EventTypeManagement.jsx'
 import { fetchEvents, deleteEvent, bulkDeleteMonth } from './lib/events.js'
 import { seedIfEmpty } from './lib/seedEvents.js'
 import { startOfMonth, endOfMonth, toIsoDate, addDays, formatMonthYear } from './lib/dates.js'
@@ -73,15 +74,16 @@ export default function App() {
 
   const filteredEvents = useMemo(() => {
     const q = search.trim().toLowerCase()
+    const words = q ? q.split(/\s+/).filter(Boolean) : []
     return events.filter((ev) => {
       if (!activeFilters.has(ev.venue_id)) return false
       if (!activeSources.has(ev.source)) return false
-      if (!q) return true
+      if (!words.length) return true
       const hay = [
         ev.guest_name, ev.tender_name, ev.title, ev.venue_name,
-        ev.sales_person, ev.phone,
+        ev.sales_person, ev.phone, ev.event_type, ev.sub_venue,
       ].filter(Boolean).join(' ').toLowerCase()
-      return hay.includes(q)
+      return words.every((w) => hay.includes(w))
     })
   }, [events, activeFilters, activeSources, search])
 
@@ -235,9 +237,9 @@ export default function App() {
     return <SetPinScreen user={user} onComplete={() => setNeedsPinChange(false)} />
   }
 
-  // Role-based access
-  const canEditDelete = user.role === 'admin' || user.role === 'manager'
-  const canClearMonth = canEditDelete
+  // Role-based access — both admin and staff can edit/delete events
+  const canEditDelete = true
+  const canClearMonth = user.role === 'admin'
 
   const manualCount = events.filter((e) => e.source === 'manual').length
   const crmCount = events.filter((e) => e.source !== 'manual').length
@@ -318,8 +320,11 @@ export default function App() {
         {currentView === 'users' && user.role === 'admin' && (
           <UserManagement currentUser={user} showToast={showToast} onMenu={() => setSidebarOpen(true)} />
         )}
-        {currentView === 'audit' && (user.role === 'admin' || user.role === 'manager') && (
+        {currentView === 'audit' && user.role === 'admin' && (
           <AuditLog onMenu={() => setSidebarOpen(true)} />
+        )}
+        {currentView === 'event-types' && user.role === 'admin' && (
+          <EventTypeManagement currentUser={user} showToast={showToast} onMenu={() => setSidebarOpen(true)} />
         )}
       </div>
       <BookingModal

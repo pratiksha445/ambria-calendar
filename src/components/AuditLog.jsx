@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase.js'
+import { formatTimestampIST } from '../lib/dates.js'
 
 const ACTION_COLORS = {
   create: '#22C55E', update: '#4A90D9', delete: '#E85D75',
@@ -13,7 +14,7 @@ const ACTION_LABELS = {
   login: 'Login', logout: 'Logout',
 }
 
-const ROLE_COLORS = { admin: '#E85D75', manager: '#4A90D9', staff: '#95A5A6' }
+const ROLE_COLORS = { admin: '#E85D75', staff: '#95A5A6' }
 
 function MenuIcon() {
   return (
@@ -34,6 +35,7 @@ export default function AuditLog({ onMenu }) {
   const [filterAction, setFilterAction] = useState('')
   const [filterFrom, setFilterFrom] = useState('')
   const [filterTo, setFilterTo] = useState('')
+  const [searchText, setSearchText] = useState('')
   const [users, setUsers] = useState([])
 
   useEffect(() => {
@@ -66,12 +68,6 @@ export default function AuditLog({ onMenu }) {
     setLoading(false)
   }
 
-  const formatTime = (ts) => {
-    const d = new Date(ts)
-    return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) +
-      ', ' + d.toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', hour12: true })
-  }
-
   const describeEntity = (entry) => {
     if (entry.entity_type === 'session') {
       return entry.action === 'login' ? 'Logged in' : 'Logged out'
@@ -91,6 +87,10 @@ export default function AuditLog({ onMenu }) {
       const venue = d.venue_id || d.new?.venue_id || ''
       return `${title}${venue ? ' | ' + venue.toUpperCase() : ''}`
     }
+    if (entry.entity_type === 'event_type') {
+      const name = entry.details?.name || ''
+      return `Event Type \u2014 ${name}`
+    }
     return entry.entity_type
   }
 
@@ -98,6 +98,21 @@ export default function AuditLog({ onMenu }) {
     const u = users.find((x) => x.id === entry.user_id)
     return u?.role || null
   }
+
+  // Smart search — fuzzy multi-word AND matching
+  const filteredEntries = entries.filter((entry) => {
+    const q = searchText.trim().toLowerCase()
+    if (!q) return true
+    const words = q.split(/\s+/).filter(Boolean)
+    const hay = [
+      entry.user_name,
+      entry.action,
+      ACTION_LABELS[entry.action],
+      describeEntity(entry),
+      entry.details ? JSON.stringify(entry.details) : '',
+    ].filter(Boolean).join(' ').toLowerCase()
+    return words.every((w) => hay.includes(w))
+  })
 
   return (
     <div className="panel-page">
@@ -126,8 +141,17 @@ export default function AuditLog({ onMenu }) {
         <input type="date" value={filterTo} onChange={(e) => setFilterTo(e.target.value)} />
       </div>
 
+      <div className="panel-search">
+        <input
+          type="search"
+          placeholder="Search audit log\u2026"
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+        />
+      </div>
+
       <div className="audit-list">
-        {entries.map((entry) => {
+        {filteredEntries.map((entry) => {
           const role = getUserRole(entry)
           return (
             <div
@@ -137,7 +161,7 @@ export default function AuditLog({ onMenu }) {
             >
               <div className="audit-entry-main">
                 <div className="audit-top-row">
-                  <span className="audit-time">{formatTime(entry.created_at)}</span>
+                  <span className="audit-time">{formatTimestampIST(entry.created_at)}</span>
                   <span
                     className="action-badge"
                     style={{ background: ACTION_COLORS[entry.action] || '#95A5A6' }}
@@ -148,7 +172,7 @@ export default function AuditLog({ onMenu }) {
                 <div className="audit-who">
                   <span className="audit-user-name">{entry.user_name || 'System'}</span>
                   {role && (
-                    <span className="role-badge sm" style={{ background: ROLE_COLORS[role] }}>{role}</span>
+                    <span className="role-badge sm" style={{ background: ROLE_COLORS[role] || '#95A5A6' }}>{role}</span>
                   )}
                 </div>
                 <div className="audit-desc">{describeEntity(entry)}</div>
@@ -159,7 +183,7 @@ export default function AuditLog({ onMenu }) {
             </div>
           )
         })}
-        {entries.length === 0 && !loading && <div className="empty-state">No audit entries found</div>}
+        {filteredEntries.length === 0 && !loading && <div className="empty-state">No audit entries found</div>}
       </div>
 
       {loading && <div className="loading">Loading\u2026</div>}

@@ -409,33 +409,37 @@
   border-top: 1px solid var(--ambria-border);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0;
 }
 .sidebar-user-info {
   display: flex;
   align-items: center;
   gap: 8px;
+  padding: 4px 0 8px;
 }
 .sidebar-user-name {
   font-size: 0.88rem;
   font-weight: 700;
   color: var(--ambria-ink);
 }
-.sidebar-logout {
+.sidebar-action-row {
   appearance: none;
   border: none;
   background: transparent;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 0;
-  font-size: 0.82rem;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 0;
+  font-size: 0.84rem;
   font-weight: 600;
   color: var(--ambria-muted);
   cursor: pointer;
   font-family: inherit;
+  text-align: left;
+  transition: color 0.15s ease;
 }
-.sidebar-logout:hover { color: var(--ambria-accent); }
+.sidebar-action-row:hover { color: var(--ambria-accent); }
 
 .sidebar-events-count {
   padding: 12px 16px;
@@ -2251,28 +2255,162 @@
 }
 
 /* ============================================================
- * Sidebar — Change PIN button
+ * Reset PIN panel (merged reset + set)
  * ============================================================ */
 
-.sidebar-change-pin {
+.reset-pin-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 0;
+}
+.reset-pin-or {
+  font-size: 0.72rem;
+  color: var(--ambria-faint);
+  font-weight: 600;
+}
+
+/* ============================================================
+ * Category dropdown (booking form)
+ * ============================================================ */
+
+.category-field select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--ambria-border);
+  border-radius: 10px;
+  background: #fff;
+  font-size: 0.92rem;
+  font-family: inherit;
+  color: var(--ambria-ink);
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+  box-sizing: border-box;
+}
+.category-field select:focus {
+  outline: none;
+  border-color: var(--ambria-accent);
+  box-shadow: 0 0 0 3px rgba(232, 93, 117, 0.12);
+}
+.category-field select.placeholder-select {
+  color: var(--ambria-muted);
+}
+
+/* ============================================================
+ * Event Type Management
+ * ============================================================ */
+
+.et-add-form {
+  display: flex;
+  gap: 8px;
+  padding: 14px 0;
+}
+.et-add-input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid var(--ambria-border);
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  background: #fff;
+  box-sizing: border-box;
+}
+.et-add-input:focus {
+  outline: none;
+  border-color: var(--ambria-accent);
+  box-shadow: 0 0 0 3px rgba(232, 93, 117, 0.12);
+}
+.et-add-btn {
+  width: auto;
+  padding: 10px 20px;
+  flex-shrink: 0;
+}
+
+.et-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.et-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  border: 1px solid var(--ambria-border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  transition: opacity 0.15s ease;
+}
+.et-row:hover { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); }
+.et-row.inactive { opacity: 0.5; }
+
+.et-reorder {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-shrink: 0;
+}
+.et-arrow {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--ambria-muted);
+  padding: 2px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+.et-arrow:hover:not(:disabled) {
+  color: var(--ambria-accent);
+  background: rgba(232, 93, 117, 0.06);
+}
+.et-arrow:disabled {
+  opacity: 0.2;
+  cursor: default;
+}
+
+.et-name-col {
+  flex: 1;
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 8px;
-  width: 100%;
-  padding: 8px 14px;
-  border: none;
-  background: none;
-  color: var(--ambria-muted);
-  font-size: 0.82rem;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
-  border-radius: 8px;
-  transition: background 0.15s ease, color 0.15s ease;
 }
-.sidebar-change-pin:hover {
-  background: rgba(232, 93, 117, 0.06);
-  color: var(--ambria-accent);
+.et-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ambria-ink);
+}
+
+.et-inline-edit {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+}
+.et-inline-edit input {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid var(--ambria-border);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-family: inherit;
+  color: var(--ambria-ink);
+}
+.et-inline-edit input:focus {
+  outline: none;
+  border-color: var(--ambria-accent);
+}
+
+.et-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
 }
 
 /* ============================================================

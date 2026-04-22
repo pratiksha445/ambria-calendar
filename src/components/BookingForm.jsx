@@ -8,6 +8,7 @@ import {
 import { autoTitle } from '../lib/autoTitle.js'
 import { sanitizeText, sanitizePhone, sanitizePax } from '../lib/sanitize.js'
 import { createEvent, updateEvent, deleteEvent } from '../lib/events.js'
+import { fetchActiveEventTypes } from '../lib/eventTypes.js'
 import Field from './Field.jsx'
 
 function blankForm(venueId, defaults = {}) {
@@ -21,15 +22,15 @@ function blankForm(venueId, defaults = {}) {
 
 export default function BookingForm({ initial, onSaved, onDeleted, onClose, user }) {
   const editing = !!(initial && initial.id)
-  const readOnly = editing && (initial?.source !== 'manual' || user?.role === 'staff')
+  const readOnly = editing && initial?.source !== 'manual'
 
-  const [venueId, setVenueId] = useState(() => initial?.venue_id ?? 'ap')
+  const [venueId, setVenueId] = useState(() => initial?.venue_id ?? '')
   const [form, setForm] = useState(() => {
     if (editing) {
       const parsed = parsePhoneCode(initial.phone)
       return { ...initial, phone: parsed.number, phone_code: parsed.value }
     }
-    return blankForm(venueId)
+    return blankForm(venueId, { date: initial?.date })
   })
   const [manualTitle, setManualTitle] = useState(() =>
     editing && initial.title && initial.title !== autoTitle(initial) ? initial.title : null
@@ -39,8 +40,15 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
   const [deleting, setDeleting] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [submitError, setSubmitError] = useState(null)
+  const [dynamicEventTypes, setDynamicEventTypes] = useState(null)
 
-  const sections = useMemo(() => getFormConfig(venueId), [venueId])
+  useEffect(() => {
+    fetchActiveEventTypes()
+      .then((types) => setDynamicEventTypes(types.map((t) => t.name)))
+      .catch(() => setDynamicEventTypes(null))
+  }, [])
+
+  const sections = useMemo(() => getFormConfig(venueId, dynamicEventTypes), [venueId, dynamicEventTypes])
   const computedTitle = useMemo(() => autoTitle({ ...form, venue_id: venueId }), [form, venueId])
   const displayTitle = manualTitle ?? computedTitle
 
@@ -48,6 +56,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
   useEffect(() => {
     if (editing) return
     setForm((prev) => blankForm(venueId, {
+      date: prev.date,
       guest_name: prev.guest_name,
       phone: prev.phone,
       phone_code: prev.phone_code,
@@ -81,7 +90,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
   const resetTitle = () => setManualTitle(null)
 
   const validate = () => {
-    const all = getAllFields(venueId)
+    const all = getAllFields(venueId, dynamicEventTypes)
     const nextErrors = {}
     for (const field of all) {
       if (field.showWhen && !field.showWhen(form)) continue
@@ -107,7 +116,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
 
   const buildPayload = () => {
     const validKeys = new Set(FIELD_MAP[venueId] || [])
-    const all = getAllFields(venueId)
+    const all = getAllFields(venueId, dynamicEventTypes)
 
     const payload = {
       venue_id: venueId,
@@ -164,6 +173,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
     e.preventDefault()
     if (readOnly) return
     setSubmitError(null)
+    if (!venueId) { setSubmitError('Please select a category'); return }
     if (!validate()) return
     setSaving(true)
     try {
@@ -210,32 +220,24 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
           </button>
         </div>
 
-        {!editing && (
-          <div className="category-pills" role="tablist" aria-label="Category">
-            {VENUES.map((v) => {
-              const active = v.id === venueId
-              return (
-                <button
-                  key={v.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={active}
-                  className={`category-pill ${active ? 'active' : ''}`}
-                  onClick={() => setVenueId(v.id)}
-                  style={active ? { background: v.color, borderColor: v.color } : { borderColor: v.color }}
-                >
-                  <span
-                    className="category-pill-dot"
-                    style={{ background: active ? '#fff' : v.color }}
-                  />
-                  {v.short}
-                </button>
-              )
-            })}
+        {!editing ? (
+          <div className="field category-field">
+            <label htmlFor="booking-category" className="field-label">Category <span className="required-star">*</span></label>
+            <select
+              id="booking-category"
+              value={venueId}
+              onChange={(e) => setVenueId(e.target.value)}
+              className={!venueId ? 'placeholder-select' : ''}
+            >
+              <option value="" disabled>Select a category…</option>
+              {VENUES.map((v) => (
+                <option key={v.id} value={v.id}>
+                  {v.short} — {v.name}
+                </option>
+              ))}
+            </select>
           </div>
-        )}
-
-        {editing && (
+        ) : (
           <div className="editing-category">
             <span
               className="category-pill-dot"
@@ -294,7 +296,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
 
       <div className="form-footer">
         {submitError && <div className="form-error-banner">{submitError}</div>}
-        {editing && user?.role !== 'staff' && (
+        {editing && !readOnly && (
           confirmDelete ? (
             <div className="confirm-delete">
               <span>Delete this booking?</span>

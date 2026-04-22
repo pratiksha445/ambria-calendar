@@ -119,24 +119,27 @@ const tenderNameField = () => T('Tender Name', 'tender_name', true, {
   filterFn: nameFilter, filterError: 'Only letters allowed',
 })
 
-const eventTypeFields = [
-  S('Event Type', 'event_type', EVENT_TYPES),
-  {
-    ...T('Specify Event Type', 'event_type_other', true, {
-      placeholder: 'Describe the event',
-    }),
-    showWhen: isOther,
-  },
-]
+function eventTypeFields(dynamicTypes) {
+  const options = dynamicTypes && dynamicTypes.length > 0 ? dynamicTypes : EVENT_TYPES
+  return [
+    S('Event Type', 'event_type', options),
+    {
+      ...T('Specify Event Type', 'event_type_other', true, {
+        placeholder: 'Describe the event',
+      }),
+      showWhen: isOther,
+    },
+  ]
+}
 
 // AP/AM/AE/AR — venue booking
-function ownVenueSections(venue) {
+function ownVenueSections(venue, dynamicTypes) {
   return [
     {
       title: 'Venue',
       fields: [
         S('Sub-Venue', 'sub_venue', venue.subVenues),
-        ...eventTypeFields,
+        ...eventTypeFields(dynamicTypes),
         S('Shift', 'shift', SHIFTS),
         statusField,
       ],
@@ -168,7 +171,7 @@ function ownVenueSections(venue) {
 }
 
 // Villa — stay booking
-function villaSections(venue) {
+function villaSections(venue, _dynamicTypes) {
   return [
     {
       title: 'Stay',
@@ -210,7 +213,7 @@ function villaSections(venue) {
 }
 
 // ADD — external venue decor
-function addSections() {
+function addSections(_venue, dynamicTypes) {
   return [
     {
       title: 'Venue',
@@ -223,7 +226,7 @@ function addSections() {
     {
       title: 'Event',
       fields: [
-        ...eventTypeFields,
+        ...eventTypeFields(dynamicTypes),
         S('Shift', 'shift', SHIFTS),
         statusField,
         D('Date', 'date'),
@@ -247,7 +250,7 @@ function addSections() {
 }
 
 // AC — external venue cuisine
-function acSections() {
+function acSections(_venue, dynamicTypes) {
   return [
     {
       title: 'Venue',
@@ -260,7 +263,7 @@ function acSections() {
     {
       title: 'Event',
       fields: [
-        ...eventTypeFields,
+        ...eventTypeFields(dynamicTypes),
         S('Shift', 'shift', SHIFTS),
         statusField,
         D('Date', 'date'),
@@ -288,7 +291,7 @@ function acSections() {
 }
 
 // AEE — same as ADD minus decor
-function aeeSections() {
+function aeeSections(_venue, dynamicTypes) {
   return [
     {
       title: 'Venue',
@@ -301,7 +304,7 @@ function aeeSections() {
     {
       title: 'Event',
       fields: [
-        ...eventTypeFields,
+        ...eventTypeFields(dynamicTypes),
         S('Shift', 'shift', SHIFTS),
         statusField,
         D('Date', 'date'),
@@ -321,7 +324,7 @@ function aeeSections() {
 }
 
 // Tender — free text event, optional phone, no shift/pax/sales
-function tenderSections() {
+function tenderSections(_venue, _dynamicTypes) {
   return [
     {
       title: 'Tender',
@@ -414,16 +417,16 @@ const BUILDERS = {
   tender: tenderSections,
 }
 
-export function getFormConfig(venueId) {
+export function getFormConfig(venueId, dynamicTypes) {
   const venue = VENUE_BY_ID[venueId]
   if (!venue) return []
   const build = BUILDERS[venueId]
-  return build ? build(venue) : []
+  return build ? build(venue, dynamicTypes) : []
 }
 
 // Flatten sections to a single field list — convenient for validation.
-export function getAllFields(venueId) {
-  return getFormConfig(venueId).flatMap((s) => s.fields)
+export function getAllFields(venueId, dynamicTypes) {
+  return getFormConfig(venueId, dynamicTypes).flatMap((s) => s.fields)
 }
 
 // Returns true if the given field is effectively required in the current

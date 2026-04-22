@@ -40,6 +40,26 @@ export function formatTime12(timeStr) {
   return `${h}:${m} ${ampm}`
 }
 
+const SHORT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+/** Format a UTC timestamp string (from Supabase) to IST "21 Apr 2026, 5:44 PM" */
+export function formatTimestampIST(ts) {
+  if (!ts) return ''
+  const d = new Date(ts)
+  // Convert to IST (UTC+5:30)
+  const ist = new Date(d.getTime() + (5.5 * 60 * 60 * 1000))
+  const day = ist.getUTCDate()
+  const month = SHORT_MONTHS[ist.getUTCMonth()]
+  const year = ist.getUTCFullYear()
+  let h = ist.getUTCHours()
+  const m = String(ist.getUTCMinutes()).padStart(2, '0')
+  const ampm = h >= 12 ? 'PM' : 'AM'
+  if (h === 0) h = 12
+  else if (h > 12) h -= 12
+  return `${day} ${month} ${year}, ${h}:${m} ${ampm}`
+}
+
 export function startOfMonth(d) {
   return new Date(d.getFullYear(), d.getMonth(), 1)
 }

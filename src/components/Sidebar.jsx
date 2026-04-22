@@ -5,7 +5,7 @@ const SOURCES = [
   { id: 'manual', label: 'Manual', color: '#E85D75' },
 ]
 
-const ROLE_COLORS = { admin: '#E85D75', manager: '#4A90D9', staff: '#95A5A6' }
+const ROLE_COLORS = { admin: '#E85D75', staff: '#95A5A6' }
 
 export default function Sidebar({
   open,
@@ -87,7 +87,23 @@ export default function Sidebar({
               Manage Users
             </button>
           )}
-          {(user?.role === 'admin' || user?.role === 'manager') && (
+          {user?.role === 'admin' && (
+            <button
+              className={`nav-item ${currentView === 'event-types' ? 'active' : ''}`}
+              onClick={() => onNavigate('event-types')}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="8" y1="6" x2="21" y2="6" />
+                <line x1="8" y1="12" x2="21" y2="12" />
+                <line x1="8" y1="18" x2="21" y2="18" />
+                <line x1="3" y1="6" x2="3.01" y2="6" />
+                <line x1="3" y1="12" x2="3.01" y2="12" />
+                <line x1="3" y1="18" x2="3.01" y2="18" />
+              </svg>
+              Event Types
+            </button>
+          )}
+          {user?.role === 'admin' && (
             <button
               className={`nav-item ${currentView === 'audit' ? 'active' : ''}`}
               onClick={() => onNavigate('audit')}
@@ -195,24 +211,24 @@ export default function Sidebar({
           </>
         )}
 
-        {/* User info + Change PIN + Logout */}
+        {/* User info + Change PIN + Logout — pinned to bottom */}
         <div className="sidebar-user">
           <div className="sidebar-user-info">
             <span className="sidebar-user-name">{(user?.name || '').split(/\s+/)[0]}</span>
             {user?.role && (
-              <span className="role-badge" style={{ background: ROLE_COLORS[user.role] }}>
+              <span className="role-badge" style={{ background: ROLE_COLORS[user.role] || '#95A5A6' }}>
                 {user.role}
               </span>
             )}
           </div>
-          <button className="sidebar-change-pin" onClick={onChangePin}>
+          <button className="sidebar-action-row" onClick={onChangePin}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
               <path d="M7 11V7a5 5 0 0 1 10 0v4" />
             </svg>
             Change PIN
           </button>
-          <button className="sidebar-logout" onClick={onLogout}>
+          <button className="sidebar-action-row" onClick={onLogout}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
               <polyline points="16 17 21 12 16 7" />

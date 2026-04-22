@@ -6,8 +6,8 @@ import {
 import { logAction } from '../lib/audit.js'
 import { COUNTRY_CODES, getCodeFromValue, parsePhoneCode } from '../config/formFields.js'
 
-const ROLES = ['admin', 'manager', 'staff']
-const ROLE_COLORS = { admin: '#E85D75', manager: '#4A90D9', staff: '#95A5A6' }
+const ROLES = ['admin', 'staff']
+const ROLE_COLORS = { admin: '#E85D75', staff: '#95A5A6' }
 const TABS = ['all', 'pending', 'approved', 'rejected']
 
 function MenuIcon() {
@@ -104,7 +104,9 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
     if (tab !== 'all' && u.approval_status !== tab) return false
     const q = search.trim().toLowerCase()
     if (!q) return true
-    return u.name.toLowerCase().includes(q) || u.phone.includes(q)
+    const words = q.split(/\s+/).filter(Boolean)
+    const hay = [u.name, u.phone, u.role].filter(Boolean).join(' ').toLowerCase()
+    return words.every((w) => hay.includes(w))
   })
 
   const pendingUsers = filtered.filter((u) => u.approval_status === 'pending')
@@ -300,22 +302,19 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
         )}
       </div>
       <div className="user-actions">
-        {/* PIN actions — all sections */}
+        {/* PIN actions — single Reset PIN with inline options */}
         {confirmResetPin === u.id ? (
-          <div className="inline-confirm">
-            <span>Reset PIN to 0000?</span>
-            <button className="btn-danger btn-sm" onClick={() => handleResetPin(u)}>Yes</button>
-            <button className="btn-ghost btn-sm" onClick={() => setConfirmResetPin(null)}>No</button>
+          <div className="reset-pin-panel">
+            <button className="btn-outline btn-sm" onClick={() => handleResetPin(u)}>Reset to default (0000)</button>
+            <div className="reset-pin-or">or set custom:</div>
+            <InlinePinInput
+              onSave={(pin) => handleSetPin(u, pin)}
+              onCancel={() => setConfirmResetPin(null)}
+            />
           </div>
-        ) : settingPinFor === u.id ? (
-          <InlinePinInput
-            onSave={(pin) => handleSetPin(u, pin)}
-            onCancel={() => setSettingPinFor(null)}
-          />
         ) : (
           <div className="pin-action-row">
             <button className="btn-outline btn-sm" onClick={() => { setConfirmResetPin(u.id); setSettingPinFor(null) }}>Reset PIN</button>
-            <button className="btn-outline btn-sm" onClick={() => { setSettingPinFor(u.id); setConfirmResetPin(null) }}>Set PIN</button>
           </div>
         )}
 
@@ -528,28 +527,31 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
                       <span className="pin-display-label">Current:</span>
                       <span className="pin-display-value">{editing.pin}</span>
                     </div>
-                    <div className="edit-pin-actions">
-                      <button type="button" className="btn-outline btn-sm" onClick={handleEditFormResetPin}>
-                        Reset to 0000
-                      </button>
-                      {form._settingCustomPin ? (
+                    {form._resetPinOpen ? (
+                      <div className="reset-pin-panel">
+                        <button type="button" className="btn-outline btn-sm" onClick={handleEditFormResetPin}>
+                          Reset to default (0000)
+                        </button>
+                        <div className="reset-pin-or">or set custom:</div>
                         <InlinePinInput
                           onSave={(pin) => {
                             handleEditFormSetPin(pin)
-                            setForm((f) => ({ ...f, _settingCustomPin: false }))
+                            setForm((f) => ({ ...f, _resetPinOpen: false }))
                           }}
-                          onCancel={() => setForm((f) => ({ ...f, _settingCustomPin: false }))}
+                          onCancel={() => setForm((f) => ({ ...f, _resetPinOpen: false }))}
                         />
-                      ) : (
+                      </div>
+                    ) : (
+                      <div className="edit-pin-actions">
                         <button
                           type="button"
                           className="btn-outline btn-sm"
-                          onClick={() => setForm((f) => ({ ...f, _settingCustomPin: true }))}
+                          onClick={() => setForm((f) => ({ ...f, _resetPinOpen: true }))}
                         >
-                          Set custom PIN
+                          Reset PIN
                         </button>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
