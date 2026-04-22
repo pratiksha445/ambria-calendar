@@ -151,7 +151,7 @@ export default function Sidebar({
               <span className="sidebar-section-title">{t('Categories')}</span>
               <div className="filter-quick">
                 <button type="button" onClick={onSelectAllVenues}>{t('All')}</button>
-                <span className="filter-quick-sep">\u00b7</span>
+                <span className="filter-quick-sep">|</span>
                 <button type="button" onClick={onSelectNoVenues}>{t('None')}</button>
               </div>
             </div>
