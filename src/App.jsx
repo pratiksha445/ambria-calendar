@@ -6,6 +6,7 @@ import WeekView from './components/WeekView.jsx'
 import DayView from './components/DayView.jsx'
 import BookingModal from './components/BookingModal.jsx'
 import DayModal from './components/DayModal.jsx'
+import ExportModal from './components/ExportModal.jsx'
 import LoginScreen from './components/LoginScreen.jsx'
 import SetPinScreen from './components/SetPinScreen.jsx'
 import ChangePinModal from './components/ChangePinModal.jsx'
@@ -51,6 +52,7 @@ export default function App() {
   const [needsPinChange, setNeedsPinChange] = useState(false)
   const [changePinOpen, setChangePinOpen] = useState(false)
   const [dayModalDate, setDayModalDate] = useState(null)
+  const [exportModal, setExportModal] = useState(null) // null | { from, to }
 
   useEffect(() => {
     if (!user) return
@@ -207,6 +209,17 @@ export default function App() {
     }
   }
 
+  const handleExport = () => {
+    const from = toIsoDate(startOfMonth(currentDate))
+    const to = toIsoDate(endOfMonth(currentDate))
+    setExportModal({ from, to })
+  }
+  const handleExportDay = (d) => {
+    const iso = toIsoDate(d)
+    setDayModalDate(null)
+    setExportModal({ from: iso, to: iso })
+  }
+
   const handleClearMonth = () => setConfirmBulk(true)
   const executeBulkDelete = async () => {
     const start = toIsoDate(startOfMonth(currentDate))
@@ -290,6 +303,7 @@ export default function App() {
               onToday={handleToday}
               onMenu={() => setSidebarOpen(true)}
               onAdd={openNew}
+              onExport={handleExport}
               onClearMonth={canClearMonth ? handleClearMonth : null}
             />
             <main className="app-body">
@@ -343,6 +357,7 @@ export default function App() {
         onAdd={openNewFromDate}
         onEdit={(ev) => { setDayModalDate(null); openEdit(ev) }}
         onDelete={canEditDelete ? handleCardDelete : null}
+        onExport={handleExportDay}
       />
       <BookingModal
         open={!!modal}
@@ -351,6 +366,12 @@ export default function App() {
         onSaved={handleSaved}
         onDeleted={handleDeleted}
         user={user}
+      />
+      <ExportModal
+        open={!!exportModal}
+        onClose={() => setExportModal(null)}
+        defaultFrom={exportModal?.from || ''}
+        defaultTo={exportModal?.to || ''}
       />
       {confirmBulk && (
         <div className="modal-root" role="dialog" aria-modal="true">

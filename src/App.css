@@ -1050,6 +1050,120 @@
 }
 
 /* ============================================================
+ * Day modal header actions (export + close)
+ * ============================================================ */
+.day-modal-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.day-modal-header-actions .icon-btn {
+  color: var(--ambria-faint);
+}
+
+/* ============================================================
+ * Export modal — bottom-sheet on mobile, centered on desktop
+ * ============================================================ */
+.export-modal-root {
+  position: fixed;
+  inset: 0;
+  z-index: 210;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.export-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(20, 20, 20, 0.42);
+  animation: fadeIn 180ms ease;
+}
+.export-modal-sheet {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  background: var(--ambria-card);
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -12px 32px rgba(0, 0, 0, 0.18);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideUp 250ms cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+.export-modal-header {
+  padding: 18px 16px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--ambria-border);
+}
+.export-modal-header h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--ambria-ink);
+}
+.export-modal-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow-y: auto;
+  max-height: 70vh;
+}
+.export-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.export-field label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ambria-muted);
+}
+.export-field input,
+.export-field select {
+  padding: 10px 14px;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.88rem;
+  background: var(--ambria-input);
+}
+.export-field input:focus,
+.export-field select:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(232, 93, 117, 0.18);
+}
+.export-error {
+  color: var(--ambria-accent);
+  font-size: 0.82rem;
+  text-align: center;
+}
+.export-download-btn {
+  appearance: none;
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 14px;
+  background: var(--ambria-accent);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 150ms ease;
+}
+.export-download-btn:hover { opacity: 0.9; }
+.export-download-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+@media (min-width: 768px) {
+  .export-modal-root { align-items: center; }
+  .export-modal-sheet {
+    border-radius: 16px;
+    animation: fadeIn 180ms ease;
+  }
+}
+
+/* ============================================================
  * Booking modal + form — Phase 5
  * ============================================================ */
 

@@ -349,6 +349,12 @@ const en = {
   'Description': 'Description',
   'Details': 'Details',
 
+  // ── Booking export ──
+  'Export Bookings': 'Export Bookings',
+  'Export Excel': 'Export Excel',
+  'No bookings to export': 'No bookings to export',
+  'Please select date range': 'Please select date range',
+
   // ── Event type management ──
   'New event type name…': 'New event type name…',
   'Adding…': 'Adding…',

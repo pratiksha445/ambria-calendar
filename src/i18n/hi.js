@@ -349,6 +349,12 @@ const hi = {
   'Description': 'विवरण',
   'Details': 'विवरण',
 
+  // ── बुकिंग निर्यात ──
+  'Export Bookings': 'बुकिंग निर्यात करें',
+  'Export Excel': 'एक्सेल निर्यात',
+  'No bookings to export': 'निर्यात के लिए कोई बुकिंग नहीं',
+  'Please select date range': 'कृपया तारीख सीमा चुनें',
+
   // ── इवेंट प्रकार प्रबंधन ──
   'New event type name…': 'नया इवेंट प्रकार नाम…',
   'Adding…': 'जोड़ रहे हैं…',
