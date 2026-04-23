@@ -1,6 +1,8 @@
 :root {
+  /* ── Core palette (light) ── */
   --ambria-bg: #FAFAF8;
   --ambria-card: #FEFCF9;
+  --ambria-elevated: #FEFCF9;
   --ambria-border: #E8E3DA;
   --ambria-accent: #E85D75;
   --ambria-accent-bg: #FEF0F2;
@@ -12,6 +14,48 @@
   --ambria-input: #F5F0E8;
   --radius: 10px;
 
+  /* ── Extended palette (light) ── */
+  --ambria-input-white: #FFFFFF;
+  --ambria-tab-strip: #F0EEE8;
+  --ambria-outside: #FCFBF8;
+  --ambria-disabled: #F5F4F0;
+  --ambria-handle: #D8D6D0;
+  --ambria-dashed: #D5D0C5;
+  --ambria-meta: #6E6E6E;
+  --ambria-search-clear-hover: #E8E5DE;
+  --ambria-error-bg: #FEE2E2;
+  --ambria-error-text: #991B1B;
+  --ambria-toast-bg: #1A1A1A;
+  --ambria-toast-text: #FFFFFF;
+  --ambria-success: #22C55E;
+
+  /* ── Overlay / backdrop ── */
+  --ambria-overlay: rgba(20, 20, 20, 0.42);
+  --ambria-sidebar-overlay: rgba(0, 0, 0, 0.35);
+
+  /* ── Interaction states ── */
+  --ambria-hover: rgba(0, 0, 0, 0.04);
+  --ambria-hover-strong: rgba(0, 0, 0, 0.06);
+  --ambria-active: rgba(0, 0, 0, 0.02);
+  --ambria-accent-hover: rgba(232, 93, 117, 0.04);
+  --ambria-accent-hover-strong: rgba(232, 93, 117, 0.06);
+  --ambria-tab-count-bg: rgba(0, 0, 0, 0.06);
+  --ambria-tab-count-active-bg: rgba(255, 255, 255, 0.25);
+
+  /* ── Focus rings ── */
+  --ambria-focus-ring: 0 0 0 2px rgba(232, 93, 117, 0.18);
+  --ambria-focus-ring-strong: 0 0 0 3px rgba(232, 93, 117, 0.12);
+
+  /* ── Shadows ── */
+  --ambria-shadow-card: 0 2px 8px rgba(0, 0, 0, 0.05);
+  --ambria-shadow-dropdown: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --ambria-shadow-sheet: 0 -12px 32px rgba(0, 0, 0, 0.18);
+  --ambria-shadow-dialog: 0 8px 32px rgba(0, 0, 0, 0.18);
+  --ambria-shadow-login: 0 8px 32px rgba(0, 0, 0, 0.08);
+  --ambria-shadow-tab: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --ambria-shadow-toast: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --ambria-shadow-accent: 0 2px 8px rgba(232, 93, 117, 0.28);
+
   font-family: 'DM Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   color: var(--ambria-ink);
   background: var(--ambria-bg);
@@ -19,6 +63,69 @@
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Dark mode overrides ── */
+[data-theme="dark"] {
+  --ambria-bg: #1A1A1A;
+  --ambria-card: #242424;
+  --ambria-elevated: #2E2E2E;
+  --ambria-border: #3A3834;
+  --ambria-accent: #E85D75;
+  --ambria-accent-bg: rgba(232, 93, 117, 0.15);
+  --ambria-accent-border: rgba(232, 93, 117, 0.25);
+  --ambria-ink: #F0EDE6;
+  --ambria-muted: #A8A49C;
+  --ambria-faint: #6E6A62;
+  --ambria-chip: #2E2E2E;
+  --ambria-input: #2E2E2E;
+
+  --ambria-input-white: #2E2E2E;
+  --ambria-tab-strip: #2E2E2E;
+  --ambria-outside: #1E1E1E;
+  --ambria-disabled: #2A2A2A;
+  --ambria-handle: #4A4A46;
+  --ambria-dashed: #4A4640;
+  --ambria-meta: #8A8680;
+  --ambria-search-clear-hover: #3A3834;
+  --ambria-error-bg: rgba(232, 93, 117, 0.15);
+  --ambria-error-text: #F0A0A0;
+  --ambria-toast-bg: #F0EDE6;
+  --ambria-toast-text: #1A1A1A;
+  --ambria-success: #22C55E;
+
+  --ambria-overlay: rgba(0, 0, 0, 0.6);
+  --ambria-sidebar-overlay: rgba(0, 0, 0, 0.5);
+
+  --ambria-hover: rgba(255, 255, 255, 0.06);
+  --ambria-hover-strong: rgba(255, 255, 255, 0.08);
+  --ambria-active: rgba(255, 255, 255, 0.03);
+  --ambria-accent-hover: rgba(232, 93, 117, 0.08);
+  --ambria-accent-hover-strong: rgba(232, 93, 117, 0.12);
+  --ambria-tab-count-bg: rgba(255, 255, 255, 0.1);
+  --ambria-tab-count-active-bg: rgba(255, 255, 255, 0.25);
+
+  --ambria-focus-ring: 0 0 0 2px rgba(232, 93, 117, 0.3);
+  --ambria-focus-ring-strong: 0 0 0 3px rgba(232, 93, 117, 0.2);
+
+  --ambria-shadow-card: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --ambria-shadow-dropdown: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --ambria-shadow-sheet: 0 -12px 32px rgba(0, 0, 0, 0.5);
+  --ambria-shadow-dialog: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --ambria-shadow-login: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --ambria-shadow-tab: 0 1px 3px rgba(0, 0, 0, 0.2);
+  --ambria-shadow-toast: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --ambria-shadow-accent: 0 2px 8px rgba(232, 93, 117, 0.35);
+
+  color-scheme: dark;
+}
+
+/* ── Dark mode: invert logo ── */
+[data-theme="dark"] .sidebar-logo {
+  filter: brightness(0) invert(1);
+}
+[data-theme="dark"] .login-logo {
+  filter: brightness(0) invert(1);
 }
 
 * { box-sizing: border-box; }

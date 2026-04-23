@@ -349,6 +349,10 @@ const en = {
   'Description': 'Description',
   'Details': 'Details',
 
+  // ── Theme ──
+  'Dark mode': 'Dark mode',
+  'Light mode': 'Light mode',
+
   // ── Booking export ──
   'Export Bookings': 'Export Bookings',
   'Export Excel': 'Export Excel',

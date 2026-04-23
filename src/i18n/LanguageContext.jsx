@@ -1,17 +1,42 @@
-import { createContext, useContext, useState, useCallback, useMemo } from 'react'
+import { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react'
 import en from './en.js'
 import hi from './hi.js'
 
 const dictionaries = { en, hi }
 const LanguageContext = createContext()
 
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme)
+  // Update PWA theme-color meta tag
+  const meta = document.querySelector('meta[name="theme-color"]')
+  if (meta) meta.setAttribute('content', theme === 'dark' ? '#1A1A1A' : '#E85D75')
+}
+
 export function LanguageProvider({ children }) {
   const [lang, setLang] = useState(() => localStorage.getItem('ambria_lang') || 'en')
+  const [theme, setThemeState] = useState(() => {
+    const stored = localStorage.getItem('ambria_theme')
+    return stored === 'dark' ? 'dark' : 'light'
+  })
+
+  // Apply theme on mount and when it changes
+  useEffect(() => {
+    applyTheme(theme)
+  }, [theme])
 
   const changeLang = useCallback((l) => {
     setLang(l)
     localStorage.setItem('ambria_lang', l)
   }, [])
+
+  const setTheme = useCallback((t) => {
+    setThemeState(t)
+    localStorage.setItem('ambria_theme', t)
+  }, [])
+
+  const toggleTheme = useCallback(() => {
+    setTheme(theme === 'dark' ? 'light' : 'dark')
+  }, [theme, setTheme])
 
   const t = useCallback((key, params) => {
     if (!key) return ''
@@ -68,10 +93,11 @@ export function LanguageProvider({ children }) {
 
   const value = useMemo(() => ({
     lang, setLang: changeLang, t,
+    theme, setTheme, toggleTheme,
     formatMonthYear, formatDayHeader, dayLabel,
     formatTimestampIST, formatShortDate,
     dowHeaders, shortMonths,
-  }), [lang, changeLang, t, formatMonthYear, formatDayHeader, dayLabel, formatTimestampIST, formatShortDate, dowHeaders, shortMonths])
+  }), [lang, changeLang, t, theme, setTheme, toggleTheme, formatMonthYear, formatDayHeader, dayLabel, formatTimestampIST, formatShortDate, dowHeaders, shortMonths])
 
   return (
     <LanguageContext.Provider value={value}>

@@ -69,7 +69,7 @@
   justify-content: center;
   transition: background .15s ease;
 }
-.icon-btn:hover { background: rgba(0, 0, 0, 0.04); }
+.icon-btn:hover { background: var(--ambria-hover); }
 .icon-btn.sm { padding: 6px; }
 
 .header-actions {
@@ -88,7 +88,7 @@
   padding: 8px 14px;
   border-radius: 999px;
   font-size: 0.875rem;
-  box-shadow: 0 2px 8px rgba(232, 93, 117, 0.28);
+  box-shadow: var(--ambria-shadow-accent);
   transition: transform .15s ease, box-shadow .15s ease;
   white-space: nowrap;
 }
@@ -109,7 +109,7 @@
   background: var(--ambria-card);
   border: 1px solid var(--ambria-border);
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--ambria-shadow-dropdown);
   z-index: 6;
   padding: 4px;
   min-width: 140px;
@@ -128,14 +128,14 @@
   font-family: inherit;
   color: var(--ambria-ink);
 }
-.header-menu-item:hover { background: rgba(0, 0, 0, 0.04); }
+.header-menu-item:hover { background: var(--ambria-hover); }
 .header-menu-item.danger { color: var(--ambria-accent); }
 .header-menu-item.danger:hover { background: var(--ambria-accent-bg); }
 
 .view-tabs {
   display: inline-flex;
   gap: 4px;
-  background: #F0EEE8;
+  background: var(--ambria-tab-strip);
   padding: 3px;
   border-radius: 999px;
 }
@@ -154,7 +154,7 @@
 .view-tab.active {
   background: var(--ambria-card);
   color: var(--ambria-ink);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--ambria-shadow-tab);
 }
 
 .today-pill {
@@ -171,8 +171,8 @@
 /* ---------- Error / loading ---------- */
 
 .error-banner {
-  background: #FEE2E2;
-  color: #991B1B;
+  background: var(--ambria-error-bg);
+  color: var(--ambria-error-text);
   padding: 10px 12px;
   border-radius: var(--radius);
   font-size: 0.875rem;
@@ -190,7 +190,7 @@
 .sidebar-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.35);
+  background: var(--ambria-sidebar-overlay);
   z-index: 20;
   opacity: 0;
   pointer-events: none;
@@ -283,7 +283,7 @@
   justify-content: center;
   padding: 0 0 1px;
 }
-.search-clear:hover { background: #E8E5DE; color: var(--ambria-ink); }
+.search-clear:hover { background: var(--ambria-search-clear-hover); color: var(--ambria-ink); }
 
 .sidebar-section-head {
   display: flex;
@@ -406,7 +406,7 @@
   transition: background .15s ease, color .15s ease;
   font-family: inherit;
 }
-.nav-item:hover { background: rgba(0, 0, 0, 0.03); }
+.nav-item:hover { background: var(--ambria-hover); }
 .nav-item.active {
   background: var(--ambria-accent-bg);
   color: var(--ambria-accent);
@@ -511,7 +511,7 @@
 .day-cell:active { transform: scale(0.98); }
 .day-cell.outside {
   color: var(--ambria-faint);
-  background: #FCFBF8;
+  background: var(--ambria-outside);
 }
 .day-cell.today {
   background: var(--ambria-accent-bg);
@@ -685,7 +685,7 @@
   overflow: hidden;
   transition: box-shadow .15s ease;
 }
-.event-card:hover { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); }
+.event-card:hover { box-shadow: var(--ambria-shadow-card); }
 
 .event-card-compact {
   display: flex;
@@ -708,7 +708,7 @@
   text-align: left;
   cursor: pointer;
 }
-.event-card-row:active { background: rgba(0, 0, 0, 0.02); }
+.event-card-row:active { background: var(--ambria-active); }
 
 .card-trash-btn {
   flex-shrink: 0;
@@ -756,7 +756,7 @@
   gap: 8px;
   flex-wrap: nowrap;
   overflow: hidden;
-  color: #6E6E6E;
+  color: var(--ambria-meta);
   font-size: 11px;
   line-height: 1.1;
 }
@@ -819,7 +819,7 @@
   box-sizing: border-box;
 }
 .source-dot.crm {
-  background: #22C55E;
+  background: var(--ambria-success);
 }
 .source-dot.manual {
   background: transparent;
@@ -909,7 +909,7 @@
 .day-modal-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(20, 20, 20, 0.42);
+  background: var(--ambria-overlay);
   animation: fadeIn 180ms ease;
 }
 
@@ -918,9 +918,9 @@
   width: 100%;
   max-width: 560px;
   max-height: 85vh;
-  background: var(--ambria-card);
+  background: var(--ambria-elevated);
   border-radius: 20px 20px 0 0;
-  box-shadow: 0 -12px 32px rgba(0, 0, 0, 0.18);
+  box-shadow: var(--ambria-shadow-sheet);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -974,12 +974,12 @@
   border: none;
   border-radius: 10px;
   font-size: 0.88rem;
-  background: #F5F0E8;
+  background: var(--ambria-input);
   max-width: 100%;
 }
 .day-modal-filter-row input:focus {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(232, 93, 117, 0.18);
+  box-shadow: var(--ambria-focus-ring);
 }
 .day-modal-filter-row select {
   flex: 0 0 auto;
@@ -987,14 +987,14 @@
   max-width: 160px;
   height: 42px;
   padding: 0 10px;
-  border: 1px solid #E8E3DA;
+  border: 1px solid var(--ambria-border);
   border-radius: 10px;
   font-size: 13px;
-  background: #fff;
+  background: var(--ambria-input-white);
 }
 .day-modal-filter-row select:focus {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(232, 93, 117, 0.18);
+  box-shadow: var(--ambria-focus-ring);
 }
 
 .day-modal-body {
@@ -1012,7 +1012,7 @@
   width: 100%;
   height: 38px;
   padding: 0 16px;
-  border: 1.5px dashed #D5D0C5;
+  border: 1.5px dashed var(--ambria-dashed);
   border-radius: 20px;
   background: transparent;
   color: var(--ambria-accent);
@@ -1024,7 +1024,7 @@
 }
 .add-booking-pill:hover {
   border-color: var(--ambria-accent);
-  background: rgba(232, 93, 117, 0.04);
+  background: var(--ambria-accent-hover);
 }
 
 /* "+ Add Booking" dashed card — day view only */
@@ -1032,7 +1032,7 @@
   appearance: none;
   width: 100%;
   padding: 14px;
-  border: 1.5px dashed #D5D0C5;
+  border: 1.5px dashed var(--ambria-dashed);
   border-radius: 12px;
   background: transparent;
   color: var(--ambria-accent);
@@ -1044,7 +1044,7 @@
 }
 .add-booking-card:hover {
   border-color: var(--ambria-accent);
-  background: rgba(232, 93, 117, 0.04);
+  background: var(--ambria-accent-hover);
 }
 
 @media (min-width: 768px) {
@@ -1083,16 +1083,16 @@
 .export-modal-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(20, 20, 20, 0.42);
+  background: var(--ambria-overlay);
   animation: fadeIn 180ms ease;
 }
 .export-modal-sheet {
   position: relative;
   width: 100%;
   max-width: 480px;
-  background: var(--ambria-card);
+  background: var(--ambria-elevated);
   border-radius: 20px 20px 0 0;
-  box-shadow: 0 -12px 32px rgba(0, 0, 0, 0.18);
+  box-shadow: var(--ambria-shadow-sheet);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -1140,7 +1140,7 @@
 .export-field input:focus,
 .export-field select:focus {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(232, 93, 117, 0.18);
+  box-shadow: var(--ambria-focus-ring);
 }
 .export-error {
   color: var(--ambria-accent);
@@ -1187,7 +1187,7 @@
 .modal-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(20, 20, 20, 0.42);
+  background: var(--ambria-overlay);
   animation: fadeIn 180ms ease;
 }
 
@@ -1206,9 +1206,9 @@
   width: 100%;
   max-width: 560px;
   max-height: 92vh;
-  background: var(--ambria-card);
+  background: var(--ambria-elevated);
   border-radius: 20px 20px 0 0;
-  box-shadow: 0 -12px 32px rgba(0, 0, 0, 0.18);
+  box-shadow: var(--ambria-shadow-sheet);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -1227,7 +1227,7 @@
   width: 42px;
   height: 4px;
   border-radius: 2px;
-  background: #D8D6D0;
+  background: var(--ambria-handle);
 }
 
 .booking-form {
@@ -1389,13 +1389,13 @@
 .title-input-row input:focus {
   outline: none;
   border-color: var(--ambria-accent);
-  box-shadow: 0 0 0 3px rgba(232, 93, 117, 0.12);
+  box-shadow: var(--ambria-focus-ring-strong);
 }
 
 .field.is-disabled input,
 .field.is-disabled select,
 .field.is-disabled textarea {
-  background: #F5F4F0;
+  background: var(--ambria-disabled);
   color: var(--ambria-muted);
   cursor: not-allowed;
 }
@@ -1440,7 +1440,7 @@
 
 .form-error-banner {
   padding: 8px 10px;
-  background: #FEF0F2;
+  background: var(--ambria-accent-bg);
   border: 1px solid var(--ambria-accent);
   color: var(--ambria-accent);
   border-radius: 8px;
@@ -1522,7 +1522,7 @@
   cursor: pointer;
   font-family: inherit;
 }
-.event-edit-btn:hover { background: #FEF0F2; }
+.event-edit-btn:hover { background: var(--ambria-accent-bg); }
 
 /* Map pin link button — used in Field (location) and EventCard details */
 .field-with-pin {
@@ -1541,14 +1541,14 @@
   border: 1px solid var(--ambria-border);
   border-radius: 10px;
   background: var(--ambria-card);
-  color: #E85D75;
+  color: var(--ambria-accent);
   cursor: pointer;
   transition: background 0.15s ease, border-color 0.15s ease;
   text-decoration: none;
 }
 .map-pin-btn:hover {
-  background: #FEF0F2;
-  border-color: #E85D75;
+  background: var(--ambria-accent-bg);
+  border-color: var(--ambria-accent);
 }
 
 .map-pin-btn.inline {
@@ -1600,15 +1600,15 @@
   bottom: 24px;
   left: 50%;
   transform: translateX(-50%);
-  background: #1A1A1A;
-  color: #fff;
+  background: var(--ambria-toast-bg);
+  color: var(--ambria-toast-text);
   padding: 10px 20px;
   border-radius: 999px;
   font-size: 0.875rem;
   font-weight: 600;
   z-index: 300;
   animation: fadeIn 180ms ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--ambria-shadow-toast);
   pointer-events: none;
 }
 
@@ -1616,12 +1616,12 @@
 
 .bulk-delete-card {
   position: relative;
-  background: var(--ambria-card);
+  background: var(--ambria-elevated);
   border-radius: 16px;
   padding: 24px;
   max-width: 380px;
   width: calc(100% - 32px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  box-shadow: var(--ambria-shadow-dialog);
   animation: fadeIn 180ms ease;
   margin: auto;
 }
@@ -1670,12 +1670,12 @@
 }
 
 .login-card {
-  background: var(--ambria-card);
+  background: var(--ambria-elevated);
   border-radius: 20px;
   padding: 32px 28px;
   width: 100%;
   max-width: 380px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--ambria-shadow-login);
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -1725,7 +1725,7 @@
 .login-field .phone-combo input:focus {
   outline: none;
   border-color: var(--ambria-accent);
-  box-shadow: 0 0 0 3px rgba(232, 93, 117, 0.12);
+  box-shadow: var(--ambria-focus-ring-strong);
 }
 
 .pin-boxes {
@@ -1749,7 +1749,7 @@
 .pin-box:focus {
   outline: none;
   border-color: var(--ambria-accent);
-  box-shadow: 0 0 0 3px rgba(232, 93, 117, 0.12);
+  box-shadow: var(--ambria-focus-ring-strong);
 }
 
 @keyframes shake {
@@ -1762,7 +1762,7 @@
 }
 
 .login-error {
-  background: #FEF0F2;
+  background: var(--ambria-accent-bg);
   color: var(--ambria-accent);
   font-size: 0.85rem;
   font-weight: 600;
@@ -1845,7 +1845,7 @@
 .panel-search input:focus {
   outline: none;
   border-color: var(--ambria-accent);
-  box-shadow: 0 0 0 3px rgba(232, 93, 117, 0.12);
+  box-shadow: var(--ambria-focus-ring-strong);
 }
 
 /* User list */
@@ -1865,7 +1865,7 @@
   gap: 10px;
   transition: opacity .15s ease;
 }
-.user-row:hover { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); }
+.user-row:hover { box-shadow: var(--ambria-shadow-card); }
 .user-row.inactive { opacity: 0.5; }
 
 .user-info { display: flex; flex-direction: column; gap: 4px; }
@@ -1927,12 +1927,12 @@
 /* Panel form card (add/edit user modal) */
 .panel-form-card {
   position: relative;
-  background: var(--ambria-card);
+  background: var(--ambria-elevated);
   border-radius: 16px;
   padding: 24px;
   max-width: 420px;
   width: calc(100% - 32px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  box-shadow: var(--ambria-shadow-dialog);
   animation: fadeIn 180ms ease;
   margin: auto;
 }
@@ -1965,7 +1965,7 @@
 .pf-field select:focus {
   outline: none;
   border-color: var(--ambria-accent);
-  box-shadow: 0 0 0 3px rgba(232, 93, 117, 0.12);
+  box-shadow: var(--ambria-focus-ring-strong);
 }
 .pf-field .phone-combo select {
   width: 88px;
@@ -2060,7 +2060,7 @@
   cursor: pointer;
   transition: box-shadow .15s ease;
 }
-.audit-entry:hover { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); }
+.audit-entry:hover { box-shadow: var(--ambria-shadow-card); }
 
 .audit-entry-main {
   display: flex;
@@ -2177,7 +2177,7 @@
 .login-input:focus {
   outline: none;
   border-color: var(--ambria-accent);
-  box-shadow: 0 0 0 3px rgba(232, 93, 117, 0.12);
+  box-shadow: var(--ambria-focus-ring-strong);
 }
 
 .signup-success {
@@ -2246,11 +2246,11 @@
   border-radius: 999px;
   font-size: 0.68rem;
   font-weight: 800;
-  background: rgba(0, 0, 0, 0.06);
+  background: var(--ambria-tab-count-bg);
   color: inherit;
 }
 .um-tab.active .um-tab-count {
-  background: rgba(255, 255, 255, 0.25);
+  background: var(--ambria-tab-count-active-bg);
 }
 
 /* ============================================================
@@ -2342,7 +2342,7 @@
 }
 .pin-eye-btn:hover {
   color: var(--ambria-accent);
-  background: rgba(232, 93, 117, 0.06);
+  background: var(--ambria-accent-hover-strong);
 }
 
 /* ============================================================
@@ -2362,11 +2362,11 @@
 .btn-xs:hover { opacity: 0.85; }
 
 .btn-approve {
-  background: #22C55E;
+  background: var(--ambria-success);
   color: #fff;
 }
 .btn-reject {
-  background: #E85D75;
+  background: var(--ambria-accent);
   color: #fff;
 }
 
@@ -2394,7 +2394,7 @@
 
 .reject-reason-text {
   font-size: 0.72rem;
-  color: #E85D75;
+  color: var(--ambria-accent);
   margin-top: 2px;
   font-style: italic;
 }
@@ -2411,7 +2411,7 @@
   color: var(--ambria-faint);
 }
 .pin-status.custom {
-  color: #22C55E;
+  color: var(--ambria-success);
 }
 
 .pin-default-note {
@@ -2464,7 +2464,7 @@
 .btn-outline:hover {
   border-color: var(--ambria-accent);
   color: var(--ambria-accent);
-  background: rgba(232, 93, 117, 0.04);
+  background: var(--ambria-accent-hover);
 }
 
 .inline-set-pin {
@@ -2577,7 +2577,7 @@
 .category-field select:focus {
   outline: none;
   border-color: var(--ambria-accent);
-  box-shadow: 0 0 0 3px rgba(232, 93, 117, 0.12);
+  box-shadow: var(--ambria-focus-ring-strong);
 }
 .category-field select.placeholder-select {
   color: var(--ambria-muted);
@@ -2605,7 +2605,7 @@
 .et-add-input:focus {
   outline: none;
   border-color: var(--ambria-accent);
-  box-shadow: 0 0 0 3px rgba(232, 93, 117, 0.12);
+  box-shadow: var(--ambria-focus-ring-strong);
 }
 .et-add-btn {
   width: auto;
@@ -2629,7 +2629,7 @@
   padding: 10px 14px;
   transition: opacity 0.15s ease;
 }
-.et-row:hover { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); }
+.et-row:hover { box-shadow: var(--ambria-shadow-card); }
 .et-row.inactive { opacity: 0.5; }
 
 .et-reorder {
@@ -2653,7 +2653,7 @@
 }
 .et-arrow:hover:not(:disabled) {
   color: var(--ambria-accent);
-  background: rgba(232, 93, 117, 0.06);
+  background: var(--ambria-accent-hover-strong);
 }
 .et-arrow:disabled {
   opacity: 0.2;
@@ -2835,6 +2835,26 @@ input, select, textarea {
 .lang-btn.active {
   background: var(--ambria-accent);
   color: #fff;
+}
+
+.theme-toggle {
+  appearance: none;
+  background: none;
+  border: 1px solid var(--ambria-border);
+  border-radius: 6px;
+  padding: 4px 6px;
+  margin-left: 6px;
+  color: var(--ambria-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+.theme-toggle:hover {
+  color: var(--ambria-accent);
+  border-color: var(--ambria-accent);
+  background: var(--ambria-accent-hover);
 }
 
 .lang-sep {

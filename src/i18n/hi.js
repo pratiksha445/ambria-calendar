@@ -349,6 +349,10 @@ const hi = {
   'Description': 'विवरण',
   'Details': 'विवरण',
 
+  // ── थीम ──
+  'Dark mode': 'डार्क मोड',
+  'Light mode': 'लाइट मोड',
+
   // ── बुकिंग निर्यात ──
   'Export Bookings': 'बुकिंग निर्यात करें',
   'Export Excel': 'एक्सेल निर्यात',
