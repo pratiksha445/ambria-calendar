@@ -46,7 +46,7 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
           >
             <span
               className="event-venue-badge"
-              style={{ background: venue?.color ?? '#ccc' }}
+              style={{ background: venue?.color ?? '#ccc', color: venue?.textColor ?? '#fff' }}
             >
               {venue?.short ?? '?'}
             </span>

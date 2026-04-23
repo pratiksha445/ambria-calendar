@@ -2,8 +2,8 @@ import { VENUES } from '../config/venues.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 
 const SOURCES = [
-  { id: 'crm', labelKey: 'CRM', color: '#22C55E' },
-  { id: 'manual', labelKey: 'Manual', color: '#E85D75' },
+  { id: 'crm', labelKey: 'CRM' },
+  { id: 'manual', labelKey: 'Manual' },
 ]
 
 const ROLE_COLORS = { admin: '#E85D75', staff: '#95A5A6' }
@@ -189,7 +189,7 @@ export default function Sidebar({
                       onClick={() => onToggleFilter(v.id)}
                       aria-pressed={isOn}
                     >
-                      <span className="filter-pill" style={{ background: v.color }}>
+                      <span className="filter-pill" style={{ background: v.color, color: v.textColor }}>
                         {v.short} — {v.name}
                       </span>
                       <span className="filter-count">{venueCounts[v.id] ?? 0}</span>
@@ -212,7 +212,7 @@ export default function Sidebar({
                       onClick={() => onToggleSource(s.id)}
                       aria-pressed={isOn}
                     >
-                      <span className="filter-pill" style={{ background: s.color }}>
+                      <span className="filter-pill source-pill">
                         {t(s.labelKey)}
                       </span>
                       <span className="filter-count">{sourceCounts[s.id] ?? 0}</span>
