@@ -107,7 +107,8 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
 
       // Dropdown validation — reject values not in the options list
       if (field.type === 'select' && field.options && v && v !== '') {
-        if (!field.options.includes(v)) {
+        const validValues = field.options.map((o) => typeof o === 'object' ? o.value : o)
+        if (!validValues.includes(v)) {
           nextErrors[field.key] = 'Invalid selection'
         }
       }

@@ -52,9 +52,11 @@ export default function Field({ field, form, value, onChange, error, readOnly })
     control = (
       <select {...commonProps}>
         <option value="">{t('— Select —')}</option>
-        {field.options.map((opt) => (
-          <option key={opt} value={opt}>{t(opt)}</option>
-        ))}
+        {field.options.map((opt) => {
+          const val = typeof opt === 'object' ? opt.value : opt
+          const label = typeof opt === 'object' ? opt.label : opt
+          return <option key={val} value={val}>{t(label)}</option>
+        })}
       </select>
     )
   } else if (field.type === 'textarea') {

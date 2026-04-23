@@ -17,7 +17,10 @@ const hi = {
   day_short_4: 'गुरु', day_short_5: 'शुक्र', day_short_6: 'शनि',
 
   // ── DOW हेडर (महीना ग्रिड) ──
-  dow_0: 'र', dow_1: 'सो', dow_2: 'मं', dow_3: 'बु', dow_4: 'गु', dow_5: 'शु', dow_6: 'श',
+  dow_0: 'रवि', dow_1: 'सोम', dow_2: 'मंगल', dow_3: 'बुध', dow_4: 'गुरु', dow_5: 'शुक्र', dow_6: 'शनि',
+
+  // ── शिफ्ट बैज (छोटे) ──
+  shift_short_Morning: 'सु', shift_short_Lunch: 'दो', shift_short_Sundowner: 'शा', shift_short_Dinner: 'रा',
 
   // ── नेविगेशन ──
   'Calendar': 'कैलेंडर',
@@ -120,19 +123,19 @@ const hi = {
   'Contact': 'संपर्क',
 
   // ── ड्रॉपडाउन विकल्प ──
-  'Confirmed': 'पुष्ट',
+  'Confirmed': 'कन्फ़र्म',
   'Tentative': 'अनिश्चित',
   'Morning': 'सुबह',
   'Lunch': 'दोपहर',
-  'Sundowner': 'संडाउनर',
-  'Dinner': 'डिनर',
+  'Sundowner': 'शाम',
+  'Dinner': 'रात',
   'VMD': 'VMD',
-  'Only Rental': 'केवल किराया',
-  'Rental + Decor': 'किराया + सजावट',
-  'Rental + DJ': 'किराया + DJ',
-  'Rental + Add on Food': 'किराया + अतिरिक्त भोजन',
-  'Veg': 'शाकाहारी',
-  'Non-Veg': 'मांसाहारी',
+  'Only Rental': 'केवल रेंटल',
+  'Rental + Decor': 'रेंटल + डेकोर',
+  'Rental + DJ': 'रेंटल + DJ',
+  'Rental + Add on Food': 'रेंटल + अतिरिक्त खाना',
+  'Veg': 'वेज',
+  'Non-Veg': 'नॉन-वेज',
   'Jain': 'जैन',
   'Chaat': 'चाट',
   'MV': 'MV',
@@ -145,7 +148,7 @@ const hi = {
   'LNV': 'LNV',
   'Customised': 'कस्टमाइज़्ड',
   'Released': 'जारी',
-  'Delayed by guest': 'अतिथि द्वारा विलंब',
+  'Delayed by guest': 'अतिथि द्वारा देरी',
   'Not Released': 'जारी नहीं',
   'Silver': 'सिल्वर',
   'Gold': 'गोल्ड',
@@ -157,6 +160,8 @@ const hi = {
   'Yes': 'हाँ',
   'No': 'नहीं',
   'Breakfast': 'नाश्ता',
+  'Lunch (meal)': 'दोपहर का खाना',
+  'Dinner (meal)': 'रात का खाना',
   'All Meals': 'सभी भोजन',
 
   // ── प्लेसहोल्डर ──
@@ -295,9 +300,9 @@ const hi = {
 
   // ── भूमिकाएं ──
   'admin': 'एडमिन',
-  'staff': 'स्टाफ',
+  'staff': 'स्टाफ़',
   'Admin': 'एडमिन',
-  'Staff': 'स्टाफ',
+  'Staff': 'स्टाफ़',
   'pending': 'लंबित',
   'approved': 'स्वीकृत',
   'rejected': 'अस्वीकृत',

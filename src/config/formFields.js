@@ -31,7 +31,13 @@ export const FP_STATUSES = ['Released', 'Delayed by guest', 'Not Released']
 export const DECOR_TYPES = ['Silver', 'Gold', 'Premium']
 export const VENUE_TYPES = ['Lawn', 'Banquet', 'Lawn + Bqt', 'Poolside']
 export const POOL_OPTIONS = ['Yes', 'No']
-export const MEAL_OPTIONS = ['Breakfast', 'Lunch', 'Dinner', 'All Meals', 'None']
+export const MEAL_OPTIONS = [
+  'Breakfast',
+  { value: 'Lunch', label: 'Lunch (meal)' },
+  { value: 'Dinner', label: 'Dinner (meal)' },
+  'All Meals',
+  'None',
+]
 
 export const COUNTRY_CODES = [
   { value: '+91', code: '+91', flag: '\u{1F1EE}\u{1F1F3}', label: 'India' },

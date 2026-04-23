@@ -19,6 +19,9 @@ const en = {
   // ── DOW headers (single letter for month grid) ──
   dow_0: 'S', dow_1: 'M', dow_2: 'T', dow_3: 'W', dow_4: 'T', dow_5: 'F', dow_6: 'S',
 
+  // ── Shift badge (short) ──
+  shift_short_Morning: 'M', shift_short_Lunch: 'L', shift_short_Sundowner: 'S', shift_short_Dinner: 'D',
+
   // ── Navigation ──
   'Calendar': 'Calendar',
   'Manage Users': 'Manage Users',
@@ -157,6 +160,8 @@ const en = {
   'Yes': 'Yes',
   'No': 'No',
   'Breakfast': 'Breakfast',
+  'Lunch (meal)': 'Lunch',
+  'Dinner (meal)': 'Dinner',
   'All Meals': 'All Meals',
 
   // ── Placeholders ──

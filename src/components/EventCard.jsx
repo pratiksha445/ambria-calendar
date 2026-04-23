@@ -58,7 +58,7 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
                 )}
                 {shiftBadge && (
                   <span className="shift-badge" style={{ background: shiftBadge.color }}>
-                    {shiftBadge.short}
+                    {t(`shift_short_${event.shift}`)}
                   </span>
                 )}
                 {event.sales_person && (
