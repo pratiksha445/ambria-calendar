@@ -225,7 +225,7 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
         action: 'pin_reset', user_name: user.name, reset_to: 'default',
       })
       setConfirmResetPin(null)
-      showToast?.(t('PIN reset to 0000 \u2014 user will set new PIN on next login'))
+      showToast?.(t('PIN reset to 0000 — user will set new PIN on next login'))
       await loadUsers()
     } catch (err) { console.error(err) }
   }
@@ -249,7 +249,7 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
       await logAction(currentUser.id, currentUser.name, 'update', 'user', editing.id, {
         action: 'pin_reset', user_name: editing.name, reset_to: 'default',
       })
-      showToast?.(t('PIN reset to 0000 \u2014 user will set new PIN on next login'))
+      showToast?.(t('PIN reset to 0000 — user will set new PIN on next login'))
       await loadUsers()
       // Refresh the editing object
       const refreshed = (await fetchUsers()).find((u) => u.id === editing.id)
@@ -419,7 +419,7 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
       <div className="panel-search">
         <input
           type="search"
-          placeholder={t('Search by name or phone\u2026')}
+          placeholder={t('Search by name or phone…')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -520,7 +520,7 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
               {editing === 'new' ? (
                 <div className="pf-field">
                   <label className="field-label">{t('PIN')}</label>
-                  <div className="pin-default-note">{t('Default PIN is 0000 \u2014 user will set their own on first login')}</div>
+                  <div className="pin-default-note">{t('Default PIN is 0000 — user will set their own on first login')}</div>
                 </div>
               ) : (
                 <div className="pf-field">
@@ -571,7 +571,7 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
               <div className="panel-form-actions">
                 <button type="button" className="btn-ghost" onClick={() => setEditing(null)}>{t('Cancel')}</button>
                 <button type="submit" className="btn-save" disabled={saving}>
-                  {saving ? t('Saving\u2026') : t(editing === 'new' ? 'Create User' : 'Save Changes')}
+                  {saving ? t('Saving…') : t(editing === 'new' ? 'Create User' : 'Save Changes')}
                 </button>
               </div>
             </form>

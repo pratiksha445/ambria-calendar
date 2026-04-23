@@ -23,6 +23,7 @@ export default function EventTypeManagement({ currentUser, showToast, onMenu }) 
   const [editName, setEditName] = useState('')
   const [confirmDeleteId, setConfirmDeleteId] = useState(null)
   const [saving, setSaving] = useState(false)
+  const [search, setSearch] = useState('')
 
   useEffect(() => { load() }, [])
 
@@ -106,6 +107,15 @@ export default function EventTypeManagement({ currentUser, showToast, onMenu }) 
         <div className="panel-header-spacer" />
       </div>
 
+      <div className="panel-search">
+        <input
+          type="search"
+          placeholder={t('Search event types…')}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      </div>
+
       <form className="et-add-form" onSubmit={handleAdd}>
         <input
           type="text"
@@ -120,7 +130,7 @@ export default function EventTypeManagement({ currentUser, showToast, onMenu }) 
       </form>
 
       <div className="et-list">
-        {types.map((item, index) => {
+        {types.filter((item) => item.name.toLowerCase().includes(search.toLowerCase())).map((item, index) => {
           const isOther = item.name === 'Other'
           return (
             <div key={item.id} className={`et-row ${!item.is_active ? 'inactive' : ''}`}>
@@ -209,6 +219,9 @@ export default function EventTypeManagement({ currentUser, showToast, onMenu }) 
           )
         })}
         {types.length === 0 && <div className="empty-state">{t('No event types found')}</div>}
+        {types.length > 0 && types.filter((item) => item.name.toLowerCase().includes(search.toLowerCase())).length === 0 && (
+          <div className="empty-state">{t('No matching event types')}</div>
+        )}
       </div>
     </div>
   )

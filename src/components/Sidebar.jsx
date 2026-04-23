@@ -141,7 +141,7 @@ export default function Sidebar({
                     onClick={() => onSearch('')}
                     aria-label="Clear search"
                   >
-                    \u00d7
+                    {"×"}
                   </button>
                 )}
               </div>

@@ -98,13 +98,13 @@ export default function AuditLog({ onMenu }) {
     if (entry.entity_type === 'user') {
       const name = entry.details?.name || 'Unknown'
       const role = entry.details?.role || ''
-      return `${t('User')} \u2014 ${name}${role ? ` (${role})` : ''}`
+      return `${t('User')} — ${name}${role ? ` (${role})` : ''}`
     }
     if (entry.entity_type === 'event') {
       const d = entry.details
       if (!d) return t('Event')
       if (entry.action === 'bulk_delete') {
-        return `${t('Bulk delete')} \u2014 ${d.count || '?'} events`
+        return `${t('Bulk delete')} — ${d.count || '?'} events`
       }
       const title = d.title || d.new?.title || ''
       const venue = d.venue_id || d.new?.venue_id || ''
@@ -112,7 +112,7 @@ export default function AuditLog({ onMenu }) {
     }
     if (entry.entity_type === 'event_type') {
       const name = entry.details?.name || ''
-      return `${t('Event Type')} \u2014 ${name}`
+      return `${t('Event Type')} — ${name}`
     }
     return entry.entity_type
   }, [t])
