@@ -856,6 +856,12 @@
   letter-spacing: 0.06em;
 }
 
+.event-card-notes {
+  font-size: 0.82rem;
+  font-style: italic;
+  color: var(--ambria-muted);
+}
+
 /* ---------- Desktop ---------- */
 
 @media (min-width: 768px) {

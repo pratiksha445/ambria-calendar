@@ -92,6 +92,7 @@ const en = {
   'Menu Type': 'Menu Type',
   'Menu Category': 'Menu Category',
   'FP': 'FP',
+  'FP Status': 'FP Status',
   'Guest Name': 'Guest Name',
   'Phone': 'Phone',
   'Pax': 'Pax',

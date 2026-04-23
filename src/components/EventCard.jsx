@@ -114,7 +114,7 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
                 aria-label="Open in Google Maps"
                 onClick={(e) => e.stopPropagation()}
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E85D75" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                   <circle cx="12" cy="10" r="3" />
                 </svg>
@@ -124,13 +124,24 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
           {(event.guest_name || event.tender_name) && (
             <div><span className="k">{t('Guest')}</span> {event.guest_name || event.tender_name}</div>
           )}
-          {event.phone && <div><span className="k">{t('Phone')}</span> {event.phone}</div>}
           {event.pax && <div><span className="k">{t('Pax')}</span> {event.pax}</div>}
           {event.sales_person && (
             <div><span className="k">{t('Sales')}</span> {event.sales_person}</div>
           )}
+          {event.booking_status && (
+            <div><span className="k">{t('Booking Status')}</span> {t(event.booking_status)}</div>
+          )}
+          {event.fp_status && (
+            <div><span className="k">{t('FP Status')}</span> {t(event.fp_status)}</div>
+          )}
+          {event.menu_type && (
+            <div><span className="k">{t('Menu Type')}</span> {t(event.menu_type)}</div>
+          )}
           {event.status && (
             <div><span className="k">{t('Status')}</span> {t(event.status)}</div>
+          )}
+          {event.notes && (
+            <div className="event-card-notes"><span className="k">{t('Notes')}</span> {event.notes}</div>
           )}
           {onEdit && (
             <div className="event-card-actions">

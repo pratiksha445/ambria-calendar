@@ -92,6 +92,7 @@ const hi = {
   'Menu Type': 'मेनू प्रकार',
   'Menu Category': 'मेनू श्रेणी',
   'FP': 'एफ.पी.',
+  'FP Status': 'FP स्थिति',
   'Guest Name': 'अतिथि का नाम',
   'Phone': 'फ़ोन',
   'Pax': 'संख्या',
