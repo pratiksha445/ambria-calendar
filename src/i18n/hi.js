@@ -16,6 +16,10 @@ const hi = {
   day_short_0: 'रवि', day_short_1: 'सोम', day_short_2: 'मंगल', day_short_3: 'बुध',
   day_short_4: 'गुरु', day_short_5: 'शुक्र', day_short_6: 'शनि',
 
+  // ── दिन (पूरे) ──
+  day_full_0: 'रविवार', day_full_1: 'सोमवार', day_full_2: 'मंगलवार', day_full_3: 'बुधवार',
+  day_full_4: 'गुरुवार', day_full_5: 'शुक्रवार', day_full_6: 'शनिवार',
+
   // ── DOW हेडर (महीना ग्रिड) ──
   dow_0: 'रवि', dow_1: 'सोम', dow_2: 'मंगल', dow_3: 'बुध', dow_4: 'गुरु', dow_5: 'शुक्र', dow_6: 'शनि',
 
@@ -228,6 +232,11 @@ const hi = {
   'Sales': 'सेल्स',
   'Edit': 'संपादन',
   'View': 'देखें',
+
+  // ── डे मॉडल ──
+  '+ Add Booking': '+ बुकिंग जोड़ें',
+  'All Categories': 'सभी श्रेणियाँ',
+  'Search bookings…': 'बुकिंग खोजें…',
 
   // ── कैलेंडर व्यू ──
   'No bookings for this day': 'इस दिन कोई बुकिंग नहीं',

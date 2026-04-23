@@ -5,6 +5,7 @@ import MonthView from './components/MonthView.jsx'
 import WeekView from './components/WeekView.jsx'
 import DayView from './components/DayView.jsx'
 import BookingModal from './components/BookingModal.jsx'
+import DayModal from './components/DayModal.jsx'
 import LoginScreen from './components/LoginScreen.jsx'
 import SetPinScreen from './components/SetPinScreen.jsx'
 import ChangePinModal from './components/ChangePinModal.jsx'
@@ -49,6 +50,7 @@ export default function App() {
   const [confirmBulk, setConfirmBulk] = useState(false)
   const [needsPinChange, setNeedsPinChange] = useState(false)
   const [changePinOpen, setChangePinOpen] = useState(false)
+  const [dayModalDate, setDayModalDate] = useState(null)
 
   useEffect(() => {
     if (!user) return
@@ -150,6 +152,9 @@ export default function App() {
         d.getFullYear() !== currentDate.getFullYear()) {
       setCurrentDate(d)
     }
+    if (view === 'month' || view === 'week') {
+      setDayModalDate(d)
+    }
   }
 
   const filtersHideEverything = !loading && events.length > 0 && filteredEvents.length === 0
@@ -161,6 +166,11 @@ export default function App() {
 
   const openNew = () => {
     const iso = toIsoDate(selectedDate)
+    setModal({ mode: 'new', event: { date: iso } })
+  }
+  const openNewFromDate = (d) => {
+    setDayModalDate(null)
+    const iso = toIsoDate(d)
     setModal({ mode: 'new', event: { date: iso } })
   }
   const openEdit = (ev) => {
@@ -294,8 +304,6 @@ export default function App() {
                   selectedDate={selectedDate}
                   onSelectDate={handleSelectDate}
                   events={filteredEvents}
-                  onEdit={openEdit}
-                  onDelete={canEditDelete ? handleCardDelete : null}
                 />
               )}
               {view === 'week' && (
@@ -304,8 +312,6 @@ export default function App() {
                   selectedDate={selectedDate}
                   onSelectDate={handleSelectDate}
                   events={filteredEvents}
-                  onEdit={openEdit}
-                  onDelete={canEditDelete ? handleCardDelete : null}
                 />
               )}
               {view === 'day' && (
@@ -314,6 +320,7 @@ export default function App() {
                   events={filteredEvents}
                   onEdit={openEdit}
                   onDelete={canEditDelete ? handleCardDelete : null}
+                  onAdd={openNew}
                 />
               )}
             </main>
@@ -329,6 +336,14 @@ export default function App() {
           <EventTypeManagement currentUser={user} showToast={showToast} onMenu={() => setSidebarOpen(true)} />
         )}
       </div>
+      <DayModal
+        date={dayModalDate}
+        events={events}
+        onClose={() => setDayModalDate(null)}
+        onAdd={openNewFromDate}
+        onEdit={(ev) => { setDayModalDate(null); openEdit(ev) }}
+        onDelete={canEditDelete ? handleCardDelete : null}
+      />
       <BookingModal
         open={!!modal}
         initial={modal?.event}

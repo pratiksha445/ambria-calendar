@@ -1,21 +1,14 @@
-import { useState } from 'react'
 import { startOfWeek, addDays, isSameDay, toIsoDate } from '../lib/dates.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
-import EventCard from './EventCard.jsx'
 
-export default function WeekView({ currentDate, selectedDate, onSelectDate, events, onEdit, onDelete }) {
-  const [expandedId, setExpandedId] = useState(null)
-  const { t, dayLabel } = useLanguage()
+export default function WeekView({ currentDate, selectedDate, onSelectDate, events }) {
+  const { dayLabel } = useLanguage()
   const weekStart = startOfWeek(currentDate)
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
   const eventsByDay = events.reduce((acc, ev) => {
     (acc[ev.date] = acc[ev.date] || []).push(ev)
     return acc
   }, {})
-  const selIso = toIsoDate(selectedDate)
-  const selectedEvents = eventsByDay[selIso] ?? []
-
-  const toggle = (id) => setExpandedId((prev) => (prev === id ? null : id))
 
   return (
     <div className="week-view">
@@ -36,28 +29,6 @@ export default function WeekView({ currentDate, selectedDate, onSelectDate, even
             </button>
           )
         })}
-      </div>
-
-      <div className="event-list">
-        <div className="event-list-header">
-          {selectedEvents.length === 1
-            ? t('{count} booking', { count: selectedEvents.length })
-            : t('{count} bookings', { count: selectedEvents.length })}
-        </div>
-        {selectedEvents.length === 0 ? (
-          <div className="empty-state">{t('No bookings')}</div>
-        ) : (
-          selectedEvents.map((ev) => (
-            <EventCard
-              key={ev.id}
-              event={ev}
-              expanded={expandedId === ev.id}
-              onToggle={() => toggle(ev.id)}
-              onEdit={onEdit}
-              onDelete={onDelete}
-            />
-          ))
-        )}
       </div>
     </div>
   )

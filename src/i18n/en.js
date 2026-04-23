@@ -16,6 +16,10 @@ const en = {
   day_short_0: 'Sun', day_short_1: 'Mon', day_short_2: 'Tue', day_short_3: 'Wed',
   day_short_4: 'Thu', day_short_5: 'Fri', day_short_6: 'Sat',
 
+  // ── Day names (full) ──
+  day_full_0: 'Sunday', day_full_1: 'Monday', day_full_2: 'Tuesday', day_full_3: 'Wednesday',
+  day_full_4: 'Thursday', day_full_5: 'Friday', day_full_6: 'Saturday',
+
   // ── DOW headers (single letter for month grid) ──
   dow_0: 'S', dow_1: 'M', dow_2: 'T', dow_3: 'W', dow_4: 'T', dow_5: 'F', dow_6: 'S',
 
@@ -228,6 +232,11 @@ const en = {
   'Sales': 'Sales',
   'Edit': 'Edit',
   'View': 'View',
+
+  // ── Day modal ──
+  '+ Add Booking': '+ Add Booking',
+  'All Categories': 'All Categories',
+  'Search bookings…': 'Search bookings…',
 
   // ── Calendar views ──
   'No bookings for this day': 'No bookings for this day',

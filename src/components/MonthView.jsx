@@ -1,20 +1,13 @@
-import { useState } from 'react'
 import { buildMonthGrid, isSameDay, toIsoDate } from '../lib/dates.js'
 import { VENUE_BY_ID } from '../config/venues.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
-import EventCard from './EventCard.jsx'
 
-export default function MonthView({ currentDate, selectedDate, onSelectDate, events, onEdit, onDelete }) {
-  const [expandedId, setExpandedId] = useState(null)
-  const { t, dowHeaders } = useLanguage()
+export default function MonthView({ currentDate, selectedDate, onSelectDate, events }) {
+  const { dowHeaders } = useLanguage()
   const today = new Date()
   const days = buildMonthGrid(currentDate)
   const monthIndex = currentDate.getMonth()
   const eventsByDay = groupByDate(events)
-  const selIso = toIsoDate(selectedDate)
-  const selectedEvents = eventsByDay[selIso] ?? []
-
-  const toggle = (id) => setExpandedId((prev) => (prev === id ? null : id))
 
   return (
     <div className="month-view">
@@ -57,28 +50,6 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, eve
             </button>
           )
         })}
-      </div>
-
-      <div className="event-list">
-        <div className="event-list-header">
-          {selectedEvents.length === 1
-            ? t('{count} booking', { count: selectedEvents.length })
-            : t('{count} bookings', { count: selectedEvents.length })}
-        </div>
-        {selectedEvents.length === 0 ? (
-          <div className="empty-state">{t('No bookings')}</div>
-        ) : (
-          selectedEvents.map((ev) => (
-            <EventCard
-              key={ev.id}
-              event={ev}
-              expanded={expandedId === ev.id}
-              onToggle={() => toggle(ev.id)}
-              onEdit={onEdit}
-              onDelete={onDelete}
-            />
-          ))
-        )}
       </div>
     </div>
   )

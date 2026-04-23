@@ -4,7 +4,7 @@ import { VENUES } from '../config/venues.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 import EventCard from './EventCard.jsx'
 
-export default function DayView({ selectedDate, events, onEdit, onDelete }) {
+export default function DayView({ selectedDate, events, onEdit, onDelete, onAdd }) {
   const [expandedId, setExpandedId] = useState(null)
   const { t, formatDayHeader } = useLanguage()
   const iso = toIsoDate(selectedDate)
@@ -19,6 +19,12 @@ export default function DayView({ selectedDate, events, onEdit, onDelete }) {
   return (
     <div className="day-view">
       <div className="day-header">{formatDayHeader(selectedDate)}</div>
+
+      {onAdd && (
+        <button className="add-booking-card" onClick={onAdd}>
+          {t('+ Add Booking')}
+        </button>
+      )}
 
       {dayEvents.length === 0 ? (
         <div className="empty-state">{t('No bookings for this day')}</div>
