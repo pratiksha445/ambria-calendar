@@ -11,6 +11,7 @@ export default function DayModal({ date, events, onClose, onAdd, onEdit, onDelet
   const [expandedId, setExpandedId] = useState(null)
   const [dragY, setDragY] = useState(0)
   const dragRef = useRef({ startY: 0, tracking: false })
+  const [narrow, setNarrow] = useState(() => window.innerWidth < 380)
 
   // Reset state when date changes
   useEffect(() => {
@@ -20,6 +21,14 @@ export default function DayModal({ date, events, onClose, onAdd, onEdit, onDelet
     setDragY(0)
     dragRef.current = { startY: 0, tracking: false }
   }, [date])
+
+  // Detect narrow screens for compact labels
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 379px)')
+    const handler = (e) => setNarrow(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
 
   // Escape to close
   useEffect(() => {
@@ -122,7 +131,7 @@ export default function DayModal({ date, events, onClose, onAdd, onEdit, onDelet
               onChange={(e) => setSearch(e.target.value)}
             />
             <select value={category} onChange={(e) => setCategory(e.target.value)}>
-              <option value="">{t('All Categories')}</option>
+              <option value="">{narrow ? t('All') : t('All Categories')}</option>
               {VENUES.map((v) => (
                 <option key={v.id} value={v.id}>{v.short} — {v.name}</option>
               ))}

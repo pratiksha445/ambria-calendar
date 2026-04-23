@@ -76,6 +76,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
+  flex-shrink: 0;
 }
 
 .book-btn {
@@ -963,16 +964,18 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  overflow: hidden;
 }
 .day-modal-filter-row input {
-  flex: 2;
-  min-width: 200px;
+  flex: 1;
+  min-width: 0;
   height: 42px;
   padding: 0 14px;
   border: none;
   border-radius: 10px;
   font-size: 0.88rem;
   background: #F5F0E8;
+  max-width: 100%;
 }
 .day-modal-filter-row input:focus {
   outline: none;
@@ -2716,25 +2719,36 @@
  * Mobile responsive — small phones (320–420px)
  * ============================================================ */
 
-/* Minimum 16px on all inputs/selects to prevent iOS auto-zoom */
+/* Prevent overflow on all form elements + minimum 16px to prevent iOS auto-zoom */
 input, select, textarea {
   font-size: max(16px, inherit);
+  max-width: 100%;
 }
 
 /* Header: hide "+ Book" label on narrow screens, keep "+" */
 @media (max-width: 420px) {
   .book-btn-label { display: none; }
   .book-btn { padding: 8px 12px; }
-  .header-row { gap: 4px; }
-  .month-label { font-size: 0.95rem; min-width: 120px; }
+  .header-row { gap: 4px; overflow: hidden; }
+  .header-title { gap: 2px; min-width: 0; }
+  .month-label { font-size: 0.95rem; min-width: 100px; }
   .icon-btn.sm { padding: 4px; }
   .app-main { padding: 0 8px 24px; }
   .app-header { padding: 8px 0 6px; }
   .view-tab { padding: 5px 10px; font-size: 0.78rem; }
   .today-pill { padding: 5px 10px; font-size: 0.78rem; }
+  /* Day modal filter row */
+  .day-modal-filter-row select {
+    max-width: 140px;
+    font-size: 12px;
+    padding: 0 8px;
+  }
+  .day-modal-filters { padding: 10px 12px; }
+  .day-modal-header { padding: 6px 12px 12px; }
+  .day-modal-body { padding: 10px 12px 20px; }
 }
 
-/* Login: phone combo + PIN boxes on very small screens */
+/* Small phones: overflow prevention + tighter padding */
 @media (max-width: 400px) {
   .login-field .phone-combo select,
   .field .phone-combo select {
@@ -2747,6 +2761,16 @@ input, select, textarea {
     overflow: hidden;
   }
   .login-card { padding: 24px 16px; }
+  /* Modal sheets: ensure they never exceed viewport */
+  .day-modal-sheet,
+  .modal-sheet,
+  .export-modal-sheet,
+  .bulk-delete-card,
+  .panel-form-card { max-width: 100vw; }
+  .export-modal-header { padding: 16px 12px 12px; }
+  .export-modal-body { padding: 12px; }
+  .header-row { gap: 4px; }
+  .header-actions { gap: 2px; }
 }
 
 @media (max-width: 380px) {
@@ -2758,6 +2782,12 @@ input, select, textarea {
   .pin-boxes { gap: 8px; }
   .login-card { padding: 20px 14px; }
   .name-row { gap: 6px; }
+  /* Day modal: extra compact */
+  .day-modal-filter-row select {
+    max-width: 120px;
+    font-size: 12px;
+  }
+  .month-label { font-size: 0.88rem; min-width: 90px; }
 }
 
 /* Modal / bottom-sheet on small screens */
