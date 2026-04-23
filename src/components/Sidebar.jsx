@@ -165,15 +165,9 @@ export default function Sidebar({
                       onClick={() => onToggleFilter(v.id)}
                       aria-pressed={isOn}
                     >
-                      <span
-                        className="filter-dot"
-                        style={
-                          isOn
-                            ? { background: v.color, borderColor: v.color }
-                            : { background: 'transparent', borderColor: v.color }
-                        }
-                      />
-                      <span className="filter-name">{v.short}</span>
+                      <span className="filter-pill" style={{ background: v.color }}>
+                        {v.short} — {v.name}
+                      </span>
                       <span className="filter-count">{venueCounts[v.id] ?? 0}</span>
                     </button>
                   </li>
@@ -194,15 +188,9 @@ export default function Sidebar({
                       onClick={() => onToggleSource(s.id)}
                       aria-pressed={isOn}
                     >
-                      <span
-                        className="filter-dot"
-                        style={
-                          isOn
-                            ? { background: s.color, borderColor: s.color }
-                            : { background: 'transparent', borderColor: s.color }
-                        }
-                      />
-                      <span className="filter-name">{t(s.labelKey)}</span>
+                      <span className="filter-pill" style={{ background: s.color }}>
+                        {t(s.labelKey)}
+                      </span>
                       <span className="filter-count">{sourceCounts[s.id] ?? 0}</span>
                     </button>
                   </li>
