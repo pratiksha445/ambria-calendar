@@ -105,18 +105,20 @@ export default function DayModal({ date, events, onClose, onAdd, onEdit, onDelet
         </div>
 
         <div className="day-modal-filters">
-          <input
-            type="search"
-            placeholder={t('Search bookings…')}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          <select value={category} onChange={(e) => setCategory(e.target.value)}>
-            <option value="">{t('All Categories')}</option>
-            {VENUES.map((v) => (
-              <option key={v.id} value={v.id}>{v.short} — {v.name}</option>
-            ))}
-          </select>
+          <div className="day-modal-filter-row">
+            <input
+              type="search"
+              placeholder={t('Search bookings…')}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            <select value={category} onChange={(e) => setCategory(e.target.value)}>
+              <option value="">{t('All Categories')}</option>
+              {VENUES.map((v) => (
+                <option key={v.id} value={v.id}>{v.short} — {v.name}</option>
+              ))}
+            </select>
+          </div>
           <button className="add-booking-pill" onClick={() => onAdd(date)}>
             {t('+ Add Booking')}
           </button>
