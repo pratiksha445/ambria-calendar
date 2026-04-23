@@ -105,7 +105,7 @@
   position: absolute;
   top: calc(100% + 4px);
   right: 0;
-  background: #fff;
+  background: var(--ambria-card);
   border: 1px solid var(--ambria-border);
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -151,7 +151,7 @@
   transition: background .15s ease, color .15s ease;
 }
 .view-tab.active {
-  background: #fff;
+  background: var(--ambria-card);
   color: var(--ambria-ink);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
@@ -159,7 +159,7 @@
 .today-pill {
   appearance: none;
   border: 1px solid var(--ambria-border);
-  background: #fff;
+  background: var(--ambria-card);
   color: var(--ambria-ink);
   padding: 6px 14px;
   border-radius: 999px;
@@ -206,7 +206,7 @@
   left: 0;
   bottom: 0;
   width: min(84vw, 320px);
-  background: #fff;
+  background: var(--ambria-card);
   z-index: 30;
   transform: translateX(-100%);
   transition: transform .25s ease;
@@ -259,7 +259,7 @@
   border: 1px solid var(--ambria-border);
   border-radius: 8px;
   font-size: 0.875rem;
-  background: #fff;
+  background: var(--ambria-card);
   outline: none;
   transition: border-color .15s ease;
 }
@@ -494,7 +494,7 @@
 
 .day-cell {
   appearance: none;
-  background: #fff;
+  background: var(--ambria-card);
   border: 1px solid var(--ambria-border);
   border-radius: 8px;
   padding: 6px 4px 4px;
@@ -573,7 +573,7 @@
   padding: 24px 12px;
   text-align: center;
   color: var(--ambria-muted);
-  background: #fff;
+  background: var(--ambria-card);
   border: 1px dashed var(--ambria-border);
   border-radius: var(--radius);
   font-size: 0.875rem;
@@ -591,7 +591,7 @@
 .week-chip {
   appearance: none;
   border: 1px solid var(--ambria-border);
-  background: #fff;
+  background: var(--ambria-card);
   border-radius: 10px;
   padding: 8px 4px;
   display: flex;
@@ -630,7 +630,7 @@
   margin-top: 2px;
 }
 .week-chip.selected .week-chip-count {
-  background: #fff;
+  background: var(--ambria-card);
   color: var(--ambria-accent);
 }
 
@@ -698,7 +698,7 @@
   flex: 1;
   min-width: 0;
   min-height: 56px;
-  padding: 8px 10px;
+  padding: 10px 12px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -714,11 +714,11 @@
   padding: 8px 10px;
   background: none;
   border: none;
-  color: var(--ambria-muted);
+  color: var(--ambria-faint);
   cursor: pointer;
   display: flex;
   align-items: center;
-  opacity: 0.4;
+  opacity: 0.25;
   transition: opacity 0.15s ease, color 0.15s ease;
 }
 .card-trash-btn:hover {
@@ -917,7 +917,7 @@
   width: 100%;
   max-width: 560px;
   max-height: 85vh;
-  background: #fff;
+  background: var(--ambria-card);
   border-radius: 20px 20px 0 0;
   box-shadow: 0 -12px 32px rgba(0, 0, 0, 0.18);
   display: flex;
@@ -936,7 +936,7 @@
 }
 
 .day-modal-header {
-  padding: 4px 16px 12px;
+  padding: 6px 16px 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -944,47 +944,46 @@
 }
 .day-modal-header h2 {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 1.25rem;
   font-weight: 700;
   color: var(--ambria-ink);
 }
 .day-modal-close {
-  color: var(--ambria-muted);
+  color: var(--ambria-faint);
 }
 
 .day-modal-filters {
   padding: 12px 16px;
   display: flex;
+  align-items: center;
   gap: 8px;
   border-bottom: 1px solid var(--ambria-border);
 }
 .day-modal-filters input {
   flex: 1;
   min-width: 0;
-  padding: 8px 12px;
-  border: 1px solid var(--ambria-border);
-  border-radius: 8px;
-  font-size: 0.875rem;
-  background: #fff;
+  padding: 9px 14px;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  background: var(--ambria-input);
 }
 .day-modal-filters input:focus {
   outline: none;
-  border-color: var(--ambria-accent);
-  box-shadow: 0 0 0 3px rgba(232, 93, 117, 0.12);
+  box-shadow: 0 0 0 2px rgba(232, 93, 117, 0.18);
 }
 .day-modal-filters select {
-  padding: 8px 12px;
-  border: 1px solid var(--ambria-border);
-  border-radius: 8px;
-  font-size: 0.875rem;
-  background: #fff;
+  padding: 9px 14px;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  background: var(--ambria-input);
   min-width: 0;
-  max-width: 160px;
+  max-width: 150px;
 }
 .day-modal-filters select:focus {
   outline: none;
-  border-color: var(--ambria-accent);
-  box-shadow: 0 0 0 3px rgba(232, 93, 117, 0.12);
+  box-shadow: 0 0 0 2px rgba(232, 93, 117, 0.18);
 }
 
 .day-modal-body {
@@ -996,16 +995,36 @@
   gap: 8px;
 }
 
-/* "+ Add Booking" dashed card — shared by day modal and day view */
+/* "+ Add Booking" — compact pill for day modal filter row */
+.add-booking-pill {
+  appearance: none;
+  flex-shrink: 0;
+  padding: 7px 14px;
+  border: 1.5px dashed #D5D0C5;
+  border-radius: 20px;
+  background: transparent;
+  color: var(--ambria-accent);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 150ms ease, background 150ms ease;
+}
+.add-booking-pill:hover {
+  border-color: var(--ambria-accent);
+  background: rgba(232, 93, 117, 0.04);
+}
+
+/* "+ Add Booking" dashed card — day view only */
 .add-booking-card {
   appearance: none;
   width: 100%;
-  padding: 16px;
-  border: 2px dashed #E5E3DE;
+  padding: 14px;
+  border: 1.5px dashed #D5D0C5;
   border-radius: 12px;
   background: transparent;
   color: var(--ambria-accent);
-  font-size: 0.95rem;
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
   text-align: center;
@@ -1014,9 +1033,6 @@
 .add-booking-card:hover {
   border-color: var(--ambria-accent);
   background: rgba(232, 93, 117, 0.04);
-}
-.add-booking-card:active {
-  background: rgba(232, 93, 117, 0.08);
 }
 
 @media (min-width: 768px) {
@@ -1064,7 +1080,7 @@
   width: 100%;
   max-width: 560px;
   max-height: 92vh;
-  background: #fff;
+  background: var(--ambria-card);
   border-radius: 20px 20px 0 0;
   box-shadow: 0 -12px 32px rgba(0, 0, 0, 0.18);
   display: flex;
@@ -1098,7 +1114,7 @@
 .form-header {
   padding: 4px 16px 12px;
   border-bottom: 1px solid var(--ambria-border);
-  background: #fff;
+  background: var(--ambria-card);
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -1134,7 +1150,7 @@
   padding: 6px 12px;
   border-radius: 999px;
   border: 1.5px solid transparent;
-  background: #fff;
+  background: var(--ambria-card);
   color: var(--ambria-ink);
   font-size: 0.82rem;
   font-weight: 600;
@@ -1232,7 +1248,7 @@
   padding: 10px 12px;
   border: 1px solid var(--ambria-border);
   border-radius: 10px;
-  background: #fff;
+  background: var(--ambria-card);
   font-size: 0.92rem;
   font-family: inherit;
   color: var(--ambria-ink);
@@ -1290,7 +1306,7 @@
 .form-footer {
   padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid var(--ambria-border);
-  background: #fff;
+  background: var(--ambria-card);
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -1343,7 +1359,7 @@
 }
 .btn-danger {
   padding: 8px 12px;
-  background: #fff;
+  background: var(--ambria-card);
   color: var(--ambria-accent);
   border: 1px solid var(--ambria-accent);
   border-radius: 8px;
@@ -1371,7 +1387,7 @@
 }
 .event-edit-btn {
   padding: 6px 12px;
-  background: #fff;
+  background: var(--ambria-card);
   color: var(--ambria-accent);
   border: 1px solid var(--ambria-accent);
   border-radius: 8px;
@@ -1398,7 +1414,7 @@
   justify-content: center;
   border: 1px solid var(--ambria-border);
   border-radius: 10px;
-  background: #fff;
+  background: var(--ambria-card);
   color: #E85D75;
   cursor: pointer;
   transition: background 0.15s ease, border-color 0.15s ease;
@@ -1427,7 +1443,7 @@
 
 .event-delete-btn {
   padding: 6px 12px;
-  background: #fff;
+  background: var(--ambria-card);
   color: var(--ambria-muted);
   border: 1px solid var(--ambria-border);
   border-radius: 8px;
@@ -1474,7 +1490,7 @@
 
 .bulk-delete-card {
   position: relative;
-  background: #fff;
+  background: var(--ambria-card);
   border-radius: 16px;
   padding: 24px;
   max-width: 380px;
@@ -1528,7 +1544,7 @@
 }
 
 .login-card {
-  background: #fff;
+  background: var(--ambria-card);
   border-radius: 20px;
   padding: 32px 28px;
   width: 100%;
@@ -1564,7 +1580,7 @@
   font-size: 0.95rem;
   font-family: inherit;
   color: var(--ambria-ink);
-  background: #fff;
+  background: var(--ambria-card);
   box-sizing: border-box;
 }
 .login-field .phone-combo select {
@@ -1599,7 +1615,7 @@
   font-weight: 800;
   border: 1.5px solid var(--ambria-border);
   border-radius: 10px;
-  background: #fff;
+  background: var(--ambria-card);
   color: var(--ambria-ink);
   font-family: inherit;
   transition: border-color 120ms ease, box-shadow 120ms ease;
@@ -1697,7 +1713,7 @@
   border-radius: 10px;
   font-size: 0.9rem;
   font-family: inherit;
-  background: #fff;
+  background: var(--ambria-card);
   box-sizing: border-box;
 }
 .panel-search input:focus {
@@ -1714,7 +1730,7 @@
 }
 
 .user-row {
-  background: #fff;
+  background: var(--ambria-card);
   border: 1px solid var(--ambria-border);
   border-radius: 12px;
   padding: 14px 16px;
@@ -1785,7 +1801,7 @@
 /* Panel form card (add/edit user modal) */
 .panel-form-card {
   position: relative;
-  background: #fff;
+  background: var(--ambria-card);
   border-radius: 16px;
   padding: 24px;
   max-width: 420px;
@@ -1813,7 +1829,7 @@
   padding: 10px 12px;
   border: 1px solid var(--ambria-border);
   border-radius: 10px;
-  background: #fff;
+  background: var(--ambria-card);
   font-size: 0.92rem;
   font-family: inherit;
   color: var(--ambria-ink);
@@ -1892,7 +1908,7 @@
   border-radius: 8px;
   font-size: 0.82rem;
   font-family: inherit;
-  background: #fff;
+  background: var(--ambria-card);
   color: var(--ambria-ink);
   min-width: 0;
   flex: 1;
@@ -1911,7 +1927,7 @@
 }
 
 .audit-entry {
-  background: #fff;
+  background: var(--ambria-card);
   border: 1px solid var(--ambria-border);
   border-radius: 10px;
   padding: 12px 14px;
@@ -2029,7 +2045,7 @@
   font-size: 1rem;
   font-family: inherit;
   color: var(--ambria-ink);
-  background: #fff;
+  background: var(--ambria-card);
   box-sizing: border-box;
 }
 .login-input:focus {
@@ -2076,7 +2092,7 @@
   padding: 8px 14px;
   border: 1px solid var(--ambria-border);
   border-radius: 999px;
-  background: #fff;
+  background: var(--ambria-card);
   font-size: 0.78rem;
   font-weight: 600;
   font-family: inherit;
@@ -2425,7 +2441,7 @@
   padding: 10px 12px;
   border: 1px solid var(--ambria-border);
   border-radius: 10px;
-  background: #fff;
+  background: var(--ambria-card);
   font-size: 0.92rem;
   font-family: inherit;
   color: var(--ambria-ink);
@@ -2457,7 +2473,7 @@
   border-radius: 10px;
   font-size: 0.9rem;
   font-family: inherit;
-  background: #fff;
+  background: var(--ambria-card);
   box-sizing: border-box;
 }
 .et-add-input:focus {
@@ -2481,7 +2497,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  background: #fff;
+  background: var(--ambria-card);
   border: 1px solid var(--ambria-border);
   border-radius: 10px;
   padding: 10px 14px;

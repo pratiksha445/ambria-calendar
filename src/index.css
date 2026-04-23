@@ -1,17 +1,18 @@
 :root {
   --ambria-bg: #FAFAF8;
-  --ambria-card: #FFFFFF;
-  --ambria-border: #E5E3DE;
+  --ambria-card: #FEFCF9;
+  --ambria-border: #E8E3DA;
   --ambria-accent: #E85D75;
   --ambria-accent-bg: #FEF0F2;
   --ambria-accent-border: #FAD6DD;
   --ambria-ink: #1A1A1A;
-  --ambria-muted: #6E6E6E;
-  --ambria-faint: #A8A8A8;
-  --ambria-chip: #F4F2ED;
+  --ambria-muted: #8A8378;
+  --ambria-faint: #B5AFA5;
+  --ambria-chip: #F5F0E8;
+  --ambria-input: #F5F0E8;
   --radius: 10px;
 
-  font-family: 'Nunito', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'DM Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   color: var(--ambria-ink);
   background: var(--ambria-bg);
   line-height: 1.5;
@@ -44,6 +45,12 @@ button {
   cursor: pointer;
 }
 
-input {
+input, select, textarea {
   font-family: inherit;
+  background: var(--ambria-input);
+}
+
+::placeholder {
+  color: var(--ambria-faint);
+  opacity: 1;
 }

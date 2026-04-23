@@ -117,13 +117,12 @@ export default function DayModal({ date, events, onClose, onAdd, onEdit, onDelet
               <option key={v.id} value={v.id}>{v.short} — {v.name}</option>
             ))}
           </select>
+          <button className="add-booking-pill" onClick={() => onAdd(date)}>
+            {t('+ Add Booking')}
+          </button>
         </div>
 
         <div className="day-modal-body">
-          <button className="add-booking-card" onClick={() => onAdd(date)}>
-            {t('+ Add Booking')}
-          </button>
-
           {filtered.length === 0 ? (
             <div className="empty-state">{t('No bookings')}</div>
           ) : (
