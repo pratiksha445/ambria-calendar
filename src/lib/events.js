@@ -23,7 +23,7 @@ export async function fetchEvents(startDate, endDate) {
  * Insert a manual event. Forces source = 'manual' — CRM rows come in via sync.
  */
 export async function createEvent(eventData, user) {
-  const payload = { ...eventData, source: 'manual' }
+  const payload = { ...eventData, source: 'manual', created_by: user?.id || null }
 
   const { data, error } = await supabase
     .from('events')

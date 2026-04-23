@@ -3,12 +3,13 @@ import { VENUE_BY_ID, SHIFT_BADGE } from '../config/venues.js'
 import { formatTime12 } from '../lib/dates.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 
-export default function EventCard({ event, expanded = false, onToggle, onEdit, onDelete }) {
+export default function EventCard({ event, expanded = false, onToggle, onEdit, onDelete, user }) {
   const { t, formatShortDate } = useLanguage()
   const venue = VENUE_BY_ID[event.venue_id]
   const shiftBadge = event.shift ? SHIFT_BADGE[event.shift] : null
   const primary = buildPrimary(event, formatShortDate)
   const [confirmDel, setConfirmDel] = useState(false)
+  const canModify = user?.role === 'admin' || (event.created_by != null && user?.id === event.created_by)
 
   useEffect(() => {
     if (!expanded) setConfirmDel(false)
@@ -72,7 +73,7 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
               </div>
             </div>
           </button>
-          {onDelete && (
+          {onDelete && canModify && (
             <button
               type="button"
               className="card-trash-btn"
@@ -143,7 +144,7 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
           {event.notes && (
             <div className="event-card-notes"><span className="k">{t('Notes')}</span> {event.notes}</div>
           )}
-          {onEdit && (
+          {onEdit && canModify && (
             <div className="event-card-actions">
               <button
                 type="button"

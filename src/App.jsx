@@ -87,7 +87,7 @@ export default function App() {
       if (!words.length) return true
       const hay = [
         ev.guest_name, ev.tender_name, ev.title, ev.venue_name,
-        ev.sales_person, ev.phone, ev.event_type, ev.sub_venue,
+        ev.sales_person, ev.event_type, ev.sub_venue,
       ].filter(Boolean).join(' ').toLowerCase()
       return words.every((w) => hay.includes(w))
     })
@@ -262,8 +262,6 @@ export default function App() {
     return <SetPinScreen user={user} onComplete={() => setNeedsPinChange(false)} />
   }
 
-  // Role-based access — both admin and staff can edit/delete events
-  const canEditDelete = true
   const canClearMonth = user.role === 'admin'
 
   const manualCount = events.filter((e) => e.source === 'manual').length
@@ -333,8 +331,9 @@ export default function App() {
                   selectedDate={selectedDate}
                   events={filteredEvents}
                   onEdit={openEdit}
-                  onDelete={canEditDelete ? handleCardDelete : null}
+                  onDelete={handleCardDelete}
                   onAdd={openNew}
+                  user={user}
                 />
               )}
             </main>
@@ -356,8 +355,9 @@ export default function App() {
         onClose={() => setDayModalDate(null)}
         onAdd={openNewFromDate}
         onEdit={(ev) => { setDayModalDate(null); openEdit(ev) }}
-        onDelete={canEditDelete ? handleCardDelete : null}
+        onDelete={handleCardDelete}
         onExport={handleExportDay}
+        user={user}
       />
       <BookingModal
         open={!!modal}
