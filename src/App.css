@@ -837,29 +837,50 @@
 }
 
 .event-card-details-inner {
-  padding: 4px 12px 12px;
+  padding: 14px 16px;
   border-top: 1px dashed var(--ambria-border);
-  display: grid;
-  gap: 4px;
-  font-size: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   color: var(--ambria-ink);
-  margin-top: 2px;
-  padding-top: 10px;
 }
+
+.event-card-details-inner .detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
 .event-card-details-inner .k {
-  display: inline-block;
-  min-width: 74px;
-  color: var(--ambria-muted);
-  font-weight: 700;
-  font-size: 0.64rem;
+  font-size: 11px;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
+  color: var(--ambria-muted);
+  flex-shrink: 0;
+}
+
+.event-card-details-inner .v {
+  font-size: 14px;
+  font-weight: 500;
+  text-align: right;
+  color: var(--ambria-ink);
 }
 
 .event-card-notes {
-  font-size: 0.82rem;
+  margin-top: 8px;
+}
+.event-card-notes .k {
+  display: block;
+  margin-bottom: 4px;
+}
+.event-card-notes .v {
+  display: block;
+  text-align: left;
   font-style: italic;
   color: var(--ambria-muted);
+  font-size: 13px;
 }
 
 /* ---------- Desktop ---------- */
@@ -1512,7 +1533,7 @@
 }
 
 .event-card-actions {
-  margin-top: 6px;
+  margin-top: 12px;
   display: flex;
   justify-content: flex-end;
   gap: 6px;
@@ -1568,9 +1589,14 @@
 
 .event-detail-location {
   display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+.event-detail-location .v {
+  display: inline-flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 0;
+  gap: 4px;
 }
 
 .event-delete-btn {

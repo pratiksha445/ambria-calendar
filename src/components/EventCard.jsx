@@ -95,54 +95,73 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
       <div className="event-card-details" aria-hidden={!expanded}>
         <div className="event-card-details-inner">
           {event.sub_venue && (
-            <div><span className="k">{t('Sub-venue')}</span> {event.sub_venue}</div>
+            <div className="detail-row"><span className="k">{t('Sub-venue')}</span><span className="v">{event.sub_venue}</span></div>
           )}
           {event.venue_name && (
-            <div><span className="k">{t('Venue')}</span> {event.venue_name}</div>
+            <div className="detail-row"><span className="k">{t('Venue')}</span><span className="v">{event.venue_name}</span></div>
           )}
           {event.venue_type && (
-            <div><span className="k">{t('Type')}</span> {t(event.venue_type)}</div>
+            <div className="detail-row"><span className="k">{t('Type')}</span><span className="v">{t(event.venue_type)}</span></div>
           )}
           {event.location && (
-            <div className="event-detail-location">
+            <div className="detail-row event-detail-location">
               <span className="k">{t('Location')}</span>
-              <span>{event.location}</span>
-              <a
-                href={getMapsUrl(event.location)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="map-pin-btn inline"
-                aria-label="Open in Google Maps"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                  <circle cx="12" cy="10" r="3" />
-                </svg>
-              </a>
+              <span className="v">
+                {event.location}
+                <a
+                  href={getMapsUrl(event.location)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="map-pin-btn inline"
+                  aria-label="Open in Google Maps"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                    <circle cx="12" cy="10" r="3" />
+                  </svg>
+                </a>
+              </span>
             </div>
           )}
           {(event.guest_name || event.tender_name) && (
-            <div><span className="k">{t('Guest')}</span> {event.guest_name || event.tender_name}</div>
+            <div className="detail-row"><span className="k">{t('Guest')}</span><span className="v">{event.guest_name || event.tender_name}</span></div>
           )}
-          {event.pax && <div><span className="k">{t('Pax')}</span> {event.pax}</div>}
+          {event.pax && (
+            <div className="detail-row"><span className="k">{t('Pax')}</span><span className="v">{event.pax}</span></div>
+          )}
           {event.sales_person && (
-            <div><span className="k">{t('Sales')}</span> {event.sales_person}</div>
+            <div className="detail-row"><span className="k">{t('Sales')}</span><span className="v">{event.sales_person}</span></div>
           )}
           {event.booking_status && (
-            <div><span className="k">{t('Booking Status')}</span> {t(event.booking_status)}</div>
+            <div className="detail-row"><span className="k">{t('Booking Status')}</span><span className="v">{t(event.booking_status)}</span></div>
           )}
           {event.fp_status && (
-            <div><span className="k">{t('FP Status')}</span> {t(event.fp_status)}</div>
+            <div className="detail-row"><span className="k">{t('FP Status')}</span><span className="v">{t(event.fp_status)}</span></div>
           )}
           {event.menu_type && (
-            <div><span className="k">{t('Menu Type')}</span> {t(event.menu_type)}</div>
+            <div className="detail-row"><span className="k">{t('Menu Type')}</span><span className="v">{t(event.menu_type)}</span></div>
+          )}
+          {event.menu_cat && (
+            <div className="detail-row"><span className="k">{t('Menu Category')}</span><span className="v">{event.menu_cat}</span></div>
+          )}
+          {event.decor_type && (
+            <div className="detail-row"><span className="k">{t('Decor Type')}</span><span className="v">{event.decor_type}</span></div>
+          )}
+          {event.pool_included && (
+            <div className="detail-row"><span className="k">{t('Pool Included')}</span><span className="v">{t(event.pool_included)}</span></div>
+          )}
+          {event.meal_included && (
+            <div className="detail-row"><span className="k">{t('Meal Included')}</span><span className="v">{t(event.meal_included)}</span></div>
+          )}
+          {event.added_service && (
+            <div className="detail-row"><span className="k">{t('Added Service')}</span><span className="v">{event.added_service}</span></div>
           )}
           {event.status && (
-            <div><span className="k">{t('Status')}</span> {t(event.status)}</div>
+            <div className="detail-row"><span className="k">{t('Status')}</span><span className="v">{t(event.status)}</span></div>
           )}
           {event.notes && (
-            <div className="event-card-notes"><span className="k">{t('Notes')}</span> {event.notes}</div>
+            <div className="event-card-notes"><span className="k">{t('Notes')}</span><span className="v">{event.notes}</span></div>
           )}
           {onEdit && canModify && (
             <div className="event-card-actions">
