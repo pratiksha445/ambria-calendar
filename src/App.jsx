@@ -303,6 +303,7 @@ export default function App() {
               onAdd={openNew}
               onExport={handleExport}
               onClearMonth={canClearMonth ? handleClearMonth : null}
+              onSettings={() => showToast(t('Coming soon'))}
             />
             <main className="app-body">
               {error && <div className="error-banner">{error}</div>}

@@ -100,7 +100,7 @@
 .header-menu-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 5;
+  z-index: 99;
 }
 .header-menu-dropdown {
   position: absolute;
@@ -108,19 +108,23 @@
   right: 0;
   background: var(--ambria-card);
   border: 1px solid var(--ambria-border);
-  border-radius: 8px;
+  border-radius: 10px;
   box-shadow: var(--ambria-shadow-dropdown);
-  z-index: 6;
+  z-index: 100;
   padding: 4px;
-  min-width: 140px;
+  min-width: 180px;
 }
 .header-menu-item {
   appearance: none;
   border: none;
   background: transparent;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   width: 100%;
   text-align: left;
-  padding: 8px 12px;
+  padding: 12px 16px;
+  height: 44px;
   font-size: 0.85rem;
   font-weight: 600;
   border-radius: 6px;
@@ -2766,7 +2770,7 @@ input, select, textarea {
 @media (max-width: 420px) {
   .book-btn-label { display: none; }
   .book-btn { padding: 8px 12px; }
-  .header-row { gap: 4px; overflow: hidden; }
+  .header-row { gap: 4px; }
   .header-title { gap: 2px; min-width: 0; }
   .month-label { font-size: 0.95rem; min-width: 100px; }
   .icon-btn.sm { padding: 4px; }

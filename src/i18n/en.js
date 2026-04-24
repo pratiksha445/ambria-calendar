@@ -35,6 +35,8 @@ const en = {
   // ── Header ──
   'Book': 'Book',
   'Clear Month': 'Clear Month',
+  'Settings': 'Settings',
+  'Coming soon': 'Coming soon',
   'Day': 'Day',
   'Week': 'Week',
   'Month': 'Month',
