@@ -2743,6 +2743,217 @@
 }
 
 /* ============================================================
+ * Category Management
+ * ============================================================ */
+
+.cat-add-top {
+  width: auto;
+  padding: 8px 16px;
+  flex-shrink: 0;
+  font-size: 0.85rem;
+}
+
+.cat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cat-card {
+  background: var(--ambria-card);
+  border: 1px solid var(--ambria-border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  transition: opacity 0.15s ease;
+}
+.cat-card:hover { box-shadow: var(--ambria-shadow-card); }
+.cat-card.inactive { opacity: 0.5; }
+
+.cat-card-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cat-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+  min-width: 36px;
+  text-align: center;
+}
+
+.cat-info {
+  flex: 1;
+  min-width: 0;
+}
+.cat-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ambria-ink);
+  display: block;
+}
+.cat-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+}
+.cat-type-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ambria-muted);
+  background: var(--ambria-chip);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.cat-sub-count {
+  font-size: 0.75rem;
+  color: var(--ambria-muted);
+}
+
+.cat-subvenue-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--ambria-border);
+}
+.cat-subvenue-tag {
+  font-size: 0.72rem;
+  background: var(--ambria-chip);
+  color: var(--ambria-muted);
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+/* Category form modal */
+.cat-form-card {
+  position: relative;
+  z-index: 51;
+  background: var(--ambria-card);
+  border-radius: 14px;
+  padding: 24px;
+  width: 90%;
+  max-width: 480px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: var(--ambria-shadow-dialog);
+}
+.cat-form-card h3 {
+  margin: 0 0 16px;
+  font-size: 1.1rem;
+  color: var(--ambria-ink);
+}
+
+.cat-form-row {
+  margin-bottom: 14px;
+}
+.cat-form-row label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ambria-muted);
+  margin-bottom: 4px;
+}
+.cat-form-row input[type="text"],
+.cat-form-row select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--ambria-border);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: var(--ambria-ink);
+  background: var(--ambria-input);
+}
+.cat-form-row input:focus,
+.cat-form-row select:focus {
+  outline: none;
+  border-color: var(--ambria-accent);
+  box-shadow: var(--ambria-focus-ring);
+}
+
+.cat-color-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.cat-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+  appearance: none;
+  padding: 0;
+}
+.cat-swatch.active {
+  border-color: var(--ambria-ink);
+  transform: scale(1.15);
+}
+.cat-swatch:hover:not(.active) {
+  border-color: var(--ambria-muted);
+}
+.cat-custom-color {
+  width: 120px !important;
+  font-family: monospace !important;
+  font-size: 0.82rem !important;
+}
+
+.cat-subvenues {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.cat-subvenue-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.cat-subvenue-row input {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1px solid var(--ambria-border);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-family: inherit;
+  color: var(--ambria-ink);
+  background: var(--ambria-input);
+}
+
+.cat-toggle-label {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.cat-toggle-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--ambria-accent);
+}
+
+.cat-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+/* ============================================================
  * Name row — first + last name side by side
  * ============================================================ */
 

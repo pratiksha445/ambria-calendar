@@ -375,6 +375,28 @@ const hi = {
   'Deactivated': 'निष्क्रिय किया गया',
   'Activated': 'सक्रिय किया गया',
   'PIN reset to 0000': 'PIN 0000 पर रीसेट',
+
+  // ── श्रेणी प्रबंधन ──
+  'Manage Categories': 'श्रेणी प्रबंधन',
+  'Add Category': 'श्रेणी जोड़ें',
+  'Edit Category': 'श्रेणी संपादित करें',
+  'Short Code': 'शॉर्ट कोड',
+  'Name': 'नाम',
+  'Color': 'रंग',
+  'Category Type': 'श्रेणी प्रकार',
+  'Sub-Venues': 'उप-वेन्यू',
+  'Sub-venue name': 'उप-वेन्यू नाम',
+  'Add Sub-Venue': 'उप-वेन्यू जोड़ें',
+  'Active': 'सक्रिय',
+  'Search categories…': 'श्रेणियाँ खोजें…',
+  'Category added': 'श्रेणी जोड़ी गई',
+  'Category updated': 'श्रेणी अपडेट की गई',
+  'Category deleted': 'श्रेणी हटाई गई',
+  'Category ID already exists': 'श्रेणी ID पहले से मौजूद है',
+  'No categories found': 'कोई श्रेणी नहीं मिली',
+  'No matching categories': 'कोई मिलती श्रेणी नहीं',
+  'Search event types…': 'इवेंट प्रकार खोजें…',
+  'No matching event types': 'कोई मिलता इवेंट प्रकार नहीं',
 }
 
 export default hi

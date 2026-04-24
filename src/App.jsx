@@ -13,15 +13,16 @@ import ChangePinModal from './components/ChangePinModal.jsx'
 import UserManagement from './components/UserManagement.jsx'
 import AuditLog from './components/AuditLog.jsx'
 import EventTypeManagement from './components/EventTypeManagement.jsx'
+import CategoryManagement from './components/CategoryManagement.jsx'
 import { fetchEvents, deleteEvent, bulkDeleteMonth } from './lib/events.js'
 import { seedIfEmpty } from './lib/seedEvents.js'
 import { startOfMonth, endOfMonth, toIsoDate, addDays } from './lib/dates.js'
-import { VENUES } from './config/venues.js'
+import { VENUES, applyDynamic } from './config/venues.js'
+import { fetchActiveCategories } from './lib/categories.js'
 import { logAction } from './lib/audit.js'
 import { useLanguage } from './i18n/LanguageContext.jsx'
 import './App.css'
 
-const ALL_VENUE_IDS = VENUES.map((v) => v.id)
 const ALL_SOURCES = ['crm', 'manual']
 
 function getStoredUser() {
@@ -40,8 +41,9 @@ export default function App() {
   const [view, setView] = useState('month')
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [events, setEvents] = useState([])
-  const [activeFilters, setActiveFilters] = useState(() => new Set(ALL_VENUE_IDS))
+  const [activeFilters, setActiveFilters] = useState(() => new Set(VENUES.map((v) => v.id)))
   const [activeSources, setActiveSources] = useState(() => new Set(ALL_SOURCES))
+  const [venueKey, setVenueKey] = useState(0)
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -53,6 +55,20 @@ export default function App() {
   const [changePinOpen, setChangePinOpen] = useState(false)
   const [dayModalDate, setDayModalDate] = useState(null)
   const [exportModal, setExportModal] = useState(null) // null | { from, to }
+
+  // Load dynamic categories from Supabase — falls back to hardcoded defaults on failure
+  useEffect(() => {
+    if (!user) return
+    fetchActiveCategories()
+      .then((rows) => {
+        if (rows.length > 0) {
+          applyDynamic(rows)
+          setActiveFilters(new Set(VENUES.map((v) => v.id)))
+          setVenueKey((k) => k + 1)
+        }
+      })
+      .catch(() => {/* offline — keep hardcoded defaults */})
+  }, [user])
 
   useEffect(() => {
     if (!user) return
@@ -145,7 +161,7 @@ export default function App() {
     })
   }
 
-  const selectAllVenues = () => setActiveFilters(new Set(ALL_VENUE_IDS))
+  const selectAllVenues = () => setActiveFilters(new Set(VENUES.map((v) => v.id)))
   const selectNoVenues = () => setActiveFilters(new Set())
 
   const handleSelectDate = (d) => {
@@ -348,6 +364,9 @@ export default function App() {
         )}
         {currentView === 'event-types' && user.role === 'admin' && (
           <EventTypeManagement currentUser={user} showToast={showToast} onMenu={() => setSidebarOpen(true)} />
+        )}
+        {currentView === 'categories' && user.role === 'admin' && (
+          <CategoryManagement currentUser={user} showToast={showToast} onMenu={() => setSidebarOpen(true)} />
         )}
       </div>
       <DayModal

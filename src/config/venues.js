@@ -1,82 +1,38 @@
 // Venue / category configuration — mirrors ambria-knowledge-base.md §1.
-// Edit here to change colors, names, or sub-venue lists across the app.
+// Hardcoded defaults used as fallback when the Supabase categories table
+// is unreachable.  At runtime, App.jsx calls applyDynamic() to replace
+// these with live data.  Because VENUES and VENUE_BY_ID are mutated
+// in-place, every module that imports them sees the update automatically.
 
 export const VENUES = [
-  {
-    id: 'ap',
-    name: 'Ambria Pushpanjali',
-    short: 'AP',
-    color: '#E0C84E',
-    textColor: '#fff',
-    subVenues: ['Whole Venue', 'Amber Lawn', 'Banquet'],
-  },
-  {
-    id: 'am',
-    name: 'Ambria Manaktala',
-    short: 'AM',
-    color: '#E08E45',
-    textColor: '#fff',
-    subVenues: ['Full Venue', 'Emerald Lawn', 'Banquet', 'Alstonia Lawn', 'Banana Lawn'],
-  },
-  {
-    id: 'ae',
-    name: 'Ambria Exotica',
-    short: 'AE',
-    color: '#B08560',
-    textColor: '#fff',
-    subVenues: ['Aura', 'Aura Banquet', 'Valencia', 'Valencia Banquet', 'Poolside'],
-  },
-  {
-    id: 'ar',
-    name: 'Ambria Restro',
-    short: 'AR',
-    color: '#6088B5',
-    textColor: '#fff',
-    subVenues: ['Whole Venue', 'Glasshouse', 'Lawn', 'Rooftop'],
-  },
-  {
-    id: 'villa',
-    name: 'Villa',
-    short: 'Villa',
-    color: '#9A6BBE',
-    textColor: '#fff',
-    subVenues: ['AP Kothi', 'AM Kothi', 'AE Kothi'],
-  },
-  {
-    id: 'add',
-    name: 'Ambria Design & Decor',
-    short: 'ADD',
-    color: '#5FA8C4',
-    textColor: '#fff',
-    subVenues: [],
-  },
-  {
-    id: 'ac',
-    name: 'Ambria Cuisine',
-    short: 'AC',
-    color: '#D8728A',
-    textColor: '#fff',
-    subVenues: [],
-  },
-  {
-    id: 'aee',
-    name: 'Ambria Events',
-    short: 'AEE',
-    color: '#AD7EA5',
-    textColor: '#fff',
-    subVenues: [],
-  },
-  {
-    id: 'tender',
-    name: 'Tender',
-    short: 'TND',
-    color: '#68B078',
-    textColor: '#fff',
-    subVenues: [],
-  },
+  { id: 'ap',     name: 'Ambria Pushpanjali',    short: 'AP',    color: '#E0C84E', textColor: '#fff', subVenues: ['Whole Venue', 'Amber Lawn', 'Banquet'] },
+  { id: 'am',     name: 'Ambria Manaktala',      short: 'AM',    color: '#E08E45', textColor: '#fff', subVenues: ['Full Venue', 'Emerald Lawn', 'Banquet', 'Alstonia Lawn', 'Banana Lawn'] },
+  { id: 'ae',     name: 'Ambria Exotica',        short: 'AE',    color: '#B08560', textColor: '#fff', subVenues: ['Aura', 'Aura Banquet', 'Valencia', 'Valencia Banquet', 'Poolside'] },
+  { id: 'ar',     name: 'Ambria Restro',         short: 'AR',    color: '#6088B5', textColor: '#fff', subVenues: ['Whole Venue', 'Glasshouse', 'Lawn', 'Rooftop'] },
+  { id: 'villa',  name: 'Villa',                 short: 'Villa', color: '#9A6BBE', textColor: '#fff', subVenues: ['AP Kothi', 'AM Kothi', 'AE Kothi'] },
+  { id: 'add',    name: 'Ambria Design & Decor', short: 'ADD',   color: '#5FA8C4', textColor: '#fff', subVenues: [] },
+  { id: 'ac',     name: 'Ambria Cuisine',        short: 'AC',    color: '#D8728A', textColor: '#fff', subVenues: [] },
+  { id: 'aee',    name: 'Ambria Events',         short: 'AEE',   color: '#AD7EA5', textColor: '#fff', subVenues: [] },
+  { id: 'tender', name: 'Tender',                short: 'TND',   color: '#68B078', textColor: '#fff', subVenues: [] },
 ]
 
 export const VENUE_BY_ID = Object.fromEntries(VENUES.map((v) => [v.id, v]))
+
+/** Replace VENUES & VENUE_BY_ID in-place with rows fetched from the DB */
+export function applyDynamic(dbRows) {
+  const mapped = dbRows.map((r) => ({
+    id: r.venue_id,
+    name: r.name,
+    short: r.short_code,
+    color: r.color,
+    textColor: '#fff',
+    subVenues: r.sub_venues ?? [],
+  }))
+  VENUES.length = 0
+  VENUES.push(...mapped)
+  Object.keys(VENUE_BY_ID).forEach((k) => delete VENUE_BY_ID[k])
+  Object.assign(VENUE_BY_ID, Object.fromEntries(VENUES.map((v) => [v.id, v])))
+}
 
 // Shift badge colors — M=morning yellow, L=lunch orange, S=sundowner purple, D=dinner blue
 export const SHIFT_BADGE = {

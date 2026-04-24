@@ -375,6 +375,28 @@ const en = {
   'Deactivated': 'Deactivated',
   'Activated': 'Activated',
   'PIN reset to 0000': 'PIN reset to 0000',
+
+  // ── Category management ──
+  'Manage Categories': 'Manage Categories',
+  'Add Category': 'Add Category',
+  'Edit Category': 'Edit Category',
+  'Short Code': 'Short Code',
+  'Name': 'Name',
+  'Color': 'Color',
+  'Category Type': 'Category Type',
+  'Sub-Venues': 'Sub-Venues',
+  'Sub-venue name': 'Sub-venue name',
+  'Add Sub-Venue': 'Add Sub-Venue',
+  'Active': 'Active',
+  'Search categories…': 'Search categories…',
+  'Category added': 'Category added',
+  'Category updated': 'Category updated',
+  'Category deleted': 'Category deleted',
+  'Category ID already exists': 'Category ID already exists',
+  'No categories found': 'No categories found',
+  'No matching categories': 'No matching categories',
+  'Search event types…': 'Search event types…',
+  'No matching event types': 'No matching event types',
 }
 
 export default en
