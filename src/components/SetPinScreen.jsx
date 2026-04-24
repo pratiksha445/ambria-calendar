@@ -55,7 +55,7 @@ function PinBoxes({ value, onChange, shake, label }) {
 }
 
 export default function SetPinScreen({ user, onComplete }) {
-  const { t } = useLanguage()
+  const { t, theme } = useLanguage()
   const [newPin, setNewPin] = useState(['', '', '', ''])
   const [confirmPin, setConfirmPin] = useState(['', '', '', ''])
   const [error, setError] = useState(null)
@@ -99,7 +99,7 @@ export default function SetPinScreen({ user, onComplete }) {
     <div className="login-screen">
       <form className="login-card set-pin-card" onSubmit={handleSubmit} noValidate>
         <div className="login-brand">
-          <img src={import.meta.env.BASE_URL + 'logo.png'} alt="Ambria" className="login-logo" />
+          <img src={import.meta.env.BASE_URL + (theme === 'dark' ? 'dark theme logo.png' : 'logo.png')} alt="Ambria" className="login-logo" />
         </div>
 
         <div className="set-pin-message">

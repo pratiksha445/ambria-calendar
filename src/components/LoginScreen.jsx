@@ -5,7 +5,7 @@ import { logAction } from '../lib/audit.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 
 export default function LoginScreen({ onLogin }) {
-  const { t, lang, setLang } = useLanguage()
+  const { t, lang, setLang, theme } = useLanguage()
   const [mode, setMode] = useState('login') // 'login' | 'signup' | 'success'
   const [phoneCode, setPhoneCode] = useState('+91')
   const [phone, setPhone] = useState('')
@@ -176,7 +176,7 @@ export default function LoginScreen({ onLogin }) {
         noValidate
       >
         <div className="login-brand">
-          <img src={import.meta.env.BASE_URL + 'logo.png'} alt="Ambria" className="login-logo" />
+          <img src={import.meta.env.BASE_URL + (theme === 'dark' ? 'dark theme logo.png' : 'logo.png')} alt="Ambria" className="login-logo" />
           <div className="lang-toggle">
             <button className={`lang-btn ${lang === 'en' ? 'active' : ''}`} onClick={() => setLang('en')}>EN</button>
             <span className="lang-sep">|</span>
