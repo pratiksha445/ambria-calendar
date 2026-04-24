@@ -51,7 +51,7 @@ export default function Sidebar({
       >
         <div className="sidebar-header">
           <div className="brand">
-            <img src={import.meta.env.BASE_URL + (theme === 'dark' ? 'dark theme logo.png' : 'logo.png')} alt="Ambria" className="sidebar-logo" />
+            <img src={import.meta.env.BASE_URL + (theme === 'dark' ? 'logo-dark.png' : 'logo.png')} alt="Ambria" className="sidebar-logo" />
             <div className="lang-toggle">
               <button className={`lang-btn ${lang === 'en' ? 'active' : ''}`} onClick={() => setLang('en')}>EN</button>
               <span className="lang-sep">|</span>
