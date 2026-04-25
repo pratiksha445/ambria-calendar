@@ -71,6 +71,18 @@ export default function Field({ field, form, value, onChange, error, readOnly })
     control = <input type="date" {...commonProps} />
   } else if (field.type === 'time') {
     control = <input type="time" {...commonProps} />
+  } else if (field.suffix) {
+    control = (
+      <div className="field-with-suffix">
+        <input
+          type="text"
+          {...commonProps}
+          placeholder={field.placeholder ? t(field.placeholder) : ''}
+          inputMode={field.inputMode}
+        />
+        <span className="field-suffix">{field.suffix}</span>
+      </div>
+    )
   } else if (field.mapLink) {
     control = (
       <div className="field-with-pin">

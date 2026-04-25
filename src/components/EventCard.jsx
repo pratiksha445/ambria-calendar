@@ -1,7 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { VENUE_BY_ID, SHIFT_BADGE } from '../config/venues.js'
 import { formatTime12 } from '../lib/dates.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
+
+const OWN_VENUES = new Set(['ap', 'am', 'ae', 'ar'])
 
 export default function EventCard({ event, expanded = false, onToggle, onEdit, onDelete, user }) {
   const { t, formatShortDate } = useLanguage()
@@ -10,9 +13,13 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
   const primary = buildPrimary(event, formatShortDate, t)
   const [confirmDel, setConfirmDel] = useState(false)
   const canModify = user?.role === 'admin' || (event.created_by != null && user?.id === event.created_by)
+  const isOwnVenue = OWN_VENUES.has(event.venue_id)
+  const [showTimePopup, setShowTimePopup] = useState(false)
+  const [popupPos, setPopupPos] = useState({ top: 0, left: 0 })
 
   useEffect(() => {
     if (!expanded) setConfirmDel(false)
+    setShowTimePopup(false)
   }, [expanded])
 
   const startDel = (e) => { e.stopPropagation(); setConfirmDel(true) }
@@ -21,6 +28,13 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
     e.stopPropagation()
     onDelete?.(event)
     setConfirmDel(false)
+  }
+
+  const openTimePopup = (e) => {
+    e.stopPropagation()
+    const rect = e.currentTarget.getBoundingClientRect()
+    setPopupPos({ top: rect.bottom + 4, left: Math.max(8, rect.left - 40) })
+    setShowTimePopup((prev) => !prev)
   }
 
   return (
@@ -54,9 +68,13 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
             <div className="event-card-stack">
               <span className="event-primary">{primary}</span>
               <div className="event-card-meta">
-                {event.time && (
+                {event.time && isOwnVenue ? (
+                  <span className="event-time event-time-tap" onClick={openTimePopup}>
+                    {formatTime12(event.time)}
+                  </span>
+                ) : event.time ? (
                   <span className="event-time">{formatTime12(event.time)}</span>
-                )}
+                ) : null}
                 {shiftBadge && (
                   <span className="shift-badge" style={{ background: shiftBadge.color }}>
                     {t(`shift_short_${event.shift}`)}
@@ -90,6 +108,25 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
             </button>
           )}
         </div>
+      )}
+
+      {showTimePopup && isOwnVenue && createPortal(
+        <>
+          <div className="time-popup-backdrop" onClick={() => setShowTimePopup(false)} />
+          <div
+            className="time-popup"
+            style={{ top: popupPos.top, left: popupPos.left }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="time-popup-row"><span className="time-popup-label">{t('Assembly')}</span><span>{formatTime12(event.time) || '\u2014'}</span></div>
+            <div className="time-popup-row"><span className="time-popup-label">{t('Decor')}</span><span>{formatTime12(event.decor_time) || '\u2014'}</span></div>
+            <div className="time-popup-row"><span className="time-popup-label">{t('Chaat')}</span><span>{formatTime12(event.chaat_time) || '\u2014'}</span></div>
+            <div className="time-popup-row"><span className="time-popup-label">{t('Baraat')}</span><span>{formatTime12(event.baraat_time) || '\u2014'}</span></div>
+            <div className="time-popup-row"><span className="time-popup-label">{t('Varmala')}</span><span>{formatTime12(event.varmala_time) || '\u2014'}</span></div>
+            <div className="time-popup-row"><span className="time-popup-label">{t('Pheras')}</span><span>{formatTime12(event.pheras_time) || '\u2014'}</span></div>
+          </div>
+        </>,
+        document.body
       )}
 
       <div className="event-card-details" aria-hidden={!expanded}>
@@ -148,6 +185,35 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
           {event.decor_type && (
             <div className="detail-row"><span className="k">{t('Decor Type')}</span><span className="v">{t(event.decor_type)}</span></div>
           )}
+          {event.decor_status && (
+            <div className="detail-row"><span className="k">{t('Decor Status')}</span><span className="v">{t(event.decor_status)}</span></div>
+          )}
+          {event.entertainment_status && (
+            <div className="detail-row"><span className="k">{t('Entertainment')}</span><span className="v">{t(event.entertainment_status)}</span></div>
+          )}
+          {event.function_category && (
+            <div className="detail-row"><span className="k">{t('Function Cat')}</span><span className="v">{t(event.function_category)}</span></div>
+          )}
+          {event.delivery_person && (
+            <div className="detail-row"><span className="k">{t('Delivery')}</span><span className="v">{event.delivery_person}</span></div>
+          )}
+          {(event.payment_remaining != null && event.payment_remaining !== '') && (
+            <div className="detail-row detail-payment">
+              <span className="k">{t('Payment')}</span>
+              <div className="v payment-val">
+                <span>{event.payment_remaining}%</span>
+                <div className="payment-bar">
+                  <div
+                    className={`payment-bar-fill ${getPaymentColor(event.payment_remaining)}`}
+                    style={{ width: `${event.payment_remaining}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+          {event.payment_timing && (
+            <div className="detail-row"><span className="k">{t('Payment Timing')}</span><span className="v">{t(event.payment_timing)}</span></div>
+          )}
           {event.pool_included && (
             <div className="detail-row"><span className="k">{t('Pool Included')}</span><span className="v">{t(event.pool_included)}</span></div>
           )}
@@ -178,6 +244,13 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
       </div>
     </article>
   )
+}
+
+function getPaymentColor(pct) {
+  const n = Number(pct)
+  if (n <= 30) return 'payment-green'
+  if (n <= 60) return 'payment-yellow'
+  return 'payment-red'
 }
 
 function buildPrimary(event, formatShortDate, t) {

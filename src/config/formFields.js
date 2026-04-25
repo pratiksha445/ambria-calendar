@@ -29,6 +29,10 @@ export const MENU_TYPES = ['Veg', 'Non-Veg', 'Jain', 'Chaat']
 export const MENU_CATS = ['MV', 'MNV', 'DMV', 'DMNV', 'MCV', 'MCNV', 'LV', 'LNV', 'Customised']
 export const FP_STATUSES = ['Released', 'Delayed by guest', 'Not Released']
 export const DECOR_TYPES = ['Silver', 'Gold', 'Premium']
+export const DECOR_STATUSES = ['Open', 'Meeting', 'Closure', 'Outdoor']
+export const ENTERTAINMENT_STATUSES = ['Open', 'Meeting', 'Closure', 'Outdoor']
+export const FUNCTION_CATEGORIES = ['Silver', 'Gold', 'Platinum']
+export const PAYMENT_TIMINGS = ['Before Event', 'On the Day', 'After Event']
 export const VENUE_TYPES = ['Lawn', 'Banquet', 'Lawn + Bqt', 'Poolside']
 export const POOL_OPTIONS = ['Yes', 'No']
 export const MEAL_OPTIONS = [
@@ -86,6 +90,13 @@ const TA = (label, key, required = false, extra = {}) =>
 const nameFilter = (v) => v.replace(/[^a-zA-Z\s.']/g, '')
 const phoneFilter = (v) => v.replace(/[^\d\s]/g, '')
 const paxFilter = (v) => v.replace(/\D/g, '')
+const percentFilter = (v) => {
+  const stripped = v.replace(/\D/g, '')
+  if (stripped === '') return ''
+  const n = parseInt(stripped, 10)
+  if (n > 100) return '100'
+  return String(n)
+}
 const venueNameFilter = (v) => v.replace(/[^a-zA-Z0-9\s.,\-'&()#]/g, '')
 
 // ---------- Conditional helpers ----------
@@ -152,7 +163,18 @@ function ownVenueSections(venue, dynamicTypes) {
     },
     {
       title: 'Date & Time',
-      fields: [D('Date', 'date'), TM('Time', 'time')],
+      fields: [D('Date', 'date')],
+    },
+    {
+      title: 'Event Schedule',
+      fields: [
+        TM('Assembly Time', 'time'),
+        TM('Decor Time', 'decor_time'),
+        TM('Chaat Time', 'chaat_time'),
+        TM('Baraat Time', 'baraat_time'),
+        TM('Varmala Time', 'varmala_time'),
+        TM('Pheras Time', 'pheras_time'),
+      ],
     },
     {
       title: 'Booking',
@@ -161,6 +183,22 @@ function ownVenueSections(venue, dynamicTypes) {
         S('Menu Type', 'menu_type', MENU_TYPES, true, { disabledWhen: notVMD }),
         S('Menu Category', 'menu_cat', MENU_CATS, true, { disabledWhen: notVMD }),
         S('FP', 'fp_status', FP_STATUSES, true, { disabledWhen: notVMD }),
+      ],
+    },
+    {
+      title: 'Operations',
+      fields: [
+        S('Decor Status', 'decor_status', DECOR_STATUSES),
+        S('Entertainment Status', 'entertainment_status', ENTERTAINMENT_STATUSES),
+        S('Function Category', 'function_category', FUNCTION_CATEGORIES),
+        T('Delivery Person', 'delivery_person', true, {
+          filterFn: nameFilter, filterError: 'Only letters allowed',
+        }),
+        T('Payment Remaining', 'payment_remaining', true, {
+          filterFn: percentFilter, filterError: 'Only numbers 0-100',
+          suffix: '%', inputMode: 'numeric',
+        }),
+        S('Payment Timing', 'payment_timing', PAYMENT_TIMINGS),
       ],
     },
     {
@@ -363,7 +401,10 @@ function tenderSections(_venue, _dynamicTypes) {
 
 const VENUE_FIELD_KEYS = [
   'sub_venue', 'event_type', 'event_type_other', 'shift', 'date', 'time',
+  'decor_time', 'chaat_time', 'baraat_time', 'varmala_time', 'pheras_time',
   'booking_status', 'menu_type', 'menu_cat', 'fp_status',
+  'decor_status', 'entertainment_status', 'function_category',
+  'delivery_person', 'payment_remaining', 'payment_timing',
   'guest_name', 'phone', 'pax', 'sales_person', 'notes',
 ]
 
@@ -401,7 +442,10 @@ export const FIELD_MAP = {
 // Union of every saveable field key — used to null-out irrelevant columns.
 export const ALL_SAVEABLE_KEYS = [
   'sub_venue', 'event_type', 'event_type_other', 'shift', 'date', 'time',
+  'decor_time', 'chaat_time', 'baraat_time', 'varmala_time', 'pheras_time',
   'booking_status', 'menu_type', 'menu_cat', 'fp_status',
+  'decor_status', 'entertainment_status', 'function_category',
+  'delivery_person', 'payment_remaining', 'payment_timing',
   'guest_name', 'phone', 'pax', 'sales_person', 'notes',
   'check_in_date', 'check_out_date', 'check_in_time', 'check_out_time',
   'pool_included', 'meal_included', 'added_service',

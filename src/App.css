@@ -842,7 +842,7 @@
   transition: max-height 200ms ease;
 }
 .event-card.expanded .event-card-details {
-  max-height: 400px;
+  max-height: 700px;
 }
 
 .event-card-details-inner {
@@ -890,6 +890,94 @@
   font-style: italic;
   color: var(--ambria-muted);
   font-size: 13px;
+}
+
+/* Time popup — tappable schedule overlay */
+.event-time-tap {
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 2px;
+}
+
+.time-popup-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+}
+
+.time-popup {
+  position: fixed;
+  z-index: 201;
+  background: var(--ambria-card);
+  border: 1px solid var(--ambria-border);
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.12);
+  padding: 10px 14px;
+  min-width: 180px;
+  max-width: 240px;
+}
+.time-popup-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+  font-size: 13px;
+  color: var(--ambria-ink);
+}
+.time-popup-row + .time-popup-row {
+  border-top: 1px solid var(--ambria-border);
+}
+.time-popup-label {
+  font-weight: 600;
+  color: var(--ambria-muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Payment progress bar */
+.detail-payment .payment-val {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+.payment-bar {
+  width: 80px;
+  height: 5px;
+  background: var(--ambria-border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.payment-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width .2s ease;
+}
+.payment-bar-fill.payment-green { background: #22c55e; }
+.payment-bar-fill.payment-yellow { background: #f59e0b; }
+.payment-bar-fill.payment-red { background: #ef4444; }
+
+/* Suffix input (e.g. % label) */
+.field-with-suffix {
+  display: flex;
+  align-items: stretch;
+  position: relative;
+}
+.field-with-suffix input {
+  flex: 1;
+  padding-right: 32px !important;
+}
+.field-suffix {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ambria-muted);
+  pointer-events: none;
 }
 
 /* ---------- Desktop ---------- */

@@ -7,7 +7,7 @@ import { VENUE_BY_ID } from '../config/venues.js'
  */
 const COLUMNS = [
   { key: 'date', header: 'Date' },
-  { key: 'time', header: 'Time' },
+  { key: 'time', header: 'Assembly Time' },
   { key: '_category', header: 'Category' },
   { key: 'sub_venue', header: 'Sub-Venue' },
   { key: 'title', header: 'Title' },
@@ -22,6 +22,17 @@ const COLUMNS = [
   { key: 'menu_type', header: 'Menu Type' },
   { key: 'menu_cat', header: 'Menu Category' },
   { key: 'fp_status', header: 'FP Status' },
+  { key: 'decor_status', header: 'Decor Status' },
+  { key: 'entertainment_status', header: 'Entertainment Status' },
+  { key: 'function_category', header: 'Function Category' },
+  { key: 'delivery_person', header: 'Delivery Person' },
+  { key: 'payment_remaining', header: 'Payment Remaining' },
+  { key: 'payment_timing', header: 'Payment Timing' },
+  { key: 'decor_time', header: 'Decor Time' },
+  { key: 'chaat_time', header: 'Chaat Time' },
+  { key: 'baraat_time', header: 'Baraat Time' },
+  { key: 'varmala_time', header: 'Varmala Time' },
+  { key: 'pheras_time', header: 'Pheras Time' },
   { key: 'venue_name', header: 'Venue Name' },
   { key: 'venue_type', header: 'Venue Type' },
   { key: 'location', header: 'Location' },
@@ -30,6 +41,8 @@ const COLUMNS = [
   { key: 'source', header: 'Source' },
   { key: 'notes', header: 'Notes' },
 ]
+
+const TIME_KEYS = new Set(['time', 'decor_time', 'chaat_time', 'baraat_time', 'varmala_time', 'pheras_time'])
 
 function formatTime12(t) {
   if (!t) return ''
@@ -52,8 +65,12 @@ export function exportEventsToExcel(events, filename) {
         const v = VENUE_BY_ID[ev.venue_id]
         return v ? `${v.short} — ${v.name}` : ev.venue_id || ''
       }
-      if (col.key === 'time') return formatTime12(ev.time)
+      if (TIME_KEYS.has(col.key)) return formatTime12(ev[col.key])
       if (col.key === 'source') return (ev.source || '').toUpperCase()
+      if (col.key === 'payment_remaining') {
+        const val = ev.payment_remaining
+        return (val != null && val !== '') ? `${val}%` : ''
+      }
       return ev[col.key] ?? ''
     })
   )
