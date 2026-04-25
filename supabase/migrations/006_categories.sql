@@ -34,7 +34,7 @@ insert into categories (venue_id, name, short_code, color, sub_venues, category_
   ('am',     'Ambria Manaktala',      'AM',    '#E08E45', '["Emerald Lawn","Emerald + Glass House","Emerald + Banana Tree","Emerald + Glass House + Banana","Alstonia Lawn","Alstonia + Banana Tree","Alstonia + Banana Tree + Emerald","Glass House","Banana Tree Lawn","Full Venue"]'::jsonb, 'venue', true, 2),
   ('ae',     'Ambria Exotica',        'AE',    '#B08560', '["Aura Lawn","Aura Glass House + Lawn","Aura Glasshouse","Valencia Glass House","Valencia Glass House + Lawn","Valencia Glass House + Lawn + Poolside","Valencia Lawn + Poolside","Full Venue"]'::jsonb, 'venue', true, 3),
   ('ar',     'Ambria Restro',         'AR',    '#6088B5', '["Restro-Lawn","Restro Glass House","Rooftop","Restro Lawn + Glass House","Restro Lawn + Rooftop","Full Venue"]'::jsonb, 'venue', true, 4),
-  ('villa',  'Villa',                 'Villa', '#9A6BBE', '["AP Kothi","AM Kothi","AE Kothi"]'::jsonb,                                          'villa',   true, 5),
+  ('villa',  'Villa',                 'Villa', '#9A6BBE', '["AP Kothi","AM Kothi","AE Kothi","Sukoon"]'::jsonb,                                   'villa',   true, 5),
   ('add',    'Ambria Design & Decor', 'ADD',   '#5FA8C4', '[]'::jsonb,                                                                          'service', true, 6),
   ('ac',     'Ambria Cuisine',        'AC',    '#D8728A', '[]'::jsonb,                                                                          'service', true, 7),
   ('aee',    'Ambria Events',         'AEE',   '#AD7EA5', '[]'::jsonb,                                                                          'service', true, 8),

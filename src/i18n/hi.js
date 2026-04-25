@@ -189,6 +189,7 @@ const hi = {
   'AP Kothi': 'AP कोठी',
   'AM Kothi': 'AM कोठी',
   'AE Kothi': 'AE कोठी',
+  'Sukoon': 'सुकून',
 
   // ── इवेंट प्रकार ──
   'Anand Karaj': 'आनंद कारज',

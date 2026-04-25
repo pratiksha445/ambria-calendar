@@ -3,6 +3,7 @@ import {
   fetchCategories, createCategory, updateCategory,
   deleteCategory, reorderCategories,
 } from '../lib/categories.js'
+import { applyDynamic } from '../config/venues.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 
 const SYSTEM_IDS = new Set(['ap', 'am', 'ae', 'ar', 'villa', 'add', 'ac', 'aee', 'tender'])
@@ -47,7 +48,12 @@ export default function CategoryManagement({ currentUser, showToast, onMenu }) {
   useEffect(() => { load() }, [])
 
   async function load() {
-    try { setCategories(await fetchCategories()) } catch (e) { console.error(e) }
+    try {
+      const rows = await fetchCategories()
+      setCategories(rows)
+      // Sync global VENUES/VENUE_BY_ID so BookingForm picks up changes
+      applyDynamic(rows.filter((r) => r.is_active))
+    } catch (e) { console.error(e) }
   }
 
   const resetForm = () => {

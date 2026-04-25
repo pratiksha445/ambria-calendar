@@ -189,6 +189,7 @@ const en = {
   'AP Kothi': 'AP Kothi',
   'AM Kothi': 'AM Kothi',
   'AE Kothi': 'AE Kothi',
+  'Sukoon': 'Sukoon',
 
   // ── Event types ──
   'Anand Karaj': 'Anand Karaj',
