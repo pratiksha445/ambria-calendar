@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { COUNTRY_CODES, getCodeFromValue } from '../config/formFields.js'
+import { COUNTRY_CODES, getCodeFromValue, DEPARTMENTS } from '../config/formFields.js'
 import { loginUser, checkPhoneStatus, requestAccess } from '../lib/users.js'
 import { logAction } from '../lib/audit.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
@@ -12,6 +12,7 @@ export default function LoginScreen({ onLogin }) {
   const [pin, setPin] = useState(['', '', '', ''])
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
+  const [department, setDepartment] = useState('')
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
   const [shake, setShake] = useState(false)
@@ -100,6 +101,7 @@ export default function LoginScreen({ onLogin }) {
     setError(null)
     if (!firstName.trim()) { setError(t('First name is required')); return }
     if (!lastName.trim()) { setError(t('Last name is required')); return }
+    if (!department) { setError(t('Department is required')); return }
     if (!phone.trim()) { setError(t('Enter your phone number')); return }
     setLoading(true)
     try {
@@ -119,7 +121,7 @@ export default function LoginScreen({ onLogin }) {
         return
       }
 
-      await requestAccess(firstName.trim() + ' ' + lastName.trim(), fullPhone)
+      await requestAccess(firstName.trim() + ' ' + lastName.trim(), fullPhone, department)
       setMode('success')
     } catch (err) {
       const msg = err?.message ?? String(err)
@@ -144,6 +146,7 @@ export default function LoginScreen({ onLogin }) {
     setError(null)
     setFirstName('')
     setLastName('')
+    setDepartment('')
   }
 
   if (mode === 'success') {
@@ -208,6 +211,22 @@ export default function LoginScreen({ onLogin }) {
                 autoComplete="family-name"
               />
             </div>
+          </div>
+        )}
+
+        {mode === 'signup' && (
+          <div className="login-field">
+            <label className="field-label">{t('Department')} <span className="required-star">*</span></label>
+            <select
+              className="login-input"
+              value={department}
+              onChange={(e) => setDepartment(e.target.value)}
+            >
+              <option value="">{t('— Select —')}</option>
+              {DEPARTMENTS.map((d) => (
+                <option key={d} value={d}>{t(d)}</option>
+              ))}
+            </select>
           </div>
         )}
 

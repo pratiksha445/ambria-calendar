@@ -4,7 +4,7 @@ import {
   toggleUserActive, approveUser, rejectUser, resetPin, adminSetPin,
 } from '../lib/users.js'
 import { logAction } from '../lib/audit.js'
-import { COUNTRY_CODES, getCodeFromValue, parsePhoneCode } from '../config/formFields.js'
+import { COUNTRY_CODES, getCodeFromValue, parsePhoneCode, DEPARTMENTS } from '../config/formFields.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 
 const ROLES = ['admin', 'staff']
@@ -79,6 +79,7 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
   const [users, setUsers] = useState([])
   const [search, setSearch] = useState('')
   const [tab, setTab] = useState('all')
+  const [deptFilter, setDeptFilter] = useState('')
   const [editing, setEditing] = useState(null)
   const [form, setForm] = useState({})
   const [formError, setFormError] = useState(null)
@@ -105,10 +106,11 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
 
   const filtered = users.filter((u) => {
     if (tab !== 'all' && u.approval_status !== tab) return false
+    if (deptFilter && u.department !== deptFilter) return false
     const q = search.trim().toLowerCase()
     if (!q) return true
     const words = q.split(/\s+/).filter(Boolean)
-    const hay = [u.name, u.phone, u.role].filter(Boolean).join(' ').toLowerCase()
+    const hay = [u.name, u.phone, u.role, u.department].filter(Boolean).join(' ').toLowerCase()
     return words.every((w) => hay.includes(w))
   })
 
@@ -123,7 +125,7 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
 
   const openNew = () => {
     setEditing('new')
-    setForm({ firstName: '', lastName: '', phone_code: '+91', phone: '', role: 'staff' })
+    setForm({ firstName: '', lastName: '', phone_code: '+91', phone: '', role: 'staff', department: '' })
     setFormError(null)
   }
 
@@ -131,7 +133,7 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
     const parsed = parsePhoneCode(user.phone)
     const { firstName, lastName } = splitName(user.name)
     setEditing(user)
-    setForm({ firstName, lastName, phone_code: parsed.value, phone: parsed.number, role: user.role })
+    setForm({ firstName, lastName, phone_code: parsed.value, phone: parsed.number, role: user.role, department: user.department || '' })
     setFormError(null)
   }
 
@@ -149,13 +151,13 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
     setSaving(true)
     try {
       if (editing === 'new') {
-        const row = await createUser({ name: fullName, phone: fullPhone, role: form.role })
+        const row = await createUser({ name: fullName, phone: fullPhone, role: form.role, department: form.department || null })
         await logAction(currentUser.id, currentUser.name, 'create', 'user', row.id, {
           name: row.name, role: row.role,
         })
         showToast?.(t('User created'))
       } else {
-        const patch = { name: fullName, phone: fullPhone, role: form.role }
+        const patch = { name: fullName, phone: fullPhone, role: form.role, department: form.department || null }
         const row = await updateUser(editing.id, patch)
         await logAction(currentUser.id, currentUser.name, 'update', 'user', row.id, {
           name: row.name, role: row.role,
@@ -291,6 +293,7 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
           {!u.is_active && u.approval_status === 'approved' && <span className="status-badge-inactive">{t('Inactive')}</span>}
         </div>
         <div className="user-phone">{u.phone}</div>
+        {u.department && <div className="user-department">{t(u.department)}</div>}
         <div className="pin-display-box">
           <span className="pin-display-label">{t('PIN:')}</span>
           <span className="pin-display-value">{u.pin}</span>
@@ -416,13 +419,23 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
         ))}
       </div>
 
-      <div className="panel-search">
+      <div className="panel-search um-filters">
         <input
           type="search"
           placeholder={t('Search by name or phone…')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
+        <select
+          className="um-dept-filter"
+          value={deptFilter}
+          onChange={(e) => setDeptFilter(e.target.value)}
+        >
+          <option value="">{t('All Departments')}</option>
+          {DEPARTMENTS.map((d) => (
+            <option key={d} value={d}>{t(d)}</option>
+          ))}
+        </select>
       </div>
 
       <div className="user-list">
@@ -564,6 +577,15 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
                 <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}>
                   {ROLES.map((r) => (
                     <option key={r} value={r}>{t(r.charAt(0).toUpperCase() + r.slice(1))}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="pf-field">
+                <label className="field-label">{t('Department')}</label>
+                <select value={form.department} onChange={(e) => setForm({ ...form, department: e.target.value })}>
+                  <option value="">{t('— Select —')}</option>
+                  {DEPARTMENTS.map((d) => (
+                    <option key={d} value={d}>{t(d)}</option>
                   ))}
                 </select>
               </div>

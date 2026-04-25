@@ -313,6 +313,22 @@ const hi = {
   'No matching elements': 'कोई मिलता एलिमेंट नहीं',
   'Retry': 'पुनः प्रयास',
 
+  // ── विभाग ──
+  'Department': 'विभाग',
+  'Department is required': 'विभाग आवश्यक है',
+  'All Departments': 'सभी विभाग',
+  'Venue Sales': 'वेन्यू सेल्स',
+  'Decor Sales': 'डेकोर सेल्स',
+  'Entertainment Sales': 'एंटरटेनमेंट सेल्स',
+  'Catering Sales': 'कैटरिंग सेल्स',
+  'Kitchen': 'किचन',
+  'F&B Service': 'F&B सर्विस',
+  'Housekeeping': 'हाउसकीपिंग',
+  'Management': 'मैनेजमेंट',
+  'Social/Tech': 'सोशल/टेक',
+  'Decor Operations': 'डेकोर ऑपरेशंस',
+  'Accounts': 'अकाउंट्स',
+
   // ── प्लेसहोल्डर ──
   'e.g. Mr. Sharma': 'जैसे श्री शर्मा',
   'Optional…': 'वैकल्पिक…',

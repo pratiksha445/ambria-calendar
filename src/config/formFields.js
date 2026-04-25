@@ -43,6 +43,11 @@ export const ELEMENT_OPTIONS_FALLBACK = [
   'Sound', 'Anchor', 'Paparazzi Artist', 'International Artist',
   'Classical Dance Artist', 'Molecular Bar', 'Tattoo Artist',
 ]
+export const DEPARTMENTS = [
+  'Venue Sales', 'Decor Sales', 'Entertainment Sales', 'Catering Sales',
+  'Kitchen', 'F&B Service', 'Housekeeping', 'Admin', 'Management',
+  'Social/Tech', 'Decor Operations', 'Tender', 'Accounts',
+]
 export const VENUE_TYPES = ['Lawn', 'Banquet', 'Lawn + Bqt', 'Poolside']
 export const POOL_OPTIONS = ['Yes', 'No']
 export const MEAL_OPTIONS = [

@@ -313,6 +313,22 @@ const en = {
   'No matching elements': 'No matching elements',
   'Retry': 'Retry',
 
+  // ── Departments ──
+  'Department': 'Department',
+  'Department is required': 'Department is required',
+  'All Departments': 'All Departments',
+  'Venue Sales': 'Venue Sales',
+  'Decor Sales': 'Decor Sales',
+  'Entertainment Sales': 'Entertainment Sales',
+  'Catering Sales': 'Catering Sales',
+  'Kitchen': 'Kitchen',
+  'F&B Service': 'F&B Service',
+  'Housekeeping': 'Housekeeping',
+  'Management': 'Management',
+  'Social/Tech': 'Social/Tech',
+  'Decor Operations': 'Decor Operations',
+  'Accounts': 'Accounts',
+
   // ── Placeholders ──
   'e.g. Mr. Sharma': 'e.g. Mr. Sharma',
   'Optional…': 'Optional…',

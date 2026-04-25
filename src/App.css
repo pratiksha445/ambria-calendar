@@ -2250,6 +2250,40 @@
   color: var(--ambria-muted);
   font-weight: 600;
 }
+.user-department {
+  font-size: 0.78rem;
+  color: var(--ambria-accent);
+  font-weight: 500;
+}
+.um-filters {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.um-filters input[type="search"] {
+  flex: 1;
+}
+.um-dept-filter {
+  padding: 8px 12px;
+  border: 1px solid var(--ambria-border);
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-family: inherit;
+  background: var(--ambria-card);
+  min-width: 140px;
+}
+.um-dept-filter:focus {
+  outline: none;
+  border-color: var(--ambria-accent);
+}
+@media (max-width: 600px) {
+  .um-filters {
+    flex-direction: column;
+  }
+  .um-dept-filter {
+    width: 100%;
+  }
+}
 .user-date {
   font-size: 0.72rem;
   color: var(--ambria-faint);
