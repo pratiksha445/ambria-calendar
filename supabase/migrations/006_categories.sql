@@ -30,10 +30,10 @@ create policy "Anyone can manage categories"
 
 -- Seed the 9 existing categories
 insert into categories (venue_id, name, short_code, color, sub_venues, category_type, is_active, sort_order) values
-  ('ap',     'Ambria Pushpanjali',    'AP',    '#E0C84E', '["Whole Venue","Amber Lawn","Banquet"]'::jsonb,                                      'venue',   true, 1),
-  ('am',     'Ambria Manaktala',      'AM',    '#E08E45', '["Full Venue","Emerald Lawn","Banquet","Alstonia Lawn","Banana Lawn"]'::jsonb,        'venue',   true, 2),
-  ('ae',     'Ambria Exotica',        'AE',    '#B08560', '["Aura","Aura Banquet","Valencia","Valencia Banquet","Poolside"]'::jsonb,             'venue',   true, 3),
-  ('ar',     'Ambria Restro',         'AR',    '#6088B5', '["Whole Venue","Glasshouse","Lawn","Rooftop"]'::jsonb,                                'venue',   true, 4),
+  ('ap',     'Ambria Pushpanjali',    'AP',    '#E0C84E', '["Amber Lawn","Glass House","Amber Lawn + Glass House","Amber Lawn + Carnelian Deck","Glass House + Half Lawn","Carnelian Deck","Full Venue"]'::jsonb, 'venue', true, 1),
+  ('am',     'Ambria Manaktala',      'AM',    '#E08E45', '["Emerald Lawn","Emerald + Glass House","Emerald + Banana Tree","Emerald + Glass House + Banana","Alstonia Lawn","Alstonia + Banana Tree","Alstonia + Banana Tree + Emerald","Glass House","Banana Tree Lawn","Full Venue"]'::jsonb, 'venue', true, 2),
+  ('ae',     'Ambria Exotica',        'AE',    '#B08560', '["Aura Lawn","Aura Glass House + Lawn","Aura Glasshouse","Valencia Glass House","Valencia Glass House + Lawn","Valencia Glass House + Lawn + Poolside","Valencia Lawn + Poolside","Full Venue"]'::jsonb, 'venue', true, 3),
+  ('ar',     'Ambria Restro',         'AR',    '#6088B5', '["Restro-Lawn","Restro Glass House","Rooftop","Restro Lawn + Glass House","Restro Lawn + Rooftop","Full Venue"]'::jsonb, 'venue', true, 4),
   ('villa',  'Villa',                 'Villa', '#9A6BBE', '["AP Kothi","AM Kothi","AE Kothi"]'::jsonb,                                          'villa',   true, 5),
   ('add',    'Ambria Design & Decor', 'ADD',   '#5FA8C4', '[]'::jsonb,                                                                          'service', true, 6),
   ('ac',     'Ambria Cuisine',        'AC',    '#D8728A', '[]'::jsonb,                                                                          'service', true, 7),
