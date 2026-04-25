@@ -26,7 +26,7 @@ export const BOOKING_STATUSES = [
   'VMD', 'Only Rental', 'Rental + In-Decor', 'Rental + In-Ent', 'Rental + Chaat',
   'Rental + Add on Food', 'Rental + Outdoor Catering', 'Rental + Outdoor Decor', 'VMD + Outdoor Ent',
 ]
-export const MENU_TYPES = ['Veg', 'Non-Veg', 'Jain', 'Chaat']
+export const MENU_TYPES = ['Veg', 'Non-Veg', 'Jain']
 export const MENU_CATS = ['MV', 'MNV', 'DMV', 'DMNV', 'MCV', 'MCNV', 'LV', 'LNV', 'Customised']
 export const FP_STATUSES = ['Released', 'Delayed by guest', 'Not Released']
 export const DECOR_TYPES = ['Silver', 'Gold', 'Premium']
@@ -137,8 +137,11 @@ const phoneOpt = () => ({
 const paxField = () => T('Pax', 'pax', true, {
   filterFn: paxFilter, filterError: 'Only numbers allowed', inputMode: 'numeric',
 })
-const salesPersonField = () => T('Sales Person', 'sales_person', true, {
-  filterFn: nameFilter, filterError: 'Only letters allowed',
+const salesPersonField = () => ({
+  type: 'user-select', label: 'Sales Person', key: 'sales_person', required: true,
+})
+const operationManagerField = () => ({
+  type: 'user-select', label: 'Operation Manager', key: 'operation_manager', required: true,
 })
 const venueNameField = (placeholder) => T('Venue Name', 'venue_name', true, {
   placeholder: placeholder || 'Hotel Taj, Farmhouse…', filterFn: venueNameFilter,
@@ -156,53 +159,65 @@ function eventTypeFields(dynamicTypes) {
         placeholder: 'Describe the event',
       }),
       showWhen: isOther,
+      fullWidth: true,
     },
   ]
 }
 
 // AP/AM/AE/AR — venue booking (3-section layout)
+// Venue section field order matches the 2-column grid spec (left|right per row)
 function ownVenueSections(venue, dynamicTypes) {
   return [
     {
       title: 'Venue',
       prominent: true,
       fields: [
+        // Row 1: Sub-Venue | Event Type
         S('Sub-Venue', 'sub_venue', venue.subVenues),
         ...eventTypeFields(dynamicTypes),
-        S('Shift', 'shift', SHIFTS),
-        statusField,
-        D('Date', 'date'),
-        TM('Assembly Time', 'time'),
-        TM('Chaat Time', 'chaat_time'),
-        TM('Baraat Time', 'baraat_time'),
+        // Row 2: Package Type | Status
         S('Package Type', 'booking_status', BOOKING_STATUSES),
+        statusField,
+        // Row 3: Date | Shift
+        D('Date', 'date'),
+        S('Shift', 'shift', SHIFTS),
+        // Row 4: Baraat Time | Assembly Time
+        TM('Baraat Time', 'baraat_time'),
+        TM('Assembly Time', 'time'),
+        // Row 5: Chaat Time | FP
+        TM('Chaat Time', 'chaat_time'),
+        S('FP', 'fp_status', FP_STATUSES, true, { disabledWhen: notVMD }),
+        // Row 6: Menu Type | Menu Category
         S('Menu Type', 'menu_type', MENU_TYPES, true, { disabledWhen: notVMD }),
         S('Menu Category', 'menu_cat', MENU_CATS, true, { disabledWhen: notVMD }),
-        S('FP', 'fp_status', FP_STATUSES, true, { disabledWhen: notVMD }),
-        T('Delivery Person', 'delivery_person', true, {
-          filterFn: nameFilter, filterError: 'Only letters allowed',
-        }),
-        T('Pending Payment — Venue %', 'payment_remaining_venue', true, {
+        // Row 7: Pending Payment % | Payment Status
+        T('Pending Payment %', 'payment_remaining_venue', true, {
           filterFn: percentFilter, filterError: 'Only numbers 0-100',
           suffix: '%', inputMode: 'numeric',
         }),
-        S('Payment Timing', 'payment_timing', PAYMENT_TIMINGS),
+        S('Payment Status', 'payment_timing', PAYMENT_TIMINGS),
+        // Row 8: Guest Name | Phone
         guestName(),
         phoneReq(),
+        // Row 9: Pax | Sales Person
         paxField(),
         salesPersonField(),
+        // Row 10: Delivery Person | Operation Manager
+        { type: 'user-select', label: 'Delivery Person', key: 'delivery_person', required: true },
+        operationManagerField(),
       ],
     },
     {
       title: 'Decor',
       prominent: true,
+      collapsible: true,
       fields: [
-        TM('Decor Time', 'decor_time'),
-        TM('Varmala Time', 'varmala_time'),
-        TM('Pheras Time', 'pheras_time'),
+        TM('Decor Time', 'decor_time', false),
+        TM('Varmala Time', 'varmala_time', false),
+        TM('Pheras Time', 'pheras_time', false),
         CB('Pheras Next Day (+1)', 'pheras_next_day'),
-        S('Decor Status', 'decor_status', DECOR_STATUSES),
-        S('Decor Category', 'function_category', FUNCTION_CATEGORIES),
+        S('Decor Status', 'decor_status', DECOR_STATUSES, false),
+        S('Decor Category', 'function_category', FUNCTION_CATEGORIES, false),
         T('Pending Payment — Decor %', 'payment_remaining_decor', false, {
           filterFn: percentFilter, filterError: 'Only numbers 0-100',
           suffix: '%', inputMode: 'numeric',
@@ -212,9 +227,10 @@ function ownVenueSections(venue, dynamicTypes) {
     {
       title: 'Entertainment',
       prominent: true,
+      collapsible: true,
       fields: [
-        S('Entertainment Status', 'entertainment_status', ENTERTAINMENT_STATUSES),
-        { type: 'multiselect', label: 'Elements', key: 'elements', options: ELEMENT_OPTIONS, required: true },
+        S('Entertainment Status', 'entertainment_status', ENTERTAINMENT_STATUSES, false),
+        { type: 'multiselect', label: 'Elements', key: 'elements', options: ELEMENT_OPTIONS, required: false },
         T('Pending Payment — Ent %', 'payment_remaining_ent', false, {
           filterFn: percentFilter, filterError: 'Only numbers 0-100',
           suffix: '%', inputMode: 'numeric',
@@ -417,7 +433,7 @@ const VENUE_FIELD_KEYS = [
   'decor_time', 'chaat_time', 'baraat_time', 'varmala_time', 'pheras_time', 'pheras_next_day',
   'booking_status', 'menu_type', 'menu_cat', 'fp_status',
   'decor_status', 'entertainment_status', 'function_category', 'elements',
-  'delivery_person', 'payment_remaining_venue', 'payment_remaining_decor', 'payment_remaining_ent', 'payment_timing',
+  'delivery_person', 'operation_manager', 'payment_remaining_venue', 'payment_remaining_decor', 'payment_remaining_ent', 'payment_timing',
   'guest_name', 'phone', 'pax', 'sales_person', 'notes',
 ]
 
@@ -458,7 +474,7 @@ export const ALL_SAVEABLE_KEYS = [
   'decor_time', 'chaat_time', 'baraat_time', 'varmala_time', 'pheras_time', 'pheras_next_day',
   'booking_status', 'menu_type', 'menu_cat', 'fp_status',
   'decor_status', 'entertainment_status', 'function_category', 'elements',
-  'delivery_person', 'payment_remaining_venue', 'payment_remaining_decor', 'payment_remaining_ent', 'payment_timing',
+  'delivery_person', 'operation_manager', 'payment_remaining_venue', 'payment_remaining_decor', 'payment_remaining_ent', 'payment_timing',
   'guest_name', 'phone', 'pax', 'sales_person', 'notes',
   'check_in_date', 'check_out_date', 'check_in_time', 'check_out_time',
   'pool_included', 'meal_included', 'added_service',

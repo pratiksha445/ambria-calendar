@@ -136,10 +136,13 @@ const en = {
   'Venue %': 'Venue %',
   'Decor %': 'Decor %',
   'Ent %': 'Ent %',
+  'Pending Payment %': 'Pending Payment %',
   'Pending Payment — Venue %': 'Pending Payment — Venue %',
   'Pending Payment — Decor %': 'Pending Payment — Decor %',
   'Pending Payment — Ent %': 'Pending Payment — Ent %',
   'Payment Timing': 'Payment Timing',
+  'Payment Status': 'Payment Status',
+  'Operation Manager': 'Operation Manager',
   'Elements': 'Elements',
 
   // ── Form section titles ──

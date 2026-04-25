@@ -2,6 +2,18 @@ import { supabase } from './supabase.js'
 
 const DEFAULT_PIN = '0000'
 
+/** Fetch active approved user names for dropdowns (Sales Person, etc.) */
+export async function fetchActiveUserNames() {
+  const { data, error } = await supabase
+    .from('users')
+    .select('name')
+    .eq('is_active', true)
+    .eq('approval_status', 'approved')
+    .order('name', { ascending: true })
+  if (error) throw error
+  return (data ?? []).map((u) => u.name)
+}
+
 /**
  * Login — returns { status, user, needsPinChange?, reason? }
  * status: 'ok' | 'pending' | 'rejected' | 'deactivated' | 'not_found' | 'wrong_pin'

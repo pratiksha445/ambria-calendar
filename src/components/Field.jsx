@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from 'react'
 import { COUNTRY_CODES } from '../config/formFields.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 
-export default function Field({ field, form, value, onChange, error, readOnly }) {
+export default function Field({ field, form, value, onChange, error, readOnly, activeUsers }) {
   const { t } = useLanguage()
   const [filterErr, setFilterErr] = useState(null)
   const timerRef = useRef(null)
@@ -49,9 +49,12 @@ export default function Field({ field, form, value, onChange, error, readOnly })
 
   let control
   if (field.type === 'select') {
+    const optionValues = field.options.map((o) => typeof o === 'object' ? o.value : o)
+    const hasLegacy = effectiveValue && !optionValues.includes(effectiveValue)
     control = (
       <select {...commonProps}>
         <option value="">{t('— Select —')}</option>
+        {hasLegacy && <option value={effectiveValue}>{t(effectiveValue)}</option>}
         {field.options.map((opt) => {
           const val = typeof opt === 'object' ? opt.value : opt
           const label = typeof opt === 'object' ? opt.label : opt
@@ -115,6 +118,24 @@ export default function Field({ field, form, value, onChange, error, readOnly })
         </div>
         {displayError && <div className="field-error">{t(displayError)}</div>}
       </div>
+    )
+  } else if (field.type === 'user-select') {
+    const listId = `userlist-${field.key}`
+    control = (
+      <>
+        <input
+          type="text"
+          {...commonProps}
+          list={listId}
+          autoComplete="off"
+          placeholder={t('Search users…')}
+        />
+        <datalist id={listId}>
+          {(activeUsers || []).map((name) => (
+            <option key={name} value={name} />
+          ))}
+        </datalist>
+      </>
     )
   } else if (field.suffix) {
     control = (
@@ -201,7 +222,7 @@ export default function Field({ field, form, value, onChange, error, readOnly })
   }
 
   return (
-    <div className={`field ${displayError ? 'has-error' : ''} ${disabled ? 'is-disabled' : ''}`}>
+    <div className={`field ${displayError ? 'has-error' : ''} ${disabled ? 'is-disabled' : ''} ${field.fullWidth ? 'field-full-width' : ''}`}>
       <label htmlFor={id} className="field-label">
         {t(field.label)}
         {field.required && !disabled && <span className="required-star"> *</span>}

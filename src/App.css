@@ -1659,6 +1659,26 @@
   padding-left: 10px;
   border-left: 3px solid var(--ambria-accent);
 }
+.form-section-title-collapsible {
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-left: 4px;
+}
+.form-section-title-collapsible:hover { opacity: 0.8; }
+.section-chevron {
+  display: inline-flex;
+  transition: transform 200ms ease;
+}
+.section-chevron.open { transform: rotate(90deg); }
+
+.form-grid-collapsed {
+  display: none !important;
+}
+
+.field-full-width { grid-column: 1 / -1; }
 
 .form-grid {
   display: grid;

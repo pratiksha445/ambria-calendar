@@ -136,10 +136,13 @@ const hi = {
   'Venue %': 'वेन्यू %',
   'Decor %': 'डेकोर %',
   'Ent %': 'एंट %',
+  'Pending Payment %': 'शेष भुगतान %',
   'Pending Payment — Venue %': 'बकाया भुगतान — वेन्यू %',
   'Pending Payment — Decor %': 'बकाया भुगतान — डेकोर %',
   'Pending Payment — Ent %': 'बकाया भुगतान — एंट %',
   'Payment Timing': 'भुगतान समय',
+  'Payment Status': 'भुगतान स्थिति',
+  'Operation Manager': 'ऑपरेशन मैनेजर',
   'Elements': 'एलिमेंट्स',
 
   // ── फ़ॉर्म सेक्शन टाइटल ──

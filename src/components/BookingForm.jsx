@@ -9,6 +9,7 @@ import { autoTitle } from '../lib/autoTitle.js'
 import { sanitizeText, sanitizePhone, sanitizePax } from '../lib/sanitize.js'
 import { createEvent, updateEvent, deleteEvent } from '../lib/events.js'
 import { fetchActiveEventTypes } from '../lib/eventTypes.js'
+import { fetchActiveUserNames } from '../lib/users.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 import Field from './Field.jsx'
 
@@ -43,11 +44,16 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [submitError, setSubmitError] = useState(null)
   const [dynamicEventTypes, setDynamicEventTypes] = useState(null)
+  const [activeUsers, setActiveUsers] = useState([])
+  const [collapsedSections, setCollapsedSections] = useState({})
 
   useEffect(() => {
     fetchActiveEventTypes()
       .then((types) => setDynamicEventTypes(types.map((t) => t.name)))
       .catch(() => setDynamicEventTypes(null))
+    fetchActiveUserNames()
+      .then(setActiveUsers)
+      .catch(() => setActiveUsers([]))
   }, [])
 
   const sections = useMemo(() => getFormConfig(venueId, dynamicEventTypes), [venueId, dynamicEventTypes])
@@ -280,14 +286,35 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
       </div>
 
       <div className="form-body">
-        {sections.map((section, si) => (
-          <div key={section.title || `section-${si}`} className={`form-section ${section.prominent ? 'form-section-prominent' : ''}`}>
+        {sections.map((section, si) => {
+          const sectionKey = section.title || `section-${si}`
+          const isCollapsible = !!section.collapsible
+          const isCollapsed = isCollapsible && collapsedSections[sectionKey] !== false
+          const toggleCollapse = () => setCollapsedSections((prev) => ({
+            ...prev, [sectionKey]: prev[sectionKey] === false ? true : false,
+          }))
+
+          return (
+          <div key={sectionKey} className={`form-section ${section.prominent ? 'form-section-prominent' : ''}`}>
             {section.title && (
-              <div className={`form-section-title ${section.prominent ? 'form-section-title-prominent' : ''}`}>
+              <div
+                className={`form-section-title ${section.prominent ? 'form-section-title-prominent' : ''} ${isCollapsible ? 'form-section-title-collapsible' : ''}`}
+                onClick={isCollapsible ? toggleCollapse : undefined}
+                role={isCollapsible ? 'button' : undefined}
+                tabIndex={isCollapsible ? 0 : undefined}
+                onKeyDown={isCollapsible ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleCollapse() } } : undefined}
+              >
+                {isCollapsible && (
+                  <span className={`section-chevron ${isCollapsed ? '' : 'open'}`}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="9 18 15 12 9 6" />
+                    </svg>
+                  </span>
+                )}
                 {t(section.title)}
               </div>
             )}
-            <div className="form-grid">
+            <div className={`form-grid ${isCollapsed ? 'form-grid-collapsed' : ''}`}>
               {section.fields.map((field) => {
                 if (field.type === 'group') {
                   return (
@@ -301,6 +328,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
                           onChange={setField}
                           error={errors[f.key]}
                           readOnly={readOnly}
+                          activeUsers={activeUsers}
                         />
                       ))}
                     </div>
@@ -315,12 +343,14 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
                     onChange={setField}
                     error={errors[field.key]}
                     readOnly={readOnly}
+                    activeUsers={activeUsers}
                   />
                 )
               })}
             </div>
           </div>
-        ))}
+          )
+        })}
       </div>
 
       <div className="form-footer">

@@ -186,7 +186,7 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
           )}
           {(event.payment_remaining_venue != null && event.payment_remaining_venue !== '') && (
             <div className="detail-row detail-payment">
-              <span className="k">{t('Venue %')}</span>
+              <span className="k">{t('Pending Payment %')}</span>
               <div className="v payment-val">
                 <span>{event.payment_remaining_venue}%</span>
                 <div className="payment-bar">
@@ -199,7 +199,10 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
             </div>
           )}
           {event.payment_timing && (
-            <div className="detail-row"><span className="k">{t('Payment Timing')}</span><span className="v">{t(event.payment_timing)}</span></div>
+            <div className="detail-row"><span className="k">{t('Payment Status')}</span><span className="v">{t(event.payment_timing)}</span></div>
+          )}
+          {event.operation_manager && (
+            <div className="detail-row"><span className="k">{t('Operation Manager')}</span><span className="v">{event.operation_manager}</span></div>
           )}
 
           {/* ── Decor section ── */}
