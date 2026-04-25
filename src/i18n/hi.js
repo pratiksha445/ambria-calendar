@@ -139,6 +139,17 @@ const hi = {
   'Contact': 'संपर्क',
   'External Venue': 'बाहरी वेन्यू',
 
+  // ── वेन्यू / श्रेणी नाम ──
+  'Ambria Pushpanjali': 'अम्ब्रिया पुष्पांजलि',
+  'Ambria Manaktala': 'अम्ब्रिया मानकटला',
+  'Ambria Exotica': 'अम्ब्रिया एक्ज़ोटिका',
+  'Ambria Restro': 'अम्ब्रिया रेस्ट्रो',
+  'Villa': 'विला',
+  'Ambria Design & Decor': 'अम्ब्रिया डिज़ाइन और डेकोर',
+  'Ambria Cuisine': 'अम्ब्रिया क्यूज़ीन',
+  'Ambria Events': 'अम्ब्रिया इवेंट्स',
+  'Tender': 'टेंडर',
+
   // ── उप-वेन्यू नाम ──
   'Full Venue': 'पूरा वेन्यू',
   'Whole Venue': 'पूरा वेन्यू',

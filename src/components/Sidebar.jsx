@@ -204,7 +204,7 @@ export default function Sidebar({
                       aria-pressed={isOn}
                     >
                       <span className="filter-pill" style={{ background: v.color, color: v.textColor }}>
-                        {v.short} — {v.name}
+                        {v.short} — {t(v.name)}
                       </span>
                       <span className="filter-count">{venueCounts[v.id] ?? 0}</span>
                     </button>

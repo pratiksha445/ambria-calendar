@@ -139,6 +139,17 @@ const en = {
   'Contact': 'Contact',
   'External Venue': 'External Venue',
 
+  // ── Venue / category names ──
+  'Ambria Pushpanjali': 'Ambria Pushpanjali',
+  'Ambria Manaktala': 'Ambria Manaktala',
+  'Ambria Exotica': 'Ambria Exotica',
+  'Ambria Restro': 'Ambria Restro',
+  'Villa': 'Villa',
+  'Ambria Design & Decor': 'Ambria Design & Decor',
+  'Ambria Cuisine': 'Ambria Cuisine',
+  'Ambria Events': 'Ambria Events',
+  'Tender': 'Tender',
+
   // ── Sub-venue names ──
   'Full Venue': 'Full Venue',
   'Whole Venue': 'Whole Venue',

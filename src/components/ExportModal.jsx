@@ -116,7 +116,7 @@ export default function ExportModal({ open, onClose, defaultFrom, defaultTo }) {
             <select value={category} onChange={(e) => setCategory(e.target.value)}>
               <option value="">{t('All Categories')}</option>
               {VENUES.map((v) => (
-                <option key={v.id} value={v.id}>{v.short} — {v.name}</option>
+                <option key={v.id} value={v.id}>{v.short} — {t(v.name)}</option>
               ))}
             </select>
           </div>

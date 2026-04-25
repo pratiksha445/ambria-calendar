@@ -235,7 +235,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
               <option value="" disabled>{t('Select a category…')}</option>
               {VENUES.map((v) => (
                 <option key={v.id} value={v.id}>
-                  {v.short} — {v.name}
+                  {v.short} — {t(v.name)}
                 </option>
               ))}
             </select>
@@ -246,7 +246,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
               className="category-pill-dot"
               style={{ background: VENUE_BY_ID[venueId]?.color }}
             />
-            <span>{VENUE_BY_ID[venueId]?.name}</span>
+            <span>{t(VENUE_BY_ID[venueId]?.name)}</span>
           </div>
         )}
 

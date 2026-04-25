@@ -306,7 +306,7 @@ export default function CategoryManagement({ currentUser, showToast, onMenu }) {
                   {cat.short_code}
                 </span>
                 <div className="cat-info">
-                  <span className="cat-name">{cat.name}</span>
+                  <span className="cat-name">{t(cat.name)}</span>
                   <div className="cat-meta">
                     <span className="cat-type-badge">{cat.category_type}</span>
                     {cat.sub_venues?.length > 0 && (
