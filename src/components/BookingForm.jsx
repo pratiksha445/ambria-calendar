@@ -71,18 +71,10 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
   const setField = (key, value) => {
     setForm((prev) => {
       const next = { ...prev, [key]: value }
-      if (key === 'booking_status') {
-        if (value !== 'VMD') {
-          // Non-VMD: auto-select Chaat, disable menu_cat & fp_status
-          next.menu_type = 'Chaat'
-          next.menu_cat = ''
-          next.fp_status = ''
-        } else {
-          // Switching to VMD: clear auto-selected Chaat so user picks full options
-          next.menu_type = ''
-          next.menu_cat = ''
-          next.fp_status = ''
-        }
+      if (key === 'booking_status' && value !== 'VMD') {
+        next.menu_type = ''
+        next.menu_cat = ''
+        next.fp_status = ''
       }
       if (key === 'event_type' && value !== 'Other') {
         next.event_type_other = ''
