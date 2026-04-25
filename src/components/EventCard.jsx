@@ -170,7 +170,7 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
           )}
           {/* Guest, Pax, Sales already visible in compact card — not repeated here */}
           {event.booking_status && (
-            <div className="detail-row"><span className="k">{t('Booking Status')}</span><span className="v">{t(event.booking_status)}</span></div>
+            <div className="detail-row"><span className="k">{t('Package Type')}</span><span className="v">{t(event.booking_status)}</span></div>
           )}
           {event.fp_status && (
             <div className="detail-row"><span className="k">{t('FP Status')}</span><span className="v">{t(event.fp_status)}</span></div>

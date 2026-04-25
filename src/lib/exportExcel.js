@@ -18,7 +18,7 @@ const COLUMNS = [
   { key: 'phone', header: 'Phone' },
   { key: 'pax', header: 'Pax' },
   { key: 'sales_person', header: 'Sales Person' },
-  { key: 'booking_status', header: 'Booking Status' },
+  { key: 'booking_status', header: 'Package Type' },
   { key: 'menu_type', header: 'Menu Type' },
   { key: 'menu_cat', header: 'Menu Category' },
   { key: 'fp_status', header: 'FP Status' },

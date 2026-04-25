@@ -23,7 +23,8 @@ export const EVENT_TYPES = [
 export const STATUSES = ['Confirmed', 'Tentative']
 export const SHIFTS = ['Morning', 'Lunch', 'Sundowner', 'Dinner']
 export const BOOKING_STATUSES = [
-  'VMD', 'Only Rental', 'Rental + Decor', 'Rental + DJ', 'Rental + Add on Food',
+  'VMD', 'Only Rental', 'Rental + In-Decor', 'Rental + In-Ent', 'Rental + Chaat',
+  'Rental + Add on Food', 'Rental + Outdoor Catering', 'Rental + Outdoor Decor', 'VMD + Outdoor Ent',
 ]
 export const MENU_TYPES = ['Veg', 'Non-Veg', 'Jain', 'Chaat']
 export const MENU_CATS = ['MV', 'MNV', 'DMV', 'DMNV', 'MCV', 'MCNV', 'LV', 'LNV', 'Customised']
@@ -101,7 +102,7 @@ const venueNameFilter = (v) => v.replace(/[^a-zA-Z0-9\s.,\-'&()#]/g, '')
 
 // ---------- Conditional helpers ----------
 
-const notVMD = (f) => f.booking_status && f.booking_status !== 'VMD'
+const notVMD = (f) => f.booking_status && f.booking_status !== 'VMD' && f.booking_status !== 'VMD + Outdoor Ent'
 const isOther = (f) => f.event_type === 'Other'
 
 // ---------- Per-category shared blocks ----------
@@ -179,7 +180,7 @@ function ownVenueSections(venue, dynamicTypes) {
     {
       title: 'Booking',
       fields: [
-        S('Booking Status', 'booking_status', BOOKING_STATUSES),
+        S('Package Type', 'booking_status', BOOKING_STATUSES),
         S('Menu Type', 'menu_type', MENU_TYPES, true, { disabledWhen: notVMD }),
         S('Menu Category', 'menu_cat', MENU_CATS, true, { disabledWhen: notVMD }),
         S('FP', 'fp_status', FP_STATUSES, true, { disabledWhen: notVMD }),

@@ -38,7 +38,7 @@ const SAMPLES = [
     offset: 4,
     venue_id: 'am', sub_venue: 'Emerald Lawn', event_type: 'Reception', status: 'Confirmed',
     shift: 'Sundowner', time: '17:00', guest_name: 'Gupta', phone: '9876543211', pax: '300',
-    sales_person: 'Priya', booking_status: 'Rental + Decor',
+    sales_person: 'Priya', booking_status: 'Rental + In-Decor',
     title: 'Gupta | Reception | 300pax | S',
     source: 'manual',
   },
