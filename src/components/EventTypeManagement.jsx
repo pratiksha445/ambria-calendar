@@ -43,18 +43,28 @@ export default function EventTypeManagement({ currentUser, showToast, onMenu }) 
     e.preventDefault()
     const name = newName.trim()
     if (!name) return
+    console.log('[ET] handleAdd start:', name)
     setSaving(true)
+    // Safety: auto-reset saving after 15s in case something hangs
+    const safetyTimer = setTimeout(() => {
+      console.warn('[ET] handleAdd safety timeout — resetting saving state')
+      setSaving(false)
+    }, 15000)
     try {
       await createEventType(name, currentUser)
+      console.log('[ET] createEventType succeeded')
       setNewName('')
       showToast?.(t('Event type added'))
       await load()
     } catch (err) {
+      console.error('[ET] handleAdd error:', err)
       const msg = err?.message ?? String(err)
       if (msg.includes('duplicate') || msg.includes('unique')) showToast?.(t('Event type already exists'))
       else showToast?.(t('Error:') + ' ' + msg)
     } finally {
+      clearTimeout(safetyTimer)
       setSaving(false)
+      console.log('[ET] handleAdd done, saving=false')
     }
   }
 
