@@ -33,7 +33,14 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
   const openTimePopup = (e) => {
     e.stopPropagation()
     const rect = e.currentTarget.getBoundingClientRect()
-    setPopupPos({ top: rect.bottom + 4, left: Math.max(8, rect.left - 40) })
+    const popupH = 200 // approximate height of 6 rows
+    const popupW = 210
+    let top = rect.bottom + 4
+    let left = Math.max(8, rect.left - 40)
+    // Clamp within viewport
+    if (top + popupH > window.innerHeight - 8) top = Math.max(8, rect.top - popupH - 4)
+    if (left + popupW > window.innerWidth - 8) left = window.innerWidth - popupW - 8
+    setPopupPos({ top, left })
     setShowTimePopup((prev) => !prev)
   }
 
@@ -161,15 +168,7 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
               </span>
             </div>
           )}
-          {(event.guest_name || event.tender_name) && (
-            <div className="detail-row"><span className="k">{t('Guest')}</span><span className="v">{event.guest_name || event.tender_name}</span></div>
-          )}
-          {event.pax && (
-            <div className="detail-row"><span className="k">{t('Pax')}</span><span className="v">{event.pax}</span></div>
-          )}
-          {event.sales_person && (
-            <div className="detail-row"><span className="k">{t('Sales')}</span><span className="v">{event.sales_person}</span></div>
-          )}
+          {/* Guest, Pax, Sales already visible in compact card — not repeated here */}
           {event.booking_status && (
             <div className="detail-row"><span className="k">{t('Booking Status')}</span><span className="v">{t(event.booking_status)}</span></div>
           )}
@@ -179,9 +178,7 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
           {event.menu_type && (
             <div className="detail-row"><span className="k">{t('Menu Type')}</span><span className="v">{t(event.menu_type)}</span></div>
           )}
-          {event.menu_cat && (
-            <div className="detail-row"><span className="k">{t('Menu Category')}</span><span className="v">{event.menu_cat}</span></div>
-          )}
+          {/* Menu Category already visible in compact card title — not repeated here */}
           {event.decor_type && (
             <div className="detail-row"><span className="k">{t('Decor Type')}</span><span className="v">{t(event.decor_type)}</span></div>
           )}

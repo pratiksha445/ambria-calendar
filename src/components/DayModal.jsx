@@ -11,6 +11,7 @@ export default function DayModal({ date, events, onClose, onAdd, onEdit, onDelet
   const [expandedId, setExpandedId] = useState(null)
   const [dragY, setDragY] = useState(0)
   const dragRef = useRef({ startY: 0, tracking: false })
+  const bodyRef = useRef(null)
   const [narrow, setNarrow] = useState(() => window.innerWidth < 380)
 
   // Reset state when date changes
@@ -63,7 +64,19 @@ export default function DayModal({ date, events, onClose, onAdd, onEdit, onDelet
     return words.every((w) => hay.includes(w))
   })
 
-  const toggle = (id) => setExpandedId((prev) => (prev === id ? null : id))
+  const toggle = (id) => {
+    const next = expandedId === id ? null : id
+    setExpandedId(next)
+    // Auto-scroll expanded card into view after expansion animation starts
+    if (next != null) {
+      requestAnimationFrame(() => {
+        const body = bodyRef.current
+        if (!body) return
+        const card = body.querySelector('.event-card.expanded')
+        if (card) card.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      })
+    }
+  }
 
   // Localized header: "Thursday, 23 April"
   const fullDayName = t(`day_full_${date.getDay()}`)
@@ -142,7 +155,7 @@ export default function DayModal({ date, events, onClose, onAdd, onEdit, onDelet
           </button>
         </div>
 
-        <div className="day-modal-body">
+        <div className="day-modal-body" ref={bodyRef}>
           {filtered.length === 0 ? (
             <div className="empty-state">{t('No bookings')}</div>
           ) : (
