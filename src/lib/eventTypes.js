@@ -3,11 +3,13 @@ import { logAction } from './audit.js'
 
 /** Fetch all event types, sorted by sort_order */
 export async function fetchEventTypes() {
+  console.log('[eventTypes] fetchEventTypes …')
   const { data, error } = await supabase
     .from('event_types')
     .select('*')
     .order('sort_order', { ascending: true })
-  if (error) throw error
+  if (error) { console.error('[eventTypes] fetchEventTypes error:', error); throw error }
+  console.log('[eventTypes] fetched', data?.length, 'types')
   return data ?? []
 }
 
@@ -24,6 +26,7 @@ export async function fetchActiveEventTypes() {
 
 /** Create a new event type */
 export async function createEventType(name, user) {
+  console.log('[eventTypes] createEventType:', name)
   // Get max sort_order
   const { data: existing } = await supabase
     .from('event_types')
@@ -37,7 +40,7 @@ export async function createEventType(name, user) {
     .insert({ name, is_active: true, sort_order: nextOrder })
     .select()
     .single()
-  if (error) throw error
+  if (error) { console.error('[eventTypes] createEventType error:', error); throw error }
 
   if (user) {
     await logAction(user.id, user.name, 'create', 'event_type', data.id, { name })
@@ -65,6 +68,7 @@ export async function updateEventType(id, updates, user) {
 
 /** Delete an event type */
 export async function deleteEventType(id, user) {
+  console.log('[eventTypes] deleteEventType:', id)
   // Fetch name for audit
   const { data: existing } = await supabase
     .from('event_types')
@@ -76,7 +80,7 @@ export async function deleteEventType(id, user) {
     .from('event_types')
     .delete()
     .eq('id', id)
-  if (error) throw error
+  if (error) { console.error('[eventTypes] deleteEventType error:', error); throw error }
 
   if (user && existing) {
     await logAction(user.id, user.name, 'delete', 'event_type', id, { name: existing.name })

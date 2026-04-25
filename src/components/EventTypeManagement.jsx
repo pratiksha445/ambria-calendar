@@ -24,11 +24,19 @@ export default function EventTypeManagement({ currentUser, showToast, onMenu }) 
   const [confirmDeleteId, setConfirmDeleteId] = useState(null)
   const [saving, setSaving] = useState(false)
   const [search, setSearch] = useState('')
+  const [loadError, setLoadError] = useState(null)
 
   useEffect(() => { load() }, [])
 
   async function load() {
-    try { setTypes(await fetchEventTypes()) } catch (e) { console.error(e) }
+    setLoadError(null)
+    try {
+      setTypes(await fetchEventTypes())
+    } catch (e) {
+      console.error('[EventTypeManagement] load error:', e)
+      setLoadError(e?.message ?? String(e))
+      showToast?.(t('Failed to load event types'))
+    }
   }
 
   const handleAdd = async (e) => {
@@ -59,7 +67,12 @@ export default function EventTypeManagement({ currentUser, showToast, onMenu }) 
       setEditName('')
       showToast?.(t('Event type renamed'))
       await load()
-    } catch (err) { console.error(err) }
+    } catch (err) {
+      console.error('[EventTypeManagement] rename error:', err)
+      const msg = err?.message ?? String(err)
+      if (msg.includes('duplicate') || msg.includes('unique')) showToast?.(t('Event type already exists'))
+      else showToast?.(t('Error:') + ' ' + msg)
+    }
   }
 
   const handleToggleActive = async (item) => {
@@ -78,7 +91,10 @@ export default function EventTypeManagement({ currentUser, showToast, onMenu }) 
       setConfirmDeleteId(null)
       showToast?.(t('Event type deleted'))
       await load()
-    } catch (err) { console.error(err) }
+    } catch (err) {
+      console.error('[EventTypeManagement] delete error:', err)
+      showToast?.(t('Error:') + ' ' + (err?.message ?? String(err)))
+    }
   }
 
   const moveUp = async (index) => {
@@ -128,6 +144,13 @@ export default function EventTypeManagement({ currentUser, showToast, onMenu }) 
           {saving ? t('Adding…') : t('Add')}
         </button>
       </form>
+
+      {loadError && (
+        <div className="et-error-banner">
+          {t('Could not load event types.')} {loadError}
+          <button type="button" className="btn-ghost btn-sm" onClick={load}>{t('Retry')}</button>
+        </div>
+      )}
 
       <div className="et-list">
         {types.filter((item) => item.name.toLowerCase().includes(search.toLowerCase())).map((item, index) => {
