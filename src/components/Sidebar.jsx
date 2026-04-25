@@ -47,7 +47,6 @@ export default function Sidebar({
       />
       <aside
         className={`sidebar ${open ? 'open' : ''}`}
-        aria-hidden={!open}
       >
         <div className="sidebar-header">
           <div className="brand">
