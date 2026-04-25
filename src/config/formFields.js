@@ -279,6 +279,11 @@ function villaSections(venue, _dynamicTypes) {
         phoneReq(),
         paxField(),
         salesPersonField(),
+        T('Pending Payment %', 'payment_remaining_venue', false, {
+          filterFn: percentFilter, filterError: 'Only numbers 0-100',
+          suffix: '%', inputMode: 'numeric',
+        }),
+        S('Payment Status', 'payment_timing', PAYMENT_TIMINGS, false),
         notesField,
       ],
     },
@@ -316,6 +321,11 @@ function addSections(_venue, dynamicTypes) {
         guestName(),
         phoneReq(),
         salesPersonField(),
+        T('Pending Payment %', 'payment_remaining_venue', false, {
+          filterFn: percentFilter, filterError: 'Only numbers 0-100',
+          suffix: '%', inputMode: 'numeric',
+        }),
+        S('Payment Status', 'payment_timing', PAYMENT_TIMINGS, false),
         notesField,
       ],
     },
@@ -357,6 +367,11 @@ function acSections(_venue, dynamicTypes) {
         phoneReq(),
         paxField(),
         salesPersonField(),
+        T('Pending Payment %', 'payment_remaining_venue', false, {
+          filterFn: percentFilter, filterError: 'Only numbers 0-100',
+          suffix: '%', inputMode: 'numeric',
+        }),
+        S('Payment Status', 'payment_timing', PAYMENT_TIMINGS, false),
         notesField,
       ],
     },
@@ -390,6 +405,11 @@ function aeeSections(_venue, dynamicTypes) {
         guestName(),
         phoneReq(),
         salesPersonField(),
+        T('Pending Payment %', 'payment_remaining_venue', false, {
+          filterFn: percentFilter, filterError: 'Only numbers 0-100',
+          suffix: '%', inputMode: 'numeric',
+        }),
+        S('Payment Status', 'payment_timing', PAYMENT_TIMINGS, false),
         notesField,
       ],
     },
@@ -420,6 +440,11 @@ function tenderSections(_venue, _dynamicTypes) {
       fields: [
         tenderNameField(),
         phoneOpt(),
+        T('Pending Payment %', 'payment_remaining_venue', false, {
+          filterFn: percentFilter, filterError: 'Only numbers 0-100',
+          suffix: '%', inputMode: 'numeric',
+        }),
+        S('Payment Status', 'payment_timing', PAYMENT_TIMINGS, false),
         notesField,
       ],
     },
@@ -445,26 +470,31 @@ export const FIELD_MAP = {
   villa: [
     'sub_venue', 'check_in_date', 'check_out_date', 'check_in_time', 'check_out_time',
     'pool_included', 'meal_included', 'added_service',
-    'guest_name', 'phone', 'pax', 'sales_person', 'notes',
+    'guest_name', 'phone', 'pax', 'sales_person',
+    'payment_remaining_venue', 'payment_timing', 'notes',
   ],
   add: [
     'venue_name', 'venue_type', 'location', 'event_type', 'event_type_other',
     'shift', 'date', 'time', 'decor_type',
-    'guest_name', 'phone', 'sales_person', 'notes',
+    'guest_name', 'phone', 'sales_person',
+    'payment_remaining_venue', 'payment_timing', 'notes',
   ],
   ac: [
     'venue_name', 'venue_type', 'location', 'event_type', 'event_type_other',
     'shift', 'date', 'time', 'menu_type', 'menu_cat',
-    'guest_name', 'phone', 'pax', 'sales_person', 'notes',
+    'guest_name', 'phone', 'pax', 'sales_person',
+    'payment_remaining_venue', 'payment_timing', 'notes',
   ],
   aee: [
     'venue_name', 'venue_type', 'location', 'event_type', 'event_type_other',
     'shift', 'date', 'time',
-    'guest_name', 'phone', 'sales_person', 'notes',
+    'guest_name', 'phone', 'sales_person',
+    'payment_remaining_venue', 'payment_timing', 'notes',
   ],
   tender: [
     'venue_name', 'location', 'event_type_text', 'date', 'end_date',
-    'tender_name', 'phone', 'notes',
+    'tender_name', 'phone',
+    'payment_remaining_venue', 'payment_timing', 'notes',
   ],
 }
 

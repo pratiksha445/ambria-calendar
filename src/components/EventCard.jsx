@@ -276,6 +276,25 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
             <div className="detail-row"><span className="k">{t('Added Service')}</span><span className="v">{event.added_service}</span></div>
           )}
 
+          {/* ── Payment (non-own-venue categories) ── */}
+          {!isOwnVenue && (event.payment_remaining_venue != null && event.payment_remaining_venue !== '') && (
+            <div className="detail-row detail-payment">
+              <span className="k">{t('Pending Payment %')}</span>
+              <div className="v payment-val">
+                <span>{event.payment_remaining_venue}%</span>
+                <div className="payment-bar">
+                  <div
+                    className={`payment-bar-fill ${getPaymentColor(event.payment_remaining_venue)}`}
+                    style={{ width: `${event.payment_remaining_venue}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+          {!isOwnVenue && event.payment_timing && (
+            <div className="detail-row"><span className="k">{t('Payment Status')}</span><span className="v">{t(event.payment_timing)}</span></div>
+          )}
+
           {event.status && (
             <div className="detail-row"><span className="k">{t('Status')}</span><span className="v">{t(event.status)}</span></div>
           )}
