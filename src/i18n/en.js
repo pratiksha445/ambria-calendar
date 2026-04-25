@@ -150,19 +150,42 @@ const en = {
   'Ambria Events': 'Ambria Events',
   'Tender': 'Tender',
 
-  // ── Sub-venue names ──
-  'Full Venue': 'Full Venue',
-  'Whole Venue': 'Whole Venue',
+  // ── Sub-venue names — AP ──
   'Amber Lawn': 'Amber Lawn',
+  'Glass House': 'Glass House',
+  'Amber Lawn + Glass House': 'Amber Lawn + Glass House',
+  'Amber Lawn + Carnelian Deck': 'Amber Lawn + Carnelian Deck',
+  'Glass House + Half Lawn': 'Glass House + Half Lawn',
+  'Carnelian Deck': 'Carnelian Deck',
+  'Full Venue': 'Full Venue',
+
+  // ── Sub-venue names — AM ──
   'Emerald Lawn': 'Emerald Lawn',
+  'Emerald + Glass House': 'Emerald + Glass House',
+  'Emerald + Banana Tree': 'Emerald + Banana Tree',
+  'Emerald + Glass House + Banana': 'Emerald + Glass House + Banana',
   'Alstonia Lawn': 'Alstonia Lawn',
-  'Banana Lawn': 'Banana Lawn',
-  'Aura': 'Aura',
-  'Aura Banquet': 'Aura Banquet',
-  'Valencia': 'Valencia',
-  'Valencia Banquet': 'Valencia Banquet',
-  'Glasshouse': 'Glasshouse',
+  'Alstonia + Banana Tree': 'Alstonia + Banana Tree',
+  'Alstonia + Banana Tree + Emerald': 'Alstonia + Banana Tree + Emerald',
+  'Banana Tree Lawn': 'Banana Tree Lawn',
+
+  // ── Sub-venue names — AE ──
+  'Aura Lawn': 'Aura Lawn',
+  'Aura Glass House + Lawn': 'Aura Glass House + Lawn',
+  'Aura Glasshouse': 'Aura Glasshouse',
+  'Valencia Glass House': 'Valencia Glass House',
+  'Valencia Glass House + Lawn': 'Valencia Glass House + Lawn',
+  'Valencia Glass House + Lawn + Poolside': 'Valencia Glass House + Lawn + Poolside',
+  'Valencia Lawn + Poolside': 'Valencia Lawn + Poolside',
+
+  // ── Sub-venue names — AR ──
+  'Restro-Lawn': 'Restro-Lawn',
+  'Restro Glass House': 'Restro Glass House',
   'Rooftop': 'Rooftop',
+  'Restro Lawn + Glass House': 'Restro Lawn + Glass House',
+  'Restro Lawn + Rooftop': 'Restro Lawn + Rooftop',
+
+  // ── Sub-venue names — Villa ──
   'AP Kothi': 'AP Kothi',
   'AM Kothi': 'AM Kothi',
   'AE Kothi': 'AE Kothi',

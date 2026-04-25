@@ -150,19 +150,42 @@ const hi = {
   'Ambria Events': 'अम्ब्रिया इवेंट्स',
   'Tender': 'टेंडर',
 
-  // ── उप-वेन्यू नाम ──
-  'Full Venue': 'पूरा वेन्यू',
-  'Whole Venue': 'पूरा वेन्यू',
+  // ── उप-वेन्यू नाम — AP ──
   'Amber Lawn': 'एम्बर लॉन',
+  'Glass House': 'ग्लास हाउस',
+  'Amber Lawn + Glass House': 'एम्बर लॉन + ग्लास हाउस',
+  'Amber Lawn + Carnelian Deck': 'एम्बर लॉन + कार्नेलियन डेक',
+  'Glass House + Half Lawn': 'ग्लास हाउस + हाफ लॉन',
+  'Carnelian Deck': 'कार्नेलियन डेक',
+  'Full Venue': 'पूरा वेन्यू',
+
+  // ── उप-वेन्यू नाम — AM ──
   'Emerald Lawn': 'एमराल्ड लॉन',
+  'Emerald + Glass House': 'एमराल्ड + ग्लास हाउस',
+  'Emerald + Banana Tree': 'एमराल्ड + बनाना ट्री',
+  'Emerald + Glass House + Banana': 'एमराल्ड + ग्लास हाउस + बनाना',
   'Alstonia Lawn': 'अल्स्टोनिया लॉन',
-  'Banana Lawn': 'बनाना लॉन',
-  'Aura': 'ऑरा',
-  'Aura Banquet': 'ऑरा बैंक्वेट',
-  'Valencia': 'वैलेंसिया',
-  'Valencia Banquet': 'वैलेंसिया बैंक्वेट',
-  'Glasshouse': 'ग्लासहाउस',
+  'Alstonia + Banana Tree': 'अल्स्टोनिया + बनाना ट्री',
+  'Alstonia + Banana Tree + Emerald': 'अल्स्टोनिया + बनाना ट्री + एमराल्ड',
+  'Banana Tree Lawn': 'बनाना ट्री लॉन',
+
+  // ── उप-वेन्यू नाम — AE ──
+  'Aura Lawn': 'ऑरा लॉन',
+  'Aura Glass House + Lawn': 'ऑरा ग्लास हाउस + लॉन',
+  'Aura Glasshouse': 'ऑरा ग्लासहाउस',
+  'Valencia Glass House': 'वैलेंसिया ग्लास हाउस',
+  'Valencia Glass House + Lawn': 'वैलेंसिया ग्लास हाउस + लॉन',
+  'Valencia Glass House + Lawn + Poolside': 'वैलेंसिया ग्लास हाउस + लॉन + पूलसाइड',
+  'Valencia Lawn + Poolside': 'वैलेंसिया लॉन + पूलसाइड',
+
+  // ── उप-वेन्यू नाम — AR ──
+  'Restro-Lawn': 'रेस्ट्रो-लॉन',
+  'Restro Glass House': 'रेस्ट्रो ग्लास हाउस',
   'Rooftop': 'रूफटॉप',
+  'Restro Lawn + Glass House': 'रेस्ट्रो लॉन + ग्लास हाउस',
+  'Restro Lawn + Rooftop': 'रेस्ट्रो लॉन + रूफटॉप',
+
+  // ── उप-वेन्यू नाम — Villa ──
   'AP Kothi': 'AP कोठी',
   'AM Kothi': 'AM कोठी',
   'AE Kothi': 'AE कोठी',

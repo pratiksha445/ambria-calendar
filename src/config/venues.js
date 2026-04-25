@@ -5,10 +5,10 @@
 // in-place, every module that imports them sees the update automatically.
 
 export const VENUES = [
-  { id: 'ap',     name: 'Ambria Pushpanjali',    short: 'AP',    color: '#E0C84E', textColor: '#fff', subVenues: ['Whole Venue', 'Amber Lawn', 'Banquet'] },
-  { id: 'am',     name: 'Ambria Manaktala',      short: 'AM',    color: '#E08E45', textColor: '#fff', subVenues: ['Full Venue', 'Emerald Lawn', 'Banquet', 'Alstonia Lawn', 'Banana Lawn'] },
-  { id: 'ae',     name: 'Ambria Exotica',        short: 'AE',    color: '#B08560', textColor: '#fff', subVenues: ['Aura', 'Aura Banquet', 'Valencia', 'Valencia Banquet', 'Poolside'] },
-  { id: 'ar',     name: 'Ambria Restro',         short: 'AR',    color: '#6088B5', textColor: '#fff', subVenues: ['Whole Venue', 'Glasshouse', 'Lawn', 'Rooftop'] },
+  { id: 'ap',     name: 'Ambria Pushpanjali',    short: 'AP',    color: '#E0C84E', textColor: '#fff', subVenues: ['Amber Lawn', 'Glass House', 'Amber Lawn + Glass House', 'Amber Lawn + Carnelian Deck', 'Glass House + Half Lawn', 'Carnelian Deck', 'Full Venue'] },
+  { id: 'am',     name: 'Ambria Manaktala',      short: 'AM',    color: '#E08E45', textColor: '#fff', subVenues: ['Emerald Lawn', 'Emerald + Glass House', 'Emerald + Banana Tree', 'Emerald + Glass House + Banana', 'Alstonia Lawn', 'Alstonia + Banana Tree', 'Alstonia + Banana Tree + Emerald', 'Glass House', 'Banana Tree Lawn', 'Full Venue'] },
+  { id: 'ae',     name: 'Ambria Exotica',        short: 'AE',    color: '#B08560', textColor: '#fff', subVenues: ['Aura Lawn', 'Aura Glass House + Lawn', 'Aura Glasshouse', 'Valencia Glass House', 'Valencia Glass House + Lawn', 'Valencia Glass House + Lawn + Poolside', 'Valencia Lawn + Poolside', 'Full Venue'] },
+  { id: 'ar',     name: 'Ambria Restro',         short: 'AR',    color: '#6088B5', textColor: '#fff', subVenues: ['Restro-Lawn', 'Restro Glass House', 'Rooftop', 'Restro Lawn + Glass House', 'Restro Lawn + Rooftop', 'Full Venue'] },
   { id: 'villa',  name: 'Villa',                 short: 'Villa', color: '#9A6BBE', textColor: '#fff', subVenues: ['AP Kothi', 'AM Kothi', 'AE Kothi'] },
   { id: 'add',    name: 'Ambria Design & Decor', short: 'ADD',   color: '#5FA8C4', textColor: '#fff', subVenues: [] },
   { id: 'ac',     name: 'Ambria Cuisine',        short: 'AC',    color: '#D8728A', textColor: '#fff', subVenues: [] },
