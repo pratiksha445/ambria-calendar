@@ -7,7 +7,7 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
   const { t, formatShortDate } = useLanguage()
   const venue = VENUE_BY_ID[event.venue_id]
   const shiftBadge = event.shift ? SHIFT_BADGE[event.shift] : null
-  const primary = buildPrimary(event, formatShortDate)
+  const primary = buildPrimary(event, formatShortDate, t)
   const [confirmDel, setConfirmDel] = useState(false)
   const canModify = user?.role === 'admin' || (event.created_by != null && user?.id === event.created_by)
 
@@ -95,7 +95,7 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
       <div className="event-card-details" aria-hidden={!expanded}>
         <div className="event-card-details-inner">
           {event.sub_venue && (
-            <div className="detail-row"><span className="k">{t('Sub-venue')}</span><span className="v">{event.sub_venue}</span></div>
+            <div className="detail-row"><span className="k">{t('Sub-venue')}</span><span className="v">{t(event.sub_venue)}</span></div>
           )}
           {event.venue_name && (
             <div className="detail-row"><span className="k">{t('Venue')}</span><span className="v">{event.venue_name}</span></div>
@@ -146,7 +146,7 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
             <div className="detail-row"><span className="k">{t('Menu Category')}</span><span className="v">{event.menu_cat}</span></div>
           )}
           {event.decor_type && (
-            <div className="detail-row"><span className="k">{t('Decor Type')}</span><span className="v">{event.decor_type}</span></div>
+            <div className="detail-row"><span className="k">{t('Decor Type')}</span><span className="v">{t(event.decor_type)}</span></div>
           )}
           {event.pool_included && (
             <div className="detail-row"><span className="k">{t('Pool Included')}</span><span className="v">{t(event.pool_included)}</span></div>
@@ -180,20 +180,20 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
   )
 }
 
-function buildPrimary(event, formatShortDate) {
+function buildPrimary(event, formatShortDate, t) {
   if (event.venue_id === 'tender') {
     return joinPipes([event.tender_name, event.event_type_text, event.venue_name])
   }
   if (event.venue_id === 'villa') {
     return joinPipes([
       event.guest_name,
-      event.sub_venue,
+      event.sub_venue ? t(event.sub_venue) : null,
       formatShortDate(event.check_in_date),
     ])
   }
   return joinPipes([
     event.guest_name,
-    event.event_type === 'Other' ? event.event_type_other : event.event_type,
+    event.event_type === 'Other' ? event.event_type_other : (event.event_type ? t(event.event_type) : null),
     event.pax ? `${event.pax}pax` : null,
     event.menu_cat,
     event.venue_name,

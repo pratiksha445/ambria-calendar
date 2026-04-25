@@ -340,7 +340,7 @@ export default function CategoryManagement({ currentUser, showToast, onMenu }) {
               {cat.sub_venues?.length > 0 && (
                 <div className="cat-subvenue-list">
                   {cat.sub_venues.map((sv, i) => (
-                    <span key={i} className="cat-subvenue-tag">{sv}</span>
+                    <span key={i} className="cat-subvenue-tag">{t(sv)}</span>
                   ))}
                 </div>
               )}
