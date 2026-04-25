@@ -90,11 +90,18 @@ export default function Field({ field, form, value, onChange, error, readOnly, a
     )
   } else if (field.type === 'multiselect') {
     const selected = Array.isArray(value) ? value : []
-    const toggle = (opt) => {
+    // Options can be strings or { value, label } objects
+    const opts = (field.options || []).map((o) =>
+      typeof o === 'object' ? o : { value: o, label: o }
+    )
+    const optValues = new Set(opts.map((o) => o.value))
+    // Legacy: selected values not in current options (deactivated/removed elements)
+    const legacy = selected.filter((v) => !optValues.has(v))
+    const toggle = (val) => {
       if (disabled) return
-      const next = selected.includes(opt)
-        ? selected.filter((v) => v !== opt)
-        : [...selected, opt]
+      const next = selected.includes(val)
+        ? selected.filter((v) => v !== val)
+        : [...selected, val]
       onChange(field.key, next)
     }
     return (
@@ -104,15 +111,26 @@ export default function Field({ field, form, value, onChange, error, readOnly, a
           {field.required && !disabled && <span className="required-star"> *</span>}
         </label>
         <div className="multiselect-grid">
-          {field.options.map((opt) => (
-            <label key={opt} className={`multiselect-chip ${selected.includes(opt) ? 'selected' : ''} ${disabled ? 'disabled' : ''}`}>
+          {opts.map((opt) => (
+            <label key={opt.value} className={`multiselect-chip ${selected.includes(opt.value) ? 'selected' : ''} ${disabled ? 'disabled' : ''}`}>
               <input
                 type="checkbox"
-                checked={selected.includes(opt)}
-                onChange={() => toggle(opt)}
+                checked={selected.includes(opt.value)}
+                onChange={() => toggle(opt.value)}
                 disabled={disabled}
               />
-              <span>{t(opt)}</span>
+              <span>{opt.label}</span>
+            </label>
+          ))}
+          {legacy.map((val) => (
+            <label key={val} className={`multiselect-chip selected legacy ${disabled ? 'disabled' : ''}`}>
+              <input
+                type="checkbox"
+                checked
+                onChange={() => toggle(val)}
+                disabled={disabled}
+              />
+              <span>{val}</span>
             </label>
           ))}
         </div>

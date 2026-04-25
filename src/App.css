@@ -1076,6 +1076,12 @@
   opacity: 0.5;
   cursor: default;
 }
+.multiselect-chip.legacy {
+  background: var(--ambria-border);
+  color: var(--ambria-text-secondary, #666);
+  border-color: var(--ambria-border);
+  opacity: 0.7;
+}
 
 /* Detail section headings (EventCard expanded view) */
 .detail-section-heading {
@@ -3061,6 +3067,21 @@
   gap: 6px;
   flex-shrink: 0;
   flex-wrap: wrap;
+}
+
+/* ============================================================
+ * Element Management
+ * ============================================================ */
+.element-add-form {
+  flex-wrap: wrap;
+}
+.element-inline-edit {
+  flex-wrap: wrap;
+}
+.element-name-hi {
+  font-size: 0.78rem;
+  color: var(--ambria-muted);
+  margin-left: 6px;
 }
 
 /* ============================================================

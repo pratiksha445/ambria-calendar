@@ -10,6 +10,7 @@ import { sanitizeText, sanitizePhone, sanitizePax } from '../lib/sanitize.js'
 import { createEvent, updateEvent, deleteEvent } from '../lib/events.js'
 import { fetchActiveEventTypes } from '../lib/eventTypes.js'
 import { fetchActiveUserNames } from '../lib/users.js'
+import { fetchActiveElements, getElementLabel } from '../lib/elements.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 import Field from './Field.jsx'
 
@@ -23,7 +24,7 @@ function blankForm(venueId, defaults = {}) {
 }
 
 export default function BookingForm({ initial, onSaved, onDeleted, onClose, user }) {
-  const { t } = useLanguage()
+  const { t, lang } = useLanguage()
   const editing = !!(initial && initial.id)
   const readOnly = editing && initial?.source !== 'manual'
 
@@ -44,6 +45,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [submitError, setSubmitError] = useState(null)
   const [dynamicEventTypes, setDynamicEventTypes] = useState(null)
+  const [dynamicElements, setDynamicElements] = useState(null)
   const [activeUsers, setActiveUsers] = useState([])
   const [collapsedSections, setCollapsedSections] = useState({})
 
@@ -54,9 +56,14 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
     fetchActiveUserNames()
       .then(setActiveUsers)
       .catch(() => setActiveUsers([]))
+    fetchActiveElements()
+      .then((rows) => setDynamicElements(
+        rows.map((el) => ({ value: el.name, label: getElementLabel(el.name, lang, { [el.name]: el.name_hi }) }))
+      ))
+      .catch(() => setDynamicElements(null))
   }, [])
 
-  const sections = useMemo(() => getFormConfig(venueId, dynamicEventTypes), [venueId, dynamicEventTypes])
+  const sections = useMemo(() => getFormConfig(venueId, dynamicEventTypes, dynamicElements), [venueId, dynamicEventTypes, dynamicElements])
   const computedTitle = useMemo(() => autoTitle({ ...form, venue_id: venueId }), [form, venueId])
   const displayTitle = manualTitle ?? computedTitle
 
@@ -98,7 +105,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
   const resetTitle = () => setManualTitle(null)
 
   const validate = () => {
-    const all = getAllFields(venueId, dynamicEventTypes)
+    const all = getAllFields(venueId, dynamicEventTypes, dynamicElements)
     const nextErrors = {}
     for (const field of all) {
       if (field.showWhen && !field.showWhen(form)) continue
@@ -126,7 +133,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
 
   const buildPayload = () => {
     const validKeys = new Set(FIELD_MAP[venueId] || [])
-    const all = getAllFields(venueId, dynamicEventTypes)
+    const all = getAllFields(venueId, dynamicEventTypes, dynamicElements)
 
     const payload = {
       venue_id: venueId,

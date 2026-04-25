@@ -14,6 +14,7 @@ import UserManagement from './components/UserManagement.jsx'
 import AuditLog from './components/AuditLog.jsx'
 import EventTypeManagement from './components/EventTypeManagement.jsx'
 import CategoryManagement from './components/CategoryManagement.jsx'
+import ManageElements from './components/ManageElements.jsx'
 import { fetchEvents, deleteEvent, bulkDeleteMonth } from './lib/events.js'
 import { seedIfEmpty } from './lib/seedEvents.js'
 import { startOfMonth, endOfMonth, toIsoDate, addDays } from './lib/dates.js'
@@ -367,6 +368,9 @@ export default function App() {
         )}
         {currentView === 'categories' && user.role === 'admin' && (
           <CategoryManagement currentUser={user} showToast={showToast} onMenu={() => setSidebarOpen(true)} />
+        )}
+        {currentView === 'elements' && user.role === 'admin' && (
+          <ManageElements currentUser={user} showToast={showToast} onMenu={() => setSidebarOpen(true)} />
         )}
       </div>
       <DayModal

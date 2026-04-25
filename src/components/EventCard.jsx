@@ -3,11 +3,13 @@ import { createPortal } from 'react-dom'
 import { VENUE_BY_ID, SHIFT_BADGE } from '../config/venues.js'
 import { formatTime12 } from '../lib/dates.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
+import { loadElementLabels, getElementLabel } from '../lib/elements.js'
 
 const OWN_VENUES = new Set(['ap', 'am', 'ae', 'ar'])
 
 export default function EventCard({ event, expanded = false, onToggle, onEdit, onDelete, user }) {
-  const { t, formatShortDate } = useLanguage()
+  const { t, lang, formatShortDate } = useLanguage()
+  const [elementLabels, setElementLabels] = useState({})
   const venue = VENUE_BY_ID[event.venue_id]
   const shiftBadge = event.shift ? SHIFT_BADGE[event.shift] : null
   const primary = buildPrimary(event, formatShortDate, t)
@@ -16,6 +18,10 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
   const isOwnVenue = OWN_VENUES.has(event.venue_id)
   const [showTimePopup, setShowTimePopup] = useState(false)
   const [popupPos, setPopupPos] = useState({ top: 0, left: 0 })
+
+  useEffect(() => {
+    loadElementLabels().then(setElementLabels).catch(() => {})
+  }, [])
 
   useEffect(() => {
     if (!expanded) setConfirmDel(false)
@@ -245,7 +251,7 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
               <span className="k">{t('Elements')}</span>
               <div className="v element-chips">
                 {event.elements.map((el) => (
-                  <span key={el} className="element-chip">{t(el)}</span>
+                  <span key={el} className="element-chip">{getElementLabel(el, lang, elementLabels)}</span>
                 ))}
               </div>
             </div>

@@ -34,7 +34,8 @@ export const DECOR_STATUSES = ['Open', 'Meeting', 'Closure', 'Outdoor']
 export const ENTERTAINMENT_STATUSES = ['Open', 'Meeting', 'Closure', 'Outdoor']
 export const FUNCTION_CATEGORIES = ['Silver', 'Gold', 'Platinum']
 export const PAYMENT_TIMINGS = ['Before Event', 'On the Day', 'After Event']
-export const ELEMENT_OPTIONS = [
+// Hardcoded fallback — used only when DB fetch fails
+export const ELEMENT_OPTIONS_FALLBACK = [
   'Coldpyros', 'Coldpyro Guns', 'Flower Shower', 'Sparkle Machine',
   'CO2 Jets/Guns', 'Dhol', 'Live Band', 'Ghori Baggi', 'Vintage Car',
   'Mascot', 'Celebrity Artist', 'Sky Shots', 'Color Sky Shot', 'Color Bomb',
@@ -166,7 +167,7 @@ function eventTypeFields(dynamicTypes) {
 
 // AP/AM/AE/AR — venue booking (3-section layout)
 // Venue section field order matches the 2-column grid spec (left|right per row)
-function ownVenueSections(venue, dynamicTypes) {
+function ownVenueSections(venue, dynamicTypes, dynamicElements) {
   return [
     {
       title: 'Venue',
@@ -230,7 +231,7 @@ function ownVenueSections(venue, dynamicTypes) {
       collapsible: true,
       fields: [
         S('Entertainment Status', 'entertainment_status', ENTERTAINMENT_STATUSES, false),
-        { type: 'multiselect', label: 'Elements', key: 'elements', options: ELEMENT_OPTIONS, required: false },
+        { type: 'multiselect', label: 'Elements', key: 'elements', options: dynamicElements || ELEMENT_OPTIONS_FALLBACK, required: false },
         T('Pending Payment — Ent %', 'payment_remaining_ent', false, {
           filterFn: percentFilter, filterError: 'Only numbers 0-100',
           suffix: '%', inputMode: 'numeric',
@@ -526,17 +527,17 @@ const BUILDERS = {
   tender: tenderSections,
 }
 
-export function getFormConfig(venueId, dynamicTypes) {
+export function getFormConfig(venueId, dynamicTypes, dynamicElements) {
   const venue = VENUE_BY_ID[venueId]
   if (!venue) return []
   const build = BUILDERS[venueId]
-  return build ? build(venue, dynamicTypes) : []
+  return build ? build(venue, dynamicTypes, dynamicElements) : []
 }
 
 // Flatten sections to a single field list — convenient for validation.
 // Expands 'group' type fields into their child fields.
-export function getAllFields(venueId, dynamicTypes) {
-  return getFormConfig(venueId, dynamicTypes).flatMap((s) => s.fields).flatMap(
+export function getAllFields(venueId, dynamicTypes, dynamicElements) {
+  return getFormConfig(venueId, dynamicTypes, dynamicElements).flatMap((s) => s.fields).flatMap(
     (f) => f.type === 'group' ? f.fields : [f]
   )
 }
