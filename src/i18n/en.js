@@ -125,6 +125,8 @@ const en = {
   'Baraat Time': 'Baraat Time',
   'Varmala Time': 'Varmala Time',
   'Pheras Time': 'Pheras Time',
+  'Pheras Next Day (+1)': 'Pheras Next Day (+1)',
+  'Next Day': 'Next Day',
   'Decor Status': 'Decor Status',
   'Entertainment Status': 'Entertainment Status',
   'Function Category': 'Function Category',

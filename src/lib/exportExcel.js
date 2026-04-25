@@ -65,7 +65,11 @@ export function exportEventsToExcel(events, filename) {
         const v = VENUE_BY_ID[ev.venue_id]
         return v ? `${v.short} — ${v.name}` : ev.venue_id || ''
       }
-      if (TIME_KEYS.has(col.key)) return formatTime12(ev[col.key])
+      if (TIME_KEYS.has(col.key)) {
+        const t12 = formatTime12(ev[col.key])
+        if (col.key === 'pheras_time' && ev.pheras_next_day && t12) return `${t12} (+1)`
+        return t12
+      }
       if (col.key === 'source') return (ev.source || '').toUpperCase()
       if (col.key === 'payment_remaining') {
         const val = ev.payment_remaining

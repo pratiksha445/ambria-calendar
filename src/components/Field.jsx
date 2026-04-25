@@ -71,6 +71,20 @@ export default function Field({ field, form, value, onChange, error, readOnly })
     control = <input type="date" {...commonProps} />
   } else if (field.type === 'time') {
     control = <input type="time" {...commonProps} />
+  } else if (field.type === 'checkbox') {
+    return (
+      <div className={`field field-checkbox ${disabled ? 'is-disabled' : ''}`}>
+        <label className="field-checkbox-row">
+          <input
+            type="checkbox"
+            checked={!!value}
+            disabled={disabled}
+            onChange={(e) => onChange(field.key, e.target.checked)}
+          />
+          <span className="field-checkbox-text">{t(field.label)}</span>
+        </label>
+      </div>
+    )
   } else if (field.suffix) {
     control = (
       <div className="field-with-suffix">

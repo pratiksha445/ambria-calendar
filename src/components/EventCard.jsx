@@ -130,7 +130,7 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
             <div className="time-popup-row"><span className="time-popup-label">{t('Chaat')}</span><span>{formatTime12(event.chaat_time) || '\u2014'}</span></div>
             <div className="time-popup-row"><span className="time-popup-label">{t('Baraat')}</span><span>{formatTime12(event.baraat_time) || '\u2014'}</span></div>
             <div className="time-popup-row"><span className="time-popup-label">{t('Varmala')}</span><span>{formatTime12(event.varmala_time) || '\u2014'}</span></div>
-            <div className="time-popup-row"><span className="time-popup-label">{t('Pheras')}</span><span>{formatTime12(event.pheras_time) || '\u2014'}</span></div>
+            <div className="time-popup-row"><span className="time-popup-label">{t('Pheras')}</span><span>{formatTime12(event.pheras_time) || '\u2014'}{event.pheras_next_day && <span className="next-day-badge">+1</span>}</span></div>
           </div>
         </>,
         document.body

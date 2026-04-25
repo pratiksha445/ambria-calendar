@@ -936,6 +936,48 @@
   letter-spacing: 0.04em;
 }
 
+/* Next-day badge (+1) in time popup */
+.next-day-badge {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 1px 5px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--ambria-accent);
+  border-radius: 4px;
+  vertical-align: middle;
+  line-height: 1.3;
+}
+
+/* Checkbox field (e.g. Pheras Next Day) */
+.field-checkbox {
+  margin-top: -4px;
+}
+.field-checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px 0;
+}
+.field-checkbox-row input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--ambria-accent);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.field-checkbox-text {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--ambria-ink);
+}
+.field-checkbox.is-disabled .field-checkbox-row {
+  opacity: 0.5;
+  cursor: default;
+}
+
 /* Payment progress bar */
 .detail-payment .payment-val {
   display: flex;

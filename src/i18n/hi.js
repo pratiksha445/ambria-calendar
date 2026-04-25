@@ -125,6 +125,8 @@ const hi = {
   'Baraat Time': 'बारात समय',
   'Varmala Time': 'वरमाला समय',
   'Pheras Time': 'फेरे समय',
+  'Pheras Next Day (+1)': 'फेरे अगला दिन (+1)',
+  'Next Day': 'अगला दिन',
   'Decor Status': 'डेकोर स्थिति',
   'Entertainment Status': 'मनोरंजन स्थिति',
   'Function Category': 'फंक्शन श्रेणी',

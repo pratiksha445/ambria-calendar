@@ -85,6 +85,8 @@ const TM = (label, key, required = true, extra = {}) =>
   ({ type: 'time', label, key, required, ...extra })
 const TA = (label, key, required = false, extra = {}) =>
   ({ type: 'textarea', label, key, required, ...extra })
+const CB = (label, key, extra = {}) =>
+  ({ type: 'checkbox', label, key, required: false, ...extra })
 
 // ---------- Input filters — strip invalid characters on keystroke ----------
 
@@ -175,6 +177,7 @@ function ownVenueSections(venue, dynamicTypes) {
         TM('Baraat Time', 'baraat_time'),
         TM('Varmala Time', 'varmala_time'),
         TM('Pheras Time', 'pheras_time'),
+        CB('Pheras Next Day (+1)', 'pheras_next_day'),
       ],
     },
     {
@@ -402,7 +405,7 @@ function tenderSections(_venue, _dynamicTypes) {
 
 const VENUE_FIELD_KEYS = [
   'sub_venue', 'event_type', 'event_type_other', 'shift', 'date', 'time',
-  'decor_time', 'chaat_time', 'baraat_time', 'varmala_time', 'pheras_time',
+  'decor_time', 'chaat_time', 'baraat_time', 'varmala_time', 'pheras_time', 'pheras_next_day',
   'booking_status', 'menu_type', 'menu_cat', 'fp_status',
   'decor_status', 'entertainment_status', 'function_category',
   'delivery_person', 'payment_remaining', 'payment_timing',
@@ -443,7 +446,7 @@ export const FIELD_MAP = {
 // Union of every saveable field key — used to null-out irrelevant columns.
 export const ALL_SAVEABLE_KEYS = [
   'sub_venue', 'event_type', 'event_type_other', 'shift', 'date', 'time',
-  'decor_time', 'chaat_time', 'baraat_time', 'varmala_time', 'pheras_time',
+  'decor_time', 'chaat_time', 'baraat_time', 'varmala_time', 'pheras_time', 'pheras_next_day',
   'booking_status', 'menu_type', 'menu_cat', 'fp_status',
   'decor_status', 'entertainment_status', 'function_category',
   'delivery_person', 'payment_remaining', 'payment_timing',
