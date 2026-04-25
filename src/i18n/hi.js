@@ -321,6 +321,7 @@ const hi = {
   'Decor Sales': 'डेकोर सेल्स',
   'Entertainment Sales': 'एंटरटेनमेंट सेल्स',
   'Catering Sales': 'कैटरिंग सेल्स',
+  'Wedding Services': 'वेडिंग सर्विसेज',
   'Kitchen': 'किचन',
   'F&B Service': 'F&B सर्विस',
   'Housekeeping': 'हाउसकीपिंग',

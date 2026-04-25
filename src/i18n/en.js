@@ -321,6 +321,7 @@ const en = {
   'Decor Sales': 'Decor Sales',
   'Entertainment Sales': 'Entertainment Sales',
   'Catering Sales': 'Catering Sales',
+  'Wedding Services': 'Wedding Services',
   'Kitchen': 'Kitchen',
   'F&B Service': 'F&B Service',
   'Housekeeping': 'Housekeeping',

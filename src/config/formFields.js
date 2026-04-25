@@ -45,7 +45,7 @@ export const ELEMENT_OPTIONS_FALLBACK = [
 ]
 export const DEPARTMENTS = [
   'Venue Sales', 'Decor Sales', 'Entertainment Sales', 'Catering Sales',
-  'Kitchen', 'F&B Service', 'Housekeeping', 'Admin', 'Management',
+  'Wedding Services', 'Kitchen', 'F&B Service', 'Housekeeping', 'Admin', 'Management',
   'Social/Tech', 'Decor Operations', 'Tender', 'Accounts',
 ]
 export const VENUE_TYPES = ['Lawn', 'Banquet', 'Lawn + Bqt', 'Poolside']
