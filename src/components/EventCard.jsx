@@ -194,15 +194,43 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
           {event.delivery_person && (
             <div className="detail-row"><span className="k">{t('Delivery')}</span><span className="v">{event.delivery_person}</span></div>
           )}
-          {(event.payment_remaining != null && event.payment_remaining !== '') && (
+          {(event.payment_remaining_venue != null && event.payment_remaining_venue !== '') && (
             <div className="detail-row detail-payment">
-              <span className="k">{t('Payment')}</span>
+              <span className="k">{t('Venue %')}</span>
               <div className="v payment-val">
-                <span>{event.payment_remaining}%</span>
+                <span>{event.payment_remaining_venue}%</span>
                 <div className="payment-bar">
                   <div
-                    className={`payment-bar-fill ${getPaymentColor(event.payment_remaining)}`}
-                    style={{ width: `${event.payment_remaining}%` }}
+                    className={`payment-bar-fill ${getPaymentColor(event.payment_remaining_venue)}`}
+                    style={{ width: `${event.payment_remaining_venue}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+          {(event.payment_remaining_decor != null && event.payment_remaining_decor !== '') && (
+            <div className="detail-row detail-payment">
+              <span className="k">{t('Decor %')}</span>
+              <div className="v payment-val">
+                <span>{event.payment_remaining_decor}%</span>
+                <div className="payment-bar">
+                  <div
+                    className={`payment-bar-fill ${getPaymentColor(event.payment_remaining_decor)}`}
+                    style={{ width: `${event.payment_remaining_decor}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+          {(event.payment_remaining_ent != null && event.payment_remaining_ent !== '') && (
+            <div className="detail-row detail-payment">
+              <span className="k">{t('Ent %')}</span>
+              <div className="v payment-val">
+                <span>{event.payment_remaining_ent}%</span>
+                <div className="payment-bar">
+                  <div
+                    className={`payment-bar-fill ${getPaymentColor(event.payment_remaining_ent)}`}
+                    style={{ width: `${event.payment_remaining_ent}%` }}
                   />
                 </div>
               </div>

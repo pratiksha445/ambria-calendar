@@ -281,17 +281,36 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
           <div key={section.title} className="form-section">
             <div className="form-section-title">{t(section.title)}</div>
             <div className="form-grid">
-              {section.fields.map((field) => (
-                <Field
-                  key={field.key}
-                  field={field}
-                  form={form}
-                  value={form[field.key]}
-                  onChange={setField}
-                  error={errors[field.key]}
-                  readOnly={readOnly}
-                />
-              ))}
+              {section.fields.map((field) => {
+                if (field.type === 'group') {
+                  return (
+                    <div key={field.key} className={`field-group field-group-${field.columns || 2}`}>
+                      {field.fields.map((f) => (
+                        <Field
+                          key={f.key}
+                          field={f}
+                          form={form}
+                          value={form[f.key]}
+                          onChange={setField}
+                          error={errors[f.key]}
+                          readOnly={readOnly}
+                        />
+                      ))}
+                    </div>
+                  )
+                }
+                return (
+                  <Field
+                    key={field.key}
+                    field={field}
+                    form={form}
+                    value={form[field.key]}
+                    onChange={setField}
+                    error={errors[field.key]}
+                    readOnly={readOnly}
+                  />
+                )
+              })}
             </div>
           </div>
         ))}

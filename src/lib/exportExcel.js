@@ -26,7 +26,9 @@ const COLUMNS = [
   { key: 'entertainment_status', header: 'Entertainment Status' },
   { key: 'function_category', header: 'Function Category' },
   { key: 'delivery_person', header: 'Delivery Person' },
-  { key: 'payment_remaining', header: 'Payment Remaining' },
+  { key: 'payment_remaining_venue', header: 'Payment Remaining (Venue) %' },
+  { key: 'payment_remaining_decor', header: 'Payment Remaining (Decor) %' },
+  { key: 'payment_remaining_ent', header: 'Payment Remaining (Ent) %' },
   { key: 'payment_timing', header: 'Payment Timing' },
   { key: 'decor_time', header: 'Decor Time' },
   { key: 'chaat_time', header: 'Chaat Time' },
@@ -71,8 +73,8 @@ export function exportEventsToExcel(events, filename) {
         return t12
       }
       if (col.key === 'source') return (ev.source || '').toUpperCase()
-      if (col.key === 'payment_remaining') {
-        const val = ev.payment_remaining
+      if (col.key.startsWith('payment_remaining_')) {
+        const val = ev[col.key]
         return (val != null && val !== '') ? `${val}%` : ''
       }
       return ev[col.key] ?? ''

@@ -132,6 +132,9 @@ const en = {
   'Function Category': 'Function Category',
   'Delivery Person': 'Delivery Person',
   'Payment Remaining': 'Payment Remaining',
+  'Venue %': 'Venue %',
+  'Decor %': 'Decor %',
+  'Ent %': 'Ent %',
   'Payment Timing': 'Payment Timing',
 
   // ── Form section titles ──

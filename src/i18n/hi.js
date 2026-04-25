@@ -132,6 +132,9 @@ const hi = {
   'Function Category': 'फंक्शन श्रेणी',
   'Delivery Person': 'डिलीवरी व्यक्ति',
   'Payment Remaining': 'बकाया भुगतान',
+  'Venue %': 'वेन्यू %',
+  'Decor %': 'डेकोर %',
+  'Ent %': 'एंट %',
   'Payment Timing': 'भुगतान समय',
 
   // ── फ़ॉर्म सेक्शन टाइटल ──

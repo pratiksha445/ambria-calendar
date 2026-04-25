@@ -198,10 +198,23 @@ function ownVenueSections(venue, dynamicTypes) {
         T('Delivery Person', 'delivery_person', true, {
           filterFn: nameFilter, filterError: 'Only letters allowed',
         }),
-        T('Payment Remaining', 'payment_remaining', true, {
-          filterFn: percentFilter, filterError: 'Only numbers 0-100',
-          suffix: '%', inputMode: 'numeric',
-        }),
+        {
+          type: 'group', key: 'payment_remaining_group', columns: 3,
+          fields: [
+            T('Venue %', 'payment_remaining_venue', true, {
+              filterFn: percentFilter, filterError: 'Only numbers 0-100',
+              suffix: '%', inputMode: 'numeric',
+            }),
+            T('Decor %', 'payment_remaining_decor', false, {
+              filterFn: percentFilter, filterError: 'Only numbers 0-100',
+              suffix: '%', inputMode: 'numeric',
+            }),
+            T('Ent %', 'payment_remaining_ent', false, {
+              filterFn: percentFilter, filterError: 'Only numbers 0-100',
+              suffix: '%', inputMode: 'numeric',
+            }),
+          ],
+        },
         S('Payment Timing', 'payment_timing', PAYMENT_TIMINGS),
       ],
     },
@@ -408,7 +421,7 @@ const VENUE_FIELD_KEYS = [
   'decor_time', 'chaat_time', 'baraat_time', 'varmala_time', 'pheras_time', 'pheras_next_day',
   'booking_status', 'menu_type', 'menu_cat', 'fp_status',
   'decor_status', 'entertainment_status', 'function_category',
-  'delivery_person', 'payment_remaining', 'payment_timing',
+  'delivery_person', 'payment_remaining_venue', 'payment_remaining_decor', 'payment_remaining_ent', 'payment_timing',
   'guest_name', 'phone', 'pax', 'sales_person', 'notes',
 ]
 
@@ -449,7 +462,7 @@ export const ALL_SAVEABLE_KEYS = [
   'decor_time', 'chaat_time', 'baraat_time', 'varmala_time', 'pheras_time', 'pheras_next_day',
   'booking_status', 'menu_type', 'menu_cat', 'fp_status',
   'decor_status', 'entertainment_status', 'function_category',
-  'delivery_person', 'payment_remaining', 'payment_timing',
+  'delivery_person', 'payment_remaining_venue', 'payment_remaining_decor', 'payment_remaining_ent', 'payment_timing',
   'guest_name', 'phone', 'pax', 'sales_person', 'notes',
   'check_in_date', 'check_out_date', 'check_in_time', 'check_out_time',
   'pool_included', 'meal_included', 'added_service',
@@ -479,8 +492,11 @@ export function getFormConfig(venueId, dynamicTypes) {
 }
 
 // Flatten sections to a single field list — convenient for validation.
+// Expands 'group' type fields into their child fields.
 export function getAllFields(venueId, dynamicTypes) {
-  return getFormConfig(venueId, dynamicTypes).flatMap((s) => s.fields)
+  return getFormConfig(venueId, dynamicTypes).flatMap((s) => s.fields).flatMap(
+    (f) => f.type === 'group' ? f.fields : [f]
+  )
 }
 
 // Returns true if the given field is effectively required in the current

@@ -1588,6 +1588,13 @@
   gap: 10px;
 }
 
+.field-group {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
 .field {
   display: flex;
   flex-direction: column;
@@ -1895,6 +1902,7 @@
   }
   .modal-handle { display: none; }
   .form-grid { grid-template-columns: 1fr 1fr; }
+  .field-group-3 { grid-template-columns: repeat(3, 1fr); }
   .field textarea { grid-column: 1 / -1; }
 }
 
