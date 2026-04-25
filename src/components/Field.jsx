@@ -85,6 +85,37 @@ export default function Field({ field, form, value, onChange, error, readOnly })
         </label>
       </div>
     )
+  } else if (field.type === 'multiselect') {
+    const selected = Array.isArray(value) ? value : []
+    const toggle = (opt) => {
+      if (disabled) return
+      const next = selected.includes(opt)
+        ? selected.filter((v) => v !== opt)
+        : [...selected, opt]
+      onChange(field.key, next)
+    }
+    return (
+      <div className={`field field-multiselect ${displayError ? 'has-error' : ''} ${disabled ? 'is-disabled' : ''}`}>
+        <label className="field-label">
+          {t(field.label)}
+          {field.required && !disabled && <span className="required-star"> *</span>}
+        </label>
+        <div className="multiselect-grid">
+          {field.options.map((opt) => (
+            <label key={opt} className={`multiselect-chip ${selected.includes(opt) ? 'selected' : ''} ${disabled ? 'disabled' : ''}`}>
+              <input
+                type="checkbox"
+                checked={selected.includes(opt)}
+                onChange={() => toggle(opt)}
+                disabled={disabled}
+              />
+              <span>{t(opt)}</span>
+            </label>
+          ))}
+        </div>
+        {displayError && <div className="field-error">{t(displayError)}</div>}
+      </div>
+    )
   } else if (field.suffix) {
     control = (
       <div className="field-with-suffix">

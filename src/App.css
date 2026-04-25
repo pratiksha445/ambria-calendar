@@ -1038,6 +1038,72 @@
   cursor: default;
 }
 
+/* Multiselect chips (Elements field) */
+.field-multiselect {
+  grid-column: 1 / -1;
+}
+.multiselect-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.multiselect-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border: 1px solid var(--ambria-border);
+  border-radius: 16px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  user-select: none;
+  transition: all 150ms ease;
+  background: var(--ambria-card);
+  color: var(--ambria-text);
+}
+.multiselect-chip input[type="checkbox"] {
+  display: none;
+}
+.multiselect-chip.selected {
+  background: var(--ambria-accent);
+  color: #fff;
+  border-color: var(--ambria-accent);
+}
+.multiselect-chip:not(.disabled):hover {
+  border-color: var(--ambria-accent);
+}
+.multiselect-chip.disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* Detail section headings (EventCard expanded view) */
+.detail-section-heading {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--ambria-text);
+  padding-left: 8px;
+  border-left: 2px solid var(--ambria-accent);
+  margin-top: 10px;
+  margin-bottom: 2px;
+}
+.detail-section-heading:first-child { margin-top: 0; }
+
+/* Element chips in detail view */
+.detail-elements .element-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.element-chip {
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  background: var(--ambria-bg);
+  border: 1px solid var(--ambria-border);
+  border-radius: 12px;
+  white-space: nowrap;
+}
+
 /* Payment progress bar */
 .detail-payment .payment-val {
   display: flex;
@@ -1572,6 +1638,8 @@
 }
 
 .form-section + .form-section { margin-top: 14px; }
+.form-section + .form-section-prominent,
+.form-section-prominent + .form-section { margin-top: 20px; }
 
 .form-section-title {
   font-size: 0.72rem;
@@ -1580,6 +1648,16 @@
   color: var(--ambria-muted);
   font-weight: 700;
   margin-bottom: 8px;
+}
+.form-section-title-prominent {
+  font-size: 1rem;
+  text-transform: none;
+  letter-spacing: normal;
+  color: var(--ambria-text);
+  font-weight: 700;
+  margin-bottom: 12px;
+  padding-left: 10px;
+  border-left: 3px solid var(--ambria-accent);
 }
 
 .form-grid {

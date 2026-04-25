@@ -100,7 +100,8 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
 
       const v = form[field.key]
 
-      if (isFieldRequired(field, form) && (v === undefined || v === null || v === '')) {
+      const isEmpty = Array.isArray(v) ? v.length === 0 : (v === undefined || v === null || v === '')
+      if (isFieldRequired(field, form) && isEmpty) {
         nextErrors[field.key] = 'Required'
         continue
       }
@@ -159,6 +160,8 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
         payload[key] = sanitizePax(raw)
       } else if (fieldDef && (fieldDef.type === 'date' || fieldDef.type === 'time' || fieldDef.type === 'select')) {
         payload[key] = raw || null
+      } else if (fieldDef?.type === 'multiselect') {
+        payload[key] = Array.isArray(raw) && raw.length > 0 ? raw : null
       } else {
         payload[key] = sanitizeText(raw, key)
       }
@@ -277,9 +280,13 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
       </div>
 
       <div className="form-body">
-        {sections.map((section) => (
-          <div key={section.title} className="form-section">
-            <div className="form-section-title">{t(section.title)}</div>
+        {sections.map((section, si) => (
+          <div key={section.title || `section-${si}`} className={`form-section ${section.prominent ? 'form-section-prominent' : ''}`}>
+            {section.title && (
+              <div className={`form-section-title ${section.prominent ? 'form-section-title-prominent' : ''}`}>
+                {t(section.title)}
+              </div>
+            )}
             <div className="form-grid">
               {section.fields.map((field) => {
                 if (field.type === 'group') {

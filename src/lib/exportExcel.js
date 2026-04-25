@@ -24,7 +24,8 @@ const COLUMNS = [
   { key: 'fp_status', header: 'FP Status' },
   { key: 'decor_status', header: 'Decor Status' },
   { key: 'entertainment_status', header: 'Entertainment Status' },
-  { key: 'function_category', header: 'Function Category' },
+  { key: 'function_category', header: 'Decor Category' },
+  { key: 'elements', header: 'Elements' },
   { key: 'delivery_person', header: 'Delivery Person' },
   { key: 'payment_remaining_venue', header: 'Payment Remaining (Venue) %' },
   { key: 'payment_remaining_decor', header: 'Payment Remaining (Decor) %' },
@@ -71,6 +72,9 @@ export function exportEventsToExcel(events, filename) {
         const t12 = formatTime12(ev[col.key])
         if (col.key === 'pheras_time' && ev.pheras_next_day && t12) return `${t12} (+1)`
         return t12
+      }
+      if (col.key === 'elements') {
+        return Array.isArray(ev.elements) ? ev.elements.join('; ') : ''
       }
       if (col.key === 'source') return (ev.source || '').toUpperCase()
       if (col.key.startsWith('payment_remaining_')) {

@@ -34,6 +34,14 @@ export const DECOR_STATUSES = ['Open', 'Meeting', 'Closure', 'Outdoor']
 export const ENTERTAINMENT_STATUSES = ['Open', 'Meeting', 'Closure', 'Outdoor']
 export const FUNCTION_CATEGORIES = ['Silver', 'Gold', 'Platinum']
 export const PAYMENT_TIMINGS = ['Before Event', 'On the Day', 'After Event']
+export const ELEMENT_OPTIONS = [
+  'Coldpyros', 'Coldpyro Guns', 'Flower Shower', 'Sparkle Machine',
+  'CO2 Jets/Guns', 'Dhol', 'Live Band', 'Ghori Baggi', 'Vintage Car',
+  'Mascot', 'Celebrity Artist', 'Sky Shots', 'Color Sky Shot', 'Color Bomb',
+  'LED Screen', 'Singer', 'DJ', 'Percussionist', 'Lazer', 'Bubble Machine',
+  'Sound', 'Anchor', 'Paparazzi Artist', 'International Artist',
+  'Classical Dance Artist', 'Molecular Bar', 'Tattoo Artist',
+]
 export const VENUE_TYPES = ['Lawn', 'Banquet', 'Lawn + Bqt', 'Poolside']
 export const POOL_OPTIONS = ['Yes', 'No']
 export const MEAL_OPTIONS = [
@@ -152,81 +160,69 @@ function eventTypeFields(dynamicTypes) {
   ]
 }
 
-// AP/AM/AE/AR — venue booking
+// AP/AM/AE/AR — venue booking (3-section layout)
 function ownVenueSections(venue, dynamicTypes) {
   return [
     {
       title: 'Venue',
+      prominent: true,
       fields: [
         S('Sub-Venue', 'sub_venue', venue.subVenues),
         ...eventTypeFields(dynamicTypes),
         S('Shift', 'shift', SHIFTS),
         statusField,
-      ],
-    },
-    {
-      title: 'Date & Time',
-      fields: [D('Date', 'date')],
-    },
-    {
-      title: 'Event Schedule',
-      fields: [
+        D('Date', 'date'),
         TM('Assembly Time', 'time'),
-        TM('Decor Time', 'decor_time'),
         TM('Chaat Time', 'chaat_time'),
         TM('Baraat Time', 'baraat_time'),
-        TM('Varmala Time', 'varmala_time'),
-        TM('Pheras Time', 'pheras_time'),
-        CB('Pheras Next Day (+1)', 'pheras_next_day'),
-      ],
-    },
-    {
-      title: 'Booking',
-      fields: [
         S('Package Type', 'booking_status', BOOKING_STATUSES),
         S('Menu Type', 'menu_type', MENU_TYPES, true, { disabledWhen: notVMD }),
         S('Menu Category', 'menu_cat', MENU_CATS, true, { disabledWhen: notVMD }),
         S('FP', 'fp_status', FP_STATUSES, true, { disabledWhen: notVMD }),
-      ],
-    },
-    {
-      title: 'Operations',
-      fields: [
-        S('Decor Status', 'decor_status', DECOR_STATUSES),
-        S('Entertainment Status', 'entertainment_status', ENTERTAINMENT_STATUSES),
-        S('Function Category', 'function_category', FUNCTION_CATEGORIES),
         T('Delivery Person', 'delivery_person', true, {
           filterFn: nameFilter, filterError: 'Only letters allowed',
         }),
-        {
-          type: 'group', key: 'payment_remaining_group', columns: 3,
-          fields: [
-            T('Venue %', 'payment_remaining_venue', true, {
-              filterFn: percentFilter, filterError: 'Only numbers 0-100',
-              suffix: '%', inputMode: 'numeric',
-            }),
-            T('Decor %', 'payment_remaining_decor', false, {
-              filterFn: percentFilter, filterError: 'Only numbers 0-100',
-              suffix: '%', inputMode: 'numeric',
-            }),
-            T('Ent %', 'payment_remaining_ent', false, {
-              filterFn: percentFilter, filterError: 'Only numbers 0-100',
-              suffix: '%', inputMode: 'numeric',
-            }),
-          ],
-        },
+        T('Pending Payment — Venue %', 'payment_remaining_venue', true, {
+          filterFn: percentFilter, filterError: 'Only numbers 0-100',
+          suffix: '%', inputMode: 'numeric',
+        }),
         S('Payment Timing', 'payment_timing', PAYMENT_TIMINGS),
-      ],
-    },
-    {
-      title: 'Guest',
-      fields: [
         guestName(),
         phoneReq(),
         paxField(),
         salesPersonField(),
-        notesField,
       ],
+    },
+    {
+      title: 'Decor',
+      prominent: true,
+      fields: [
+        TM('Decor Time', 'decor_time'),
+        TM('Varmala Time', 'varmala_time'),
+        TM('Pheras Time', 'pheras_time'),
+        CB('Pheras Next Day (+1)', 'pheras_next_day'),
+        S('Decor Status', 'decor_status', DECOR_STATUSES),
+        S('Decor Category', 'function_category', FUNCTION_CATEGORIES),
+        T('Pending Payment — Decor %', 'payment_remaining_decor', false, {
+          filterFn: percentFilter, filterError: 'Only numbers 0-100',
+          suffix: '%', inputMode: 'numeric',
+        }),
+      ],
+    },
+    {
+      title: 'Entertainment',
+      prominent: true,
+      fields: [
+        S('Entertainment Status', 'entertainment_status', ENTERTAINMENT_STATUSES),
+        { type: 'multiselect', label: 'Elements', key: 'elements', options: ELEMENT_OPTIONS, required: true },
+        T('Pending Payment — Ent %', 'payment_remaining_ent', false, {
+          filterFn: percentFilter, filterError: 'Only numbers 0-100',
+          suffix: '%', inputMode: 'numeric',
+        }),
+      ],
+    },
+    {
+      fields: [notesField],
     },
   ]
 }
@@ -420,7 +416,7 @@ const VENUE_FIELD_KEYS = [
   'sub_venue', 'event_type', 'event_type_other', 'shift', 'date', 'time',
   'decor_time', 'chaat_time', 'baraat_time', 'varmala_time', 'pheras_time', 'pheras_next_day',
   'booking_status', 'menu_type', 'menu_cat', 'fp_status',
-  'decor_status', 'entertainment_status', 'function_category',
+  'decor_status', 'entertainment_status', 'function_category', 'elements',
   'delivery_person', 'payment_remaining_venue', 'payment_remaining_decor', 'payment_remaining_ent', 'payment_timing',
   'guest_name', 'phone', 'pax', 'sales_person', 'notes',
 ]
@@ -461,7 +457,7 @@ export const ALL_SAVEABLE_KEYS = [
   'sub_venue', 'event_type', 'event_type_other', 'shift', 'date', 'time',
   'decor_time', 'chaat_time', 'baraat_time', 'varmala_time', 'pheras_time', 'pheras_next_day',
   'booking_status', 'menu_type', 'menu_cat', 'fp_status',
-  'decor_status', 'entertainment_status', 'function_category',
+  'decor_status', 'entertainment_status', 'function_category', 'elements',
   'delivery_person', 'payment_remaining_venue', 'payment_remaining_decor', 'payment_remaining_ent', 'payment_timing',
   'guest_name', 'phone', 'pax', 'sales_person', 'notes',
   'check_in_date', 'check_out_date', 'check_in_time', 'check_out_time',
