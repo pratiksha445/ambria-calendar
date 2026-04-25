@@ -379,8 +379,8 @@ function acSections(_venue, dynamicTypes) {
   ]
 }
 
-// AEE — same as ADD minus decor
-function aeeSections(_venue, dynamicTypes) {
+// AEE — external venue events & entertainment
+function aeeSections(_venue, dynamicTypes, dynamicElements) {
   return [
     {
       title: 'Venue',
@@ -406,6 +406,7 @@ function aeeSections(_venue, dynamicTypes) {
         guestName(),
         phoneReq(),
         salesPersonField(),
+        { type: 'multiselect', label: 'Elements', key: 'elements', options: dynamicElements || ELEMENT_OPTIONS_FALLBACK, required: true, fullWidth: true },
         T('Pending Payment %', 'payment_remaining_venue', false, {
           filterFn: percentFilter, filterError: 'Only numbers 0-100',
           suffix: '%', inputMode: 'numeric',
@@ -489,7 +490,7 @@ export const FIELD_MAP = {
   aee: [
     'venue_name', 'venue_type', 'location', 'event_type', 'event_type_other',
     'shift', 'date', 'time',
-    'guest_name', 'phone', 'sales_person',
+    'guest_name', 'phone', 'sales_person', 'elements',
     'payment_remaining_venue', 'payment_timing', 'notes',
   ],
   tender: [
