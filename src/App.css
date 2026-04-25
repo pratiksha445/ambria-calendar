@@ -692,7 +692,7 @@
   border: 1px solid var(--ambria-border);
   border-left-width: 3px;
   border-radius: 8px;
-  overflow: hidden;
+  overflow: visible;
   transition: box-shadow .15s ease;
 }
 .event-card:hover { box-shadow: var(--ambria-shadow-card); }
@@ -835,14 +835,12 @@
   border: 1.5px solid var(--ambria-accent);
 }
 
-/* Expanded details — smooth 200ms max-height transition */
+/* Expanded details — hidden when collapsed, fully visible when expanded */
 .event-card-details {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 200ms ease;
+  display: none;
 }
 .event-card.expanded .event-card-details {
-  max-height: 700px;
+  display: block;
 }
 
 .event-card-details-inner {
