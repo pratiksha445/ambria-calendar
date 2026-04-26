@@ -138,6 +138,7 @@ const en = {
   'Venue %': 'Venue %',
   'Decor %': 'Decor %',
   'Ent %': 'Ent %',
+  'Pending Payment': 'Pending Payment',
   'Pending Payment %': 'Pending Payment %',
   'Pending Payment — Venue %': 'Pending Payment — Venue %',
   'Pending Payment — Decor %': 'Pending Payment — Decor %',

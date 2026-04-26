@@ -186,18 +186,18 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
           {event.fp_status && (
             <div className="detail-row"><span className="k">{t('FP Status')}</span><span className="v">{t(event.fp_status)}</span></div>
           )}
-          {event.rooms != null && event.rooms !== '' && (
-            <div className="detail-row"><span className="k">{t('Rooms')}</span><span className="v">{event.rooms}</span></div>
-          )}
           {event.menu_type && (
             <div className="detail-row"><span className="k">{t('Menu Type')}</span><span className="v">{t(event.menu_type)}</span></div>
           )}
-          {event.delivery_person && (
-            <div className="detail-row"><span className="k">{t('Delivery')}</span><span className="v">{event.delivery_person}</span></div>
+          {event.menu_cat && (
+            <div className="detail-row"><span className="k">{t('Menu Category')}</span><span className="v">{t(event.menu_cat)}</span></div>
           )}
-          {(event.payment_remaining_venue != null && event.payment_remaining_venue !== '') && (
+          {event.delivery_person && (
+            <div className="detail-row"><span className="k">{t('Delivery Person')}</span><span className="v">{event.delivery_person}</span></div>
+          )}
+          {isOwnVenue && (event.payment_remaining_venue != null && event.payment_remaining_venue !== '') && (
             <div className="detail-row detail-payment">
-              <span className="k">{t('Pending Payment %')}</span>
+              <span className="k">{t('Pending Payment')}</span>
               <div className="v payment-val">
                 <span>{event.payment_remaining_venue}%</span>
                 <div className="payment-bar">
@@ -209,19 +209,19 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
               </div>
             </div>
           )}
-          {event.payment_timing && (
+          {isOwnVenue && event.payment_timing && (
             <div className="detail-row"><span className="k">{t('Payment Status')}</span><span className="v">{t(event.payment_timing)}</span></div>
           )}
           {event.operation_manager && (
             <div className="detail-row"><span className="k">{t('F&B Service Manager')}</span><span className="v">{event.operation_manager}</span></div>
           )}
+          {isOwnVenue && event.status && (
+            <div className="detail-row"><span className="k">{t('Status')}</span><span className="v">{t(event.status)}</span></div>
+          )}
 
           {/* ── Decor section ── */}
-          {isOwnVenue && (event.decor_status || event.function_category || (event.payment_remaining_decor != null && event.payment_remaining_decor !== '')) && (
+          {isOwnVenue && (event.decor_status || event.function_category || (event.payment_remaining_decor != null && event.payment_remaining_decor !== '') || event.decor_delivery_person) && (
             <div className="detail-section-heading">{t('Decor')}</div>
-          )}
-          {event.decor_type && (
-            <div className="detail-row"><span className="k">{t('Decor Type')}</span><span className="v">{t(event.decor_type)}</span></div>
           )}
           {event.decor_status && (
             <div className="detail-row"><span className="k">{t('Decor Status')}</span><span className="v">{t(event.decor_status)}</span></div>
@@ -231,7 +231,7 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
           )}
           {(event.payment_remaining_decor != null && event.payment_remaining_decor !== '') && (
             <div className="detail-row detail-payment">
-              <span className="k">{t('Decor %')}</span>
+              <span className="k">{t('Pending Payment')}</span>
               <div className="v payment-val">
                 <span>{event.payment_remaining_decor}%</span>
                 <div className="payment-bar">
@@ -243,13 +243,16 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
               </div>
             </div>
           )}
+          {event.decor_delivery_person && (
+            <div className="detail-row"><span className="k">{t('Delivery Person')}</span><span className="v">{event.decor_delivery_person}</span></div>
+          )}
 
           {/* ── Entertainment section ── */}
-          {isOwnVenue && (event.entertainment_status || (Array.isArray(event.elements) && event.elements.length > 0) || (event.payment_remaining_ent != null && event.payment_remaining_ent !== '')) && (
+          {isOwnVenue && (event.entertainment_status || (Array.isArray(event.elements) && event.elements.length > 0) || (event.payment_remaining_ent != null && event.payment_remaining_ent !== '') || event.ent_delivery_person) && (
             <div className="detail-section-heading">{t('Entertainment')}</div>
           )}
           {event.entertainment_status && (
-            <div className="detail-row"><span className="k">{t('Entertainment')}</span><span className="v">{t(event.entertainment_status)}</span></div>
+            <div className="detail-row"><span className="k">{t('Entertainment Status')}</span><span className="v">{t(event.entertainment_status)}</span></div>
           )}
           {Array.isArray(event.elements) && event.elements.length > 0 && (
             <div className="detail-row detail-elements">
@@ -263,7 +266,7 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
           )}
           {(event.payment_remaining_ent != null && event.payment_remaining_ent !== '') && (
             <div className="detail-row detail-payment">
-              <span className="k">{t('Ent %')}</span>
+              <span className="k">{t('Pending Payment')}</span>
               <div className="v payment-val">
                 <span>{event.payment_remaining_ent}%</span>
                 <div className="payment-bar">
@@ -274,6 +277,9 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
                 </div>
               </div>
             </div>
+          )}
+          {event.ent_delivery_person && (
+            <div className="detail-row"><span className="k">{t('Delivery Person')}</span><span className="v">{event.ent_delivery_person}</span></div>
           )}
 
           {/* Villa fields */}
@@ -306,7 +312,7 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
             <div className="detail-row"><span className="k">{t('Payment Status')}</span><span className="v">{t(event.payment_timing)}</span></div>
           )}
 
-          {event.status && (
+          {!isOwnVenue && event.status && (
             <div className="detail-row"><span className="k">{t('Status')}</span><span className="v">{t(event.status)}</span></div>
           )}
           {event.notes && (

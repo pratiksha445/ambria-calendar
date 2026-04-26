@@ -138,6 +138,7 @@ const hi = {
   'Venue %': 'वेन्यू %',
   'Decor %': 'डेकोर %',
   'Ent %': 'एंट %',
+  'Pending Payment': 'शेष भुगतान',
   'Pending Payment %': 'शेष भुगतान %',
   'Pending Payment — Venue %': 'बकाया भुगतान — वेन्यू %',
   'Pending Payment — Decor %': 'बकाया भुगतान — डेकोर %',
