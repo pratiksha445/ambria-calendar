@@ -64,9 +64,13 @@ export function getLockedFieldKeys(sections, editableSections) {
     // Notes section (no title) is always editable
     for (const field of section.fields) {
       if (field.type === 'group') {
-        for (const f of field.fields) locked.add(f.key)
+        for (const f of field.fields) {
+          locked.add(f.key)
+          if (f.inlineCheckbox) locked.add(f.inlineCheckbox.key)
+        }
       } else {
         locked.add(field.key)
+        if (field.inlineCheckbox) locked.add(field.inlineCheckbox.key)
       }
     }
   }

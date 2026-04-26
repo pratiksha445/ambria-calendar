@@ -47,9 +47,13 @@ function buildFieldSectionMap(venueId) {
     const sectionName = section.title || 'Other'
     for (const field of section.fields) {
       if (field.type === 'group') {
-        for (const f of field.fields) map[f.key] = sectionName
+        for (const f of field.fields) {
+          map[f.key] = sectionName
+          if (f.inlineCheckbox) map[f.inlineCheckbox.key] = sectionName
+        }
       } else {
         map[field.key] = sectionName
+        if (field.inlineCheckbox) map[field.inlineCheckbox.key] = sectionName
       }
     }
   }
@@ -59,13 +63,21 @@ function buildFieldSectionMap(venueId) {
 function buildFieldLabelMap(venueId) {
   const all = getAllFields(venueId, null, null)
   const map = {}
-  for (const f of all) map[f.key] = f.label
+  for (const f of all) {
+    map[f.key] = f.label
+    if (f.inlineCheckbox) map[f.inlineCheckbox.key] = f.inlineCheckbox.label
+  }
   return map
 }
 
 function getFieldDef(venueId, key) {
   const all = getAllFields(venueId, null, null)
-  return all.find((f) => f.key === key) || null
+  const direct = all.find((f) => f.key === key)
+  if (direct) return direct
+  // Check for inline checkbox keys embedded in parent fields
+  const parent = all.find((f) => f.inlineCheckbox?.key === key)
+  if (parent) return { type: 'checkbox', key, label: parent.inlineCheckbox.label }
+  return null
 }
 
 // Keys to skip in diffs (internal, auto-generated, or _id shadow fields)

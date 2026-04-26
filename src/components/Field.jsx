@@ -74,7 +74,26 @@ export default function Field({ field, form, value, onChange, error, readOnly, a
   } else if (field.type === 'date') {
     control = <input type="date" {...commonProps} />
   } else if (field.type === 'time') {
-    control = <input type="time" {...commonProps} />
+    if (field.inlineCheckbox) {
+      const cb = field.inlineCheckbox
+      const cbChecked = !!form[cb.key]
+      control = (
+        <div className="time-inline-row">
+          <input type="time" {...commonProps} className="time-inline-input" />
+          <label className={`time-inline-cb ${disabled ? 'is-disabled' : ''}`}>
+            <input
+              type="checkbox"
+              checked={cbChecked}
+              disabled={disabled}
+              onChange={(e) => onChange(cb.key, e.target.checked)}
+            />
+            <span>{cb.label}</span>
+          </label>
+        </div>
+      )
+    } else {
+      control = <input type="time" {...commonProps} />
+    }
   } else if (field.type === 'checkbox') {
     return (
       <div className={`field field-checkbox ${disabled ? 'is-disabled' : ''}`}>

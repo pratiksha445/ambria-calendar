@@ -213,8 +213,7 @@ function ownVenueSections(venue, dynamicTypes, dynamicElements) {
         TM('Assembly Time', 'time'),
         // Row 5: Chaat Time | Wind Up Time
         TM('Chaat Time', 'chaat_time'),
-        TM('Wind Up Time', 'wind_up_time'),
-        CB('Wind Up Next Day (+1)', 'wind_up_next_day'),
+        TM('Wind Up Time', 'wind_up_time', true, { inlineCheckbox: { key: 'wind_up_next_day', label: '+1' } }),
         // Row 6: FP | Rooms
         S('FP', 'fp_status', FP_STATUSES, true, { disabledWhen: notVMD }),
         roomsField(),
@@ -254,8 +253,7 @@ function ownVenueSections(venue, dynamicTypes, dynamicElements) {
       fields: [
         TM('Decor Time', 'decor_time', false),
         TM('Varmala Time', 'varmala_time', false),
-        TM('Pheras Time', 'pheras_time', false),
-        CB('Pheras Next Day (+1)', 'pheras_next_day'),
+        TM('Pheras Time', 'pheras_time', false, { inlineCheckbox: { key: 'pheras_next_day', label: '+1' } }),
         S('Decor Status', 'decor_status', DECOR_STATUSES, false),
         S('Decor Category', 'function_category', FUNCTION_CATEGORIES, false),
         T('Pending Payment — Decor %', 'payment_remaining_decor', false, {
