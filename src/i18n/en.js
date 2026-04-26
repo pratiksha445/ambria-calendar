@@ -78,6 +78,7 @@ const en = {
   '— Select —': '— Select —',
   'Required': 'Required',
   'Invalid selection': 'Invalid selection',
+  'Must be 0–100': 'Must be 0–100',
   'Only letters allowed': 'Only letters allowed',
   'Only numbers allowed': 'Only numbers allowed',
   'Only numbers 0-100': 'Only numbers 0-100',

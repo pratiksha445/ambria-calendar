@@ -327,11 +327,11 @@ function villaSections(venue, _dynamicTypes) {
         phoneReq(),
         paxField(),
         salesPersonField(),
-        T('Pending Payment %', 'payment_remaining_venue', false, {
+        T('Pending Payment %', 'payment_remaining_venue', true, {
           filterFn: percentFilter, filterError: 'Only numbers 0-100',
           suffix: '%', inputMode: 'numeric',
         }),
-        S('Payment Status', 'payment_timing', PAYMENT_TIMINGS, false),
+        S('Payment Status', 'payment_timing', PAYMENT_TIMINGS),
         notesField,
       ],
     },
@@ -493,11 +493,11 @@ function acSections(_venue, dynamicTypes) {
         guestName(),
         phoneReq(),
         // Row 5: Pending Payment % | Payment Status
-        T('Pending Payment %', 'payment_remaining_venue', false, {
+        T('Pending Payment %', 'payment_remaining_venue', true, {
           filterFn: percentFilter, filterError: 'Only numbers 0-100',
           suffix: '%', inputMode: 'numeric',
         }),
-        S('Payment Status', 'payment_timing', PAYMENT_TIMINGS, false),
+        S('Payment Status', 'payment_timing', PAYMENT_TIMINGS),
         // Row 6: Notes (full width)
         notesField,
       ],
@@ -533,11 +533,11 @@ function aeeSections(_venue, dynamicTypes, dynamicElements) {
         phoneReq(),
         salesPersonField(),
         { type: 'multiselect', label: 'Elements', key: 'elements', options: dynamicElements || ELEMENT_OPTIONS_FALLBACK, required: true, fullWidth: true },
-        T('Pending Payment %', 'payment_remaining_venue', false, {
+        T('Pending Payment %', 'payment_remaining_venue', true, {
           filterFn: percentFilter, filterError: 'Only numbers 0-100',
           suffix: '%', inputMode: 'numeric',
         }),
-        S('Payment Status', 'payment_timing', PAYMENT_TIMINGS, false),
+        S('Payment Status', 'payment_timing', PAYMENT_TIMINGS),
         notesField,
       ],
     },
@@ -568,11 +568,11 @@ function tenderSections(_venue, _dynamicTypes) {
       fields: [
         tenderNameField(),
         phoneOpt(),
-        T('Pending Payment %', 'payment_remaining_venue', false, {
+        T('Pending Payment %', 'payment_remaining_venue', true, {
           filterFn: percentFilter, filterError: 'Only numbers 0-100',
           suffix: '%', inputMode: 'numeric',
         }),
-        S('Payment Status', 'payment_timing', PAYMENT_TIMINGS, false),
+        S('Payment Status', 'payment_timing', PAYMENT_TIMINGS),
         notesField,
       ],
     },
@@ -626,11 +626,11 @@ function wsSections(_venue, dynamicTypes) {
         guestName(),
         phoneReq(),
         salesPersonField(),
-        T('Pending Payment %', 'payment_remaining_venue', false, {
+        T('Pending Payment %', 'payment_remaining_venue', true, {
           filterFn: percentFilter, filterError: 'Only numbers 0-100',
           suffix: '%', inputMode: 'numeric',
         }),
-        S('Payment Status', 'payment_timing', PAYMENT_TIMINGS, false),
+        S('Payment Status', 'payment_timing', PAYMENT_TIMINGS),
         notesField,
       ],
     },

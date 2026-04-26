@@ -170,6 +170,15 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
         continue
       }
 
+      // Percent-range validation — block values outside 0-100
+      if (field.suffix === '%' && v !== undefined && v !== null && v !== '') {
+        const n = parseInt(v, 10)
+        if (isNaN(n) || n < 0 || n > 100) {
+          nextErrors[field.key] = 'Must be 0–100'
+          continue
+        }
+      }
+
       // Dropdown validation — reject values not in the options list
       if (field.type === 'select' && field.options && v && v !== '') {
         const validValues = field.options.map((o) => typeof o === 'object' ? o.value : o)
