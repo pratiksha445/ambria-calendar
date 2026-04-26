@@ -226,7 +226,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
         } else {
           payload[key] = null
         }
-      } else if (key === 'pax') {
+      } else if (key === 'pax' || key === 'rooms') {
         payload[key] = sanitizePax(raw)
       } else if (fieldDef && (fieldDef.type === 'date' || fieldDef.type === 'time' || fieldDef.type === 'select')) {
         payload[key] = raw || null

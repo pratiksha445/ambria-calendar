@@ -143,6 +143,9 @@ const hi = {
   'Payment Timing': 'भुगतान समय',
   'Payment Status': 'भुगतान स्थिति',
   'Operation Manager': 'ऑपरेशन मैनेजर',
+  'F&B Service Manager': 'F&B सर्विस मैनेजर',
+  'Guest Phone': 'गेस्ट फोन',
+  'Rooms': 'कमरे',
   'Elements': 'एलिमेंट्स',
 
   // ── फ़ॉर्म सेक्शन टाइटल ──
