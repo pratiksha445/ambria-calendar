@@ -245,7 +245,7 @@ export default function Field({ field, form, value, onChange, error, readOnly, a
   }
 
   return (
-    <div className={`field ${displayError ? 'has-error' : ''} ${disabled ? 'is-disabled' : ''} ${field.fullWidth ? 'field-full-width' : ''}`}>
+    <div className={`field ${displayError ? 'has-error' : ''} ${disabled ? 'is-disabled' : ''} ${field.fullWidth ? 'field-full-width' : ''} ${field.narrow ? 'field-narrow' : ''}`}>
       <label htmlFor={id} className="field-label">
         {t(field.label)}
         {field.required && !disabled && <span className="required-star"> *</span>}
