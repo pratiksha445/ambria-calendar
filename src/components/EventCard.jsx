@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { VENUE_BY_ID, SHIFT_BADGE } from '../config/venues.js'
 import { formatTime12 } from '../lib/dates.js'
+import { canAccessBooking } from '../lib/sectionPermissions.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 import { loadElementLabels, getElementLabel } from '../lib/elements.js'
 
@@ -14,7 +15,7 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
   const shiftBadge = event.shift ? SHIFT_BADGE[event.shift] : null
   const primary = buildPrimary(event, formatShortDate, t)
   const [confirmDel, setConfirmDel] = useState(false)
-  const canModify = user?.role === 'admin' || (event.created_by != null && user?.id === event.created_by)
+  const canModify = canAccessBooking(user, event)
   const isOwnVenue = OWN_VENUES.has(event.venue_id)
   const [showTimePopup, setShowTimePopup] = useState(false)
   const [popupPos, setPopupPos] = useState({ top: 0, left: 0 })

@@ -3,13 +3,52 @@
 //
 // Rules:
 // - Venue: editable by admin, or user whose id matches sales_person_id or delivery_person_id
-// - Decor: editable by admin, or Decor Sales + In-house/In-house+Outdoor
-// - Entertainment: editable by admin, or Entertainment Sales + In-house/In-house+Outdoor
+// - Decor: editable by admin, or Decor Sales + In-house/In-house+Outdoor,
+//          or assigned decor_delivery_person
+// - Entertainment: editable by admin, or Entertainment Sales + In-house/In-house+Outdoor,
+//                  or assigned ent_delivery_person
 // - New bookings (no id): all sections editable
 // - Non-AP/AM/AE/AR categories: no section locks
 
 const OWN_VENUE_IDS = new Set(['ap', 'am', 'ae', 'ar'])
 const INHOUSE_TYPES = new Set(['In-house', 'In-house + Outdoor'])
+
+/** Match user against a booking's assigned-person field (id preferred, name fallback). */
+function matchesAssigned(user, eventId, eventName) {
+  if (eventId && user?.id === eventId) return true
+  if (!eventId && eventName && user?.name === eventName) return true
+  return false
+}
+
+/**
+ * Returns true if the user should be allowed to open/edit a booking
+ * (i.e. the Edit button should be visible in EventCard / DayModal).
+ *
+ * For non-AP/AM/AE/AR, falls back to creator check.
+ * For AP/AM/AE/AR, also checks assigned-person fields and department.
+ */
+export function canAccessBooking(user, event) {
+  if (!user || !event) return false
+  if (user.role === 'admin') return true
+  if (event.created_by != null && user.id === event.created_by) return true
+
+  // For AP/AM/AE/AR: check if user is an assigned person or has department access
+  if (OWN_VENUE_IDS.has(event.venue_id)) {
+    // Venue section: sales_person or delivery_person
+    if (matchesAssigned(user, event.sales_person_id, event.sales_person)) return true
+    if (matchesAssigned(user, event.delivery_person_id, event.delivery_person)) return true
+    // Decor section: decor_delivery_person or department match
+    if (matchesAssigned(user, event.decor_delivery_person_id, event.decor_delivery_person)) return true
+    if (user.department === 'Decor Sales' && INHOUSE_TYPES.has(user.sales_type)) return true
+    // Entertainment section: ent_delivery_person or department match
+    if (matchesAssigned(user, event.ent_delivery_person_id, event.ent_delivery_person)) return true
+    if (user.department === 'Entertainment Sales' && INHOUSE_TYPES.has(user.sales_type)) return true
+    // Operation manager
+    if (matchesAssigned(user, event.operation_manager_id, event.operation_manager)) return true
+  }
+
+  return false
+}
 
 /**
  * @param {object} user   - current logged-in user { id, role, department, sales_type }
@@ -29,22 +68,25 @@ export function getEditableSections(user, event, venueId) {
 
   // Venue section: editable if user is sales_person or delivery_person
   if (
-    (event.sales_person_id && user?.id === event.sales_person_id) ||
-    (event.delivery_person_id && user?.id === event.delivery_person_id) ||
-    // Fallback for old data without _id: match by name
-    (!event.sales_person_id && event.sales_person && user?.name === event.sales_person) ||
-    (!event.delivery_person_id && event.delivery_person && user?.name === event.delivery_person)
+    matchesAssigned(user, event.sales_person_id, event.sales_person) ||
+    matchesAssigned(user, event.delivery_person_id, event.delivery_person)
   ) {
     editable.add('Venue')
   }
 
-  // Decor section: editable if user is Decor Sales + In-house type
-  if (user?.department === 'Decor Sales' && INHOUSE_TYPES.has(user?.sales_type)) {
+  // Decor section: editable if user is Decor Sales + In-house type, or assigned decor delivery person
+  if (
+    (user?.department === 'Decor Sales' && INHOUSE_TYPES.has(user?.sales_type)) ||
+    matchesAssigned(user, event.decor_delivery_person_id, event.decor_delivery_person)
+  ) {
     editable.add('Decor')
   }
 
-  // Entertainment section: editable if user is Entertainment Sales + In-house type
-  if (user?.department === 'Entertainment Sales' && INHOUSE_TYPES.has(user?.sales_type)) {
+  // Entertainment section: editable if user is Entertainment Sales + In-house type, or assigned ent delivery person
+  if (
+    (user?.department === 'Entertainment Sales' && INHOUSE_TYPES.has(user?.sales_type)) ||
+    matchesAssigned(user, event.ent_delivery_person_id, event.ent_delivery_person)
+  ) {
     editable.add('Entertainment')
   }
 

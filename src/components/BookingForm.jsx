@@ -243,10 +243,34 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
       }
     }
 
+    // Backfill _id for user-select fields where name is set but _id is missing
+    // (handles legacy rows created before dual-write was added)
+    for (const section of sections) {
+      for (const field of section.fields) {
+        if (field.type !== 'user-select') continue
+        const nameKey = field.key
+        const idKey = nameKey + '_id'
+        if (!payload[nameKey] || payload[idKey]) continue
+        const users = getUsersForField(field)
+        const match = users.find((u) => (typeof u === 'string' ? u : u.name) === payload[nameKey])
+        if (match && typeof match === 'object') {
+          payload[idKey] = match.id
+        }
+      }
+    }
+
     // Villa stores check-in date as `date` for calendar placement.
     if (venueId === 'villa' && payload.check_in_date) {
       payload.date = payload.check_in_date
     }
+
+    console.log('[ambria] saving booking payload:', {
+      sales_person: payload.sales_person, sales_person_id: payload.sales_person_id,
+      delivery_person: payload.delivery_person, delivery_person_id: payload.delivery_person_id,
+      decor_delivery_person: payload.decor_delivery_person, decor_delivery_person_id: payload.decor_delivery_person_id,
+      ent_delivery_person: payload.ent_delivery_person, ent_delivery_person_id: payload.ent_delivery_person_id,
+      operation_manager: payload.operation_manager, operation_manager_id: payload.operation_manager_id,
+    })
 
     return payload
   }
