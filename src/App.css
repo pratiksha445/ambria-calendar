@@ -29,6 +29,9 @@
   flex-direction: column;
   flex: 1;
   min-height: 0;
+  will-change: transform;
+  touch-action: pan-y;
+  overflow-x: clip;
 }
 
 /* ---------- Header ---------- */
@@ -3915,4 +3918,22 @@ input, select, textarea {
     flex-basis: calc(50% - 4px);
     min-width: 0;
   }
+}
+
+/* ---------- Swipe hint ---------- */
+
+.swipe-hint {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.75);
+  color: #fff;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 13px;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 400ms ease;
 }

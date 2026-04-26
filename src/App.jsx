@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Header from './components/Header.jsx'
 import Sidebar from './components/Sidebar.jsx'
 import MonthView from './components/MonthView.jsx'
@@ -22,6 +22,7 @@ import { VENUES, applyDynamic } from './config/venues.js'
 import { fetchActiveCategories } from './lib/categories.js'
 import { logAction } from './lib/audit.js'
 import { useLanguage } from './i18n/LanguageContext.jsx'
+import useSwipeNav from './hooks/useSwipeNav.js'
 import './App.css'
 
 const ALL_SOURCES = ['crm', 'manual']
@@ -56,6 +57,7 @@ export default function App() {
   const [changePinOpen, setChangePinOpen] = useState(false)
   const [dayModalDate, setDayModalDate] = useState(null)
   const [exportModal, setExportModal] = useState(null) // null | { from, to }
+  const calendarBodyRef = useRef(null)
 
   // Load dynamic categories from Supabase — falls back to hardcoded defaults on failure
   useEffect(() => {
@@ -143,6 +145,9 @@ export default function App() {
     setCurrentDate(t)
     setSelectedDate(t)
   }
+
+  // Swipe navigation for the calendar grid
+  useSwipeNav(calendarBodyRef, { onPrev: handlePrev, onNext: handleNext })
 
   const toggleFilter = (id) => {
     setActiveFilters((prev) => {
@@ -321,7 +326,7 @@ export default function App() {
               onExport={handleExport}
               onClearMonth={canClearMonth ? handleClearMonth : null}
             />
-            <main className="app-body">
+            <main className="app-body" ref={calendarBodyRef}>
               {error && <div className="error-banner">{error}</div>}
               {loading && <div className="loading">{t('Loading…')}</div>}
               {filtersHideEverything && (
