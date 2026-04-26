@@ -360,6 +360,11 @@ const hi = {
   // ── फ़िल्टर्ड यूज़र ड्रॉपडाउन ──
   'No Venue Sales users available. Add users in Manage Users.': 'कोई वेन्यू सेल्स उपयोगकर्ता उपलब्ध नहीं। उपयोगकर्ता प्रबंधन में जोड़ें।',
   'No F&B Service users available. Add users in Manage Users.': 'कोई F&B सर्विस उपयोगकर्ता उपलब्ध नहीं। उपयोगकर्ता प्रबंधन में जोड़ें।',
+  'Wind Up Time': 'समापन समय',
+  'Delivery Person (Decor)': 'डिलीवरी व्यक्ति (डेकोर)',
+  'Delivery Person (Entertainment)': 'डिलीवरी व्यक्ति (मनोरंजन)',
+  'No Decor Sales users available. Add users in Manage Users.': 'कोई डेकोर सेल्स उपयोगकर्ता उपलब्ध नहीं। उपयोगकर्ता प्रबंधन में जोड़ें।',
+  'No Entertainment Sales users available. Add users in Manage Users.': 'कोई मनोरंजन सेल्स उपयोगकर्ता उपलब्ध नहीं। उपयोगकर्ता प्रबंधन में जोड़ें।',
 
   // ── प्लेसहोल्डर ──
   'e.g. Mr. Sharma': 'जैसे श्री शर्मा',

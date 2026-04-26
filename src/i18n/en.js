@@ -360,6 +360,11 @@ const en = {
   // ── Filtered user dropdowns ──
   'No Venue Sales users available. Add users in Manage Users.': 'No Venue Sales users available. Add users in Manage Users.',
   'No F&B Service users available. Add users in Manage Users.': 'No F&B Service users available. Add users in Manage Users.',
+  'Wind Up Time': 'Wind Up Time',
+  'Delivery Person (Decor)': 'Delivery Person (Decor)',
+  'Delivery Person (Entertainment)': 'Delivery Person (Entertainment)',
+  'No Decor Sales users available. Add users in Manage Users.': 'No Decor Sales users available. Add users in Manage Users.',
+  'No Entertainment Sales users available. Add users in Manage Users.': 'No Entertainment Sales users available. Add users in Manage Users.',
 
   // ── Placeholders ──
   'e.g. Mr. Sharma': 'e.g. Mr. Sharma',

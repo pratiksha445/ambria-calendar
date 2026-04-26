@@ -27,6 +27,8 @@ const COLUMNS = [
   { key: 'function_category', header: 'Decor Category' },
   { key: 'elements', header: 'Elements' },
   { key: 'delivery_person', header: 'Delivery Person' },
+  { key: 'decor_delivery_person', header: 'Delivery Person (Decor)' },
+  { key: 'ent_delivery_person', header: 'Delivery Person (Entertainment)' },
   { key: 'operation_manager', header: 'Operation Manager' },
   { key: 'payment_remaining_venue', header: 'Pending Payment %' },
   { key: 'payment_remaining_decor', header: 'Payment Remaining (Decor) %' },
@@ -35,6 +37,7 @@ const COLUMNS = [
   { key: 'decor_time', header: 'Decor Time' },
   { key: 'chaat_time', header: 'Chaat Time' },
   { key: 'baraat_time', header: 'Baraat Time' },
+  { key: 'wind_up_time', header: 'Wind Up Time' },
   { key: 'varmala_time', header: 'Varmala Time' },
   { key: 'pheras_time', header: 'Pheras Time' },
   { key: 'venue_name', header: 'Venue Name' },
@@ -50,7 +53,7 @@ const COLUMNS = [
   { key: 'notes', header: 'Notes' },
 ]
 
-const TIME_KEYS = new Set(['time', 'decor_time', 'chaat_time', 'baraat_time', 'varmala_time', 'pheras_time'])
+const TIME_KEYS = new Set(['time', 'decor_time', 'chaat_time', 'baraat_time', 'wind_up_time', 'varmala_time', 'pheras_time'])
 
 function formatTime12(t) {
   if (!t) return ''

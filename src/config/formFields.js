@@ -195,31 +195,33 @@ function ownVenueSections(venue, dynamicTypes, dynamicElements) {
         // Row 3: Date | Shift
         D('Date', 'date'),
         S('Shift', 'shift', SHIFTS),
-        // Row 4: Baraat Time | Assembly Time
+        // Row 4: Baraat Time | Wind Up Time
         TM('Baraat Time', 'baraat_time'),
+        TM('Wind Up Time', 'wind_up_time'),
+        // Row 5: Assembly Time | Chaat Time
         TM('Assembly Time', 'time'),
-        // Row 5: Chaat Time | FP
         TM('Chaat Time', 'chaat_time'),
+        // Row 6: FP | (empty)
         S('FP', 'fp_status', FP_STATUSES, true, { disabledWhen: notVMD }),
-        // Row 6: Menu Type | Menu Category
+        // Row 7: Menu Type | Menu Category
         S('Menu Type', 'menu_type', MENU_TYPES, true, { disabledWhen: notVMD }),
         S('Menu Category', 'menu_cat', MENU_CATS, true, { disabledWhen: notVMD }),
-        // Row 7: Pending Payment % | Payment Status
+        // Row 8: Pending Payment % | Payment Status
         T('Pending Payment %', 'payment_remaining_venue', true, {
           filterFn: percentFilter, filterError: 'Only numbers 0-100',
           suffix: '%', inputMode: 'numeric',
         }),
         S('Payment Status', 'payment_timing', PAYMENT_TIMINGS),
-        // Row 8: Guest Name | Phone
+        // Row 9: Guest Name | Phone
         guestName(),
         phoneReq(),
-        // Row 9: Pax | Sales Person
+        // Row 10: Pax | Sales Person
         paxField(),
         { ...salesPersonField(),
           userFilter: { department: 'Venue Sales', salesTypes: ['In-house', 'In-house + Outdoor'] },
           userEmptyMsg: 'No Venue Sales users available. Add users in Manage Users.',
         },
-        // Row 10: Delivery Person | Operation Manager
+        // Row 11: Delivery Person | Operation Manager
         { type: 'user-select', label: 'Delivery Person', key: 'delivery_person', required: true,
           userFilter: { department: 'Venue Sales', salesTypes: ['In-house', 'In-house + Outdoor'] },
           userEmptyMsg: 'No Venue Sales users available. Add users in Manage Users.',
@@ -245,6 +247,10 @@ function ownVenueSections(venue, dynamicTypes, dynamicElements) {
           filterFn: percentFilter, filterError: 'Only numbers 0-100',
           suffix: '%', inputMode: 'numeric',
         }),
+        { type: 'user-select', label: 'Delivery Person (Decor)', key: 'decor_delivery_person', required: false,
+          userFilter: { department: 'Decor Sales', salesTypes: ['In-house', 'In-house + Outdoor'] },
+          userEmptyMsg: 'No Decor Sales users available. Add users in Manage Users.',
+        },
       ],
     },
     {
@@ -258,6 +264,10 @@ function ownVenueSections(venue, dynamicTypes, dynamicElements) {
           filterFn: percentFilter, filterError: 'Only numbers 0-100',
           suffix: '%', inputMode: 'numeric',
         }),
+        { type: 'user-select', label: 'Delivery Person (Entertainment)', key: 'ent_delivery_person', required: false,
+          userFilter: { department: 'Entertainment Sales', salesTypes: ['In-house', 'In-house + Outdoor'] },
+          userEmptyMsg: 'No Entertainment Sales users available. Add users in Manage Users.',
+        },
       ],
     },
     {
@@ -537,10 +547,11 @@ function wsSections(_venue, dynamicTypes) {
 
 const VENUE_FIELD_KEYS = [
   'sub_venue', 'event_type', 'event_type_other', 'shift', 'date', 'time',
-  'decor_time', 'chaat_time', 'baraat_time', 'varmala_time', 'pheras_time', 'pheras_next_day',
+  'decor_time', 'chaat_time', 'baraat_time', 'wind_up_time', 'varmala_time', 'pheras_time', 'pheras_next_day',
   'booking_status', 'menu_type', 'menu_cat', 'fp_status',
   'decor_status', 'entertainment_status', 'function_category', 'elements',
-  'delivery_person', 'operation_manager', 'payment_remaining_venue', 'payment_remaining_decor', 'payment_remaining_ent', 'payment_timing',
+  'delivery_person', 'decor_delivery_person', 'ent_delivery_person', 'operation_manager',
+  'payment_remaining_venue', 'payment_remaining_decor', 'payment_remaining_ent', 'payment_timing',
   'guest_name', 'phone', 'pax', 'sales_person', 'notes',
 ]
 
@@ -590,10 +601,11 @@ export const FIELD_MAP = {
 // Union of every saveable field key — used to null-out irrelevant columns.
 export const ALL_SAVEABLE_KEYS = [
   'sub_venue', 'event_type', 'event_type_other', 'shift', 'date', 'time',
-  'decor_time', 'chaat_time', 'baraat_time', 'varmala_time', 'pheras_time', 'pheras_next_day',
+  'decor_time', 'chaat_time', 'baraat_time', 'wind_up_time', 'varmala_time', 'pheras_time', 'pheras_next_day',
   'booking_status', 'menu_type', 'menu_cat', 'fp_status',
   'decor_status', 'entertainment_status', 'function_category', 'elements',
-  'delivery_person', 'operation_manager', 'payment_remaining_venue', 'payment_remaining_decor', 'payment_remaining_ent', 'payment_timing',
+  'delivery_person', 'decor_delivery_person', 'ent_delivery_person', 'operation_manager',
+  'payment_remaining_venue', 'payment_remaining_decor', 'payment_remaining_ent', 'payment_timing',
   'guest_name', 'phone', 'pax', 'sales_person', 'notes',
   'check_in_date', 'check_out_date', 'check_in_time', 'check_out_time',
   'pool_included', 'meal_included', 'added_service',
