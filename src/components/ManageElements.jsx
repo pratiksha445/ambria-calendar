@@ -52,7 +52,7 @@ export default function ManageElements({ currentUser, showToast, onMenu }) {
     setError(null)
     try {
       const row = await createElement(name, newNameHi.trim(), currentUser)
-      setItems((prev) => [...prev, row])
+      setItems((prev) => [...prev, row].sort((a, b) => a.name.localeCompare(b.name)))
       setNewName('')
       setNewNameHi('')
       showToast?.(t('Element added'))
@@ -73,7 +73,7 @@ export default function ManageElements({ currentUser, showToast, onMenu }) {
     setError(null)
     try {
       const row = await updateElement(id, { name, name_hi: editNameHi.trim() || null }, currentUser)
-      setItems((prev) => prev.map((it) => it.id === id ? { ...it, ...row } : it))
+      setItems((prev) => prev.map((it) => it.id === id ? { ...it, ...row } : it).sort((a, b) => a.name.localeCompare(b.name)))
       setEditingId(null)
       showToast?.(t('Element updated'))
     } catch (err) {

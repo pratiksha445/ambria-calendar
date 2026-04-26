@@ -13,7 +13,7 @@ function withTimeout(promise, ms = 10000) {
 
 export async function fetchEventTypes() {
   const { data, error } = await withTimeout(
-    supabase.from('event_types').select('*').order('sort_order', { ascending: true })
+    supabase.from('event_types').select('*').order('name', { ascending: true })
   )
   if (error) throw error
   return data ?? []
@@ -21,7 +21,7 @@ export async function fetchEventTypes() {
 
 export async function fetchActiveEventTypes() {
   const { data, error } = await withTimeout(
-    supabase.from('event_types').select('*').order('sort_order', { ascending: true })
+    supabase.from('event_types').select('*').order('name', { ascending: true })
   )
   if (error) throw error
   return data ?? []

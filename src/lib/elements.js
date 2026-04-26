@@ -20,7 +20,7 @@ let _labelPromise = null
 /** Fetch all elements (admin page) */
 export async function fetchElements() {
   const { data, error } = await withTimeout(
-    supabase.from('elements').select('*').order('sort_order', { ascending: true })
+    supabase.from('elements').select('*').order('name', { ascending: true })
   )
   if (error) throw error
   return data ?? []
@@ -30,7 +30,7 @@ export async function fetchElements() {
 export async function fetchActiveElements() {
   const { data, error } = await withTimeout(
     supabase.from('elements').select('id, name, name_hi')
-      .order('sort_order', { ascending: true }).order('name', { ascending: true })
+      .order('name', { ascending: true })
   )
   if (error) throw error
   return data ?? []
