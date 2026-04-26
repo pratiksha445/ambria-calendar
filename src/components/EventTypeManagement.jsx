@@ -145,7 +145,7 @@ export default function EventTypeManagement({ currentUser, showToast, onMenu }) 
           placeholder={t('Hindi Name')}
           className="et-add-input"
         />
-        <button type="submit" className="btn-save et-add-btn" disabled={adding || !newName.trim()}>
+        <button type="submit" className="btn-save et-add-btn" disabled={adding}>
           {adding ? t('Adding…') : t('Add')}
         </button>
       </form>
