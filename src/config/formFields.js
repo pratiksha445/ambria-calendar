@@ -153,7 +153,6 @@ const phoneOpt = () => ({
 })
 const paxField = () => T('Pax', 'pax', true, {
   filterFn: paxFilter, filterError: 'Only numbers allowed', inputMode: 'numeric',
-  narrow: true,
 })
 const salesPersonField = () => ({
   type: 'user-select', label: 'Sales Person', key: 'sales_person', required: true,
