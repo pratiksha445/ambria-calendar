@@ -1161,24 +1161,32 @@
 .payment-bar-fill.payment-yellow { background: #f59e0b; }
 .payment-bar-fill.payment-red { background: #ef4444; }
 
-/* User-select clear button */
+/* User-select: input + icon tray (clear × | chevron ▼) */
 .user-select-wrap {
   position: relative;
   display: flex;
   align-items: stretch;
 }
-.user-select-wrap input { flex: 1; min-width: 0; }
-.user-select-wrap input.has-clear { padding-right: 32px; }
-.field-clear-btn {
+.user-select-wrap input { flex: 1; min-width: 0; padding-right: 52px; }
+/* Hide native datalist arrow so our custom chevron is the only one */
+.user-select-wrap input[list]::-webkit-calendar-picker-indicator { opacity: 0; width: 0; padding: 0; margin: 0; }
+
+.user-select-icons {
   position: absolute;
   right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  pointer-events: none;          /* pass clicks through to input by default */
+}
+.field-clear-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   padding: 0;
   border: none;
   border-radius: 50%;
@@ -1186,14 +1194,19 @@
   color: var(--ambria-text-muted, #999);
   cursor: pointer;
   transition: background 120ms ease, color 120ms ease;
-  z-index: 1;
+  pointer-events: auto;          /* re-enable clicks on this button */
 }
 .field-clear-btn:hover {
   background: var(--ambria-border);
   color: var(--ambria-ink);
 }
+.user-select-chevron {
+  display: flex;
+  align-items: center;
+  color: var(--ambria-text-muted, #999);
+}
 @media (max-width: 412px) {
-  .field-clear-btn { width: 32px; height: 32px; right: 4px; }
+  .field-clear-btn { width: 32px; height: 32px; }
 }
 
 /* Suffix input (e.g. % label) */
