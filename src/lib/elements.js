@@ -26,10 +26,10 @@ export async function fetchElements() {
   return data ?? []
 }
 
-/** Fetch active elements for dropdown use */
+/** Fetch all elements for dropdown use */
 export async function fetchActiveElements() {
   const { data, error } = await withTimeout(
-    supabase.from('elements').select('id, name, name_hi').eq('is_active', true)
+    supabase.from('elements').select('id, name, name_hi')
       .order('sort_order', { ascending: true }).order('name', { ascending: true })
   )
   if (error) throw error
@@ -78,7 +78,7 @@ export async function createElement(name, nameHi, user) {
 
   const { data, error } = await withTimeout(
     supabase.from('elements').insert({
-      name, name_hi: nameHi || null, is_active: true, sort_order: nextOrder,
+      name, name_hi: nameHi || null, sort_order: nextOrder,
     }).select().single()
   )
   if (error) throw error
