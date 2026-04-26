@@ -1680,6 +1680,27 @@
 }
 .section-chevron.open { transform: rotate(90deg); }
 
+/* Locked section (permission-based) */
+.form-section-locked { opacity: 0.65; }
+.section-lock-icon { margin-left: 6px; font-size: 0.85em; }
+
+/* Lock toast */
+.lock-toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.82);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  z-index: 9999;
+  pointer-events: none;
+  animation: fadeIn 180ms ease;
+  white-space: nowrap;
+}
+
 .form-grid-collapsed {
   display: none !important;
 }
@@ -2589,6 +2610,42 @@
   color: var(--ambria-muted);
   line-height: 1.35;
 }
+
+.audit-booking-title {
+  font-size: 0.78rem;
+  color: var(--ambria-muted);
+  margin-top: 2px;
+}
+
+.audit-changes {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: var(--ambria-bg);
+  border-radius: 8px;
+  font-size: 0.8rem;
+}
+.audit-change-row {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 2px 0;
+  flex-wrap: wrap;
+}
+.audit-change-bullet { color: var(--ambria-muted); flex-shrink: 0; }
+.audit-change-label { font-weight: 600; color: var(--ambria-text); flex-shrink: 0; }
+.audit-change-old { color: var(--ambria-muted); text-decoration: line-through; }
+.audit-change-arrow { color: var(--ambria-muted); flex-shrink: 0; }
+.audit-change-new { color: var(--ambria-text); font-weight: 500; }
+.audit-show-more {
+  background: none;
+  border: none;
+  color: var(--ambria-accent);
+  font-size: 0.78rem;
+  cursor: pointer;
+  padding: 4px 0;
+  margin-top: 2px;
+}
+.audit-show-more:hover { text-decoration: underline; }
 
 .audit-details {
   margin-top: 10px;

@@ -372,6 +372,16 @@ const hi = {
   'No Decor Sales users available. Add users in Manage Users.': 'कोई डेकोर सेल्स उपयोगकर्ता उपलब्ध नहीं। उपयोगकर्ता प्रबंधन में जोड़ें।',
   'No Entertainment Sales users available. Add users in Manage Users.': 'कोई मनोरंजन सेल्स उपयोगकर्ता उपलब्ध नहीं। उपयोगकर्ता प्रबंधन में जोड़ें।',
 
+  // ── सेक्शन अनुमतियाँ ──
+  "You don't have permission to edit this section.": 'इस सेक्शन को संपादित करने की अनुमति नहीं है।',
+
+  // ── ऑडिट लॉग ──
+  'Booking': 'बुकिंग',
+  'Venue': 'वेन्यू',
+  'Decor': 'डेकोर',
+  'Entertainment': 'एंटरटेनमेंट',
+  '+{n} more changes': '+{n} और बदलाव',
+
   // ── प्लेसहोल्डर ──
   'e.g. Mr. Sharma': 'जैसे श्री शर्मा',
   'Optional…': 'वैकल्पिक…',

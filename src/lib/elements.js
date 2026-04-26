@@ -85,7 +85,7 @@ export async function createElement(name, nameHi, user) {
 
   invalidateElementCache()
   if (user) {
-    logAction(user.id, user.name, 'create', 'element', data.id, { name }).catch(() => {})
+    logAction(user.id, user.name, 'create', 'element', data.id, { summary: `Added element: ${name}`, name }).catch(() => {})
   }
   return data
 }
@@ -101,7 +101,7 @@ export async function updateElement(id, updates, user) {
   invalidateElementCache()
   if (user) {
     logAction(user.id, user.name, 'update', 'element', data.id, {
-      name: data.name, ...updates,
+      summary: `Edited element: ${data.name}`, name: data.name, ...updates,
     }).catch(() => {})
   }
   return data
@@ -120,7 +120,7 @@ export async function deleteElement(id, user) {
 
   invalidateElementCache()
   if (user && existing) {
-    logAction(user.id, user.name, 'delete', 'element', id, { name: existing.name }).catch(() => {})
+    logAction(user.id, user.name, 'delete', 'element', id, { summary: `Deleted element: ${existing.name}`, name: existing.name }).catch(() => {})
   }
 }
 
@@ -134,7 +134,7 @@ export async function reorderElements(orderedIds, user) {
   invalidateElementCache()
   if (user) {
     logAction(user.id, user.name, 'update', 'element', null, {
-      action: 'reorder', count: orderedIds.length,
+      summary: 'Reordered elements', action: 'reorder', count: orderedIds.length,
     }).catch(() => {})
   }
 }

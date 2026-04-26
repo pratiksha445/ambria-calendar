@@ -79,6 +79,7 @@ export default function AuditLog({ onMenu }) {
   const [loading, setLoading] = useState(false)
   const [hasMore, setHasMore] = useState(true)
   const [expanded, setExpanded] = useState(null)
+  const [showAllChanges, setShowAllChanges] = useState({})
   const [filterUser, setFilterUser] = useState('')
   const [filterAction, setFilterAction] = useState('')
   const [filterFrom, setFilterFrom] = useState('')
@@ -124,6 +125,9 @@ export default function AuditLog({ onMenu }) {
   }
 
   const describeEntity = useCallback((entry) => {
+    // Use structured summary if available
+    if (entry.details?.summary) return entry.details.summary
+    // Fallback for legacy entries
     if (entry.entity_type === 'session') {
       return entry.action === 'login' ? t('Logged in') : t('Logged out')
     }
@@ -138,7 +142,7 @@ export default function AuditLog({ onMenu }) {
       if (entry.action === 'bulk_delete') {
         return `${t('Bulk delete')} — ${d.count || '?'} events`
       }
-      const title = d.title || d.new?.title || ''
+      const title = d.title || d.booking_title || d.new?.title || ''
       const venue = d.venue_id || d.new?.venue_id || ''
       return `${title}${venue ? ' | ' + venue.toUpperCase() : ''}`
     }
@@ -198,6 +202,7 @@ export default function AuditLog({ onMenu }) {
 
   // Describe entity for export (plain English, no t() wrapping)
   function describeEntityPlain(entry) {
+    if (entry.details?.summary) return entry.details.summary
     if (entry.entity_type === 'session') {
       return entry.action === 'login' ? 'Logged in' : 'Logged out'
     }
@@ -210,7 +215,7 @@ export default function AuditLog({ onMenu }) {
       const d = entry.details
       if (!d) return 'Event'
       if (entry.action === 'bulk_delete') return `Bulk delete — ${d.count || '?'} events`
-      const title = d.title || d.new?.title || ''
+      const title = d.title || d.booking_title || d.new?.title || ''
       const venue = d.venue_id || d.new?.venue_id || ''
       return `${title}${venue ? ' | ' + venue.toUpperCase() : ''}`
     }
@@ -356,6 +361,13 @@ export default function AuditLog({ onMenu }) {
       <div className="audit-list">
         {filteredEntries.map((entry) => {
           const role = getUserRole(entry)
+          const changes = entry.details?.changes
+          const hasChanges = Array.isArray(changes) && changes.length > 0
+          const bookingTitle = entry.details?.booking_title
+          const showAll = showAllChanges[entry.id]
+          const visibleChanges = hasChanges ? (showAll ? changes : changes.slice(0, 5)) : []
+          const hiddenCount = hasChanges ? changes.length - 5 : 0
+
           return (
             <div
               key={entry.id}
@@ -379,8 +391,33 @@ export default function AuditLog({ onMenu }) {
                   )}
                 </div>
                 <div className="audit-desc">{describeEntity(entry)}</div>
+                {bookingTitle && entry.entity_type === 'event' && (
+                  <div className="audit-booking-title">{t('Booking')}: {bookingTitle}</div>
+                )}
               </div>
-              {expanded === entry.id && entry.details && (
+              {expanded === entry.id && hasChanges && (
+                <div className="audit-changes">
+                  {visibleChanges.map((c, i) => (
+                    <div key={i} className="audit-change-row">
+                      <span className="audit-change-bullet">•</span>
+                      <span className="audit-change-label">{c.field_label}:</span>
+                      <span className="audit-change-old">{c.old_value}</span>
+                      <span className="audit-change-arrow">→</span>
+                      <span className="audit-change-new">{c.new_value}</span>
+                    </div>
+                  ))}
+                  {!showAll && hiddenCount > 0 && (
+                    <button
+                      type="button"
+                      className="audit-show-more"
+                      onClick={(e) => { e.stopPropagation(); setShowAllChanges((prev) => ({ ...prev, [entry.id]: true })) }}
+                    >
+                      {t('+{n} more changes', { n: hiddenCount })}
+                    </button>
+                  )}
+                </div>
+              )}
+              {expanded === entry.id && !hasChanges && entry.details && (
                 <pre className="audit-details">{JSON.stringify(entry.details, null, 2)}</pre>
               )}
             </div>

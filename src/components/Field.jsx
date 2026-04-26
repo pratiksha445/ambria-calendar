@@ -139,22 +139,33 @@ export default function Field({ field, form, value, onChange, error, readOnly, a
     )
   } else if (field.type === 'user-select') {
     const listId = `userlist-${field.key}`
+    // activeUsers is [{id, name}] — extract names for datalist
     const users = activeUsers || []
+    const userNames = users.map((u) => typeof u === 'string' ? u : u.name)
     const currentVal = commonProps.value || ''
-    const hasStored = currentVal && !users.includes(currentVal)
+    const hasStored = currentVal && !userNames.includes(currentVal)
     const isEmpty = field.userFilter && users.length === 0 && !currentVal
+    const idKey = field.key + '_id'
+    const handleUserChange = (e) => {
+      const name = e.target.value
+      onChange(field.key, name)
+      // Dual-write: also set the _id field when a matching user is found
+      const match = users.find((u) => (typeof u === 'string' ? u : u.name) === name)
+      onChange(idKey, match && typeof match === 'object' ? match.id : null)
+    }
     control = (
       <>
         <input
           type="text"
           {...commonProps}
+          onChange={handleUserChange}
           list={listId}
           autoComplete="off"
           placeholder={isEmpty && field.userEmptyMsg ? t(field.userEmptyMsg) : t('Search users…')}
         />
         <datalist id={listId}>
           {hasStored && <option key="__stored" value={currentVal} />}
-          {users.map((name) => (
+          {userNames.map((name) => (
             <option key={name} value={name} />
           ))}
         </datalist>

@@ -9,8 +9,9 @@ import { autoTitle } from '../lib/autoTitle.js'
 import { sanitizeText, sanitizePhone, sanitizePax } from '../lib/sanitize.js'
 import { createEvent, updateEvent, deleteEvent } from '../lib/events.js'
 import { fetchActiveEventTypes } from '../lib/eventTypes.js'
-import { fetchActiveUserNames, fetchFilteredUserNames } from '../lib/users.js'
+import { fetchActiveUsers, fetchFilteredUsers } from '../lib/users.js'
 import { fetchActiveElements, getElementLabel } from '../lib/elements.js'
+import { getEditableSections, getLockedFieldKeys } from '../lib/sectionPermissions.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 import Field from './Field.jsx'
 
@@ -49,12 +50,24 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
   const [activeUsers, setActiveUsers] = useState([])
   const [filteredUsersMap, setFilteredUsersMap] = useState({})
   const [collapsedSections, setCollapsedSections] = useState({})
+  const [lockToast, setLockToast] = useState(false)
+
+  // Section-level edit permissions (AP/AM/AE/AR only, editing only)
+  const editableSections = useMemo(
+    () => getEditableSections(user, initial, venueId),
+    [user, initial, venueId]
+  )
+
+  const showLockToast = () => {
+    setLockToast(true)
+    setTimeout(() => setLockToast(false), 2500)
+  }
 
   useEffect(() => {
     fetchActiveEventTypes()
       .then((types) => setDynamicEventTypes(types.map((t) => t.name)))
       .catch(() => setDynamicEventTypes(null))
-    fetchActiveUserNames()
+    fetchActiveUsers()
       .then(setActiveUsers)
       .catch(() => setActiveUsers([]))
     fetchActiveElements()
@@ -82,8 +95,8 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
     const keys = filterKeysStr.split('|')
     Promise.all(
       keys.map((key) =>
-        fetchFilteredUserNames(JSON.parse(key))
-          .then((names) => [key, names])
+        fetchFilteredUsers(JSON.parse(key))
+          .then((users) => [key, users])
           .catch(() => [key, []])
       )
     ).then((results) => setFilteredUsersMap(Object.fromEntries(results)))
@@ -136,8 +149,10 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
 
   const validate = () => {
     const all = getAllFields(venueId, dynamicEventTypes, dynamicElements)
+    const lockedKeys = getLockedFieldKeys(sections, editableSections)
     const nextErrors = {}
     for (const field of all) {
+      if (editing && lockedKeys.has(field.key)) continue // skip locked-section fields
       if (field.showWhen && !field.showWhen(form)) continue
       if (field.disabledWhen && field.disabledWhen(form)) continue
 
@@ -164,6 +179,11 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
   const buildPayload = () => {
     const validKeys = new Set(FIELD_MAP[venueId] || [])
     const all = getAllFields(venueId, dynamicEventTypes, dynamicElements)
+    // Exclude fields from locked sections (permission-based)
+    const lockedKeys = getLockedFieldKeys(sections, editableSections)
+    // Also lock the corresponding _id fields
+    const lockedWithIds = new Set(lockedKeys)
+    for (const k of lockedKeys) lockedWithIds.add(k + '_id')
 
     const payload = {
       venue_id: venueId,
@@ -177,6 +197,8 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
         payload[key] = null
         continue
       }
+      // Skip locked-section fields entirely — don't overwrite them
+      if (editing && lockedWithIds.has(key)) continue
 
       const fieldDef = all.find((f) => f.key === key)
       if (fieldDef) {
@@ -191,6 +213,11 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
       }
 
       const raw = form[key]
+      // _id fields are UUIDs set by user-select dual-write — pass through directly
+      if (key.endsWith('_id')) {
+        payload[key] = raw || null
+        continue
+      }
       if (key === 'phone') {
         const num = raw ? String(raw).replace(/[^\d\s]/g, '').trim() : ''
         if (num) {
@@ -330,9 +357,12 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
           const toggleCollapse = () => setCollapsedSections((prev) => ({
             ...prev, [sectionKey]: prev[sectionKey] === false ? true : false,
           }))
+          // Section lock: if editableSections is a Set and this titled section is not in it
+          const sectionLocked = editableSections && section.title && !editableSections.has(section.title)
+          const sectionReadOnly = readOnly || sectionLocked
 
           return (
-          <div key={sectionKey} className={`form-section ${section.prominent ? 'form-section-prominent' : ''}`}>
+          <div key={sectionKey} className={`form-section ${section.prominent ? 'form-section-prominent' : ''} ${sectionLocked ? 'form-section-locked' : ''}`}>
             {section.title && (
               <div
                 className={`form-section-title ${section.prominent ? 'form-section-title-prominent' : ''} ${isCollapsible ? 'form-section-title-collapsible' : ''}`}
@@ -349,9 +379,14 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
                   </span>
                 )}
                 {t(section.title)}
+                {sectionLocked && <span className="section-lock-icon" aria-label="Locked">🔒</span>}
               </div>
             )}
-            <div className={`form-grid ${isCollapsed ? 'form-grid-collapsed' : ''}`}>
+            {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
+            <div
+              className={`form-grid ${isCollapsed ? 'form-grid-collapsed' : ''}`}
+              onClick={sectionLocked ? showLockToast : undefined}
+            >
               {section.fields.map((field) => {
                 if (field.type === 'group') {
                   return (
@@ -364,7 +399,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
                           value={form[f.key]}
                           onChange={setField}
                           error={errors[f.key]}
-                          readOnly={readOnly}
+                          readOnly={sectionReadOnly}
                           activeUsers={getUsersForField(f)}
                         />
                       ))}
@@ -379,7 +414,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
                     value={form[field.key]}
                     onChange={setField}
                     error={errors[field.key]}
-                    readOnly={readOnly}
+                    readOnly={sectionReadOnly}
                     activeUsers={getUsersForField(field)}
                   />
                 )
@@ -389,6 +424,9 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
           )
         })}
       </div>
+      {lockToast && (
+        <div className="lock-toast">{t("You don't have permission to edit this section.")}</div>
+      )}
 
       <div className="form-footer">
         {submitError && <div className="form-error-banner">{t(submitError)}</div>}

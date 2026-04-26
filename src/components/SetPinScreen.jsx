@@ -86,7 +86,7 @@ export default function SetPinScreen({ user, onComplete }) {
     setSaving(true)
     try {
       await setInitialPin(user.id, pin)
-      await logAction(user.id, user.name, 'set_pin', 'user', user.id, { initial: true })
+      await logAction(user.id, user.name, 'set_pin', 'user', user.id, { summary: 'Set initial PIN', initial: true })
       onComplete()
     } catch (err) {
       setError(err?.message ?? String(err))

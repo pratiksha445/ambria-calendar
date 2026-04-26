@@ -259,7 +259,7 @@ export default function App() {
 
   const handleLogout = async () => {
     if (user) {
-      await logAction(user.id, user.name, 'logout', 'session', null, null)
+      await logAction(user.id, user.name, 'logout', 'session', null, { summary: 'Logged out' })
     }
     localStorage.removeItem('ambria_user')
     setUser(null)

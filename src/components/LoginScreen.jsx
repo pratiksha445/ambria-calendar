@@ -61,7 +61,7 @@ export default function LoginScreen({ onLogin }) {
       const result = await loginUser(fullPhone, fullPin)
       switch (result.status) {
         case 'ok':
-          await logAction(result.user.id, result.user.name, 'login', 'session', null, null)
+          await logAction(result.user.id, result.user.name, 'login', 'session', null, { summary: 'Logged in' })
           localStorage.setItem('ambria_user', JSON.stringify(result.user))
           onLogin(result.user, result.needsPinChange)
           return

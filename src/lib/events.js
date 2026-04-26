@@ -1,5 +1,9 @@
 import { supabase } from './supabase.js'
 import { logAction } from './audit.js'
+import {
+  buildAuditDiff, buildCreateSummary, buildDeleteSummary,
+  buildSoftDeleteSummary, buildBulkDeleteSummary,
+} from './auditDiff.js'
 
 /**
  * Fetch events whose `date` falls within [startDate, endDate] (inclusive).
@@ -32,7 +36,14 @@ export async function createEvent(eventData, user) {
     .single()
 
   if (error) throw error
-  if (user) logAction(user.id, user.name, 'create', 'event', data.id, data)
+  if (user) {
+    const summary = buildCreateSummary(data)
+    logAction(user.id, user.name, 'create', 'event', data.id, {
+      summary,
+      booking_title: data.title,
+      venue_id: data.venue_id,
+    })
+  }
   return data
 }
 
@@ -64,15 +75,16 @@ export async function updateEvent(id, eventData, user) {
   }
 
   if (user && oldData) {
-    const changes = {}
-    for (const key of Object.keys(patch)) {
-      if (String(oldData[key] ?? '') !== String(data[key] ?? '')) {
-        changes[key] = { old: oldData[key], new: data[key] }
-      }
+    const diff = buildAuditDiff(oldData, data, data.venue_id)
+    if (diff) {
+      logAction(user.id, user.name, 'update', 'event', data.id, {
+        summary: diff.summary,
+        booking_title: data.title,
+        venue_id: data.venue_id,
+        sections_edited: diff.sections_edited,
+        changes: diff.changes,
+      })
     }
-    logAction(user.id, user.name, 'update', 'event', data.id, {
-      title: data.title, venue_id: data.venue_id, changes,
-    })
   }
   return data
 }
@@ -117,8 +129,11 @@ export async function bulkDeleteMonth(startDate, endDate, user) {
   if (crmErr) throw crmErr
 
   if (user) {
+    const totalCount = manualCount + crmCount
+    const summary = buildBulkDeleteSummary(startDate, endDate, totalCount)
     logAction(user.id, user.name, 'bulk_delete', 'event', null, {
-      count: manualCount + crmCount,
+      summary,
+      count: totalCount,
       manual_deleted: manualCount,
       crm_soft_deleted: crmCount,
       month: `${startDate} to ${endDate}`,
@@ -147,14 +162,24 @@ export async function deleteEvent(id, user) {
       .delete()
       .eq('id', id)
     if (error) throw error
-    if (user) logAction(user.id, user.name, 'delete', 'event', id, { title: event.title, venue_id: event.venue_id })
+    if (user) {
+      const summary = buildDeleteSummary(event)
+      logAction(user.id, user.name, 'delete', 'event', id, {
+        summary, title: event.title, venue_id: event.venue_id,
+      })
+    }
   } else {
     const { error } = await supabase
       .from('events')
       .update({ deleted_at: new Date().toISOString() })
       .eq('id', id)
     if (error) throw error
-    if (user) logAction(user.id, user.name, 'soft_delete', 'event', id, { title: event.title, venue_id: event.venue_id })
+    if (user) {
+      const summary = buildSoftDeleteSummary(event)
+      logAction(user.id, user.name, 'soft_delete', 'event', id, {
+        summary, title: event.title, venue_id: event.venue_id,
+      })
+    }
   }
 
   return event

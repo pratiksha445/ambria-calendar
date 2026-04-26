@@ -162,14 +162,14 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
       if (editing === 'new') {
         const row = await createUser({ name: fullName, phone: fullPhone, role: form.role, department: form.department || null, sales_type: salesType })
         await logAction(currentUser.id, currentUser.name, 'create', 'user', row.id, {
-          name: row.name, role: row.role,
+          summary: `Created user: ${row.name}`, name: row.name, role: row.role,
         })
         showToast?.(t('User created'))
       } else {
         const patch = { name: fullName, phone: fullPhone, role: form.role, department: form.department || null, sales_type: salesType }
         const row = await updateUser(editing.id, patch)
         await logAction(currentUser.id, currentUser.name, 'update', 'user', row.id, {
-          name: row.name, role: row.role,
+          summary: `Updated user: ${row.name}`, name: row.name, role: row.role,
         })
         showToast?.(t('User updated'))
       }
@@ -188,7 +188,7 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
     try {
       await deleteUser(user.id)
       await logAction(currentUser.id, currentUser.name, 'delete', 'user', user.id, {
-        name: user.name, role: user.role,
+        summary: `Deleted user: ${user.name}`, name: user.name, role: user.role,
       })
       setConfirmDelete(null)
       showToast?.(t('User deleted'))
@@ -200,6 +200,7 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
     try {
       await toggleUserActive(user.id, !user.is_active)
       await logAction(currentUser.id, currentUser.name, 'update', 'user', user.id, {
+        summary: `${user.is_active ? 'Deactivated' : 'Activated'} user: ${user.name}`,
         name: user.name, is_active: !user.is_active,
       })
       showToast?.(t(user.is_active ? 'User deactivated' : 'User activated'))
@@ -210,7 +211,7 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
   const handleApprove = async (user) => {
     try {
       const row = await approveUser(user.id, currentUser.id)
-      await logAction(currentUser.id, currentUser.name, 'approve', 'user', row.id, { name: row.name })
+      await logAction(currentUser.id, currentUser.name, 'approve', 'user', row.id, { summary: `Approved user: ${row.name}`, name: row.name })
       showToast?.(t('{name} approved', { name: user.name }))
       await loadUsers()
     } catch (err) { console.error(err) }
@@ -220,6 +221,7 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
     try {
       const row = await rejectUser(user.id, rejectReason.trim())
       await logAction(currentUser.id, currentUser.name, 'reject', 'user', row.id, {
+        summary: `Rejected user: ${row.name}${rejectReason.trim() ? ` (reason: ${rejectReason.trim()})` : ''}`,
         name: row.name, reason: rejectReason.trim() || null,
       })
       setRejectingId(null)
@@ -233,6 +235,7 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
     try {
       await resetPin(user.id)
       await logAction(currentUser.id, currentUser.name, 'update', 'user', user.id, {
+        summary: `Reset PIN for user: ${user.name}`,
         action: 'pin_reset', user_name: user.name, reset_to: 'default',
       })
       setConfirmResetPin(null)
@@ -245,6 +248,7 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
     try {
       await adminSetPin(user.id, pin)
       await logAction(currentUser.id, currentUser.name, 'update', 'user', user.id, {
+        summary: `Set PIN for user: ${user.name}`,
         action: 'pin_set', user_name: user.name,
       })
       setSettingPinFor(null)
@@ -258,6 +262,7 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
     try {
       await resetPin(editing.id)
       await logAction(currentUser.id, currentUser.name, 'update', 'user', editing.id, {
+        summary: `Reset PIN for user: ${editing.name}`,
         action: 'pin_reset', user_name: editing.name, reset_to: 'default',
       })
       showToast?.(t('PIN reset to 0000 — user will set new PIN on next login'))
@@ -273,6 +278,7 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
     try {
       await adminSetPin(editing.id, pin)
       await logAction(currentUser.id, currentUser.name, 'update', 'user', editing.id, {
+        summary: `Set PIN for user: ${editing.name}`,
         action: 'pin_set', user_name: editing.name,
       })
       showToast?.(t('PIN updated'))

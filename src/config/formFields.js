@@ -553,9 +553,10 @@ const VENUE_FIELD_KEYS = [
   'decor_time', 'chaat_time', 'baraat_time', 'wind_up_time', 'varmala_time', 'pheras_time', 'pheras_next_day',
   'booking_status', 'menu_type', 'menu_cat', 'fp_status',
   'decor_status', 'entertainment_status', 'function_category', 'elements',
-  'delivery_person', 'decor_delivery_person', 'ent_delivery_person', 'operation_manager',
+  'delivery_person', 'delivery_person_id', 'decor_delivery_person', 'decor_delivery_person_id',
+  'ent_delivery_person', 'ent_delivery_person_id', 'operation_manager', 'operation_manager_id',
   'payment_remaining_venue', 'payment_remaining_decor', 'payment_remaining_ent', 'payment_timing',
-  'guest_name', 'phone', 'pax', 'sales_person', 'notes',
+  'guest_name', 'phone', 'pax', 'sales_person', 'sales_person_id', 'notes',
 ]
 
 export const FIELD_MAP = {
@@ -566,32 +567,32 @@ export const FIELD_MAP = {
   villa: [
     'sub_venue', 'check_in_date', 'check_out_date', 'check_in_time', 'check_out_time',
     'pool_included', 'meal_included', 'added_service',
-    'guest_name', 'phone', 'pax', 'sales_person',
+    'guest_name', 'phone', 'pax', 'sales_person', 'sales_person_id',
     'payment_remaining_venue', 'payment_timing', 'notes',
   ],
   add: [
     'venue_name', 'venue_type', 'location', 'event_type', 'event_type_other',
     'shift', 'date', 'time', 'decor_type',
-    'guest_name', 'phone', 'sales_person',
+    'guest_name', 'phone', 'sales_person', 'sales_person_id',
     'payment_remaining_venue', 'payment_timing', 'notes',
   ],
   ac: [
     'venue_name', 'venue_type', 'location', 'event_type', 'event_type_other',
     'shift', 'date', 'time', 'menu_type', 'menu_cat',
-    'guest_name', 'phone', 'pax', 'sales_person',
+    'guest_name', 'phone', 'pax', 'sales_person', 'sales_person_id',
     'payment_remaining_venue', 'payment_timing', 'notes',
   ],
   aee: [
     'venue_name', 'venue_type', 'location', 'event_type', 'event_type_other',
     'shift', 'date', 'time',
-    'guest_name', 'phone', 'sales_person', 'elements',
+    'guest_name', 'phone', 'sales_person', 'sales_person_id', 'elements',
     'payment_remaining_venue', 'payment_timing', 'notes',
   ],
   ws: [
     'service_type', 'service_type_other', 'vendor_name', 'vendor_phone',
     'venue_name', 'location', 'event_type', 'event_type_other',
     'date', 'time',
-    'guest_name', 'phone', 'sales_person',
+    'guest_name', 'phone', 'sales_person', 'sales_person_id',
     'payment_remaining_venue', 'payment_timing', 'notes',
   ],
   tender: [
@@ -607,9 +608,10 @@ export const ALL_SAVEABLE_KEYS = [
   'decor_time', 'chaat_time', 'baraat_time', 'wind_up_time', 'varmala_time', 'pheras_time', 'pheras_next_day',
   'booking_status', 'menu_type', 'menu_cat', 'fp_status',
   'decor_status', 'entertainment_status', 'function_category', 'elements',
-  'delivery_person', 'decor_delivery_person', 'ent_delivery_person', 'operation_manager',
+  'delivery_person', 'delivery_person_id', 'decor_delivery_person', 'decor_delivery_person_id',
+  'ent_delivery_person', 'ent_delivery_person_id', 'operation_manager', 'operation_manager_id',
   'payment_remaining_venue', 'payment_remaining_decor', 'payment_remaining_ent', 'payment_timing',
-  'guest_name', 'phone', 'pax', 'sales_person', 'notes',
+  'guest_name', 'phone', 'pax', 'sales_person', 'sales_person_id', 'notes',
   'check_in_date', 'check_out_date', 'check_in_time', 'check_out_time',
   'pool_included', 'meal_included', 'added_service',
   'venue_name', 'venue_type', 'location', 'decor_type',

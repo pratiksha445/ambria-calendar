@@ -92,7 +92,7 @@ export default function ChangePinModal({ user, onClose, showToast }) {
         setCurrentPin(['', '', '', ''])
         return
       }
-      await logAction(user.id, user.name, 'change_pin', 'user', user.id, null)
+      await logAction(user.id, user.name, 'change_pin', 'user', user.id, { summary: 'Changed own PIN' })
       showToast?.(t('PIN updated'))
       onClose()
     } catch (err) {

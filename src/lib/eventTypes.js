@@ -40,7 +40,7 @@ export async function createEventType(name, nameHi, user) {
   if (error) throw error
 
   if (user) {
-    logAction(user.id, user.name, 'create', 'event_type', data.id, { name }).catch(() => {})
+    logAction(user.id, user.name, 'create', 'event_type', data.id, { summary: `Added event type: ${name}`, name }).catch(() => {})
   }
   return data
 }
@@ -53,7 +53,7 @@ export async function updateEventType(id, updates, user) {
 
   if (user) {
     logAction(user.id, user.name, 'update', 'event_type', data.id, {
-      name: data.name, ...updates,
+      summary: `Edited event type: ${data.name}`, name: data.name, ...updates,
     }).catch(() => {})
   }
   return data
@@ -70,7 +70,7 @@ export async function deleteEventType(id, user) {
   if (error) throw error
 
   if (user && existing) {
-    logAction(user.id, user.name, 'delete', 'event_type', id, { name: existing.name }).catch(() => {})
+    logAction(user.id, user.name, 'delete', 'event_type', id, { summary: `Deleted event type: ${existing.name}`, name: existing.name }).catch(() => {})
   }
 }
 
@@ -82,7 +82,7 @@ export async function reorderEventTypes(orderedIds, user) {
 
   if (user) {
     logAction(user.id, user.name, 'update', 'event_type', null, {
-      action: 'reorder', count: orderedIds.length,
+      summary: 'Reordered event types', action: 'reorder', count: orderedIds.length,
     }).catch(() => {})
   }
 }

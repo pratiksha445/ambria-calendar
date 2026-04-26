@@ -40,7 +40,7 @@ export async function createCategory(fields, user) {
 
   if (user) {
     await logAction(user.id, user.name, 'create', 'category', data.id, {
-      name: data.name, venue_id: data.venue_id,
+      summary: `Added category: ${data.name}`, name: data.name, venue_id: data.venue_id,
     })
   }
   return data
@@ -58,7 +58,7 @@ export async function updateCategory(id, updates, user) {
 
   if (user) {
     await logAction(user.id, user.name, 'update', 'category', data.id, {
-      name: data.name, ...updates,
+      summary: `Updated category: ${data.name}`, name: data.name, ...updates,
     })
   }
   return data
@@ -80,7 +80,7 @@ export async function deleteCategory(id, user) {
 
   if (user && existing) {
     await logAction(user.id, user.name, 'delete', 'category', id, {
-      name: existing.name, venue_id: existing.venue_id,
+      summary: `Deleted category: ${existing.name}`, name: existing.name, venue_id: existing.venue_id,
     })
   }
 }
@@ -94,7 +94,7 @@ export async function reorderCategories(orderedIds, user) {
 
   if (user) {
     await logAction(user.id, user.name, 'update', 'category', null, {
-      action: 'reorder', count: orderedIds.length,
+      summary: 'Reordered categories', action: 'reorder', count: orderedIds.length,
     })
   }
 }

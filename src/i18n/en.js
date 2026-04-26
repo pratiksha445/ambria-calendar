@@ -372,6 +372,16 @@ const en = {
   'No Decor Sales users available. Add users in Manage Users.': 'No Decor Sales users available. Add users in Manage Users.',
   'No Entertainment Sales users available. Add users in Manage Users.': 'No Entertainment Sales users available. Add users in Manage Users.',
 
+  // ── Section permissions ──
+  "You don't have permission to edit this section.": "You don't have permission to edit this section.",
+
+  // ── Audit log ──
+  'Booking': 'Booking',
+  'Venue': 'Venue',
+  'Decor': 'Decor',
+  'Entertainment': 'Entertainment',
+  '+{n} more changes': '+{n} more changes',
+
   // ── Placeholders ──
   'e.g. Mr. Sharma': 'e.g. Mr. Sharma',
   'Optional…': 'Optional…',

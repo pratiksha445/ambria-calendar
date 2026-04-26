@@ -2,23 +2,23 @@ import { supabase } from './supabase.js'
 
 const DEFAULT_PIN = '0000'
 
-/** Fetch active approved user names for dropdowns (Sales Person, etc.) */
-export async function fetchActiveUserNames() {
+/** Fetch active approved users for dropdowns (Sales Person, etc.) — returns [{id, name}] */
+export async function fetchActiveUsers() {
   const { data, error } = await supabase
     .from('users')
-    .select('name')
+    .select('id, name')
     .eq('is_active', true)
     .eq('approval_status', 'approved')
     .order('name', { ascending: true })
   if (error) throw error
-  return (data ?? []).map((u) => u.name)
+  return data ?? []
 }
 
-/** Fetch active approved user names filtered by department and/or sales types */
-export async function fetchFilteredUserNames(filter) {
+/** Fetch active approved users filtered by department and/or sales types — returns [{id, name}] */
+export async function fetchFilteredUsers(filter) {
   let q = supabase
     .from('users')
-    .select('name')
+    .select('id, name')
     .eq('is_active', true)
     .eq('approval_status', 'approved')
   if (filter?.department) q = q.eq('department', filter.department)
@@ -26,7 +26,7 @@ export async function fetchFilteredUserNames(filter) {
   q = q.order('name', { ascending: true })
   const { data, error } = await q
   if (error) throw error
-  return (data ?? []).map((u) => u.name)
+  return data ?? []
 }
 
 /**
@@ -36,7 +36,7 @@ export async function fetchFilteredUserNames(filter) {
 export async function loginUser(phone, pin) {
   const { data: row, error } = await supabase
     .from('users')
-    .select('id, name, phone, role, pin, is_active, approval_status, rejection_reason')
+    .select('id, name, phone, role, pin, is_active, approval_status, rejection_reason, department, sales_type')
     .eq('phone', phone)
     .maybeSingle()
   if (error) throw error
@@ -47,7 +47,7 @@ export async function loginUser(phone, pin) {
   if (!row.is_active) return { status: 'deactivated', user: null }
   if (row.pin !== pin) return { status: 'wrong_pin', user: null }
 
-  const user = { id: row.id, name: row.name, phone: row.phone, role: row.role }
+  const user = { id: row.id, name: row.name, phone: row.phone, role: row.role, department: row.department, sales_type: row.sales_type }
   return { status: 'ok', user, needsPinChange: row.pin === DEFAULT_PIN }
 }
 
