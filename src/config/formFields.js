@@ -120,6 +120,7 @@ const CB = (label, key, extra = {}) =>
 
 const nameFilter = (v) => v.replace(/[^a-zA-Z\s.']/g, '')
 const phoneFilter = (v) => v.replace(/[^\d\s]/g, '')
+const phoneWithPlusFilter = (v) => v.replace(/[^\d+\s]/g, '')
 const paxFilter = (v) => v.replace(/\D/g, '')
 const percentFilter = (v) => {
   const stripped = v.replace(/\D/g, '')
@@ -383,33 +384,38 @@ function addSections(_venue, dynamicTypes) {
     {
       title: 'Guest',
       fields: [
-        // Row 7: Sales Person | Execution Person
-        salesPersonField(),
-        { type: 'user-select', label: 'Execution Person', key: 'execution_person', required: false,
-          userFilter: { department: 'Decor Sales' },
-          userEmptyMsg: 'No Decor Sales users available. Add users in Manage Users.',
+        // Row 1: Guest Name | Guest Phone
+        guestName(),
+        phoneReq(),
+        // Row 2: Pax | Sales Person
+        paxField(),
+        { ...salesPersonField(),
+          userFilter: { department: 'Decor Sales', salesTypes: ['Outdoor', 'In-house + Outdoor'] },
+          userEmptyMsg: 'No Decor Sales (Outdoor) users available. Add users in Manage Users.',
         },
-        // Row 8: Operation Manager (full width)
-        { type: 'user-select', label: 'Operation Manager', key: 'operation_manager', required: false,
+        // Row 3: Execution Person | Operation Manager
+        { type: 'user-select', label: 'Execution Person', key: 'execution_person', required: true,
+          userFilter: { department: 'Decor Sales', salesTypes: ['Outdoor', 'In-house + Outdoor'] },
+          userEmptyMsg: 'No Decor Sales (Outdoor) users available. Add users in Manage Users.',
+        },
+        { type: 'user-select', label: 'Operation Manager', key: 'operation_manager', required: true,
           userFilter: { department: 'Decor Operations' },
           userEmptyMsg: 'No Decor Operations users available. Add users in Manage Users.',
         },
-        // Row 9: Venue Manager Name | Venue Manager Number
+        // Row 4: Venue Manager Name | Venue Manager Number
         T('Venue Manager Name', 'venue_manager_name', false, {
           filterFn: nameFilter, filterError: 'Only letters allowed',
         }),
         T('Venue Manager Number', 'venue_manager_number', false, {
-          filterFn: phoneFilter, filterError: 'Only numbers allowed', inputMode: 'numeric',
+          filterFn: phoneWithPlusFilter, filterError: 'Only + and numbers allowed', inputMode: 'numeric',
         }),
-        // Row 10: Guest Name | Guest Phone
-        guestName(),
-        phoneReq(),
-        // Row 11: Pending Payment % | Payment Status
-        T('Pending Payment %', 'payment_remaining_venue', false, {
+        // Row 5: Payment Status | Pending Payment %
+        S('Payment Status', 'payment_timing', PAYMENT_TIMINGS),
+        T('Pending Payment %', 'payment_remaining_venue', true, {
           filterFn: percentFilter, filterError: 'Only numbers 0-100',
           suffix: '%', inputMode: 'numeric',
         }),
-        S('Payment Status', 'payment_timing', PAYMENT_TIMINGS, false),
+        // Row 6: Notes (full width)
         notesField,
       ],
     },
@@ -622,7 +628,7 @@ export const FIELD_MAP = {
     'venue_name', 'venue_type', 'location', 'event_type', 'event_type_other',
     'shift', 'date', 'time', 'site_availability', 'site_availability_other',
     'decor_type', 'color_theme',
-    'guest_name', 'phone', 'sales_person', 'sales_person_id',
+    'guest_name', 'phone', 'pax', 'sales_person', 'sales_person_id',
     'execution_person', 'execution_person_id',
     'operation_manager', 'operation_manager_id',
     'venue_manager_name', 'venue_manager_number',

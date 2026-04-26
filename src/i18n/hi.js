@@ -397,6 +397,7 @@ const hi = {
   'No Entertainment Sales users available. Add users in Manage Users.': 'कोई मनोरंजन सेल्स उपयोगकर्ता उपलब्ध नहीं। उपयोगकर्ता प्रबंधन में जोड़ें।',
   'No Decor Sales users available. Add users in Manage Users.': 'कोई डेकोर सेल्स उपयोगकर्ता उपलब्ध नहीं। उपयोगकर्ता प्रबंधन में जोड़ें।',
   'No Decor Operations users available. Add users in Manage Users.': 'कोई डेकोर ऑपरेशंस उपयोगकर्ता उपलब्ध नहीं। उपयोगकर्ता प्रबंधन में जोड़ें।',
+  'No Decor Sales (Outdoor) users available. Add users in Manage Users.': 'कोई डेकोर सेल्स (आउटडोर) उपयोगकर्ता उपलब्ध नहीं। उपयोगकर्ता प्रबंधन में जोड़ें।',
 
   // ── सेक्शन अनुमतियाँ ──
   "You don't have permission to edit this section.": 'इस सेक्शन को संपादित करने की अनुमति नहीं है।',
