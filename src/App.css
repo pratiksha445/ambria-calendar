@@ -2044,39 +2044,6 @@
   width: 100%;
 }
 
-/* ---------- Reload prompt (PWA update banner) ---------- */
-
-.reload-prompt {
-  position: fixed;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--ambria-ink);
-  color: var(--ambria-bg);
-  padding: 10px 16px;
-  border-radius: 12px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  z-index: 310;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  box-shadow: var(--ambria-shadow-toast);
-  animation: fadeIn 180ms ease;
-  white-space: nowrap;
-}
-.reload-prompt-btn {
-  background: var(--ambria-accent);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 6px 14px;
-  font-size: 0.82rem;
-  font-weight: 700;
-  cursor: pointer;
-  font-family: inherit;
-}
-
 /* ---------- Sidebar version ---------- */
 
 .sidebar-version {
