@@ -135,8 +135,8 @@ const venueNameFilter = (v) => v.replace(/[^a-zA-Z0-9\s.,\-'&()#]/g, '')
 
 const notVMD = (f) => f.booking_status && f.booking_status !== 'VMD' && f.booking_status !== 'VMD + Outdoor Ent'
 const menuCatOptions = (f) => {
-  if (f.menu_type === 'Non-Veg') return NON_VEG_CATS
-  if (f.menu_type === 'Veg' || f.menu_type === 'Jain') return VEG_CATS
+  if (f.menu_type === 'Non-Veg') return [...NON_VEG_CATS, 'Customised']
+  if (f.menu_type === 'Veg' || f.menu_type === 'Jain') return [...VEG_CATS, 'Customised']
   return MENU_CATS
 }
 const isOther = (f) => f.event_type === 'Other'
