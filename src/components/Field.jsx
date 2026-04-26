@@ -173,23 +173,35 @@ export default function Field({ field, form, value, onChange, error, readOnly, a
       const match = users.find((u) => (typeof u === 'string' ? u : u.name) === name)
       onChange(idKey, match && typeof match === 'object' ? match.id : null)
     }
+    const handleClear = (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+      onChange(field.key, '')
+      onChange(idKey, null)
+    }
     control = (
-      <>
+      <div className="user-select-wrap">
         <input
           type="text"
           {...commonProps}
+          className={currentVal ? 'has-clear' : ''}
           onChange={handleUserChange}
           list={listId}
           autoComplete="off"
           placeholder={isEmpty && field.userEmptyMsg ? t(field.userEmptyMsg) : t('Search users…')}
         />
+        {currentVal && !disabled && (
+          <button type="button" className="field-clear-btn" onMouseDown={handleClear} aria-label="Clear" tabIndex={-1}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        )}
         <datalist id={listId}>
           {hasStored && <option key="__stored" value={currentVal} />}
           {userNames.map((name) => (
             <option key={name} value={name} />
           ))}
         </datalist>
-      </>
+      </div>
     )
   } else if (field.suffix) {
     control = (
