@@ -79,15 +79,6 @@ export default function EventTypeManagement({ currentUser, showToast, onMenu }) 
     }
   }
 
-  const handleToggleActive = async (item) => {
-    if (item.name === 'Other') return
-    try {
-      await updateEventType(item.id, { is_active: !item.is_active }, currentUser)
-      showToast?.(t(item.is_active ? 'Deactivated' : 'Activated'))
-      await load()
-    } catch (err) { console.error(err) }
-  }
-
   const handleDelete = async (item) => {
     if (item.name === 'Other') return
     try {
@@ -160,7 +151,7 @@ export default function EventTypeManagement({ currentUser, showToast, onMenu }) 
         {types.filter((item) => item.name.toLowerCase().includes(search.toLowerCase())).map((item, index) => {
           const isOther = item.name === 'Other'
           return (
-            <div key={item.id} className={`et-row ${!item.is_active ? 'inactive' : ''}`}>
+            <div key={item.id} className="et-row">
               <div className="et-reorder">
                 <button
                   type="button"
@@ -202,19 +193,9 @@ export default function EventTypeManagement({ currentUser, showToast, onMenu }) 
                 ) : (
                   <span className="et-name">{item.name}</span>
                 )}
-                {!item.is_active && <span className="status-badge-inactive">{t('Inactive')}</span>}
               </div>
 
               <div className="et-actions">
-                {!isOther && (
-                  <button
-                    type="button"
-                    className="btn-outline btn-sm"
-                    onClick={() => handleToggleActive(item)}
-                  >
-                    {t(item.is_active ? 'Deactivate' : 'Activate')}
-                  </button>
-                )}
                 {!isOther && editingId !== item.id && (
                   <button
                     type="button"

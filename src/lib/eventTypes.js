@@ -23,10 +23,10 @@ export async function fetchEventTypes() {
   return data ?? []
 }
 
-/** Fetch only active event types for dropdown use */
+/** Fetch all event types for dropdown use */
 export async function fetchActiveEventTypes() {
   const { data, error } = await withTimeout(
-    supabase.from('event_types').select('*').eq('is_active', true).order('sort_order', { ascending: true })
+    supabase.from('event_types').select('*').order('sort_order', { ascending: true })
   )
   if (error) throw error
   return data ?? []
@@ -45,7 +45,7 @@ export async function createEventType(name, user) {
   console.log('[eventTypes] inserting with sort_order:', nextOrder)
 
   const { data, error } = await withTimeout(
-    supabase.from('event_types').insert({ name, is_active: true, sort_order: nextOrder }).select().single()
+    supabase.from('event_types').insert({ name, sort_order: nextOrder }).select().single()
   )
   if (error) { console.error('[eventTypes] createEventType insert error:', error); throw error }
   console.log('[eventTypes] inserted:', data.id)
