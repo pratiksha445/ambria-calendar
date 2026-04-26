@@ -14,7 +14,6 @@ export default function Header({
   onAdd,
   onExport,
   onClearMonth,
-  onSettings,
 }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const { t, formatMonthYear } = useLanguage()
@@ -41,22 +40,22 @@ export default function Header({
             <ExportIcon />
           </button>
           <button className="book-btn" onClick={onAdd}>+<span className="book-btn-label"> {t('Book')}</span></button>
-          <div className="header-more-wrap">
-            <button
-              className="icon-btn sm"
-              onClick={() => setMenuOpen((p) => !p)}
-              aria-label="More options"
-            >
-              <MoreIcon />
-            </button>
-            {menuOpen && (
-              <>
-                <div
-                  className="header-menu-backdrop"
-                  onClick={() => setMenuOpen(false)}
-                />
-                <div className="header-menu-dropdown">
-                  {onClearMonth && (
+          {onClearMonth && (
+            <div className="header-more-wrap">
+              <button
+                className="icon-btn sm"
+                onClick={() => setMenuOpen((p) => !p)}
+                aria-label="More options"
+              >
+                <MoreIcon />
+              </button>
+              {menuOpen && (
+                <>
+                  <div
+                    className="header-menu-backdrop"
+                    onClick={() => setMenuOpen(false)}
+                  />
+                  <div className="header-menu-dropdown">
                     <button
                       className="header-menu-item danger"
                       onClick={() => { setMenuOpen(false); onClearMonth() }}
@@ -64,18 +63,11 @@ export default function Header({
                       <TrashIcon />
                       {t('Clear Month')}
                     </button>
-                  )}
-                  <button
-                    className="header-menu-item"
-                    onClick={() => { setMenuOpen(false); onSettings?.() }}
-                  >
-                    <SettingsIcon />
-                    {t('Settings')}
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -150,11 +142,3 @@ function TrashIcon() {
   )
 }
 
-function SettingsIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="3" />
-      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-    </svg>
-  )
-}
