@@ -215,10 +215,19 @@ function ownVenueSections(venue, dynamicTypes, dynamicElements) {
         phoneReq(),
         // Row 9: Pax | Sales Person
         paxField(),
-        salesPersonField(),
+        { ...salesPersonField(),
+          userFilter: { department: 'Venue Sales', salesTypes: ['In-house', 'In-house + Outdoor'] },
+          userEmptyMsg: 'No Venue Sales users available. Add users in Manage Users.',
+        },
         // Row 10: Delivery Person | Operation Manager
-        { type: 'user-select', label: 'Delivery Person', key: 'delivery_person', required: true },
-        operationManagerField(),
+        { type: 'user-select', label: 'Delivery Person', key: 'delivery_person', required: true,
+          userFilter: { department: 'Venue Sales', salesTypes: ['In-house', 'In-house + Outdoor'] },
+          userEmptyMsg: 'No Venue Sales users available. Add users in Manage Users.',
+        },
+        { ...operationManagerField(),
+          userFilter: { department: 'F&B Service' },
+          userEmptyMsg: 'No F&B Service users available. Add users in Manage Users.',
+        },
       ],
     },
     {

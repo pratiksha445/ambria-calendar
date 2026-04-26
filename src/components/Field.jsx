@@ -139,6 +139,10 @@ export default function Field({ field, form, value, onChange, error, readOnly, a
     )
   } else if (field.type === 'user-select') {
     const listId = `userlist-${field.key}`
+    const users = activeUsers || []
+    const currentVal = commonProps.value || ''
+    const hasStored = currentVal && !users.includes(currentVal)
+    const isEmpty = field.userFilter && users.length === 0 && !currentVal
     control = (
       <>
         <input
@@ -146,10 +150,11 @@ export default function Field({ field, form, value, onChange, error, readOnly, a
           {...commonProps}
           list={listId}
           autoComplete="off"
-          placeholder={t('Search users…')}
+          placeholder={isEmpty && field.userEmptyMsg ? t(field.userEmptyMsg) : t('Search users…')}
         />
         <datalist id={listId}>
-          {(activeUsers || []).map((name) => (
+          {hasStored && <option key="__stored" value={currentVal} />}
+          {users.map((name) => (
             <option key={name} value={name} />
           ))}
         </datalist>

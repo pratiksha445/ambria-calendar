@@ -9,7 +9,7 @@ import { autoTitle } from '../lib/autoTitle.js'
 import { sanitizeText, sanitizePhone, sanitizePax } from '../lib/sanitize.js'
 import { createEvent, updateEvent, deleteEvent } from '../lib/events.js'
 import { fetchActiveEventTypes } from '../lib/eventTypes.js'
-import { fetchActiveUserNames } from '../lib/users.js'
+import { fetchActiveUserNames, fetchFilteredUserNames } from '../lib/users.js'
 import { fetchActiveElements, getElementLabel } from '../lib/elements.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 import Field from './Field.jsx'
@@ -47,6 +47,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
   const [dynamicEventTypes, setDynamicEventTypes] = useState(null)
   const [dynamicElements, setDynamicElements] = useState(null)
   const [activeUsers, setActiveUsers] = useState([])
+  const [filteredUsersMap, setFilteredUsersMap] = useState({})
   const [collapsedSections, setCollapsedSections] = useState({})
 
   useEffect(() => {
@@ -64,8 +65,37 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
   }, [])
 
   const sections = useMemo(() => getFormConfig(venueId, dynamicEventTypes, dynamicElements), [venueId, dynamicEventTypes, dynamicElements])
+
+  // Fetch filtered user lists for fields with userFilter (e.g. AP/AM/AE/AR forms)
+  const filterKeysStr = useMemo(() => {
+    const keys = new Set()
+    for (const s of sections) {
+      for (const f of s.fields) {
+        if (f.userFilter) keys.add(JSON.stringify(f.userFilter))
+      }
+    }
+    return [...keys].sort().join('|')
+  }, [sections])
+
+  useEffect(() => {
+    if (!filterKeysStr) { setFilteredUsersMap({}); return }
+    const keys = filterKeysStr.split('|')
+    Promise.all(
+      keys.map((key) =>
+        fetchFilteredUserNames(JSON.parse(key))
+          .then((names) => [key, names])
+          .catch(() => [key, []])
+      )
+    ).then((results) => setFilteredUsersMap(Object.fromEntries(results)))
+  }, [filterKeysStr])
   const computedTitle = useMemo(() => autoTitle({ ...form, venue_id: venueId }), [form, venueId])
   const displayTitle = manualTitle ?? computedTitle
+
+  const getUsersForField = (field) => {
+    if (!field.userFilter) return activeUsers
+    const key = JSON.stringify(field.userFilter)
+    return filteredUsersMap[key] ?? activeUsers
+  }
 
   // When category switches, reset per-category fields and sub-venue.
   useEffect(() => {
@@ -335,7 +365,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
                           onChange={setField}
                           error={errors[f.key]}
                           readOnly={readOnly}
-                          activeUsers={activeUsers}
+                          activeUsers={getUsersForField(f)}
                         />
                       ))}
                     </div>
@@ -350,7 +380,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
                     onChange={setField}
                     error={errors[field.key]}
                     readOnly={readOnly}
-                    activeUsers={activeUsers}
+                    activeUsers={getUsersForField(field)}
                   />
                 )
               })}

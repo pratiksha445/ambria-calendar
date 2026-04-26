@@ -14,6 +14,21 @@ export async function fetchActiveUserNames() {
   return (data ?? []).map((u) => u.name)
 }
 
+/** Fetch active approved user names filtered by department and/or sales types */
+export async function fetchFilteredUserNames(filter) {
+  let q = supabase
+    .from('users')
+    .select('name')
+    .eq('is_active', true)
+    .eq('approval_status', 'approved')
+  if (filter?.department) q = q.eq('department', filter.department)
+  if (filter?.salesTypes?.length) q = q.in('sales_type', filter.salesTypes)
+  q = q.order('name', { ascending: true })
+  const { data, error } = await q
+  if (error) throw error
+  return (data ?? []).map((u) => u.name)
+}
+
 /**
  * Login — returns { status, user, needsPinChange?, reason? }
  * status: 'ok' | 'pending' | 'rejected' | 'deactivated' | 'not_found' | 'wrong_pin'

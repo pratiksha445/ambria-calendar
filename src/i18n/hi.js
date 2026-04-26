@@ -357,6 +357,10 @@ const hi = {
   'Describe the service': 'सर्विस का विवरण दें',
   'Service Type (Other)': 'सर्विस प्रकार (अन्य)',
 
+  // ── फ़िल्टर्ड यूज़र ड्रॉपडाउन ──
+  'No Venue Sales users available. Add users in Manage Users.': 'कोई वेन्यू सेल्स उपयोगकर्ता उपलब्ध नहीं। उपयोगकर्ता प्रबंधन में जोड़ें।',
+  'No F&B Service users available. Add users in Manage Users.': 'कोई F&B सर्विस उपयोगकर्ता उपलब्ध नहीं। उपयोगकर्ता प्रबंधन में जोड़ें।',
+
   // ── प्लेसहोल्डर ──
   'e.g. Mr. Sharma': 'जैसे श्री शर्मा',
   'Optional…': 'वैकल्पिक…',

@@ -357,6 +357,10 @@ const en = {
   'Describe the service': 'Describe the service',
   'Service Type (Other)': 'Service Type (Other)',
 
+  // ── Filtered user dropdowns ──
+  'No Venue Sales users available. Add users in Manage Users.': 'No Venue Sales users available. Add users in Manage Users.',
+  'No F&B Service users available. Add users in Manage Users.': 'No F&B Service users available. Add users in Manage Users.',
+
   // ── Placeholders ──
   'e.g. Mr. Sharma': 'e.g. Mr. Sharma',
   'Optional…': 'Optional…',
