@@ -648,6 +648,10 @@ const hi = {
   'Search event types…': 'इवेंट प्रकार खोजें…',
   'No matching event types': 'कोई मिलता इवेंट प्रकार नहीं',
   'Cannot delete the Other event type': '"अन्य" इवेंट प्रकार हटाया नहीं जा सकता',
+
+  // ── PWA अपडेट ──
+  'New version available': 'नया वर्शन उपलब्ध है',
+  'Refresh': 'रिफ्रेश',
 }
 
 export default hi

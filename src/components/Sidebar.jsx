@@ -281,6 +281,7 @@ export default function Sidebar({
             </svg>
             {t('Sign Out')}
           </button>
+          <span className="sidebar-version">v {__APP_VERSION__}</span>
         </div>
       </aside>
     </>

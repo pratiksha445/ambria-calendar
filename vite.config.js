@@ -5,10 +5,15 @@ import { VitePWA } from 'vite-plugin-pwa'
 // https://vitejs.dev/config/
 export default defineConfig({
   base: '/ambria-calendar/',
+  define: {
+    __APP_VERSION__: JSON.stringify(
+      process.env.GITHUB_SHA?.slice(0, 7) || Date.now().toString()
+    ),
+  },
   plugins: [
     react(),
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
       strategies: 'generateSW',
       includeAssets: ['favicon.png', 'logo.png', 'icons/icon-192.png', 'icons/icon-512.png'],
       manifest: {
@@ -41,6 +46,13 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        clientsClaim: true,
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
+            handler: 'NetworkOnly',
+          },
+        ],
       },
     }),
   ],

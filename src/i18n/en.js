@@ -648,6 +648,10 @@ const en = {
   'Search event types…': 'Search event types…',
   'No matching event types': 'No matching event types',
   'Cannot delete the Other event type': 'Cannot delete the Other event type',
+
+  // ── PWA update ──
+  'New version available': 'New version available',
+  'Refresh': 'Refresh',
 }
 
 export default en

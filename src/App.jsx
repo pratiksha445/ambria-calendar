@@ -15,6 +15,7 @@ import AuditLog from './components/AuditLog.jsx'
 import EventTypeManagement from './components/EventTypeManagement.jsx'
 import CategoryManagement from './components/CategoryManagement.jsx'
 import ManageElements from './components/ManageElements.jsx'
+import ReloadPrompt from './components/ReloadPrompt.jsx'
 import { fetchEvents, deleteEvent, bulkDeleteMonth } from './lib/events.js'
 import { seedIfEmpty } from './lib/seedEvents.js'
 import { startOfMonth, endOfMonth, toIsoDate, addDays } from './lib/dates.js'
@@ -420,6 +421,7 @@ export default function App() {
         />
       )}
       {toast && <div className="toast">{toast}</div>}
+      <ReloadPrompt />
     </div>
   )
 }
