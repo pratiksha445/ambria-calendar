@@ -501,7 +501,6 @@ function wsSections(_venue, dynamicTypes) {
         ...eventTypeFields(dynamicTypes),
         statusField,
         D('Date', 'date'),
-        S('Shift', 'shift', SHIFTS),
         TM('Time', 'time'),
       ],
     },
@@ -565,7 +564,7 @@ export const FIELD_MAP = {
   ws: [
     'service_type', 'service_type_other', 'vendor_name', 'vendor_phone',
     'venue_name', 'location', 'event_type', 'event_type_other',
-    'shift', 'date', 'time',
+    'date', 'time',
     'guest_name', 'phone', 'sales_person',
     'payment_remaining_venue', 'payment_timing', 'notes',
   ],
