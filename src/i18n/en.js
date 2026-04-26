@@ -594,6 +594,7 @@ const en = {
   'No matching categories': 'No matching categories',
   'Search event types…': 'Search event types…',
   'No matching event types': 'No matching event types',
+  'Cannot delete the Other event type': 'Cannot delete the Other event type',
 }
 
 export default en

@@ -33,22 +33,18 @@ export async function fetchActiveEventTypes() {
 }
 
 /** Create a new event type */
-export async function createEventType(name, user) {
-  console.log('[eventTypes] createEventType called:', name)
-
+export async function createEventType(name, nameHi, user) {
   // Get max sort_order
   const { data: existing, error: sortErr } = await withTimeout(
     supabase.from('event_types').select('sort_order').order('sort_order', { ascending: false }).limit(1)
   )
   if (sortErr) console.warn('[eventTypes] sort_order query error (continuing):', sortErr.message)
   const nextOrder = (existing?.[0]?.sort_order ?? 0) + 1
-  console.log('[eventTypes] inserting with sort_order:', nextOrder)
 
   const { data, error } = await withTimeout(
-    supabase.from('event_types').insert({ name, sort_order: nextOrder }).select().single()
+    supabase.from('event_types').insert({ name, name_hi: nameHi || null, sort_order: nextOrder }).select().single()
   )
-  if (error) { console.error('[eventTypes] createEventType insert error:', error); throw error }
-  console.log('[eventTypes] inserted:', data.id)
+  if (error) throw error
 
   // Fire-and-forget audit — never block the main flow
   if (user) {

@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import {
-  fetchEventTypes, createEventType, updateEventType,
-  deleteEventType, reorderEventTypes,
+  fetchEventTypes, createEventType, updateEventType, deleteEventType,
 } from '../lib/eventTypes.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 
@@ -17,96 +16,100 @@ function MenuIcon() {
 
 export default function EventTypeManagement({ currentUser, showToast, onMenu }) {
   const { t } = useLanguage()
-  const [types, setTypes] = useState([])
+  const [items, setItems] = useState([])
   const [newName, setNewName] = useState('')
+  const [newNameHi, setNewNameHi] = useState('')
   const [editingId, setEditingId] = useState(null)
   const [editName, setEditName] = useState('')
-  const [confirmDeleteId, setConfirmDeleteId] = useState(null)
-  const [saving, setSaving] = useState(false)
+  const [editNameHi, setEditNameHi] = useState('')
+  const [adding, setAdding] = useState(false)
+  const [savingId, setSavingId] = useState(null)
   const [search, setSearch] = useState('')
-  const [loadError, setLoadError] = useState(null)
+  const [error, setError] = useState(null)
 
-  useEffect(() => { load() }, [])
+  useEffect(() => {
+    let cancelled = false
+    fetchEventTypes()
+      .then((rows) => { if (!cancelled) setItems(rows) })
+      .catch((e) => { if (!cancelled) { console.error(e); setError(e?.message ?? String(e)) } })
+    return () => { cancelled = true }
+  }, [])
 
-  async function load() {
-    setLoadError(null)
-    try {
-      setTypes(await fetchEventTypes())
-    } catch (e) {
-      console.error('[EventTypeManagement] load error:', e)
-      setLoadError(e?.message ?? String(e))
-      showToast?.(t('Failed to load event types'))
-    }
-  }
+  const filtered = items.filter((item) =>
+    item.name.toLowerCase().includes(search.toLowerCase()) ||
+    (item.name_hi || '').includes(search)
+  )
 
   const handleAdd = async (e) => {
     e.preventDefault()
     const name = newName.trim()
     if (!name) return
-    console.log('[ET] handleAdd start:', name)
-    setSaving(true)
-    try {
-      await createEventType(name, currentUser)
-      console.log('[ET] createEventType succeeded')
-      setNewName('')
-      showToast?.(t('Event type added'))
-      await load()
-    } catch (err) {
-      console.error('[ET] handleAdd error:', err)
-      const msg = err?.message ?? String(err)
-      if (msg.includes('duplicate') || msg.includes('unique')) showToast?.(t('Event type already exists'))
-      else showToast?.(t('Error:') + ' ' + msg)
+    if (items.some((it) => it.name.toLowerCase() === name.toLowerCase())) {
+      setError(t('Event type already exists'))
+      return
     }
-    // Always reset — outside try/catch so it runs even if catch itself throws
-    setSaving(false)
-    console.log('[ET] handleAdd done, saving=false')
+    setAdding(true)
+    setError(null)
+    try {
+      const row = await createEventType(name, newNameHi.trim(), currentUser)
+      setItems((prev) => [...prev, row])
+      setNewName('')
+      setNewNameHi('')
+      showToast?.(t('Event type added'))
+    } catch (err) {
+      console.error(err)
+      const msg = err?.message ?? String(err)
+      if (msg.includes('duplicate') || msg.includes('unique')) setError(t('Event type already exists'))
+      else setError(msg)
+    } finally {
+      setAdding(false)
+    }
   }
 
-  const handleRename = async (id) => {
+  const handleSaveEdit = async (id) => {
     const name = editName.trim()
     if (!name) return
+    setSavingId(id)
+    setError(null)
     try {
-      await updateEventType(id, { name }, currentUser)
+      const row = await updateEventType(id, { name, name_hi: editNameHi.trim() || null }, currentUser)
+      setItems((prev) => prev.map((it) => it.id === id ? { ...it, ...row } : it))
       setEditingId(null)
-      setEditName('')
       showToast?.(t('Event type renamed'))
-      await load()
     } catch (err) {
-      console.error('[EventTypeManagement] rename error:', err)
+      console.error(err)
       const msg = err?.message ?? String(err)
-      if (msg.includes('duplicate') || msg.includes('unique')) showToast?.(t('Event type already exists'))
-      else showToast?.(t('Error:') + ' ' + msg)
+      if (msg.includes('duplicate') || msg.includes('unique')) setError(t('Event type already exists'))
+      else setError(msg)
+    } finally {
+      setSavingId(null)
     }
   }
 
   const handleDelete = async (item) => {
-    if (item.name === 'Other') return
+    if (item.name === 'Other' || item.is_protected) {
+      alert(t('Cannot delete the Other event type'))
+      return
+    }
+    if (!window.confirm(t('Delete') + ` "${item.name}"?`)) return
+    setError(null)
     try {
       await deleteEventType(item.id, currentUser)
-      setConfirmDeleteId(null)
+      setItems((prev) => prev.filter((it) => it.id !== item.id))
       showToast?.(t('Event type deleted'))
-      await load()
     } catch (err) {
-      console.error('[EventTypeManagement] delete error:', err)
-      showToast?.(t('Error:') + ' ' + (err?.message ?? String(err)))
+      console.error(err)
+      setError(err?.message ?? String(err))
     }
   }
 
-  const moveUp = async (index) => {
-    if (index <= 0) return
-    const ids = types.map((t) => t.id)
-    ;[ids[index - 1], ids[index]] = [ids[index], ids[index - 1]]
-    await reorderEventTypes(ids, currentUser)
-    await load()
+  const startEdit = (item) => {
+    setEditingId(item.id)
+    setEditName(item.name)
+    setEditNameHi(item.name_hi || '')
   }
 
-  const moveDown = async (index) => {
-    if (index >= types.length - 1) return
-    const ids = types.map((t) => t.id)
-    ;[ids[index], ids[index + 1]] = [ids[index + 1], ids[index]]
-    await reorderEventTypes(ids, currentUser)
-    await load()
-  }
+  const isProtected = (item) => item.name === 'Other' || item.is_protected
 
   return (
     <div className="panel-page">
@@ -127,7 +130,7 @@ export default function EventTypeManagement({ currentUser, showToast, onMenu }) 
         />
       </div>
 
-      <form className="et-add-form" onSubmit={handleAdd}>
+      <form className="et-add-form element-add-form" onSubmit={handleAdd}>
         <input
           type="text"
           value={newName}
@@ -135,99 +138,70 @@ export default function EventTypeManagement({ currentUser, showToast, onMenu }) 
           placeholder={t('New event type name…')}
           className="et-add-input"
         />
-        <button type="submit" className="btn-save et-add-btn" disabled={saving || !newName.trim()}>
-          {saving ? t('Adding…') : t('Add')}
+        <input
+          type="text"
+          value={newNameHi}
+          onChange={(e) => setNewNameHi(e.target.value)}
+          placeholder={t('Hindi Name')}
+          className="et-add-input"
+        />
+        <button type="submit" className="btn-save et-add-btn" disabled={adding || !newName.trim()}>
+          {adding ? t('Adding…') : t('Add')}
         </button>
       </form>
 
-      {loadError && (
+      {error && (
         <div className="et-error-banner">
-          {t('Could not load event types.')} {loadError}
-          <button type="button" className="btn-ghost btn-sm" onClick={load}>{t('Retry')}</button>
+          {error}
+          <button type="button" className="btn-ghost btn-sm" onClick={() => setError(null)}>×</button>
         </div>
       )}
 
       <div className="et-list">
-        {types.filter((item) => item.name.toLowerCase().includes(search.toLowerCase())).map((item, index) => {
-          const isOther = item.name === 'Other'
-          return (
-            <div key={item.id} className="et-row">
-              <div className="et-reorder">
-                <button
-                  type="button"
-                  className="et-arrow"
-                  onClick={() => moveUp(index)}
-                  disabled={index === 0}
-                  aria-label="Move up"
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="18 15 12 9 6 15" />
-                  </svg>
-                </button>
-                <button
-                  type="button"
-                  className="et-arrow"
-                  onClick={() => moveDown(index)}
-                  disabled={index === types.length - 1}
-                  aria-label="Move down"
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="6 9 12 15 18 9" />
-                  </svg>
-                </button>
-              </div>
-
-              <div className="et-name-col">
-                {editingId === item.id ? (
-                  <div className="et-inline-edit">
-                    <input
-                      type="text"
-                      value={editName}
-                      onChange={(e) => setEditName(e.target.value)}
-                      autoFocus
-                      onKeyDown={(e) => { if (e.key === 'Enter') handleRename(item.id) }}
-                    />
-                    <button className="btn-xs btn-approve" onClick={() => handleRename(item.id)}>{t('Save')}</button>
-                    <button className="btn-xs btn-ghost" onClick={() => setEditingId(null)}>{t('Cancel')}</button>
-                  </div>
-                ) : (
-                  <span className="et-name">{item.name}</span>
-                )}
-              </div>
-
-              <div className="et-actions">
-                {!isOther && editingId !== item.id && (
-                  <button
-                    type="button"
-                    className="btn-ghost btn-sm"
-                    onClick={() => { setEditingId(item.id); setEditName(item.name) }}
-                  >
-                    {t('Edit')}
+        {filtered.map((item) => (
+          <div key={item.id} className="et-row">
+            <div className="et-name-col">
+              {editingId === item.id ? (
+                <div className="et-inline-edit element-inline-edit">
+                  <input
+                    type="text"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    autoFocus
+                    placeholder={t('New event type name…')}
+                    onKeyDown={(e) => { if (e.key === 'Enter') handleSaveEdit(item.id) }}
+                  />
+                  <input
+                    type="text"
+                    value={editNameHi}
+                    onChange={(e) => setEditNameHi(e.target.value)}
+                    placeholder={t('Hindi Name')}
+                    onKeyDown={(e) => { if (e.key === 'Enter') handleSaveEdit(item.id) }}
+                  />
+                  <button className="btn-xs btn-approve" onClick={() => handleSaveEdit(item.id)} disabled={savingId === item.id}>
+                    {savingId === item.id ? '…' : t('Save')}
                   </button>
-                )}
-                {!isOther && (
-                  confirmDeleteId === item.id ? (
-                    <div className="inline-confirm">
-                      <span>{t('Delete?')}</span>
-                      <button className="btn-danger btn-sm" onClick={() => handleDelete(item)}>{t('Yes')}</button>
-                      <button className="btn-ghost btn-sm" onClick={() => setConfirmDeleteId(null)}>{t('No')}</button>
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      className="btn-ghost btn-sm danger-text"
-                      onClick={() => setConfirmDeleteId(item.id)}
-                    >
-                      {t('Delete')}
-                    </button>
-                  )
-                )}
-              </div>
+                  <button className="btn-xs btn-ghost" onClick={() => setEditingId(null)}>{t('Cancel')}</button>
+                </div>
+              ) : (
+                <>
+                  <span className="et-name">{item.name}</span>
+                  {item.name_hi && <span className="element-name-hi">{item.name_hi}</span>}
+                </>
+              )}
             </div>
-          )
-        })}
-        {types.length === 0 && <div className="empty-state">{t('No event types found')}</div>}
-        {types.length > 0 && types.filter((item) => item.name.toLowerCase().includes(search.toLowerCase())).length === 0 && (
+            <div className="et-actions">
+              {editingId !== item.id && !isProtected(item) && (
+                <>
+                  <button type="button" className="btn-ghost btn-sm" onClick={() => startEdit(item)}>{t('Edit')}</button>
+                  <button type="button" className="btn-ghost btn-sm danger-text" onClick={() => handleDelete(item)}>{t('Delete')}</button>
+                </>
+              )}
+            </div>
+          </div>
+        ))}
+        {items.length === 0 && !error && <div className="empty-state">{t('No event types found')}</div>}
+        {items.length > 0 && filtered.length === 0 && (
           <div className="empty-state">{t('No matching event types')}</div>
         )}
       </div>

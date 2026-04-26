@@ -594,6 +594,7 @@ const hi = {
   'No matching categories': 'कोई मिलती श्रेणी नहीं',
   'Search event types…': 'इवेंट प्रकार खोजें…',
   'No matching event types': 'कोई मिलता इवेंट प्रकार नहीं',
+  'Cannot delete the Other event type': '"अन्य" इवेंट प्रकार हटाया नहीं जा सकता',
 }
 
 export default hi
