@@ -44,8 +44,11 @@ export const ELEMENT_OPTIONS_FALLBACK = [
   'Classical Dance Artist', 'Molecular Bar', 'Tattoo Artist',
 ]
 export const SERVICE_TYPES = [
-  'Photography', 'Makeup', 'Party Makeup', 'Guest Mehendi', 'Bridal Mehndi',
-  'Band', 'Choreography', 'Paan', 'Small Counters', 'Others',
+  'Band', 'Bridal Mehndi', 'Cakes & Gift Hampers', 'Choreography',
+  'E-invite / Return Gifts', 'Groom Styling', 'Guest Mehendi',
+  'Luxury Cars / Vintage Cars', 'Makeup', 'Outside Entertainment',
+  'Paan', 'Party Makeup', 'Photography', 'Small Counters',
+  'Wedding Planning', 'Others',
 ]
 
 export const SALES_TYPES = ['In-house', 'Outdoor', 'In-house + Outdoor']
