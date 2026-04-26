@@ -155,6 +155,8 @@ const en = {
   'Operation Manager': 'Operation Manager',
   'Venue Manager Name': 'Venue Manager Name',
   'Venue Manager Number': 'Venue Manager Number',
+  'Service Head': 'Service Head',
+  'Kitchen Head': 'Kitchen Head',
 
   // ── Site Availability options ──
   '1 day': '1 day',
@@ -398,6 +400,8 @@ const en = {
   'No Decor Sales users available. Add users in Manage Users.': 'No Decor Sales users available. Add users in Manage Users.',
   'No Decor Operations users available. Add users in Manage Users.': 'No Decor Operations users available. Add users in Manage Users.',
   'No Decor Sales (Outdoor) users available. Add users in Manage Users.': 'No Decor Sales (Outdoor) users available. Add users in Manage Users.',
+  'No Catering Sales (Outdoor) users available. Add users in Manage Users.': 'No Catering Sales (Outdoor) users available. Add users in Manage Users.',
+  'No Kitchen users available. Add users in Manage Users.': 'No Kitchen users available. Add users in Manage Users.',
 
   // ── Section permissions ──
   "You don't have permission to edit this section.": "You don't have permission to edit this section.",

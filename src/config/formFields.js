@@ -424,21 +424,35 @@ function addSections(_venue, dynamicTypes) {
 
 // AC — external venue cuisine
 function acSections(_venue, dynamicTypes) {
+  const isSiteOther = (f) => f.site_availability === 'Others'
   return [
     {
       title: 'Venue',
       fields: [
+        // Row 1: Venue Name | Venue Type
         venueNameField(),
         S('Venue Type', 'venue_type', VENUE_TYPES),
+        // Row 2: Location (full width)
         T('Location', 'location', false, { placeholder: 'Google Maps link or address', mapLink: true }),
       ],
     },
     {
       title: 'Event',
       fields: [
+        // Row 3: Event Type | Shift
         ...eventTypeFields(dynamicTypes),
         S('Shift', 'shift', SHIFTS),
+        // Row 4: Status | Site Availability
         statusField,
+        S('Site Availability', 'site_availability', SITE_AVAILABILITIES, false),
+        {
+          ...T('Specify', 'site_availability_other', true, {
+            placeholder: 'Describe availability',
+          }),
+          showWhen: isSiteOther,
+          fullWidth: true,
+        },
+        // Row 5: Date | Time
         D('Date', 'date'),
         TM('Time', 'time'),
       ],
@@ -453,15 +467,38 @@ function acSections(_venue, dynamicTypes) {
     {
       title: 'Guest',
       fields: [
+        // Row 1: Sales Person | Service Head
+        { ...salesPersonField(),
+          userFilter: { department: 'Catering Sales', salesTypes: ['Outdoor', 'In-house + Outdoor'] },
+          userEmptyMsg: 'No Catering Sales (Outdoor) users available. Add users in Manage Users.',
+        },
+        { type: 'user-select', label: 'Service Head', key: 'service_head', required: true,
+          userFilter: { department: 'F&B Service' },
+          userEmptyMsg: 'No F&B Service users available. Add users in Manage Users.',
+        },
+        // Row 2: Kitchen Head | Pax
+        { type: 'user-select', label: 'Kitchen Head', key: 'kitchen_head', required: true,
+          userFilter: { department: 'Kitchen' },
+          userEmptyMsg: 'No Kitchen users available. Add users in Manage Users.',
+        },
+        paxField(),
+        // Row 3: Venue Manager Name | Venue Manager Number
+        T('Venue Manager Name', 'venue_manager_name', false, {
+          filterFn: nameFilter, filterError: 'Only letters allowed',
+        }),
+        T('Venue Manager Number', 'venue_manager_number', false, {
+          filterFn: phoneWithPlusFilter, filterError: 'Only + and numbers allowed', inputMode: 'numeric',
+        }),
+        // Row 4: Guest Name | Guest Phone
         guestName(),
         phoneReq(),
-        paxField(),
-        salesPersonField(),
+        // Row 5: Pending Payment % | Payment Status
         T('Pending Payment %', 'payment_remaining_venue', false, {
           filterFn: percentFilter, filterError: 'Only numbers 0-100',
           suffix: '%', inputMode: 'numeric',
         }),
         S('Payment Status', 'payment_timing', PAYMENT_TIMINGS, false),
+        // Row 6: Notes (full width)
         notesField,
       ],
     },
@@ -636,8 +673,11 @@ export const FIELD_MAP = {
   ],
   ac: [
     'venue_name', 'venue_type', 'location', 'event_type', 'event_type_other',
-    'shift', 'date', 'time', 'menu_type', 'menu_cat',
+    'shift', 'date', 'time', 'site_availability', 'site_availability_other',
+    'menu_type', 'menu_cat',
     'guest_name', 'phone', 'pax', 'sales_person', 'sales_person_id',
+    'service_head', 'service_head_id', 'kitchen_head', 'kitchen_head_id',
+    'venue_manager_name', 'venue_manager_number',
     'payment_remaining_venue', 'payment_timing', 'notes',
   ],
   aee: [
@@ -678,6 +718,7 @@ export const ALL_SAVEABLE_KEYS = [
   'venue_manager_name', 'venue_manager_number',
   'tender_name', 'event_type_text', 'end_date',
   'service_type', 'service_type_other', 'vendor_name', 'vendor_phone',
+  'service_head', 'service_head_id', 'kitchen_head', 'kitchen_head_id',
 ]
 
 // ---------- Public API ----------

@@ -51,6 +51,8 @@ const COLUMNS = [
   { key: 'execution_person', header: 'Execution Person' },
   { key: 'venue_manager_name', header: 'Venue Manager Name' },
   { key: 'venue_manager_number', header: 'Venue Manager Number' },
+  { key: 'service_head', header: 'Service Head' },
+  { key: 'kitchen_head', header: 'Kitchen Head' },
   { key: 'tender_name', header: 'Tender Name' },
   { key: 'service_type', header: 'Service Type' },
   { key: 'service_type_other', header: 'Service Type (Other)' },

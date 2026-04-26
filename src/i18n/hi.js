@@ -155,6 +155,8 @@ const hi = {
   'Operation Manager': 'ऑपरेशन मैनेजर',
   'Venue Manager Name': 'वेन्यू मैनेजर का नाम',
   'Venue Manager Number': 'वेन्यू मैनेजर नंबर',
+  'Service Head': 'सर्विस हेड',
+  'Kitchen Head': 'किचन हेड',
 
   // ── साइट उपलब्धता विकल्प ──
   '1 day': '1 दिन',
@@ -398,6 +400,8 @@ const hi = {
   'No Decor Sales users available. Add users in Manage Users.': 'कोई डेकोर सेल्स उपयोगकर्ता उपलब्ध नहीं। उपयोगकर्ता प्रबंधन में जोड़ें।',
   'No Decor Operations users available. Add users in Manage Users.': 'कोई डेकोर ऑपरेशंस उपयोगकर्ता उपलब्ध नहीं। उपयोगकर्ता प्रबंधन में जोड़ें।',
   'No Decor Sales (Outdoor) users available. Add users in Manage Users.': 'कोई डेकोर सेल्स (आउटडोर) उपयोगकर्ता उपलब्ध नहीं। उपयोगकर्ता प्रबंधन में जोड़ें।',
+  'No Catering Sales (Outdoor) users available. Add users in Manage Users.': 'कोई कैटरिंग सेल्स (आउटडोर) उपयोगकर्ता उपलब्ध नहीं। उपयोगकर्ता प्रबंधन में जोड़ें।',
+  'No Kitchen users available. Add users in Manage Users.': 'कोई किचन उपयोगकर्ता उपलब्ध नहीं। उपयोगकर्ता प्रबंधन में जोड़ें।',
 
   // ── सेक्शन अनुमतियाँ ──
   "You don't have permission to edit this section.": 'इस सेक्शन को संपादित करने की अनुमति नहीं है।',
