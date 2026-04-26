@@ -148,6 +148,26 @@ const en = {
   'Guest Phone': 'Guest Phone',
   'Rooms': 'Rooms',
   'Elements': 'Elements',
+  'Color Theme': 'Color Theme',
+  'Site Availability': 'Site Availability',
+  'Specify': 'Specify',
+  'Execution Person': 'Execution Person',
+  'Operation Manager': 'Operation Manager',
+  'Venue Manager Name': 'Venue Manager Name',
+  'Venue Manager Number': 'Venue Manager Number',
+
+  // ── Site Availability options ──
+  '1 day': '1 day',
+  '-2 day': '-2 day',
+  '+2 hr bandwidth': '+2 hr bandwidth',
+  'Same day': 'Same day',
+
+  // ── Venue Type (new options) ──
+  'Terrace': 'Terrace',
+  'Courtyard': 'Courtyard',
+  'Restaurant': 'Restaurant',
+  'Private Villa': 'Private Villa',
+  'Home': 'Home',
 
   // ── Form section titles ──
   'Venue': 'Venue',
@@ -375,6 +395,8 @@ const en = {
   'Delivery Person (Entertainment)': 'Delivery Person (Entertainment)',
   'No Decor Sales users available. Add users in Manage Users.': 'No Decor Sales users available. Add users in Manage Users.',
   'No Entertainment Sales users available. Add users in Manage Users.': 'No Entertainment Sales users available. Add users in Manage Users.',
+  'No Decor Sales users available. Add users in Manage Users.': 'No Decor Sales users available. Add users in Manage Users.',
+  'No Decor Operations users available. Add users in Manage Users.': 'No Decor Operations users available. Add users in Manage Users.',
 
   // ── Section permissions ──
   "You don't have permission to edit this section.": "You don't have permission to edit this section.",
@@ -393,6 +415,7 @@ const en = {
   'Hotel Taj, Farmhouse…': 'Hotel Taj, Farmhouse…',
   'Google Maps link or address': 'Google Maps link or address',
   'Describe the event': 'Describe the event',
+  'Describe availability': 'Describe availability',
   'Any additional notes…': 'Any additional notes…',
   'Shot list, props, wardrobe…': 'Shot list, props, wardrobe…',
   'DJ, Bonfire, BBQ…': 'DJ, Bonfire, BBQ…',

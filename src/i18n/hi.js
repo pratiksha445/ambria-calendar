@@ -148,6 +148,26 @@ const hi = {
   'Guest Phone': 'गेस्ट फोन',
   'Rooms': 'कमरे',
   'Elements': 'एलिमेंट्स',
+  'Color Theme': 'कलर थीम',
+  'Site Availability': 'साइट उपलब्धता',
+  'Specify': 'विवरण दें',
+  'Execution Person': 'एक्सीक्यूशन व्यक्ति',
+  'Operation Manager': 'ऑपरेशन मैनेजर',
+  'Venue Manager Name': 'वेन्यू मैनेजर का नाम',
+  'Venue Manager Number': 'वेन्यू मैनेजर नंबर',
+
+  // ── साइट उपलब्धता विकल्प ──
+  '1 day': '1 दिन',
+  '-2 day': '-2 दिन',
+  '+2 hr bandwidth': '+2 घंटा बैंडविड्थ',
+  'Same day': 'उसी दिन',
+
+  // ── वेन्यू प्रकार (नए विकल्प) ──
+  'Terrace': 'टेरेस',
+  'Courtyard': 'कोर्टयार्ड',
+  'Restaurant': 'रेस्टोरेंट',
+  'Private Villa': 'प्राइवेट विला',
+  'Home': 'होम',
 
   // ── फ़ॉर्म सेक्शन टाइटल ──
   'Venue': 'वेन्यू',
@@ -375,6 +395,8 @@ const hi = {
   'Delivery Person (Entertainment)': 'डिलीवरी व्यक्ति (मनोरंजन)',
   'No Decor Sales users available. Add users in Manage Users.': 'कोई डेकोर सेल्स उपयोगकर्ता उपलब्ध नहीं। उपयोगकर्ता प्रबंधन में जोड़ें।',
   'No Entertainment Sales users available. Add users in Manage Users.': 'कोई मनोरंजन सेल्स उपयोगकर्ता उपलब्ध नहीं। उपयोगकर्ता प्रबंधन में जोड़ें।',
+  'No Decor Sales users available. Add users in Manage Users.': 'कोई डेकोर सेल्स उपयोगकर्ता उपलब्ध नहीं। उपयोगकर्ता प्रबंधन में जोड़ें।',
+  'No Decor Operations users available. Add users in Manage Users.': 'कोई डेकोर ऑपरेशंस उपयोगकर्ता उपलब्ध नहीं। उपयोगकर्ता प्रबंधन में जोड़ें।',
 
   // ── सेक्शन अनुमतियाँ ──
   "You don't have permission to edit this section.": 'इस सेक्शन को संपादित करने की अनुमति नहीं है।',
@@ -393,6 +415,7 @@ const hi = {
   'Hotel Taj, Farmhouse…': 'होटल ताज, फ़ार्महाउस…',
   'Google Maps link or address': 'गूगल मैप्स लिंक या पता',
   'Describe the event': 'इवेंट का विवरण दें',
+  'Describe availability': 'उपलब्धता का विवरण दें',
   'Any additional notes…': 'अतिरिक्त नोट्स…',
   'Shot list, props, wardrobe…': 'शॉट लिस्ट, प्रॉप्स…',
   'DJ, Bonfire, BBQ…': 'DJ, बोनफ़ायर, BBQ, एक्स्ट्रा गद्दा…',

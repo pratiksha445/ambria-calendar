@@ -61,7 +61,8 @@ export const DEPARTMENTS = [
   'Wedding Services', 'Kitchen', 'F&B Service', 'Housekeeping', 'Admin', 'Management',
   'Social/Tech', 'Decor Operations', 'Tender', 'Accounts',
 ]
-export const VENUE_TYPES = ['Lawn', 'Banquet', 'Lawn + Bqt', 'Poolside']
+export const VENUE_TYPES = ['Lawn', 'Banquet', 'Lawn + Bqt', 'Poolside', 'Terrace', 'Courtyard', 'Restaurant', 'Private Villa', 'Home']
+export const SITE_AVAILABILITIES = ['1 day', '-2 day', 'Morning', '+2 hr bandwidth', 'Same day', 'Others']
 export const POOL_OPTIONS = ['Yes', 'No']
 export const MEAL_OPTIONS = [
   'Breakfast',
@@ -338,35 +339,72 @@ function villaSections(venue, _dynamicTypes) {
 
 // ADD — external venue decor
 function addSections(_venue, dynamicTypes) {
+  const isSiteOther = (f) => f.site_availability === 'Others'
   return [
     {
       title: 'Venue',
       fields: [
+        // Row 1: Venue Name | Venue Type
         venueNameField(),
         S('Venue Type', 'venue_type', VENUE_TYPES),
+        // Row 2: Location (full width)
         T('Location', 'location', false, { placeholder: 'Google Maps link or address', mapLink: true }),
       ],
     },
     {
       title: 'Event',
       fields: [
+        // Row 3: Event Type | Shift
         ...eventTypeFields(dynamicTypes),
         S('Shift', 'shift', SHIFTS),
+        // Row 4: Status | Site Availability
         statusField,
+        S('Site Availability', 'site_availability', SITE_AVAILABILITIES, false),
+        {
+          ...T('Specify', 'site_availability_other', true, {
+            placeholder: 'Describe availability',
+          }),
+          showWhen: isSiteOther,
+          fullWidth: true,
+        },
+        // Row 5: Date | Time
         D('Date', 'date'),
         TM('Time', 'time'),
       ],
     },
     {
       title: 'Decor',
-      fields: [S('Decor Type', 'decor_type', DECOR_TYPES)],
+      fields: [
+        // Row 6: Decor Type | Color Theme
+        S('Decor Type', 'decor_type', DECOR_TYPES),
+        T('Color Theme', 'color_theme', false),
+      ],
     },
     {
       title: 'Guest',
       fields: [
+        // Row 7: Sales Person | Execution Person
+        salesPersonField(),
+        { type: 'user-select', label: 'Execution Person', key: 'execution_person', required: false,
+          userFilter: { department: 'Decor Sales' },
+          userEmptyMsg: 'No Decor Sales users available. Add users in Manage Users.',
+        },
+        // Row 8: Operation Manager (full width)
+        { type: 'user-select', label: 'Operation Manager', key: 'operation_manager', required: false,
+          userFilter: { department: 'Decor Operations' },
+          userEmptyMsg: 'No Decor Operations users available. Add users in Manage Users.',
+        },
+        // Row 9: Venue Manager Name | Venue Manager Number
+        T('Venue Manager Name', 'venue_manager_name', false, {
+          filterFn: nameFilter, filterError: 'Only letters allowed',
+        }),
+        T('Venue Manager Number', 'venue_manager_number', false, {
+          filterFn: phoneFilter, filterError: 'Only numbers allowed', inputMode: 'numeric',
+        }),
+        // Row 10: Guest Name | Guest Phone
         guestName(),
         phoneReq(),
-        salesPersonField(),
+        // Row 11: Pending Payment % | Payment Status
         T('Pending Payment %', 'payment_remaining_venue', false, {
           filterFn: percentFilter, filterError: 'Only numbers 0-100',
           suffix: '%', inputMode: 'numeric',
@@ -582,8 +620,12 @@ export const FIELD_MAP = {
   ],
   add: [
     'venue_name', 'venue_type', 'location', 'event_type', 'event_type_other',
-    'shift', 'date', 'time', 'decor_type',
+    'shift', 'date', 'time', 'site_availability', 'site_availability_other',
+    'decor_type', 'color_theme',
     'guest_name', 'phone', 'sales_person', 'sales_person_id',
+    'execution_person', 'execution_person_id',
+    'operation_manager', 'operation_manager_id',
+    'venue_manager_name', 'venue_manager_number',
     'payment_remaining_venue', 'payment_timing', 'notes',
   ],
   ac: [
@@ -624,7 +666,10 @@ export const ALL_SAVEABLE_KEYS = [
   'guest_name', 'phone', 'pax', 'sales_person', 'sales_person_id', 'notes',
   'check_in_date', 'check_out_date', 'check_in_time', 'check_out_time',
   'pool_included', 'meal_included', 'added_service',
-  'venue_name', 'venue_type', 'location', 'decor_type',
+  'venue_name', 'venue_type', 'location', 'decor_type', 'color_theme',
+  'site_availability', 'site_availability_other',
+  'execution_person', 'execution_person_id',
+  'venue_manager_name', 'venue_manager_number',
   'tender_name', 'event_type_text', 'end_date',
   'service_type', 'service_type_other', 'vendor_name', 'vendor_phone',
 ]
