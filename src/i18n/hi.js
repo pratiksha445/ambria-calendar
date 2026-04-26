@@ -455,6 +455,7 @@ const hi = {
   'Payment': 'भुगतान',
   'Assembly': 'असेंबली',
   'Baraat': 'बारात',
+  'Wind Up': 'विंड अप',
   'Varmala': 'वरमाला',
   'Pheras': 'फेरे',
 

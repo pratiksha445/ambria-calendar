@@ -455,6 +455,7 @@ const en = {
   'Payment': 'Payment',
   'Assembly': 'Assembly',
   'Baraat': 'Baraat',
+  'Wind Up': 'Wind Up',
   'Varmala': 'Varmala',
   'Pheras': 'Pheras',
 
