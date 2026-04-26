@@ -42,6 +42,10 @@ const COLUMNS = [
   { key: 'location', header: 'Location' },
   { key: 'decor_type', header: 'Decor Type' },
   { key: 'tender_name', header: 'Tender Name' },
+  { key: 'service_type', header: 'Service Type' },
+  { key: 'service_type_other', header: 'Service Type (Other)' },
+  { key: 'vendor_name', header: 'Vendor Name' },
+  { key: 'vendor_phone', header: 'Vendor Phone' },
   { key: 'source', header: 'Source' },
   { key: 'notes', header: 'Notes' },
 ]
@@ -76,6 +80,9 @@ export function exportEventsToExcel(events, filename) {
       }
       if (col.key === 'elements') {
         return Array.isArray(ev.elements) ? ev.elements.join('; ') : ''
+      }
+      if (col.key === 'service_type') {
+        return Array.isArray(ev.service_type) ? ev.service_type.join('; ') : ''
       }
       if (col.key === 'source') return (ev.source || '').toUpperCase()
       if (col.key.startsWith('payment_remaining_')) {

@@ -178,6 +178,7 @@ const hi = {
   'Ambria Design & Decor': 'अम्ब्रिया डिज़ाइन और डेकोर',
   'Ambria Cuisine': 'अम्ब्रिया क्यूज़ीन',
   'Ambria Events': 'अम्ब्रिया इवेंट्स',
+  'Wedding Services': 'वेडिंग सर्विसेज',
   'Tender': 'टेंडर',
 
   // ── उप-वेन्यू नाम — AP ──
@@ -329,6 +330,24 @@ const hi = {
   'Social/Tech': 'सोशल/टेक',
   'Decor Operations': 'डेकोर ऑपरेशंस',
   'Accounts': 'अकाउंट्स',
+
+  // ── वेडिंग सर्विसेज ──
+  'Service Type': 'सर्विस प्रकार',
+  'Specify Service Type': 'सर्विस प्रकार बताएं',
+  'Vendor Name': 'वेंडर का नाम',
+  'Vendor Phone': 'वेंडर फ़ोन',
+  'Photography': 'फ़ोटोग्राफ़ी',
+  'Makeup': 'मेकअप',
+  'Party Makeup': 'पार्टी मेकअप',
+  'Guest Mehendi': 'गेस्ट मेहंदी',
+  'Bridal Mehndi': 'ब्राइडल मेहंदी',
+  'Band': 'बैंड',
+  'Choreography': 'कोरियोग्राफ़ी',
+  'Paan': 'पान',
+  'Small Counters': 'स्मॉल काउंटर्स',
+  'Others': 'अन्य',
+  'Describe the service': 'सर्विस का विवरण दें',
+  'Service Type (Other)': 'सर्विस प्रकार (अन्य)',
 
   // ── प्लेसहोल्डर ──
   'e.g. Mr. Sharma': 'जैसे श्री शर्मा',

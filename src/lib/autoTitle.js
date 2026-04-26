@@ -64,6 +64,18 @@ export function autoTitle(form) {
     ])
   }
 
+  if (venueId === 'ws') {
+    const services = Array.isArray(form.service_type) ? form.service_type : []
+    const serviceLabel = services
+      .map((s) => s === 'Others' ? (form.service_type_other || 'Others') : s)
+      .join(', ')
+    return joinPipes([
+      firstName(form.guest_name),
+      serviceLabel,
+      form.venue_name,
+    ])
+  }
+
   // add, ac, aee — external venue bookings
   return joinPipes([
     firstName(form.guest_name),

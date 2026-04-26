@@ -13,6 +13,7 @@ export const VENUES = [
   { id: 'add',    name: 'Ambria Design & Decor', short: 'ADD',   color: '#5FA8C4', textColor: '#fff', subVenues: [] },
   { id: 'ac',     name: 'Ambria Cuisine',        short: 'AC',    color: '#D8728A', textColor: '#fff', subVenues: [] },
   { id: 'aee',    name: 'Ambria Events',         short: 'AEE',   color: '#AD7EA5', textColor: '#fff', subVenues: [] },
+  { id: 'ws',     name: 'Wedding Services',      short: 'WS',    color: '#E85D9E', textColor: '#fff', subVenues: [] },
   { id: 'tender', name: 'Tender',                short: 'TND',   color: '#68B078', textColor: '#fff', subVenues: [] },
 ]
 

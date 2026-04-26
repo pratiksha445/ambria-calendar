@@ -178,6 +178,7 @@ const en = {
   'Ambria Design & Decor': 'Ambria Design & Decor',
   'Ambria Cuisine': 'Ambria Cuisine',
   'Ambria Events': 'Ambria Events',
+  'Wedding Services': 'Wedding Services',
   'Tender': 'Tender',
 
   // ── Sub-venue names — AP ──
@@ -329,6 +330,24 @@ const en = {
   'Social/Tech': 'Social/Tech',
   'Decor Operations': 'Decor Operations',
   'Accounts': 'Accounts',
+
+  // ── Wedding Services ──
+  'Service Type': 'Service Type',
+  'Specify Service Type': 'Specify Service Type',
+  'Vendor Name': 'Vendor Name',
+  'Vendor Phone': 'Vendor Phone',
+  'Photography': 'Photography',
+  'Makeup': 'Makeup',
+  'Party Makeup': 'Party Makeup',
+  'Guest Mehendi': 'Guest Mehendi',
+  'Bridal Mehndi': 'Bridal Mehndi',
+  'Band': 'Band',
+  'Choreography': 'Choreography',
+  'Paan': 'Paan',
+  'Small Counters': 'Small Counters',
+  'Others': 'Others',
+  'Describe the service': 'Describe the service',
+  'Service Type (Other)': 'Service Type (Other)',
 
   // ── Placeholders ──
   'e.g. Mr. Sharma': 'e.g. Mr. Sharma',

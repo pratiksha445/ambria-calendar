@@ -43,6 +43,11 @@ export const ELEMENT_OPTIONS_FALLBACK = [
   'Sound', 'Anchor', 'Paparazzi Artist', 'International Artist',
   'Classical Dance Artist', 'Molecular Bar', 'Tattoo Artist',
 ]
+export const SERVICE_TYPES = [
+  'Photography', 'Makeup', 'Party Makeup', 'Guest Mehendi', 'Bridal Mehndi',
+  'Band', 'Choreography', 'Paan', 'Small Counters', 'Others',
+]
+
 export const DEPARTMENTS = [
   'Venue Sales', 'Decor Sales', 'Entertainment Sales', 'Catering Sales',
   'Wedding Services', 'Kitchen', 'F&B Service', 'Housekeeping', 'Admin', 'Management',
@@ -458,6 +463,65 @@ function tenderSections(_venue, _dynamicTypes) {
   ]
 }
 
+// WS — Wedding Services (external vendor coordination)
+function wsSections(_venue, dynamicTypes) {
+  const isServiceOther = (f) => Array.isArray(f.service_type) && f.service_type.includes('Others')
+  return [
+    {
+      title: 'Services',
+      fields: [
+        { type: 'multiselect', label: 'Service Type', key: 'service_type', options: SERVICE_TYPES, required: true, fullWidth: true },
+        {
+          ...T('Specify Service Type', 'service_type_other', true, {
+            placeholder: 'Describe the service',
+          }),
+          showWhen: isServiceOther,
+          fullWidth: true,
+        },
+        T('Vendor Name', 'vendor_name', true, {
+          filterFn: nameFilter, filterError: 'Only letters allowed',
+        }),
+        {
+          type: 'phone', label: 'Vendor Phone', key: 'vendor_phone', required: false,
+          filterFn: phoneFilter, filterError: 'Only numbers allowed',
+          placeholder: '98765 43210', inputMode: 'tel',
+        },
+      ],
+    },
+    {
+      title: 'Venue',
+      fields: [
+        venueNameField(),
+        T('Location', 'location', false, { placeholder: 'Google Maps link or address', mapLink: true }),
+      ],
+    },
+    {
+      title: 'Event',
+      fields: [
+        ...eventTypeFields(dynamicTypes),
+        statusField,
+        D('Date', 'date'),
+        S('Shift', 'shift', SHIFTS),
+        TM('Time', 'time'),
+      ],
+    },
+    {
+      title: 'Guest',
+      fields: [
+        guestName(),
+        phoneReq(),
+        salesPersonField(),
+        T('Pending Payment %', 'payment_remaining_venue', false, {
+          filterFn: percentFilter, filterError: 'Only numbers 0-100',
+          suffix: '%', inputMode: 'numeric',
+        }),
+        S('Payment Status', 'payment_timing', PAYMENT_TIMINGS, false),
+        notesField,
+      ],
+    },
+  ]
+}
+
 // ---------- Field parity: valid keys per category ----------
 
 const VENUE_FIELD_KEYS = [
@@ -498,6 +562,13 @@ export const FIELD_MAP = {
     'guest_name', 'phone', 'sales_person', 'elements',
     'payment_remaining_venue', 'payment_timing', 'notes',
   ],
+  ws: [
+    'service_type', 'service_type_other', 'vendor_name', 'vendor_phone',
+    'venue_name', 'location', 'event_type', 'event_type_other',
+    'shift', 'date', 'time',
+    'guest_name', 'phone', 'sales_person',
+    'payment_remaining_venue', 'payment_timing', 'notes',
+  ],
   tender: [
     'venue_name', 'location', 'event_type_text', 'date', 'end_date',
     'tender_name', 'phone',
@@ -517,6 +588,7 @@ export const ALL_SAVEABLE_KEYS = [
   'pool_included', 'meal_included', 'added_service',
   'venue_name', 'venue_type', 'location', 'decor_type',
   'tender_name', 'event_type_text', 'end_date',
+  'service_type', 'service_type_other', 'vendor_name', 'vendor_phone',
 ]
 
 // ---------- Public API ----------
@@ -530,6 +602,7 @@ const BUILDERS = {
   add: addSections,
   ac: acSections,
   aee: aeeSections,
+  ws: wsSections,
   tender: tenderSections,
 }
 
