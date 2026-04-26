@@ -28,6 +28,8 @@ export const BOOKING_STATUSES = [
 ]
 export const MENU_TYPES = ['Veg', 'Non-Veg', 'Jain']
 export const MENU_CATS = ['MV', 'MNV', 'DMV', 'DMNV', 'MCV', 'MCNV', 'LV', 'LNV', 'Customised']
+export const VEG_CATS = ['MV', 'DMV', 'MCV', 'LV']
+export const NON_VEG_CATS = ['MNV', 'DMNV', 'MCNV', 'LNV']
 export const FP_STATUSES = ['Released', 'Delayed by guest', 'Not Released']
 export const DECOR_TYPES = ['Silver', 'Gold', 'Premium']
 export const DECOR_STATUSES = ['Open', 'Meeting', 'Closure', 'Outdoor']
@@ -130,6 +132,11 @@ const venueNameFilter = (v) => v.replace(/[^a-zA-Z0-9\s.,\-'&()#]/g, '')
 // ---------- Conditional helpers ----------
 
 const notVMD = (f) => f.booking_status && f.booking_status !== 'VMD' && f.booking_status !== 'VMD + Outdoor Ent'
+const menuCatOptions = (f) => {
+  if (f.menu_type === 'Non-Veg') return NON_VEG_CATS
+  if (f.menu_type === 'Veg' || f.menu_type === 'Jain') return VEG_CATS
+  return MENU_CATS
+}
 const isOther = (f) => f.event_type === 'Other'
 
 // ---------- Per-category shared blocks ----------
@@ -207,12 +214,13 @@ function ownVenueSections(venue, dynamicTypes, dynamicElements) {
         // Row 5: Chaat Time | Wind Up Time
         TM('Chaat Time', 'chaat_time'),
         TM('Wind Up Time', 'wind_up_time'),
+        CB('Wind Up Next Day (+1)', 'wind_up_next_day'),
         // Row 6: FP | Rooms
         S('FP', 'fp_status', FP_STATUSES, true, { disabledWhen: notVMD }),
         roomsField(),
         // Row 7: Menu Type | Menu Category
         S('Menu Type', 'menu_type', MENU_TYPES, true, { disabledWhen: notVMD }),
-        S('Menu Category', 'menu_cat', MENU_CATS, true, { disabledWhen: notVMD }),
+        S('Menu Category', 'menu_cat', MENU_CATS, true, { disabledWhen: notVMD, getOptions: menuCatOptions }),
         // Row 8: Payment Status | Pending Payment %
         S('Payment Status', 'payment_timing', PAYMENT_TIMINGS),
         T('Pending Payment %', 'payment_remaining_venue', true, {
@@ -397,7 +405,7 @@ function acSections(_venue, dynamicTypes) {
       title: 'Menu',
       fields: [
         S('Menu Type', 'menu_type', MENU_TYPES),
-        S('Menu Category', 'menu_cat', MENU_CATS),
+        S('Menu Category', 'menu_cat', MENU_CATS, true, { getOptions: menuCatOptions }),
       ],
     },
     {
@@ -554,7 +562,7 @@ function wsSections(_venue, dynamicTypes) {
 
 const VENUE_FIELD_KEYS = [
   'sub_venue', 'event_type', 'event_type_other', 'shift', 'date', 'time',
-  'decor_time', 'chaat_time', 'baraat_time', 'wind_up_time', 'varmala_time', 'pheras_time', 'pheras_next_day',
+  'decor_time', 'chaat_time', 'baraat_time', 'wind_up_time', 'wind_up_next_day', 'varmala_time', 'pheras_time', 'pheras_next_day',
   'booking_status', 'menu_type', 'menu_cat', 'fp_status', 'rooms',
   'decor_status', 'entertainment_status', 'function_category', 'elements',
   'delivery_person', 'delivery_person_id', 'decor_delivery_person', 'decor_delivery_person_id',
@@ -609,7 +617,7 @@ export const FIELD_MAP = {
 // Union of every saveable field key — used to null-out irrelevant columns.
 export const ALL_SAVEABLE_KEYS = [
   'sub_venue', 'event_type', 'event_type_other', 'shift', 'date', 'time',
-  'decor_time', 'chaat_time', 'baraat_time', 'wind_up_time', 'varmala_time', 'pheras_time', 'pheras_next_day',
+  'decor_time', 'chaat_time', 'baraat_time', 'wind_up_time', 'wind_up_next_day', 'varmala_time', 'pheras_time', 'pheras_next_day',
   'booking_status', 'menu_type', 'menu_cat', 'fp_status', 'rooms',
   'decor_status', 'entertainment_status', 'function_category', 'elements',
   'delivery_person', 'delivery_person_id', 'decor_delivery_person', 'decor_delivery_person_id',

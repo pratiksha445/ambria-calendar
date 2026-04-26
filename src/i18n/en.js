@@ -126,6 +126,7 @@ const en = {
   'Varmala Time': 'Varmala Time',
   'Pheras Time': 'Pheras Time',
   'Pheras Next Day (+1)': 'Pheras Next Day (+1)',
+  'Wind Up Next Day (+1)': 'Wind Up Next Day (+1)',
   'Next Day': 'Next Day',
   'Decor Status': 'Decor Status',
   'Entertainment Status': 'Entertainment Status',

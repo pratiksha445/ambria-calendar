@@ -79,6 +79,7 @@ export function exportEventsToExcel(events, filename) {
       }
       if (TIME_KEYS.has(col.key)) {
         const t12 = formatTime12(ev[col.key])
+        if (col.key === 'wind_up_time' && ev.wind_up_next_day && t12) return `${t12} (+1)`
         if (col.key === 'pheras_time' && ev.pheras_next_day && t12) return `${t12} (+1)`
         return t12
       }

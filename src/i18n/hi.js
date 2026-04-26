@@ -126,6 +126,7 @@ const hi = {
   'Varmala Time': 'वरमाला समय',
   'Pheras Time': 'फेरे समय',
   'Pheras Next Day (+1)': 'फेरे अगला दिन (+1)',
+  'Wind Up Next Day (+1)': 'विंड अप अगले दिन (+1)',
   'Next Day': 'अगला दिन',
   'Decor Status': 'डेकोर स्थिति',
   'Entertainment Status': 'मनोरंजन स्थिति',

@@ -132,6 +132,9 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
         next.menu_cat = ''
         next.fp_status = ''
       }
+      if (key === 'menu_type') {
+        next.menu_cat = ''
+      }
       if (key === 'event_type' && value !== 'Other') {
         next.event_type_other = ''
       }

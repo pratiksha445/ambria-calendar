@@ -49,13 +49,14 @@ export default function Field({ field, form, value, onChange, error, readOnly, a
 
   let control
   if (field.type === 'select') {
-    const optionValues = field.options.map((o) => typeof o === 'object' ? o.value : o)
+    const options = field.getOptions ? field.getOptions(form) : field.options
+    const optionValues = options.map((o) => typeof o === 'object' ? o.value : o)
     const hasLegacy = effectiveValue && !optionValues.includes(effectiveValue)
     control = (
       <select {...commonProps}>
         <option value="">{t('— Select —')}</option>
         {hasLegacy && <option value={effectiveValue}>{t(effectiveValue)}</option>}
-        {field.options.map((opt) => {
+        {options.map((opt) => {
           const val = typeof opt === 'object' ? opt.value : opt
           const label = typeof opt === 'object' ? opt.label : opt
           return <option key={val} value={val}>{t(label)}</option>
