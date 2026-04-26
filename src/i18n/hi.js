@@ -314,6 +314,12 @@ const hi = {
   'No matching elements': 'कोई मिलता एलिमेंट नहीं',
   'Retry': 'पुनः प्रयास',
 
+  // ── सेल्स टाइप ──
+  'Sales Type': 'सेल्स टाइप',
+  'All Sales Types': 'सभी सेल्स टाइप',
+  'In-house': 'इन-हाउस',
+  'Outdoor': 'आउटडोर',
+
   // ── विभाग ──
   'Department': 'विभाग',
   'Department is required': 'विभाग आवश्यक है',

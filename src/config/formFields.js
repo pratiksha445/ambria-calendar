@@ -48,6 +48,9 @@ export const SERVICE_TYPES = [
   'Band', 'Choreography', 'Paan', 'Small Counters', 'Others',
 ]
 
+export const SALES_TYPES = ['In-house', 'Outdoor']
+export const SALES_DEPARTMENTS = ['Venue Sales', 'Decor Sales', 'Entertainment Sales', 'Catering Sales']
+
 export const DEPARTMENTS = [
   'Venue Sales', 'Decor Sales', 'Entertainment Sales', 'Catering Sales',
   'Wedding Services', 'Kitchen', 'F&B Service', 'Housekeeping', 'Admin', 'Management',

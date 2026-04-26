@@ -2255,6 +2255,17 @@
   color: var(--ambria-accent);
   font-weight: 500;
 }
+.sales-type-tag {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 7px;
+  font-size: 0.7rem;
+  border-radius: 8px;
+  background: var(--ambria-bg-hover, #f0f0f0);
+  color: var(--ambria-text-secondary, #666);
+  font-weight: 500;
+  vertical-align: middle;
+}
 .um-filters {
   display: flex;
   gap: 8px;

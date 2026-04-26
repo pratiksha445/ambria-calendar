@@ -4,7 +4,7 @@ import {
   toggleUserActive, approveUser, rejectUser, resetPin, adminSetPin,
 } from '../lib/users.js'
 import { logAction } from '../lib/audit.js'
-import { COUNTRY_CODES, getCodeFromValue, parsePhoneCode, DEPARTMENTS } from '../config/formFields.js'
+import { COUNTRY_CODES, getCodeFromValue, parsePhoneCode, DEPARTMENTS, SALES_TYPES, SALES_DEPARTMENTS } from '../config/formFields.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 
 const ROLES = ['admin', 'staff']
@@ -80,6 +80,7 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
   const [search, setSearch] = useState('')
   const [tab, setTab] = useState('all')
   const [deptFilter, setDeptFilter] = useState('')
+  const [salesTypeFilter, setSalesTypeFilter] = useState('')
   const [editing, setEditing] = useState(null)
   const [form, setForm] = useState({})
   const [formError, setFormError] = useState(null)
@@ -107,10 +108,15 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
   const filtered = users.filter((u) => {
     if (tab !== 'all' && u.approval_status !== tab) return false
     if (deptFilter && u.department !== deptFilter) return false
+    if (salesTypeFilter) {
+      if (salesTypeFilter === '_none') {
+        if (u.sales_type) return false
+      } else if (u.sales_type !== salesTypeFilter) return false
+    }
     const q = search.trim().toLowerCase()
     if (!q) return true
     const words = q.split(/\s+/).filter(Boolean)
-    const hay = [u.name, u.phone, u.role, u.department].filter(Boolean).join(' ').toLowerCase()
+    const hay = [u.name, u.phone, u.role, u.department, u.sales_type].filter(Boolean).join(' ').toLowerCase()
     return words.every((w) => hay.includes(w))
   })
 
@@ -125,7 +131,7 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
 
   const openNew = () => {
     setEditing('new')
-    setForm({ firstName: '', lastName: '', phone_code: '+91', phone: '', role: 'staff', department: '' })
+    setForm({ firstName: '', lastName: '', phone_code: '+91', phone: '', role: 'staff', department: '', sales_type: '' })
     setFormError(null)
   }
 
@@ -133,7 +139,7 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
     const parsed = parsePhoneCode(user.phone)
     const { firstName, lastName } = splitName(user.name)
     setEditing(user)
-    setForm({ firstName, lastName, phone_code: parsed.value, phone: parsed.number, role: user.role, department: user.department || '' })
+    setForm({ firstName, lastName, phone_code: parsed.value, phone: parsed.number, role: user.role, department: user.department || '', sales_type: user.sales_type || '' })
     setFormError(null)
   }
 
@@ -150,14 +156,17 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
 
     setSaving(true)
     try {
+      const isSalesDept = SALES_DEPARTMENTS.includes(form.department)
+      const salesType = isSalesDept && form.sales_type ? form.sales_type : null
+
       if (editing === 'new') {
-        const row = await createUser({ name: fullName, phone: fullPhone, role: form.role, department: form.department || null })
+        const row = await createUser({ name: fullName, phone: fullPhone, role: form.role, department: form.department || null, sales_type: salesType })
         await logAction(currentUser.id, currentUser.name, 'create', 'user', row.id, {
           name: row.name, role: row.role,
         })
         showToast?.(t('User created'))
       } else {
-        const patch = { name: fullName, phone: fullPhone, role: form.role, department: form.department || null }
+        const patch = { name: fullName, phone: fullPhone, role: form.role, department: form.department || null, sales_type: salesType }
         const row = await updateUser(editing.id, patch)
         await logAction(currentUser.id, currentUser.name, 'update', 'user', row.id, {
           name: row.name, role: row.role,
@@ -293,7 +302,12 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
           {!u.is_active && u.approval_status === 'approved' && <span className="status-badge-inactive">{t('Inactive')}</span>}
         </div>
         <div className="user-phone">{u.phone}</div>
-        {u.department && <div className="user-department">{t(u.department)}</div>}
+        {u.department && (
+          <div className="user-department">
+            {t(u.department)}
+            {u.sales_type && <span className="sales-type-tag">{t(u.sales_type)}</span>}
+          </div>
+        )}
         <div className="pin-display-box">
           <span className="pin-display-label">{t('PIN:')}</span>
           <span className="pin-display-value">{u.pin}</span>
@@ -434,6 +448,16 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
           <option value="">{t('All Departments')}</option>
           {DEPARTMENTS.map((d) => (
             <option key={d} value={d}>{t(d)}</option>
+          ))}
+        </select>
+        <select
+          className="um-dept-filter"
+          value={salesTypeFilter}
+          onChange={(e) => setSalesTypeFilter(e.target.value)}
+        >
+          <option value="">{t('All Sales Types')}</option>
+          {SALES_TYPES.map((st) => (
+            <option key={st} value={st}>{t(st)}</option>
           ))}
         </select>
       </div>
@@ -582,13 +606,28 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
               </div>
               <div className="pf-field">
                 <label className="field-label">{t('Department')}</label>
-                <select value={form.department} onChange={(e) => setForm({ ...form, department: e.target.value })}>
+                <select value={form.department} onChange={(e) => {
+                  const dept = e.target.value
+                  const isSales = SALES_DEPARTMENTS.includes(dept)
+                  setForm({ ...form, department: dept, sales_type: isSales ? form.sales_type : '' })
+                }}>
                   <option value="">{t('— Select —')}</option>
                   {DEPARTMENTS.map((d) => (
                     <option key={d} value={d}>{t(d)}</option>
                   ))}
                 </select>
               </div>
+              {SALES_DEPARTMENTS.includes(form.department) && (
+                <div className="pf-field">
+                  <label className="field-label">{t('Sales Type')}</label>
+                  <select value={form.sales_type} onChange={(e) => setForm({ ...form, sales_type: e.target.value })}>
+                    <option value="">{t('— Select —')}</option>
+                    {SALES_TYPES.map((st) => (
+                      <option key={st} value={st}>{t(st)}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
               {formError && <div className="login-error">{formError}</div>}
               <div className="panel-form-actions">
                 <button type="button" className="btn-ghost" onClick={() => setEditing(null)}>{t('Cancel')}</button>

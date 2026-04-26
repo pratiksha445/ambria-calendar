@@ -314,6 +314,12 @@ const en = {
   'No matching elements': 'No matching elements',
   'Retry': 'Retry',
 
+  // ── Sales Type ──
+  'Sales Type': 'Sales Type',
+  'All Sales Types': 'All Sales Types',
+  'In-house': 'In-house',
+  'Outdoor': 'Outdoor',
+
   // ── Departments ──
   'Department': 'Department',
   'Department is required': 'Department is required',
