@@ -2410,10 +2410,23 @@
  * ============================================================ */
 
 .audit-filters {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 8px;
   padding: 12px 0;
-  flex-wrap: wrap;
+}
+.audit-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.audit-filter-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--ambria-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 .audit-filters select,
 .audit-filters input[type="date"] {
@@ -2424,9 +2437,8 @@
   font-family: inherit;
   background: var(--ambria-card);
   color: var(--ambria-ink);
-  min-width: 0;
-  flex: 1;
-  max-width: 200px;
+  width: 100%;
+  box-sizing: border-box;
 }
 .audit-filters select:focus,
 .audit-filters input:focus {
@@ -2522,8 +2534,7 @@
 @media (min-width: 768px) {
   .panel-page { padding: 16px 24px 40px; }
   .user-row { flex-direction: row; align-items: center; justify-content: space-between; }
-  .audit-filters select,
-  .audit-filters input[type="date"] { flex: 0 0 auto; }
+  .audit-filters { grid-template-columns: repeat(4, 1fr); }
 }
 
 /* ============================================================
@@ -3569,4 +3580,117 @@ input, select, textarea {
 /* Sidebar — cap at 85vw so it never exceeds narrow screens */
 @media (max-width: 380px) {
   .sidebar { width: min(85vw, 300px); }
+}
+
+/* ============================================================
+ * Mobile responsive — admin pages (320–768px)
+ * ============================================================ */
+
+@media (max-width: 768px) {
+  /* Global admin page overflow prevention */
+  .panel-page {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  /* Touch targets — buttons (min 40px) */
+  .user-actions .btn-sm,
+  .user-actions .btn-xs,
+  .user-actions .btn-outline,
+  .et-actions .btn-outline,
+  .et-actions .btn-ghost,
+  .et-actions .btn-sm,
+  .inline-confirm .btn-danger,
+  .inline-confirm .btn-ghost,
+  .cat-form-actions button,
+  .panel-form-actions button,
+  .btn-approve,
+  .btn-reject {
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Touch targets — inputs (min 44px) */
+  .panel-search input,
+  .audit-filters select,
+  .audit-filters input[type="date"],
+  .um-dept-filter,
+  .et-add-input {
+    min-height: 44px;
+  }
+
+  /* Button spacing — 8px minimum gap */
+  .user-actions {
+    gap: 8px;
+  }
+  .et-actions {
+    gap: 8px;
+  }
+  .inline-confirm {
+    gap: 8px;
+  }
+
+  /* ── Manage Users: tabs wrap on narrow screens ── */
+  .um-tabs {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 480px) {
+  /* ── Panel header: allow wrapping for Add buttons ── */
+  .panel-header {
+    flex-wrap: wrap;
+  }
+  .panel-header h2 {
+    flex-basis: 0;
+  }
+  .cat-add-top {
+    width: 100%;
+    order: 3;
+    margin-top: 4px;
+    text-align: center;
+  }
+
+  /* ── Event Types & Elements: stack name + actions vertically ── */
+  .et-row {
+    flex-wrap: wrap;
+  }
+  .et-row > .et-actions {
+    flex-basis: 100%;
+    justify-content: flex-start;
+    padding-top: 4px;
+  }
+  .et-inline-edit {
+    flex-wrap: wrap;
+  }
+
+  /* ── Categories: stack card layout ── */
+  .cat-card-top {
+    flex-wrap: wrap;
+  }
+  .cat-card-top > .et-actions {
+    flex-basis: 100%;
+    justify-content: flex-start;
+    padding-top: 4px;
+  }
+
+  /* Long category names: ellipsis with tooltip */
+  .cat-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Sub-venue chips spacing */
+  .cat-subvenue-list {
+    gap: 8px;
+  }
+
+  /* ── Element add form: stack inputs ── */
+  .element-add-form .et-add-input {
+    flex-basis: calc(50% - 4px);
+    min-width: 0;
+  }
 }

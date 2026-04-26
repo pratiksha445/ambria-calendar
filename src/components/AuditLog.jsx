@@ -284,20 +284,32 @@ export default function AuditLog({ onMenu }) {
       </div>
 
       <div className="audit-filters">
-        <select value={filterUser} onChange={(e) => setFilterUser(e.target.value)}>
-          <option value="">{t('All users')}</option>
-          {users.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
-        </select>
-        <select value={filterAction} onChange={(e) => setFilterAction(e.target.value)}>
-          <option value="">{t('All actions')}</option>
-          <option value="create">{t('Created')}</option>
-          <option value="update">{t('Updated')}</option>
-          <option value="delete">{t('Deleted')}</option>
-          <option value="login">{t('Login')}</option>
-          <option value="logout">{t('Logout')}</option>
-        </select>
-        <input type="date" value={filterFrom} onChange={(e) => setFilterFrom(e.target.value)} />
-        <input type="date" value={filterTo} onChange={(e) => setFilterTo(e.target.value)} />
+        <div className="audit-filter-group">
+          <label className="audit-filter-label">{t('User')}</label>
+          <select value={filterUser} onChange={(e) => setFilterUser(e.target.value)}>
+            <option value="">{t('All users')}</option>
+            {users.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
+          </select>
+        </div>
+        <div className="audit-filter-group">
+          <label className="audit-filter-label">{t('Action')}</label>
+          <select value={filterAction} onChange={(e) => setFilterAction(e.target.value)}>
+            <option value="">{t('All actions')}</option>
+            <option value="create">{t('Created')}</option>
+            <option value="update">{t('Updated')}</option>
+            <option value="delete">{t('Deleted')}</option>
+            <option value="login">{t('Login')}</option>
+            <option value="logout">{t('Logout')}</option>
+          </select>
+        </div>
+        <div className="audit-filter-group">
+          <label className="audit-filter-label">{t('From Date')}</label>
+          <input type="date" value={filterFrom} onChange={(e) => setFilterFrom(e.target.value)} />
+        </div>
+        <div className="audit-filter-group">
+          <label className="audit-filter-label">{t('To Date')}</label>
+          <input type="date" value={filterTo} onChange={(e) => setFilterTo(e.target.value)} />
+        </div>
       </div>
 
       <div className="panel-search">
