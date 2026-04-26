@@ -102,13 +102,14 @@ export async function checkPhoneStatus(phone) {
 }
 
 /** Request access — creates a pending user with default PIN 0000 */
-export async function requestAccess(name, phone, department) {
+export async function requestAccess(name, phone, department, salesType) {
   const { data, error } = await supabase
     .from('users')
     .insert({
       name,
       phone,
       department: department || null,
+      sales_type: salesType || null,
       pin: DEFAULT_PIN,
       role: 'staff',
       is_active: true,

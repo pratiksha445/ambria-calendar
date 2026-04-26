@@ -319,6 +319,8 @@ const hi = {
   'All Sales Types': 'सभी सेल्स टाइप',
   'In-house': 'इन-हाउस',
   'Outdoor': 'आउटडोर',
+  'In-house + Outdoor': 'इन-हाउस + आउटडोर',
+  'Sales Type is required': 'सेल्स टाइप आवश्यक है',
 
   // ── विभाग ──
   'Department': 'विभाग',

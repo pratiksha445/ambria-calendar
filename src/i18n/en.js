@@ -319,6 +319,8 @@ const en = {
   'All Sales Types': 'All Sales Types',
   'In-house': 'In-house',
   'Outdoor': 'Outdoor',
+  'In-house + Outdoor': 'In-house + Outdoor',
+  'Sales Type is required': 'Sales Type is required',
 
   // ── Departments ──
   'Department': 'Department',

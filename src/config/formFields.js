@@ -48,8 +48,8 @@ export const SERVICE_TYPES = [
   'Band', 'Choreography', 'Paan', 'Small Counters', 'Others',
 ]
 
-export const SALES_TYPES = ['In-house', 'Outdoor']
-export const SALES_DEPARTMENTS = ['Venue Sales', 'Decor Sales', 'Entertainment Sales', 'Catering Sales']
+export const SALES_TYPES = ['In-house', 'Outdoor', 'In-house + Outdoor']
+export const SALES_DEPARTMENTS = ['Venue Sales', 'Decor Sales', 'Entertainment Sales', 'Catering Sales', 'Wedding Services']
 
 export const DEPARTMENTS = [
   'Venue Sales', 'Decor Sales', 'Entertainment Sales', 'Catering Sales',
