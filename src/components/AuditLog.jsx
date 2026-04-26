@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { supabase } from '../lib/supabase.js'
 import { formatTimestampIST } from '../lib/dates.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
@@ -38,6 +38,38 @@ function ExportIcon() {
       <polyline points="7 10 12 15 17 10" />
       <line x1="12" y1="15" x2="12" y2="3" />
     </svg>
+  )
+}
+
+function DateInput({ value, onChange, placeholder }) {
+  const ref = useRef()
+  const display = value
+    ? new Date(value + 'T00:00:00').toLocaleDateString('en-GB')
+    : null
+
+  return (
+    <div className="date-input-wrap" onClick={() => { ref.current?.showPicker?.(); ref.current?.focus() }}>
+      <input
+        ref={ref}
+        type="date"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="date-input-native"
+      />
+      <div className="date-input-face">
+        <span className={display ? '' : 'date-input-placeholder'}>
+          {display || placeholder || 'dd/mm/yyyy'}
+        </span>
+      </div>
+      {value && (
+        <button
+          type="button"
+          className="date-input-clear"
+          onClick={(e) => { e.stopPropagation(); onChange('') }}
+          aria-label="Clear"
+        >×</button>
+      )}
+    </div>
   )
 }
 
@@ -304,11 +336,11 @@ export default function AuditLog({ onMenu }) {
         </div>
         <div className="audit-filter-group">
           <label className="audit-filter-label">{t('From Date')}</label>
-          <input type="date" value={filterFrom} onChange={(e) => setFilterFrom(e.target.value)} />
+          <DateInput value={filterFrom} onChange={setFilterFrom} placeholder="dd/mm/yyyy" />
         </div>
         <div className="audit-filter-group">
           <label className="audit-filter-label">{t('To Date')}</label>
-          <input type="date" value={filterTo} onChange={(e) => setFilterTo(e.target.value)} />
+          <DateInput value={filterTo} onChange={setFilterTo} placeholder="dd/mm/yyyy" />
         </div>
       </div>
 
@@ -372,11 +404,11 @@ export default function AuditLog({ onMenu }) {
             <div className="export-filters">
               <div className="export-row">
                 <label className="field-label">{t('From')}</label>
-                <input type="date" value={exportFrom} onChange={(e) => setExportFrom(e.target.value)} />
+                <DateInput value={exportFrom} onChange={setExportFrom} placeholder="dd/mm/yyyy" />
               </div>
               <div className="export-row">
                 <label className="field-label">{t('To')}</label>
-                <input type="date" value={exportTo} onChange={(e) => setExportTo(e.target.value)} />
+                <DateInput value={exportTo} onChange={setExportTo} placeholder="dd/mm/yyyy" />
               </div>
               <div className="export-row">
                 <label className="field-label">{t('User')}</label>

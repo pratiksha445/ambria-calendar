@@ -2428,8 +2428,7 @@
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
-.audit-filters select,
-.audit-filters input[type="date"] {
+.audit-filters select {
   padding: 8px 10px;
   border: 1px solid var(--ambria-border);
   border-radius: 8px;
@@ -2440,10 +2439,77 @@
   width: 100%;
   box-sizing: border-box;
 }
-.audit-filters select:focus,
-.audit-filters input:focus {
+.audit-filters select:focus {
   outline: none;
   border-color: var(--ambria-accent);
+}
+
+/* ── Custom date input (dd/mm/yyyy with clear button) ── */
+.date-input-wrap {
+  position: relative;
+  width: 100%;
+  cursor: pointer;
+}
+.date-input-native {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  z-index: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font-size: 16px;
+  min-height: 0;
+}
+.date-input-face {
+  width: 100%;
+  padding: 8px 32px 8px 10px;
+  border: 1px solid var(--ambria-border);
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-family: inherit;
+  background: var(--ambria-card);
+  color: var(--ambria-ink);
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+}
+.date-input-wrap:focus-within .date-input-face {
+  border-color: var(--ambria-accent);
+}
+.date-input-placeholder {
+  color: var(--ambria-faint);
+}
+.date-input-clear {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  background: var(--ambria-chip);
+  color: var(--ambria-muted);
+  font-size: 14px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+.date-input-clear:hover {
+  background: var(--ambria-search-clear-hover);
+  color: var(--ambria-ink);
 }
 
 .audit-list {
@@ -3539,8 +3605,7 @@ input, select, textarea {
   gap: 4px;
 }
 
-.export-row select,
-.export-row input[type="date"] {
+.export-row select {
   padding: 8px 10px;
   border: 1px solid var(--ambria-border);
   border-radius: 8px;
@@ -3615,7 +3680,6 @@ input, select, textarea {
   /* Touch targets — inputs (min 44px) */
   .panel-search input,
   .audit-filters select,
-  .audit-filters input[type="date"],
   .um-dept-filter,
   .et-add-input {
     min-height: 44px;
