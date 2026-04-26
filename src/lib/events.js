@@ -4,6 +4,33 @@ import {
   buildAuditDiff, buildCreateSummary, buildDeleteSummary,
   buildSoftDeleteSummary, buildBulkDeleteSummary,
 } from './auditDiff.js'
+import { FIELD_MAP } from '../config/formFields.js'
+
+// ── Per-category DB column allowlist ──
+// Prevents leaking columns from other categories (e.g. kitchen_head on AP save).
+// Meta columns every category can write:
+const META_COLUMNS = ['venue_id', 'title', 'status', 'date', 'source', 'created_by']
+
+function filterPayloadByCategory(payload) {
+  const venueId = payload.venue_id
+  if (!venueId) return payload
+  const categoryFields = FIELD_MAP[venueId]
+  if (!categoryFields) return payload // unknown category — pass through
+  const allowed = new Set([...META_COLUMNS, ...categoryFields])
+  const filtered = {}
+  const stripped = []
+  for (const [key, value] of Object.entries(payload)) {
+    if (allowed.has(key)) {
+      filtered[key] = value
+    } else {
+      stripped.push(key)
+    }
+  }
+  if (stripped.length > 0) {
+    console.warn('[ambria save] stripped non-category columns:', stripped, 'for category:', venueId)
+  }
+  return filtered
+}
 
 /**
  * Fetch events whose `date` falls within [startDate, endDate] (inclusive).
@@ -27,7 +54,8 @@ export async function fetchEvents(startDate, endDate) {
  * Insert a manual event. Forces source = 'manual' — CRM rows come in via sync.
  */
 export async function createEvent(eventData, user) {
-  const payload = { ...eventData, source: 'manual', created_by: user?.id || null }
+  const raw = { ...eventData, source: 'manual', created_by: user?.id || null }
+  const payload = filterPayloadByCategory(raw)
 
   const { data, error } = await supabase
     .from('events')
@@ -59,7 +87,8 @@ export async function updateEvent(id, eventData, user) {
     oldData = old
   }
 
-  const { source: _ignored, ...patch } = eventData
+  const { source: _ignored, ...rawPatch } = eventData
+  const patch = filterPayloadByCategory(rawPatch)
 
   const { data, error } = await supabase
     .from('events')

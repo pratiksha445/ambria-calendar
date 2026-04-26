@@ -79,6 +79,7 @@ const hi = {
   'Required': 'आवश्यक',
   'Invalid selection': 'अमान्य चयन',
   'Must be 0–100': '0–100 के बीच होना चाहिए',
+  'Please fill required fields': 'कृपया आवश्यक फ़ील्ड भरें',
   'Only letters allowed': 'केवल अक्षर मान्य हैं',
   'Only numbers allowed': 'केवल अंक मान्य हैं',
   'Only numbers 0-100': 'केवल 0-100 अंक मान्य हैं',

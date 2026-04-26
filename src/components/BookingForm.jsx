@@ -188,7 +188,26 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
       }
     }
     setErrors(nextErrors)
-    return Object.keys(nextErrors).length === 0
+
+    const errorKeys = Object.keys(nextErrors)
+    if (errorKeys.length > 0) {
+      // Build descriptive error listing the field labels
+      const labels = errorKeys.map((key) => {
+        const f = all.find((fd) => fd.key === key)
+        return f ? t(f.label) : key
+      })
+      setSubmitError(t('Please fill required fields') + ': ' + labels.join(', '))
+      // Scroll to first error field after render
+      requestAnimationFrame(() => {
+        const el = document.getElementById(`field-${errorKeys[0]}`)
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          el.focus()
+        }
+      })
+      return false
+    }
+    return true
   }
 
   const buildPayload = () => {
@@ -206,12 +225,10 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
       status: STATUSES.includes(form.status) ? form.status : 'Confirmed',
     }
 
-    // Field parity: iterate every saveable key, include or null out.
+    // Only include keys valid for this category — skip irrelevant columns entirely
+    // to prevent leaking columns from other categories (e.g. kitchen_head on AP save).
     for (const key of ALL_SAVEABLE_KEYS) {
-      if (!validKeys.has(key)) {
-        payload[key] = null
-        continue
-      }
+      if (!validKeys.has(key)) continue
       // Skip locked-section fields entirely — don't overwrite them
       if (editing && lockedWithIds.has(key)) continue
 
@@ -273,12 +290,18 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
       payload.date = payload.check_in_date
     }
 
-    console.log('[ambria] saving booking payload:', {
-      sales_person: payload.sales_person, sales_person_id: payload.sales_person_id,
-      delivery_person: payload.delivery_person, delivery_person_id: payload.delivery_person_id,
-      decor_delivery_person: payload.decor_delivery_person, decor_delivery_person_id: payload.decor_delivery_person_id,
-      ent_delivery_person: payload.ent_delivery_person, ent_delivery_person_id: payload.ent_delivery_person_id,
-      operation_manager: payload.operation_manager, operation_manager_id: payload.operation_manager_id,
+    // Final defensive strip: only keep keys valid for this category + meta
+    const allowed = new Set(['venue_id', 'title', 'status', 'date', ...validKeys])
+    for (const key of Object.keys(payload)) {
+      if (!allowed.has(key)) delete payload[key]
+    }
+
+    console.log('[ambria save]', {
+      category: venueId,
+      bookingId: initial?.id,
+      userId: user?.id,
+      userRole: user?.role,
+      columnsBeingSent: Object.keys(payload).sort(),
     })
 
     return payload
