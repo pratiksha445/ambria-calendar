@@ -96,7 +96,7 @@ export default function ChangePinModal({ user, onClose, showToast }) {
       showToast?.(t('PIN updated'))
       onClose()
     } catch (err) {
-      setError(err?.message || 'PIN change will be re-enabled in the next deploy — contact the dev.')
+      setError(err?.message ?? String(err))
     } finally {
       setSaving(false)
     }

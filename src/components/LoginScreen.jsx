@@ -1,7 +1,6 @@
 import { useState, useRef } from 'react'
 import { COUNTRY_CODES, getCodeFromValue, DEPARTMENTS, SALES_TYPES, SALES_DEPARTMENTS } from '../config/formFields.js'
 import { loginUser, checkPhoneStatus, requestAccess } from '../lib/users.js'
-import { storeSession, applySession } from '../lib/supabase.js'
 import { logAction } from '../lib/audit.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 
@@ -60,24 +59,39 @@ export default function LoginScreen({ onLogin }) {
     setLoading(true)
     try {
       const result = await loginUser(fullPhone, fullPin)
-      if (result.status === 'ok') {
-        storeSession(result.access_token, result.expires_at, result.user)
-        await applySession(result.access_token)
-        await logAction(result.user.id, result.user.name, 'login', 'session', null, { summary: 'Logged in' })
-        onLogin(result.user)
-        return
+      switch (result.status) {
+        case 'ok':
+          await logAction(result.user.id, result.user.name, 'login', 'session', null, { summary: 'Logged in' })
+          localStorage.setItem('ambria_user', JSON.stringify(result.user))
+          onLogin(result.user, result.needsPinChange)
+          return
+        case 'pending':
+          setShake(true)
+          setTimeout(() => setShake(false), 500)
+          setError(t('Your access request is pending approval. Please wait for an admin to approve your account.'))
+          break
+        case 'rejected':
+          setShake(true)
+          setTimeout(() => setShake(false), 500)
+          setError(t('Your access request was declined.') + (result.reason ? ' ' + t('Reason:') + ' ' + result.reason : ''))
+          break
+        case 'deactivated':
+          setShake(true)
+          setTimeout(() => setShake(false), 500)
+          setError(t('Your account has been deactivated. Contact an admin.'))
+          break
+        case 'not_found':
+        case 'wrong_pin':
+        default:
+          setShake(true)
+          setTimeout(() => setShake(false), 500)
+          setError(t('Invalid phone or PIN'))
+          break
       }
-      setShake(true)
-      setTimeout(() => setShake(false), 500)
-      setError(t('Invalid phone or PIN'))
       setPin(['', '', '', ''])
       pinRefs[0].current?.focus()
-    } catch {
-      setShake(true)
-      setTimeout(() => setShake(false), 500)
-      setError(t('Invalid phone or PIN'))
-      setPin(['', '', '', ''])
-      pinRefs[0].current?.focus()
+    } catch (err) {
+      setError(err?.message ?? String(err))
     } finally {
       setLoading(false)
     }

@@ -246,10 +246,7 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
       setConfirmResetPin(null)
       showToast?.(t('PIN reset to 0000 — user will set new PIN on next login'))
       await loadUsers()
-    } catch (err) {
-      setConfirmResetPin(null)
-      showToast?.(err?.message || t('PIN reset failed'))
-    }
+    } catch (err) { console.error(err) }
   }
 
   const handleSetPin = async (user, pin) => {
@@ -262,10 +259,7 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
       setSettingPinFor(null)
       showToast?.(t('PIN updated'))
       await loadUsers()
-    } catch (err) {
-      setSettingPinFor(null)
-      showToast?.(err?.message || t('PIN update failed'))
-    }
+    } catch (err) { console.error(err) }
   }
 
   const handleEditFormResetPin = async () => {
@@ -278,11 +272,10 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
       })
       showToast?.(t('PIN reset to 0000 — user will set new PIN on next login'))
       await loadUsers()
+      // Refresh the editing object
       const refreshed = (await fetchUsers()).find((u) => u.id === editing.id)
       if (refreshed) setEditing(refreshed)
-    } catch (err) {
-      showToast?.(err?.message || t('PIN reset failed'))
-    }
+    } catch (err) { console.error(err) }
   }
 
   const handleEditFormSetPin = async (pin) => {
@@ -297,9 +290,7 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
       await loadUsers()
       const refreshed = (await fetchUsers()).find((u) => u.id === editing.id)
       if (refreshed) setEditing(refreshed)
-    } catch (err) {
-      showToast?.(err?.message || t('PIN update failed'))
-    }
+    } catch (err) { console.error(err) }
   }
 
   // Inline role change
