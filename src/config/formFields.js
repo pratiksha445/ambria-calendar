@@ -229,7 +229,7 @@ function ownVenueSections(venue, dynamicTypes, dynamicElements) {
         S('Sub-Venue', 'sub_venue', venue.subVenues),
         ...eventTypeFields(dynamicTypes, { searchable: true }),
         // Row 2: Package Type | Status
-        { ...S('Package Type', 'booking_status', BOOKING_STATUSES), helperText: 'V = Venue · M = Menu · D = Decor · E = Entertainment' },
+        S('Package Type', 'booking_status', BOOKING_STATUSES),
         statusField,
         // Row 3: Date | Shift
         D('Date', 'date'),

@@ -294,7 +294,7 @@ const hi = {
   'VME': 'VME',
   'VMD': 'VMD',
   'VMDE': 'VMDE',
-  'V = Venue · M = Menu · D = Decor · E = Entertainment': 'V = वेन्यू · M = मेन्यू · D = डेकोर · E = एंटरटेनमेंट',
+
   'Veg': 'वेज',
   'Non-Veg': 'नॉन-वेज',
   'Jain': 'जैन',
