@@ -216,11 +216,10 @@ function ownVenueSections(venue, dynamicTypes, dynamicElements) {
         // Row 5: Chaat Time | Wind Up Time
         TM('Chaat Time', 'chaat_time'),
         TM('Wind Up Time', 'wind_up_time', true, { inlineCheckbox: { key: 'wind_up_next_day', label: '+1' } }),
-        // Row 6: FP | Rooms
+        // Row 6: FP | Rooms + Liquor
         S('FP', 'fp_status', FP_STATUSES, true, { disabledWhen: notVMD }),
-        roomsField(),
-        // Row 7: Liquor | Menu Type
-        CB('Liquor', 'liquor'),
+        { ...roomsField(), inlineCheckbox: { key: 'liquor', label: 'Liquor' } },
+        // Row 7: Menu Type | Menu Category
         S('Menu Type', 'menu_type', MENU_TYPES, true, { disabledWhen: notVMD }),
         S('Menu Category', 'menu_cat', MENU_CATS, true, { disabledWhen: notVMD, getOptions: menuCatOptions }),
         // Row 8: Payment Status | Pending Payment %

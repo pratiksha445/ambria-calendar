@@ -281,6 +281,29 @@ export default function Field({ field, form, value, onChange, error, readOnly, a
         />
       </div>
     )
+  } else if (field.inlineCheckbox) {
+    const cb = field.inlineCheckbox
+    const cbChecked = !!form[cb.key]
+    control = (
+      <div className="time-inline-row">
+        <input
+          type="text"
+          {...commonProps}
+          className="time-inline-input"
+          placeholder={field.placeholder ? t(field.placeholder) : ''}
+          inputMode={field.inputMode}
+        />
+        <label className={`time-inline-cb ${disabled ? 'is-disabled' : ''}`}>
+          <input
+            type="checkbox"
+            checked={cbChecked}
+            disabled={disabled}
+            onChange={(e) => onChange(cb.key, e.target.checked)}
+          />
+          <span>{cb.label}</span>
+        </label>
+      </div>
+    )
   } else {
     control = (
       <input
