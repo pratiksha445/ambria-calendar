@@ -127,7 +127,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
   const setField = (key, value) => {
     setForm((prev) => {
       const next = { ...prev, [key]: value }
-      if (key === 'booking_status' && value !== 'VMDD' && value !== 'VMD + Outdoor Ent') {
+      if (key === 'booking_status' && !['VM', 'VME', 'VMD', 'VMDE'].includes(value)) {
         next.menu_type = ''
         next.menu_cat = ''
         next.fp_status = ''

@@ -332,6 +332,7 @@ export default function Field({ field, form, value, onChange, error, readOnly, a
         {t(field.label)}
         {(field.required || (field.requiredWhen && field.requiredWhen(form))) && !disabled && <span className="required-star"> *</span>}
       </label>
+      {field.helperText && <div className="field-helper">{t(field.helperText)}</div>}
       {control}
       {displayError && <div className="field-error">{t(displayError)}</div>}
     </div>
