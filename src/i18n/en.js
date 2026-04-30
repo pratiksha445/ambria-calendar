@@ -584,8 +584,10 @@ const en = {
   // ── Roles ──
   'admin': 'admin',
   'gm': 'GM',
+  'division_head': 'Division Head',
   'staff': 'staff',
   'Admin': 'Admin',
+  'Division Head': 'Division Head',
   'Staff': 'Staff',
   'pending': 'pending',
   'approved': 'approved',

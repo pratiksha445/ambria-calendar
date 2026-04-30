@@ -2,16 +2,37 @@
 // Returns a Set of section titles the current user may edit.
 //
 // Rules:
+// - Admin and GM bypass all locks.
+// - Division Head: department-scoped access (see DH_SCOPE below).
 // - Venue: editable by admin, or user whose id matches sales_person_id or delivery_person_id
 // - Decor: editable by admin, or Decor Sales + In-house/In-house+Outdoor,
 //          or assigned decor_delivery_person
 // - Entertainment: editable by admin, or Entertainment Sales + In-house/In-house+Outdoor,
 //                  or assigned ent_delivery_person
 // - New bookings (no id): all sections editable
-// - Non-AP/AM/AE/AR categories: no section locks
+// - Non-AP/AM/AE/AR categories: no section locks (permission via canAccessBooking)
 
 const OWN_VENUE_IDS = new Set(['ap', 'am', 'ae', 'ar'])
 const INHOUSE_TYPES = new Set(['In-house', 'In-house + Outdoor'])
+
+// Division Head department → { ownVenueSection, standaloneCategory }
+// ownVenueSection: which AP/AM/AE/AR section they can unlock
+// standaloneCategory: which standalone category they can edit any booking in
+const DH_SCOPE = {
+  'Venue Sales':         { ownVenueSection: 'Venue',         standalone: new Set(['villa']) },
+  'Decor Sales':         { ownVenueSection: 'Decor',         standalone: new Set(['add']) },
+  'Entertainment Sales': { ownVenueSection: 'Entertainment', standalone: new Set(['aee']) },
+  'Catering Sales':      { ownVenueSection: null,            standalone: new Set(['ac']) },
+}
+
+function isDH(user) {
+  return user?.role === 'division_head'
+}
+
+function dhScope(user) {
+  if (!isDH(user)) return null
+  return DH_SCOPE[user.department] || null
+}
 
 /** Match user against a booking's assigned-person field (id preferred, name fallback). */
 function matchesAssigned(user, eventId, eventName) {
@@ -25,13 +46,22 @@ function matchesAssigned(user, eventId, eventName) {
  * (i.e. the Edit button should be visible in EventCard / DayModal).
  *
  * For non-AP/AM/AE/AR, falls back to creator check.
- * For AP/AM/AE/AR, also checks assigned-person fields and department.
+ * For AP/AM/AE/AR, also checks assigned-person fields, department, and DH scope.
  */
 export function canAccessBooking(user, event) {
   if (!user || !event) return false
   if (user.role === 'admin') return true
   if (user.role === 'gm') return true
   if (event.created_by != null && user.id === event.created_by) return true
+
+  // Division Head: department-scoped access to standalone categories
+  const scope = dhScope(user)
+  if (scope) {
+    // Standalone categories (Villa, ADD, AC, AEE)
+    if (scope.standalone.has(event.venue_id)) return true
+    // AP/AM/AE/AR: DH always gets access (section locking handled by getEditableSections)
+    if (OWN_VENUE_IDS.has(event.venue_id) && scope.ownVenueSection) return true
+  }
 
   // For AP/AM/AE/AR: check if user is an assigned person or has department access
   if (OWN_VENUE_IDS.has(event.venue_id)) {
@@ -48,6 +78,9 @@ export function canAccessBooking(user, event) {
     // Operation manager
     if (matchesAssigned(user, event.operation_manager_id, event.operation_manager)) return true
   }
+
+  // Standalone categories: staff can edit if assigned as sales_person
+  if (matchesAssigned(user, event.sales_person_id, event.sales_person)) return true
 
   return false
 }
@@ -68,6 +101,12 @@ export function getEditableSections(user, event, venueId) {
   if (user?.role === 'gm') return null
 
   const editable = new Set()
+
+  // Division Head: unlock only their department's section
+  const scope = dhScope(user)
+  if (scope?.ownVenueSection) {
+    editable.add(scope.ownVenueSection)
+  }
 
   // Venue section: editable if user is sales_person or delivery_person
   if (

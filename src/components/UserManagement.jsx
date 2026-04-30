@@ -7,9 +7,9 @@ import { logAction } from '../lib/audit.js'
 import { COUNTRY_CODES, getCodeFromValue, parsePhoneCode, DEPARTMENTS, SALES_TYPES, SALES_DEPARTMENTS } from '../config/formFields.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 
-const ROLES = ['admin', 'gm', 'staff']
-const ROLE_COLORS = { admin: '#E85D75', gm: '#7C3AED', staff: '#95A5A6' }
-const ROLE_LABELS = { admin: 'Admin', gm: 'GM', staff: 'Staff' }
+const ROLES = ['admin', 'gm', 'division_head', 'staff']
+const ROLE_COLORS = { admin: '#E85D75', gm: '#7C3AED', division_head: '#D97706', staff: '#95A5A6' }
+const ROLE_LABELS = { admin: 'Admin', gm: 'GM', division_head: 'Division Head', staff: 'Staff' }
 const TABS = ['all', 'pending', 'approved', 'rejected']
 
 function MenuIcon() {

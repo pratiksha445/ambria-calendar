@@ -584,8 +584,10 @@ const hi = {
   // ── भूमिकाएं ──
   'admin': 'एडमिन',
   'gm': 'GM',
+  'division_head': 'डिवीज़न हेड',
   'staff': 'स्टाफ़',
   'Admin': 'एडमिन',
+  'Division Head': 'डिवीज़न हेड',
   'Staff': 'स्टाफ़',
   'pending': 'लंबित',
   'approved': 'स्वीकृत',
