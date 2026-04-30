@@ -30,7 +30,7 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, onE
         ))}
       </div>
       <div className="month-grid">
-        {days.map((d) => {
+        {days.map((d, i) => {
           const iso = toIsoDate(d)
           const allDayEvents = eventsByDay[iso] ?? []
           // Separate villa span events from normal events
@@ -58,7 +58,7 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, onE
 
           return (
             <button
-              key={iso}
+              key={i}
               className={classes}
               onClick={() => onSelectDate(d)}
               aria-label={`${iso}, ${totalOnDay} bookings`}

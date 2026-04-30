@@ -36,13 +36,13 @@ export default function WeekView({ currentDate, selectedDate, onSelectDate, even
   return (
     <div className="week-view">
       <div className="week-strip">
-        {days.map((d) => {
+        {days.map((d, i) => {
           const iso = toIsoDate(d)
           const count = countByDay[iso] || 0
           const isSelected = isSameDay(d, selectedDate)
           return (
             <button
-              key={iso}
+              key={i}
               className={`week-chip ${isSelected ? 'selected' : ''}`}
               onClick={() => onSelectDate(d)}
             >

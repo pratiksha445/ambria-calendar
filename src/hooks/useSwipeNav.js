@@ -4,6 +4,7 @@
 // Uses a callback ref so listeners are attached once (not re-attached on render).
 
 import { useEffect, useRef } from 'react'
+import { flushSync } from 'react-dom'
 
 const DIST_THRESHOLD = 50    // px minimum horizontal distance
 const DRIFT_MAX = 60          // px max vertical drift before abort
@@ -109,10 +110,25 @@ export default function useSwipeNav(elRef, { onPrev, onNext, onDirection }) {
           if (commitGuard !== token) return // stale
           commitGuard++
           el.removeEventListener('transitionend', finish)
+
+          // Atomic swap: update React state synchronously so the browser
+          // never paints a frame of old content at position 0.
+          // 1. Keep the element off-screen at its current slide-out position
+          // 2. flushSync forces React to commit new content in the same task
+          // 3. Jump to the opposite side and animate the slide-in
           el.style.transition = 'none'
+          flushSync(() => {
+            if (dir < 0) cb.current.onNext()
+            else cb.current.onPrev()
+          })
+          // New content is now in the DOM. Position it off-screen on the
+          // opposite side and slide it in.
+          el.style.transform = `translate3d(${-dir * (el.offsetWidth || 320)}px,0,0)`
+          // Force layout so the browser registers the starting position
+          // before we apply the transition.
+          el.getBoundingClientRect()
+          el.style.transition = 'transform 200ms cubic-bezier(0.2, 0, 0, 1)'
           el.style.transform = ''
-          if (dir < 0) cb.current.onNext()
-          else cb.current.onPrev()
         }
         el.addEventListener('transitionend', finish, { once: true })
         // Fallback if transitionend doesn't fire (e.g. display:none, tab switch)
