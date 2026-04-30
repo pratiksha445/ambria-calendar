@@ -632,6 +632,9 @@
   margin-left: -3px;
   margin-right: -3px;
   width: calc(100% + 6px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .villa-seg-start {
   border-radius: 3px 0 0 3px;

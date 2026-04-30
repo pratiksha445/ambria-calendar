@@ -84,7 +84,7 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, onE
                       }}
                       title={buildPillTooltip(seg.event, eventTypes)}
                     >
-                      {seg.showLabel ? villaSpanLabel(seg.event) : '\u00A0'}
+                      {villaSpanLabel(seg.event)}
                     </div>
                   )
                 })}
@@ -139,7 +139,6 @@ function buildVillaSpanMap(events, gridDays) {
   // Sort by check-in date for consistent rendering order
   spans.sort((a, b) => (a.check_in_date || a.date).localeCompare(b.check_in_date || b.date))
 
-  const labelAssigned = new Set()
   for (const ev of spans) {
     const cin = ev.check_in_date || ev.date
     const cout = ev.check_out_date
@@ -153,13 +152,10 @@ function buildVillaSpanMap(events, gridDays) {
       const iso = toIsoDate(d)
       if (gridSet.has(iso)) {
         if (!villaSpanMap[iso]) villaSpanMap[iso] = []
-        const showLabel = !labelAssigned.has(ev.id)
-        if (showLabel) labelAssigned.add(ev.id)
         villaSpanMap[iso].push({
           event: ev,
           isStart: iso === cin,
           isEnd: iso === cout,
-          showLabel,
         })
       }
       d = addDays(d, 1)
