@@ -42,9 +42,15 @@ export function DirectoryProvider({ children }) {
     return () => window.removeEventListener('focus', onFocus)
   }, [refresh])
 
+  const eventTypeAbbrByName = useMemo(() => {
+    const m = {}
+    for (const et of eventTypes) if (et.abbreviation) m[et.name] = et.abbreviation
+    return m
+  }, [eventTypes])
+
   const value = useMemo(
-    () => ({ eventTypes, users, elements, refresh, clear }),
-    [eventTypes, users, elements, refresh, clear],
+    () => ({ eventTypes, eventTypeAbbrByName, users, elements, refresh, clear }),
+    [eventTypes, eventTypeAbbrByName, users, elements, refresh, clear],
   )
 
   return (

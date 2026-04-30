@@ -16,6 +16,7 @@ import EventTypeManagement from './components/EventTypeManagement.jsx'
 import CategoryManagement from './components/CategoryManagement.jsx'
 import ManageElements from './components/ManageElements.jsx'
 import { fetchEvents, deleteEvent, bulkDeleteMonth } from './lib/events.js'
+import { getEventTypeAbbr } from './lib/eventTypes.js'
 import { seedIfEmpty } from './lib/seedEvents.js'
 import { useDirectory } from './contexts/DirectoryContext.jsx'
 import { startOfMonth, endOfMonth, startOfWeek, toIsoDate, addDays } from './lib/dates.js'
@@ -67,7 +68,7 @@ export default function App() {
   const [changePinOpen, setChangePinOpen] = useState(false)
   const [dayModalDate, setDayModalDate] = useState(null)
   const [exportModal, setExportModal] = useState(null) // null | { from, to }
-  const { eventTypes, refresh: refreshDirectory, clear: clearDirectory } = useDirectory()
+  const { eventTypes, eventTypeAbbrByName, refresh: refreshDirectory, clear: clearDirectory } = useDirectory()
   const calendarBodyRef = useRef(null)
   const fetchedRangesRef = useRef([])
   const seeded = useRef(false)
@@ -136,12 +137,6 @@ export default function App() {
     return () => { cancelled = true }
   }, [fetchFrom, fetchTo, user])
 
-  const abbrMap = useMemo(() => {
-    const m = {}
-    for (const et of eventTypes) if (et.abbreviation) m[et.name] = et.abbreviation
-    return m
-  }, [eventTypes])
-
   // ── Month-scoped events for sidebar counts ──
   const monthStart = toIsoDate(startOfMonth(currentDate))
   const monthEnd = toIsoDate(endOfMonth(currentDate))
@@ -160,11 +155,12 @@ export default function App() {
       const hay = [
         ev.guest_name, ev.tender_name, ev.title, ev.venue_name,
         ev.sales_person, ev.event_type, ev.sub_venue,
-        ev.event_type && abbrMap[ev.event_type],
+        ev.event_type && ev.event_type !== 'Other' ? eventTypeAbbrByName[ev.event_type] : null,
+        ev.event_type === 'Other' && ev.event_type_other ? getEventTypeAbbr('Other', ev.event_type_other, []) : null,
       ].filter(Boolean).join(' ').toLowerCase()
       return words.every((w) => hay.includes(w))
     })
-  }, [allEvents, activeFilters, activeSources, search, abbrMap])
+  }, [allEvents, activeFilters, activeSources, search, eventTypeAbbrByName])
 
   const filteredMonthCount = useMemo(
     () => filteredEvents.filter((e) => e.date >= monthStart && e.date <= monthEnd).length,
