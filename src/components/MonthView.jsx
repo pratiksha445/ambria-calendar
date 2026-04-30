@@ -5,7 +5,6 @@ import { useLanguage } from '../i18n/LanguageContext.jsx'
 
 const MAX_PILLS = 3
 const MAX_PILLS_DESKTOP = 5
-const OWN_VENUES = new Set(['ap', 'am', 'ae', 'ar'])
 
 export default function MonthView({ currentDate, selectedDate, onSelectDate, events, eventTypes = [] }) {
   const { dowHeaders } = useLanguage()
@@ -50,9 +49,6 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, eve
               <div className="day-pills">
                 {visible.map((ev, i) => {
                   const venue = VENUE_BY_ID[ev.venue_id]
-                  const isOwn = OWN_VENUES.has(ev.venue_id)
-                  const label = isOwn ? buildOwnPill(ev, eventTypes) : pillText(ev)
-                  const tip = isOwn ? buildOwnTooltip(ev, eventTypes) : (ev.guest_name || ev.tender_name || ev.venue_name || '')
                   return (
                     <div
                       key={`${ev.id}-${i}`}
@@ -61,9 +57,9 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, eve
                         background: venue?.color ?? '#ccc',
                         color: venue?.textColor ?? '#fff',
                       }}
-                      title={tip}
+                      title={buildPillTooltip(ev, eventTypes)}
                     >
-                      {label}
+                      {buildPillLabel(ev, eventTypes)}
                     </div>
                   )
                 })}
@@ -84,39 +80,110 @@ function groupByDate(events) {
   }, {})
 }
 
+// ── Shared helpers ──
+
 const SHIFT_INITIALS = { Morning: 'M', Lunch: 'L', Sundowner: 'S', Dinner: 'D' }
 
-/** Compact pill for AP/AM/AE/AR: "D500WD", "S250CKT", "MMEH" */
-function buildOwnPill(ev, eventTypes) {
+function customAbbr(text) {
+  if (!text) return ''
+  const t = text.trim()
+  if (!t) return ''
+  const words = t.split(/\s+/)
+  if (words.length === 1) return t.slice(0, 3).toUpperCase()
+  return words.map(w => w[0]).join('').slice(0, 4).toUpperCase()
+}
+
+const VILLA_SV = { 'AP Kothi': 'APK', 'AM Kothi': 'AMK', 'AE Kothi': 'AEK', 'Sukoon': 'SUK' }
+
+function villaSubVenueAbbr(sv) {
+  return VILLA_SV[sv] || (sv ? sv.replace(/\s+/g, '').slice(0, 4).toUpperCase() : '')
+}
+
+function formatListLabel(items, abbrFn, max) {
+  if (!items || items.length === 0) return ''
+  const first = items.slice(0, max).map(abbrFn)
+  const suffix = items.length > max ? '+' : ''
+  return first.join('+') + suffix
+}
+
+// ── Pill label (per-category) ──
+
+function buildPillLabel(ev, eventTypes) {
   const s = SHIFT_INITIALS[ev.shift] || ''
   const p = ev.pax ? String(ev.pax).trim() : ''
-  const a = getEventTypeAbbr(ev.event_type, ev.event_type_other, eventTypes)
-  return `${s}${p}${a}` || '—'
+
+  switch (ev.venue_id) {
+    case 'ap': case 'am': case 'ae': case 'ar':
+    case 'add': case 'ac':
+      return `${s}${p}${getEventTypeAbbr(ev.event_type, ev.event_type_other, eventTypes)}` || '—'
+
+    case 'tender':
+      return `${s}${p}${customAbbr(ev.event_type_text)}` || '—'
+
+    case 'villa':
+      return `${villaSubVenueAbbr(ev.sub_venue)}${p}` || '—'
+
+    case 'aee': {
+      if (ev.elements && ev.elements.length > 0) {
+        return formatListLabel(ev.elements, customAbbr, 2)
+      }
+      return getEventTypeAbbr(ev.event_type, ev.event_type_other, eventTypes) || '—'
+    }
+
+    case 'ws': {
+      const types = ev.service_type
+      if (!types || types.length === 0) return '—'
+      const expanded = types.map(t => t === 'Others' && ev.service_type_other ? ev.service_type_other : t)
+      return formatListLabel(expanded, customAbbr, 2) || '—'
+    }
+
+    default:
+      return '—'
+  }
 }
 
-/** Tooltip for AP/AM/AE/AR: "Dinner · 500 pax · Wedding" */
-function buildOwnTooltip(ev, eventTypes) {
-  const parts = []
-  if (ev.shift) parts.push(ev.shift)
-  if (ev.pax) parts.push(`${ev.pax} pax`)
-  const fullType = ev.event_type === 'Other' ? (ev.event_type_other || 'Other') : (ev.event_type || '')
-  if (fullType) parts.push(fullType)
-  return parts.join(' · ')
-}
+// ── Tooltip (per-category) ──
 
-/** Pill label for non-own-venue categories: "(L) Sharma" or "7P Gupta" */
-function pillText(ev) {
-  const name = ev.guest_name || ev.tender_name || ''
-  const first = name.split(/\s+/)[0] || ''
+function buildPillTooltip(ev, eventTypes) {
+  switch (ev.venue_id) {
+    case 'ap': case 'am': case 'ae': case 'ar':
+    case 'add': case 'ac': {
+      const parts = []
+      if (ev.shift) parts.push(ev.shift)
+      if (ev.pax) parts.push(`${ev.pax} pax`)
+      const ft = ev.event_type === 'Other' ? (ev.event_type_other || 'Other') : (ev.event_type || '')
+      if (ft) parts.push(ft)
+      return parts.join(' · ')
+    }
 
-  if (ev.shift) {
-    return `(${ev.shift[0]}) ${first}`
+    case 'tender': {
+      const parts = []
+      if (ev.shift) parts.push(ev.shift)
+      if (ev.pax) parts.push(`${ev.pax} pax`)
+      if (ev.event_type_text) parts.push(ev.event_type_text)
+      return parts.join(' · ')
+    }
+
+    case 'villa': {
+      const parts = []
+      if (ev.sub_venue) parts.push(ev.sub_venue)
+      if (ev.pax) parts.push(`${ev.pax} pax`)
+      return parts.join(' · ')
+    }
+
+    case 'aee':
+      return (ev.elements && ev.elements.length > 0)
+        ? ev.elements.join(', ')
+        : (ev.event_type || '')
+
+    case 'ws': {
+      if (!ev.service_type || ev.service_type.length === 0) return ''
+      return ev.service_type
+        .map(t => t === 'Others' && ev.service_type_other ? ev.service_type_other : t)
+        .join(', ')
+    }
+
+    default:
+      return ''
   }
-  if (ev.time) {
-    const h = parseInt(ev.time.split(':')[0], 10)
-    const suffix = h >= 12 ? 'P' : 'A'
-    const hr = h === 0 ? 12 : h > 12 ? h - 12 : h
-    return `${hr}${suffix} ${first}`
-  }
-  return first || ev.venue_name || '—'
 }
