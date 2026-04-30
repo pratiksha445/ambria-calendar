@@ -22,6 +22,9 @@ export default function useSwipeNav(elRef, { onPrev, onNext }) {
     const el = elRef.current
     if (!el) return
 
+    // Guard: prevents double-fire from transitionend + setTimeout fallback
+    let commitGuard = 0
+
     function handleDown(e) {
       if (e.pointerType === 'mouse' && e.button !== 0) return
       if (e.target.closest('.modal-root, .booking-form, .day-modal, .time-popup')) return
@@ -37,10 +40,6 @@ export default function useSwipeNav(elRef, { onPrev, onNext }) {
         locked: false,
       }
       el.style.transition = 'none'
-      // NOTE: Do NOT setPointerCapture here — capturing eagerly prevents the
-      // browser click event from reaching child elements (buttons, pills,
-      // EventCards). Capture is deferred to handleMove once the gesture is
-      // confirmed horizontal (g.locked = true).
     }
 
     function handleMove(e) {
@@ -74,7 +73,8 @@ export default function useSwipeNav(elRef, { onPrev, onNext }) {
       }
 
       g.dx = dx
-      el.style.transform = `translate3d(${dx * 0.4}px,0,0)`
+      // 1:1 finger tracking with GPU acceleration
+      el.style.transform = `translate3d(${dx}px,0,0)`
     }
 
     function handleUp(e) {
@@ -96,16 +96,27 @@ export default function useSwipeNav(elRef, { onPrev, onNext }) {
 
       if (commit) {
         const dir = dx < 0 ? -1 : 1
-        el.style.transition = 'transform 200ms ease-out'
-        el.style.transform = `translate3d(${dir * 80}px,0,0)`
+        const slideTarget = dir * (el.offsetWidth || 320)
+        const token = ++commitGuard
+
+        el.style.transition = 'transform 300ms cubic-bezier(0.2, 0, 0, 1)'
+        el.style.transform = `translate3d(${slideTarget}px,0,0)`
         g.committed = true
-        setTimeout(() => {
+
+        const finish = () => {
+          if (commitGuard !== token) return // stale
+          commitGuard++
+          el.removeEventListener('transitionend', finish)
           el.style.transition = 'none'
           el.style.transform = ''
           if (dir < 0) cb.current.onNext()
           else cb.current.onPrev()
-        }, 200)
+        }
+        el.addEventListener('transitionend', finish, { once: true })
+        // Fallback if transitionend doesn't fire (e.g. display:none, tab switch)
+        setTimeout(finish, 350)
       } else {
+        // Snap back
         el.style.transition = 'transform 200ms ease-out'
         el.style.transform = ''
       }
