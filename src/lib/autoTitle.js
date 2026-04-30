@@ -42,8 +42,10 @@ export function autoTitle(form) {
   if (venueId === 'villa') {
     const fn = firstName(form.guest_name)
     if (!fn && !form.sub_venue) return ''
-    const right = form.sub_venue || ''
-    return right ? `${fn || '—'} — ${right}` : fn
+    const parts = [fn || '—']
+    if (form.sub_venue) parts.push(form.sub_venue)
+    if (form.pax) parts.push(`${form.pax}pax`)
+    return parts.join(' — ')
   }
 
   if (venueId === 'tender') {

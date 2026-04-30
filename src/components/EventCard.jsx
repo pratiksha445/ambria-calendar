@@ -312,6 +312,18 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
           )}
 
           {/* Villa fields */}
+          {event.venue_id === 'villa' && event.event_type && (
+            <div className="detail-row">
+              <span className="k">{t('Event Type')}</span>
+              <span className="v">{event.event_type === 'Other' ? (event.event_type_other || 'Other') : t(event.event_type)}</span>
+            </div>
+          )}
+          {event.venue_id === 'villa' && (
+            <div className="detail-row">
+              <span className="k">{t('Extra Bedding')}</span>
+              <span className="v">{event.extra_bedding ?? 0}</span>
+            </div>
+          )}
           {event.venue_id === 'villa' && event.check_in_date && (
             <div className="detail-row">
               <span className="k">{t('Check-In')}</span>
@@ -388,11 +400,10 @@ function buildPrimary(event, formatShortDate, t) {
     return joinPipes([event.tender_name, event.event_type_text, event.venue_name])
   }
   if (event.venue_id === 'villa') {
-    return joinPipes([
-      event.guest_name,
-      event.sub_venue ? t(event.sub_venue) : null,
-      formatShortDate(event.check_in_date),
-    ])
+    const parts = [event.guest_name]
+    if (event.sub_venue) parts.push(t(event.sub_venue))
+    if (event.pax) parts.push(`${event.pax}pax`)
+    return parts.filter(Boolean).join(' — ')
   }
   // Multi-event external venue bookings
   if (Array.isArray(event.event_slots) && event.event_slots.length > 1) {

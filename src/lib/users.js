@@ -21,7 +21,8 @@ export async function fetchFilteredUsers(filter) {
     .select('id, name')
     .eq('is_active', true)
     .eq('approval_status', 'approved')
-  if (filter?.department) q = q.eq('department', filter.department)
+  if (filter?.departments?.length) q = q.in('department', filter.departments)
+  else if (filter?.department) q = q.eq('department', filter.department)
   if (filter?.salesTypes?.length) q = q.in('sales_type', filter.salesTypes)
   q = q.order('name', { ascending: true })
   const { data, error } = await q

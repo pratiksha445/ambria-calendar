@@ -334,12 +334,15 @@ function ownVenueSections(venue, dynamicTypes, dynamicElements) {
 }
 
 // Villa — stay booking
-function villaSections(venue, _dynamicTypes) {
+function villaSections(venue, dynamicTypes) {
   return [
     {
       title: 'Stay',
       fields: [
         S('Sub-Venue', 'sub_venue', venue.subVenues),
+        ...eventTypeFields(dynamicTypes, { searchable: false }).map((f) =>
+          f.key === 'event_type' ? { ...f, required: false } : f
+        ),
         statusField,
       ],
     },
@@ -368,7 +371,13 @@ function villaSections(venue, _dynamicTypes) {
         guestName(),
         phoneReq(),
         paxField(),
-        salesPersonField(),
+        T('Extra Bedding', 'extra_bedding', true, {
+          filterFn: paxFilter, filterError: 'Only numbers allowed', inputMode: 'numeric',
+        }),
+        { ...salesPersonField(),
+          userFilter: { departments: ['Venue Sales', 'Social/Tech'] },
+          userEmptyMsg: 'No Venue Sales / Social/Tech users available. Add users in Manage Users.',
+        },
         T('Pending Payment %', 'payment_remaining_venue', true, {
           filterFn: percentFilter, filterError: 'Only numbers 0-100',
           suffix: '%', inputMode: 'numeric',
@@ -672,9 +681,10 @@ export const FIELD_MAP = {
   ae: VENUE_FIELD_KEYS,
   ar: VENUE_FIELD_KEYS,
   villa: [
-    'sub_venue', 'check_in_date', 'check_out_date', 'check_in_time', 'check_out_time',
+    'sub_venue', 'event_type', 'event_type_other',
+    'check_in_date', 'check_out_date', 'check_in_time', 'check_out_time',
     'pool_included', 'meal_included', 'added_service',
-    'guest_name', 'phone', 'pax', 'sales_person', 'sales_person_id',
+    'guest_name', 'phone', 'pax', 'extra_bedding', 'sales_person', 'sales_person_id',
     'payment_remaining_venue', 'payment_timing', 'notes',
   ],
   add: [
@@ -730,7 +740,7 @@ export const ALL_SAVEABLE_KEYS = [
   'decor_operation_manager', 'decor_operation_manager_id',
   'ent_delivery_person', 'ent_delivery_person_id', 'operation_manager', 'operation_manager_id',
   'payment_remaining_venue', 'payment_remaining_decor', 'payment_remaining_ent', 'payment_timing',
-  'guest_name', 'phone', 'pax', 'guest_category', 'sales_person', 'sales_person_id', 'notes',
+  'guest_name', 'phone', 'pax', 'extra_bedding', 'guest_category', 'sales_person', 'sales_person_id', 'notes',
   'check_in_date', 'check_out_date', 'check_in_time', 'check_out_time',
   'pool_included', 'meal_included', 'added_service',
   'venue_name', 'venue_type', 'location', 'decor_type', 'color_theme',
