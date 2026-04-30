@@ -37,7 +37,10 @@ export default function useSwipeNav(elRef, { onPrev, onNext }) {
         locked: false,
       }
       el.style.transition = 'none'
-      el.setPointerCapture(e.pointerId)
+      // NOTE: Do NOT setPointerCapture here — capturing eagerly prevents the
+      // browser click event from reaching child elements (buttons, pills,
+      // EventCards). Capture is deferred to handleMove once the gesture is
+      // confirmed horizontal (g.locked = true).
     }
 
     function handleMove(e) {
@@ -58,6 +61,7 @@ export default function useSwipeNav(elRef, { onPrev, onNext }) {
             return
           }
           g.locked = true
+          el.setPointerCapture(e.pointerId)
         }
       }
 
