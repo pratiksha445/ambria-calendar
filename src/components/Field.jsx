@@ -139,7 +139,7 @@ export default function Field({ field, form, value, onChange, error, readOnly, a
       <div className={`field field-multiselect ${displayError ? 'has-error' : ''} ${disabled ? 'is-disabled' : ''}`}>
         <label className="field-label">
           {t(field.label)}
-          {field.required && !disabled && <span className="required-star"> *</span>}
+          {(field.required || (field.requiredWhen && field.requiredWhen(form))) && !disabled && <span className="required-star"> *</span>}
         </label>
         <div className="multiselect-grid">
           {opts.map((opt) => (
@@ -330,7 +330,7 @@ export default function Field({ field, form, value, onChange, error, readOnly, a
     <div className={`field ${displayError ? 'has-error' : ''} ${disabled ? 'is-disabled' : ''} ${field.fullWidth ? 'field-full-width' : ''}`}>
       <label htmlFor={id} className="field-label">
         {t(field.label)}
-        {field.required && !disabled && <span className="required-star"> *</span>}
+        {(field.required || (field.requiredWhen && field.requiredWhen(form))) && !disabled && <span className="required-star"> *</span>}
       </label>
       {control}
       {displayError && <div className="field-error">{t(displayError)}</div>}

@@ -70,7 +70,7 @@ export async function createEvent(eventData, user) {
       summary,
       booking_title: data.title,
       venue_id: data.venue_id,
-    })
+    }, user.role)
   }
   return data
 }
@@ -112,7 +112,7 @@ export async function updateEvent(id, eventData, user) {
         venue_id: data.venue_id,
         sections_edited: diff.sections_edited,
         changes: diff.changes,
-      })
+      }, user.role)
     }
   }
   return data
@@ -166,7 +166,7 @@ export async function bulkDeleteMonth(startDate, endDate, user) {
       manual_deleted: manualCount,
       crm_soft_deleted: crmCount,
       month: `${startDate} to ${endDate}`,
-    })
+    }, user.role)
   }
 }
 
@@ -195,7 +195,7 @@ export async function deleteEvent(id, user) {
       const summary = buildDeleteSummary(event)
       logAction(user.id, user.name, 'delete', 'event', id, {
         summary, title: event.title, venue_id: event.venue_id,
-      })
+      }, user.role)
     }
   } else {
     const { error } = await supabase
@@ -207,7 +207,7 @@ export async function deleteEvent(id, user) {
       const summary = buildSoftDeleteSummary(event)
       logAction(user.id, user.name, 'soft_delete', 'event', id, {
         summary, title: event.title, venue_id: event.venue_id,
-      })
+      }, user.role)
     }
   }
 

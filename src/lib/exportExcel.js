@@ -17,6 +17,7 @@ const COLUMNS = [
   { key: 'guest_name', header: 'Guest Name' },
   { key: 'phone', header: 'Guest Phone' },
   { key: 'pax', header: 'Pax' },
+  { key: 'guest_category', header: 'Guest Category' },
   { key: 'sales_person', header: 'Sales Person' },
   { key: 'booking_status', header: 'Package Type' },
   { key: 'menu_type', header: 'Menu Type' },

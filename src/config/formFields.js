@@ -35,6 +35,7 @@ export const DECOR_TYPES = ['Silver', 'Gold', 'Premium']
 export const DECOR_STATUSES = ['Open', 'Meeting', 'Closure', 'Outdoor']
 export const ENTERTAINMENT_STATUSES = ['Open', 'Meeting', 'Closure', 'Outdoor']
 export const FUNCTION_CATEGORIES = ['Silver', 'Gold', 'Platinum']
+export const GUEST_CATEGORIES = ['Multi-Event Client', 'Repeat Client', 'Premium Client', 'Standard Client']
 export const PAYMENT_TIMINGS = ['Before Event', 'On the Day', 'After Event']
 // Hardcoded fallback — used only when DB fetch fails
 export const ELEMENT_OPTIONS_FALLBACK = [
@@ -230,11 +231,14 @@ function ownVenueSections(venue, dynamicTypes, dynamicElements) {
         D('Date', 'date'),
         S('Shift', 'shift', SHIFTS),
         // Row 4: Baraat Time | Assembly Time
-        TM('Baraat Time', 'baraat_time'),
+        TM('Baraat Time', 'baraat_time', false),
         TM('Assembly Time', 'time'),
         // Row 5: Chaat Time | Wind Up Time
-        TM('Chaat Time', 'chaat_time'),
-        TM('Wind Up Time', 'wind_up_time', true, { inlineCheckbox: { key: 'wind_up_next_day', label: '+1' } }),
+        TM('Chaat Time', 'chaat_time', false),
+        TM('Wind Up Time', 'wind_up_time', false, {
+          requiredWhen: (f) => f.shift === 'Lunch' || f.shift === 'Sundowner',
+          inlineCheckbox: { key: 'wind_up_next_day', label: '+1' },
+        }),
         // Row 6: FP | Rooms + Liquor
         S('FP', 'fp_status', FP_STATUSES, true, { disabledWhen: notVMD }),
         { ...roomsField(), inlineCheckbox: { key: 'liquor', label: 'Liquor' } },
@@ -250,13 +254,15 @@ function ownVenueSections(venue, dynamicTypes, dynamicElements) {
         // Row 9: Guest Name | Guest Phone
         guestName(),
         phoneReq(),
-        // Row 10: Pax | Sales Person
+        // Row 10: Pax | Guest Category
         paxField(),
+        S('Guest Category', 'guest_category', GUEST_CATEGORIES, false),
+        // Row 11: Sales Person
         { ...salesPersonField(),
           userFilter: { department: 'Venue Sales', salesTypes: ['In-house', 'In-house + Outdoor'] },
           userEmptyMsg: 'No Venue Sales users available. Add users in Manage Users.',
         },
-        // Row 11: Delivery Person | F&B Service Manager
+        // Row 12: Delivery Person | F&B Service Manager
         { type: 'user-select', label: 'Delivery Person', key: 'delivery_person', required: true,
           userFilter: { department: 'Venue Sales', salesTypes: ['In-house', 'In-house + Outdoor'] },
           userEmptyMsg: 'No Venue Sales users available. Add users in Manage Users.',
@@ -666,7 +672,7 @@ const VENUE_FIELD_KEYS = [
   'delivery_person', 'delivery_person_id', 'decor_delivery_person', 'decor_delivery_person_id',
   'ent_delivery_person', 'ent_delivery_person_id', 'operation_manager', 'operation_manager_id',
   'payment_remaining_venue', 'payment_remaining_decor', 'payment_remaining_ent', 'payment_timing',
-  'guest_name', 'phone', 'pax', 'sales_person', 'sales_person_id', 'notes',
+  'guest_name', 'phone', 'pax', 'guest_category', 'sales_person', 'sales_person_id', 'notes',
 ]
 
 export const FIELD_MAP = {
@@ -728,7 +734,7 @@ export const ALL_SAVEABLE_KEYS = [
   'delivery_person', 'delivery_person_id', 'decor_delivery_person', 'decor_delivery_person_id',
   'ent_delivery_person', 'ent_delivery_person_id', 'operation_manager', 'operation_manager_id',
   'payment_remaining_venue', 'payment_remaining_decor', 'payment_remaining_ent', 'payment_timing',
-  'guest_name', 'phone', 'pax', 'sales_person', 'sales_person_id', 'notes',
+  'guest_name', 'phone', 'pax', 'guest_category', 'sales_person', 'sales_person_id', 'notes',
   'check_in_date', 'check_out_date', 'check_in_time', 'check_out_time',
   'pool_included', 'meal_included', 'added_service',
   'venue_name', 'venue_type', 'location', 'decor_type', 'color_theme',
@@ -771,9 +777,10 @@ export function getAllFields(venueId, dynamicTypes, dynamicElements) {
 }
 
 // Returns true if the given field is effectively required in the current
-// form state (handles disabledWhen — disabled fields aren't required).
+// form state (handles disabledWhen, showWhen, and requiredWhen).
 export function isFieldRequired(field, form) {
-  if (!field.required) return false
+  const req = field.requiredWhen ? field.requiredWhen(form) : field.required
+  if (!req) return false
   if (field.disabledWhen && field.disabledWhen(form)) return false
   if (field.showWhen && !field.showWhen(form)) return false
   return true

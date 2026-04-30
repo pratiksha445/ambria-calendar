@@ -19,7 +19,7 @@ const ACTION_LABEL_KEYS = {
   set_pin: 'Set PIN', change_pin: 'Change PIN',
 }
 
-const ROLE_COLORS = { admin: '#E85D75', staff: '#95A5A6' }
+const ROLE_COLORS = { admin: '#E85D75', gm: '#D4A24E', staff: '#95A5A6' }
 
 function MenuIcon() {
   return (
@@ -154,6 +154,7 @@ export default function AuditLog({ onMenu }) {
   }, [t])
 
   const getUserRole = (entry) => {
+    if (entry.actor_role) return entry.actor_role
     const u = users.find((x) => x.id === entry.user_id)
     return u?.role || null
   }
@@ -225,8 +226,9 @@ export default function AuditLog({ onMenu }) {
     return entry.entity_type
   }
 
-  function getUserRoleById(userId) {
-    const u = users.find((x) => x.id === userId)
+  function getUserRoleById(entry) {
+    if (entry.actor_role) return entry.actor_role
+    const u = users.find((x) => x.id === entry.user_id)
     return u?.role || ''
   }
 
@@ -255,7 +257,7 @@ export default function AuditLog({ onMenu }) {
     for (const r of rows) {
       const ts = formatTimestampIST(r.created_at)
       const user = r.user_name || 'System'
-      const role = getUserRoleById(r.user_id)
+      const role = getUserRoleById(r)
       const action = ACTION_LABEL_KEYS[r.action] || r.action
       const desc = describeEntityPlain(r)
       const details = r.details ? JSON.stringify(r.details).replace(/"/g, '""') : ''
@@ -281,7 +283,7 @@ export default function AuditLog({ onMenu }) {
     const body = rows.map((r) => [
       formatTimestampIST(r.created_at),
       r.user_name || 'System',
-      getUserRoleById(r.user_id),
+      getUserRoleById(r),
       ACTION_LABEL_KEYS[r.action] || r.action,
       describeEntityPlain(r),
     ])

@@ -492,7 +492,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
 
       <div className="form-footer">
         {submitError && <div className="form-error-banner">{t(submitError)}</div>}
-        {editing && !readOnly && (
+        {editing && !readOnly && user?.role === 'admin' && (
           confirmDelete ? (
             <div className="confirm-delete">
               <span>{t('Delete this booking?')}</span>

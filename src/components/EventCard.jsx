@@ -105,7 +105,7 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
               </div>
             </div>
           </button>
-          {onDelete && canModify && (
+          {onDelete && canModify && user?.role === 'admin' && (
             <button
               type="button"
               className="card-trash-btn"
@@ -220,6 +220,9 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
           )}
           {event.operation_manager && (
             <div className="detail-row"><span className="k">{t('F&B Service Manager')}</span><span className="v">{event.operation_manager}</span></div>
+          )}
+          {isOwnVenue && event.guest_category && (
+            <div className="detail-row"><span className="k">{t('Guest Category')}</span><span className="v">{t(event.guest_category)}</span></div>
           )}
           {isOwnVenue && event.status && (
             <div className="detail-row"><span className="k">{t('Status')}</span><span className="v">{t(event.status)}</span></div>

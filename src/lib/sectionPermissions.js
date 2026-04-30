@@ -30,6 +30,7 @@ function matchesAssigned(user, eventId, eventName) {
 export function canAccessBooking(user, event) {
   if (!user || !event) return false
   if (user.role === 'admin') return true
+  if (user.role === 'gm') return true
   if (event.created_by != null && user.id === event.created_by) return true
 
   // For AP/AM/AE/AR: check if user is an assigned person or has department access
@@ -61,8 +62,9 @@ export function getEditableSections(user, event, venueId) {
   if (!event?.id) return null
   // No locks for non-venue categories
   if (!OWN_VENUE_IDS.has(venueId)) return null
-  // Admin bypasses all locks
+  // Admin and GM bypass all locks
   if (user?.role === 'admin') return null
+  if (user?.role === 'gm') return null
 
   const editable = new Set()
 
