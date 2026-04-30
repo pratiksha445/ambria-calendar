@@ -761,6 +761,13 @@
   color: var(--ambria-accent);
 }
 
+/* Week → Day divider */
+.week-day-divider {
+  height: 1px;
+  background: var(--ambria-border);
+  margin: 2px 0 8px;
+}
+
 /* ---------- Day view ---------- */
 
 .day-header {

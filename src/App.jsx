@@ -231,7 +231,7 @@ export default function App() {
         d.getFullYear() !== currentDate.getFullYear()) {
       setCurrentDate(d)
     }
-    if (view === 'month' || view === 'week') {
+    if (view === 'month') {
       setDayModalDate(d)
     }
   }
@@ -411,12 +411,23 @@ export default function App() {
                 />
               )}
               {view === 'week' && (
-                <WeekView
-                  currentDate={currentDate}
-                  selectedDate={selectedDate}
-                  onSelectDate={handleSelectDate}
-                  events={filteredEvents}
-                />
+                <>
+                  <WeekView
+                    currentDate={currentDate}
+                    selectedDate={selectedDate}
+                    onSelectDate={handleSelectDate}
+                    events={filteredEvents}
+                  />
+                  <div className="week-day-divider" />
+                  <DayView
+                    selectedDate={selectedDate}
+                    events={filteredEvents}
+                    onEdit={openEdit}
+                    onDelete={handleCardDelete}
+                    onAdd={openNew}
+                    user={user}
+                  />
+                </>
               )}
               {view === 'day' && (
                 <DayView
