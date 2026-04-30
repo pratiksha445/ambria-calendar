@@ -394,6 +394,10 @@ function buildPrimary(event, formatShortDate, t) {
       formatShortDate(event.check_in_date),
     ])
   }
+  // Multi-event external venue bookings
+  if (Array.isArray(event.event_slots) && event.event_slots.length > 1) {
+    return joinPipes([event.guest_name, 'Multi-Event', event.venue_name])
+  }
   return joinPipes([
     event.guest_name,
     event.event_type === 'Other' ? event.event_type_other : (event.event_type ? t(event.event_type) : null),

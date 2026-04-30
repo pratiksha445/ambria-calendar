@@ -217,7 +217,13 @@ function buildPillLabel(ev, eventTypes) {
 
   switch (ev.venue_id) {
     case 'ap': case 'am': case 'ae': case 'ar':
+      return `${s}${p}${getEventTypeAbbr(ev.event_type, ev.event_type_other, eventTypes)}` || '—'
+
     case 'add': case 'ac':
+      if (Array.isArray(ev.event_slots) && ev.event_slots.length > 1) {
+        const totalPax = ev.event_slots.reduce((sum, sl) => sum + (Number(sl.pax) || 0), 0)
+        return `${s}${totalPax || ''}ME`
+      }
       return `${s}${p}${getEventTypeAbbr(ev.event_type, ev.event_type_other, eventTypes)}` || '—'
 
     case 'tender':
@@ -227,6 +233,10 @@ function buildPillLabel(ev, eventTypes) {
       return `${villaSubVenueAbbr(ev.sub_venue)}${p}` || '—'
 
     case 'aee': {
+      if (Array.isArray(ev.event_slots) && ev.event_slots.length > 1) {
+        const totalPax = ev.event_slots.reduce((sum, sl) => sum + (Number(sl.pax) || 0), 0)
+        return `${s}${totalPax || ''}ME`
+      }
       if (ev.elements && ev.elements.length > 0) {
         return formatListLabel(ev.elements, customAbbr, 2)
       }
@@ -249,6 +259,14 @@ function buildPillTooltip(ev, eventTypes) {
   switch (ev.venue_id) {
     case 'ap': case 'am': case 'ae': case 'ar':
     case 'add': case 'ac': {
+      if (Array.isArray(ev.event_slots) && ev.event_slots.length > 1) {
+        const totalPax = ev.event_slots.reduce((sum, sl) => sum + (Number(sl.pax) || 0), 0)
+        const slotSummaries = ev.event_slots.map(sl => {
+          const t = sl.event_type === 'Other' ? (sl.event_type_other || '') : (sl.event_type || '')
+          return [sl.shift, t].filter(Boolean).join(' ')
+        }).filter(Boolean)
+        return `Multi-Event (${ev.event_slots.length})${totalPax ? ` · ${totalPax} pax` : ''} · ${slotSummaries.join(', ')}`
+      }
       const parts = []
       if (ev.shift) parts.push(ev.shift)
       if (ev.pax) parts.push(`${ev.pax} pax`)
@@ -276,6 +294,14 @@ function buildPillTooltip(ev, eventTypes) {
     }
 
     case 'aee':
+      if (Array.isArray(ev.event_slots) && ev.event_slots.length > 1) {
+        const totalPax = ev.event_slots.reduce((sum, sl) => sum + (Number(sl.pax) || 0), 0)
+        const slotSummaries = ev.event_slots.map(sl => {
+          const t = sl.event_type === 'Other' ? (sl.event_type_other || '') : (sl.event_type || '')
+          return [sl.shift, t].filter(Boolean).join(' ')
+        }).filter(Boolean)
+        return `Multi-Event (${ev.event_slots.length})${totalPax ? ` · ${totalPax} pax` : ''} · ${slotSummaries.join(', ')}`
+      }
       return (ev.elements && ev.elements.length > 0)
         ? ev.elements.join(', ')
         : (ev.event_type || '')
