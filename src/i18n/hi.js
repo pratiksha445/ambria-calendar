@@ -152,6 +152,7 @@ const hi = {
   'Payment Timing': 'भुगतान समय',
   'Payment Status': 'भुगतान स्थिति',
   'Operation Manager': 'ऑपरेशन मैनेजर',
+  'Operation Manager (Decor)': 'ऑपरेशन मैनेजर (डेकोर)',
   'F&B Service Manager': 'F&B सर्विस मैनेजर',
   'Guest Phone': 'गेस्ट फोन',
   'Rooms': 'कमरे',

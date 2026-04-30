@@ -229,7 +229,7 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
           )}
 
           {/* ── Decor section ── */}
-          {isOwnVenue && (event.decor_status || event.function_category || (event.payment_remaining_decor != null && event.payment_remaining_decor !== '') || event.decor_delivery_person) && (
+          {isOwnVenue && (event.decor_status || event.function_category || (event.payment_remaining_decor != null && event.payment_remaining_decor !== '') || event.decor_delivery_person || event.decor_operation_manager) && (
             <div className="detail-section-heading">{t('Decor')}</div>
           )}
           {event.decor_status && (
@@ -254,6 +254,9 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
           )}
           {event.decor_delivery_person && (
             <div className="detail-row"><span className="k">{t('Delivery Person')}</span><span className="v">{event.decor_delivery_person}</span></div>
+          )}
+          {event.decor_operation_manager && (
+            <div className="detail-row"><span className="k">{t('Operation Manager')}</span><span className="v">{event.decor_operation_manager}</span></div>
           )}
 
           {/* ── Entertainment section ── */}

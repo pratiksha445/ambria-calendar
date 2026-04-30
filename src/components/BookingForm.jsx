@@ -140,6 +140,8 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
         next.payment_remaining_decor = ''
         next.decor_delivery_person = ''
         next.decor_delivery_person_id = null
+        next.decor_operation_manager = ''
+        next.decor_operation_manager_id = null
       }
       if (key === 'entertainment_status' && value === 'Outdoor') {
         next.elements = []

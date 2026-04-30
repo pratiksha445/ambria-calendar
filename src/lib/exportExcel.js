@@ -31,6 +31,7 @@ const COLUMNS = [
   { key: 'elements', header: 'Elements' },
   { key: 'delivery_person', header: 'Delivery Person' },
   { key: 'decor_delivery_person', header: 'Delivery Person (Decor)' },
+  { key: 'decor_operation_manager', header: 'Operation Manager (Decor)' },
   { key: 'ent_delivery_person', header: 'Delivery Person (Entertainment)' },
   { key: 'operation_manager', header: 'F&B Service Manager' },
   { key: 'payment_remaining_venue', header: 'Pending Payment %' },

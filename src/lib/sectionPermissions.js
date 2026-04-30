@@ -38,8 +38,9 @@ export function canAccessBooking(user, event) {
     // Venue section: sales_person or delivery_person
     if (matchesAssigned(user, event.sales_person_id, event.sales_person)) return true
     if (matchesAssigned(user, event.delivery_person_id, event.delivery_person)) return true
-    // Decor section: decor_delivery_person or department match
+    // Decor section: decor_delivery_person, decor_operation_manager, or department match
     if (matchesAssigned(user, event.decor_delivery_person_id, event.decor_delivery_person)) return true
+    if (matchesAssigned(user, event.decor_operation_manager_id, event.decor_operation_manager)) return true
     if (user.department === 'Decor Sales' && INHOUSE_TYPES.has(user.sales_type)) return true
     // Entertainment section: ent_delivery_person or department match
     if (matchesAssigned(user, event.ent_delivery_person_id, event.ent_delivery_person)) return true
@@ -76,10 +77,11 @@ export function getEditableSections(user, event, venueId) {
     editable.add('Venue')
   }
 
-  // Decor section: editable if user is Decor Sales + In-house type, or assigned decor delivery person
+  // Decor section: editable if user is Decor Sales/Ops + In-house type, or assigned decor delivery/operation person
   if (
     (user?.department === 'Decor Sales' && INHOUSE_TYPES.has(user?.sales_type)) ||
-    matchesAssigned(user, event.decor_delivery_person_id, event.decor_delivery_person)
+    matchesAssigned(user, event.decor_delivery_person_id, event.decor_delivery_person) ||
+    matchesAssigned(user, event.decor_operation_manager_id, event.decor_operation_manager)
   ) {
     editable.add('Decor')
   }

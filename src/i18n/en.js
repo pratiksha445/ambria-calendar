@@ -152,6 +152,7 @@ const en = {
   'Payment Timing': 'Payment Timing',
   'Payment Status': 'Payment Status',
   'Operation Manager': 'Operation Manager',
+  'Operation Manager (Decor)': 'Operation Manager (Decor)',
   'F&B Service Manager': 'F&B Service Manager',
   'Guest Phone': 'Guest Phone',
   'Rooms': 'Rooms',
