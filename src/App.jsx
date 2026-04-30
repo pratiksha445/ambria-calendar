@@ -19,7 +19,7 @@ import { fetchEvents, deleteEvent, bulkDeleteMonth } from './lib/events.js'
 import { getEventTypeAbbr } from './lib/eventTypes.js'
 import { seedIfEmpty } from './lib/seedEvents.js'
 import { useDirectory } from './contexts/DirectoryContext.jsx'
-import { startOfMonth, endOfMonth, startOfWeek, toIsoDate, addDays } from './lib/dates.js'
+import { startOfMonth, endOfMonth, toIsoDate, addDays } from './lib/dates.js'
 import { VENUES, applyDynamic } from './config/venues.js'
 import { fetchActiveCategories } from './lib/categories.js'
 import { logAction } from './lib/audit.js'
@@ -29,9 +29,9 @@ import './App.css'
 
 const ALL_SOURCES = ['crm', 'manual']
 
-// ── Range-bounded fetch helpers ──
-function isRangeCovered(from, to, ranges) {
-  return ranges.some(([rFrom, rTo]) => rFrom <= from && rTo >= to)
+// ── Month-level fetch tracking ──
+function mKey(d) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
 }
 
 function mergeEvents(existing, incoming, from, to) {
@@ -75,8 +75,11 @@ export default function App() {
   const [exportModal, setExportModal] = useState(null) // null | { from, to }
   const { eventTypes, eventTypeAbbrByName, refresh: refreshDirectory, clear: clearDirectory } = useDirectory()
   const calendarBodyRef = useRef(null)
-  const fetchedRangesRef = useRef([])
+  const fetchedMonthsRef = useRef(new Set())
+  const fetchingRef = useRef(new Set())
+  const [fetchedMonths, setFetchedMonths] = useState(() => new Set())
   const seeded = useRef(false)
+  const searchFetchedRef = useRef(false)
 
   // Load dynamic categories from Supabase — falls back to hardcoded defaults on failure
   useEffect(() => {
@@ -92,32 +95,49 @@ export default function App() {
       .catch(() => {/* offline — keep hardcoded defaults */})
   }, [user])
 
-  // ── Date-range-bounded event fetching ──
+  // ── Prefetch system: current + 3 months ahead, background pre-fetch on navigate ──
   const searchActive = !!search.trim()
-  const [fetchFrom, fetchTo] = useMemo(() => {
-    if (searchActive) {
-      const now = new Date()
-      return [toIsoDate(addDays(now, -365)), toIsoDate(addDays(now, 365))]
-    }
-    if (view === 'month') {
-      return [
-        toIsoDate(addDays(startOfMonth(currentDate), -7)),
-        toIsoDate(addDays(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1), 7)),
-      ]
-    }
-    if (view === 'week') {
-      const ws = startOfWeek(currentDate)
-      return [toIsoDate(addDays(ws, -7)), toIsoDate(addDays(ws, 13))]
-    }
-    return [toIsoDate(addDays(selectedDate, -3)), toIsoDate(addDays(selectedDate, 3))]
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [view, currentDate.getTime(), toIsoDate(selectedDate), searchActive])
+  const currentMonthKey = mKey(currentDate)
 
+  // Background fetch for a single month (non-blocking, fire-and-forget)
+  const fetchMonthBg = useCallback((date) => {
+    const key = mKey(date)
+    if (fetchedMonthsRef.current.has(key) || fetchingRef.current.has(key)) return
+    fetchingRef.current.add(key)
+    const from = toIsoDate(startOfMonth(date))
+    const to = toIsoDate(endOfMonth(date))
+    fetchEvents(from, to)
+      .then((rows) => {
+        if (import.meta.env.DEV) console.log(`[ambria prefetch] ${key} count=${rows.length}`)
+        setAllEvents((prev) => mergeEvents(prev, rows, from, to))
+        fetchedMonthsRef.current.add(key)
+        setFetchedMonths(new Set(fetchedMonthsRef.current))
+      })
+      .catch((err) => console.error('[ambria] prefetch failed', key, err))
+      .finally(() => fetchingRef.current.delete(key))
+  }, [])
+
+  // Prefetch base month + count months ahead
+  const prefetchAhead = useCallback((base, count) => {
+    for (let i = 0; i <= count; i++) {
+      fetchMonthBg(new Date(base.getFullYear(), base.getMonth() + i, 1))
+    }
+  }, [fetchMonthBg])
+
+  // ── Initial load: current month + 3 ahead in one request ──
   useEffect(() => {
     if (!user) return
-    if (isRangeCovered(fetchFrom, fetchTo, fetchedRangesRef.current)) return
     let cancelled = false
-    async function load() {
+    async function init() {
+      // Mark months as in-flight immediately (before any await) to prevent
+      // the navigation prefetch effect from firing duplicate requests
+      const now = new Date()
+      const keys = []
+      for (let i = 0; i <= 3; i++) {
+        const key = mKey(new Date(now.getFullYear(), now.getMonth() + i, 1))
+        fetchingRef.current.add(key)
+        keys.push(key)
+      }
       if (!seeded.current) {
         await seedIfEmpty()
         seeded.current = true
@@ -125,22 +145,57 @@ export default function App() {
       setLoading(true)
       setError(null)
       try {
-        const rows = await fetchEvents(fetchFrom, fetchTo)
-        if (import.meta.env.DEV) console.log(`[ambria fetch] range=${fetchFrom}..${fetchTo} count=${rows.length}`)
-        if (!cancelled) {
-          setAllEvents((prev) => mergeEvents(prev, rows, fetchFrom, fetchTo))
-          fetchedRangesRef.current = [...fetchedRangesRef.current, [fetchFrom, fetchTo]]
+        const from = toIsoDate(startOfMonth(now))
+        const to = toIsoDate(endOfMonth(new Date(now.getFullYear(), now.getMonth() + 3, 1)))
+        const rows = await fetchEvents(from, to)
+        if (cancelled) return
+        if (import.meta.env.DEV) console.log(`[ambria initial] ${from}..${to} count=${rows.length}`)
+        setAllEvents((prev) => mergeEvents(prev, rows, from, to))
+        for (const key of keys) {
+          fetchedMonthsRef.current.add(key)
+          fetchingRef.current.delete(key)
         }
+        setFetchedMonths(new Set(fetchedMonthsRef.current))
       } catch (err) {
-        console.error('[ambria] load failed', err)
+        console.error('[ambria] initial load failed', err)
         if (!cancelled) setError(err?.message ?? String(err))
+        for (const key of keys) fetchingRef.current.delete(key)
       } finally {
         if (!cancelled) setLoading(false)
       }
     }
-    load()
+    init()
     return () => { cancelled = true }
-  }, [fetchFrom, fetchTo, user])
+  }, [user])
+
+  // ── Pre-fetch +3 months whenever the viewed month changes ──
+  useEffect(() => {
+    if (!user || searchActive) return
+    prefetchAhead(currentDate, 3)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentMonthKey, user, searchActive, prefetchAhead])
+
+  // ── Search: wide-range fetch (±12 months) ──
+  useEffect(() => {
+    if (!searchActive) { searchFetchedRef.current = false; return }
+    if (!user || searchFetchedRef.current) return
+    searchFetchedRef.current = true
+    const now = new Date()
+    const from = toIsoDate(addDays(now, -365))
+    const to = toIsoDate(addDays(now, 365))
+    setLoading(true)
+    fetchEvents(from, to)
+      .then((rows) => {
+        if (import.meta.env.DEV) console.log(`[ambria search] ${from}..${to} count=${rows.length}`)
+        setAllEvents((prev) => mergeEvents(prev, rows, from, to))
+        for (let i = -12; i <= 12; i++) {
+          fetchedMonthsRef.current.add(mKey(new Date(now.getFullYear(), now.getMonth() + i, 1)))
+        }
+        setFetchedMonths(new Set(fetchedMonthsRef.current))
+      })
+      .catch((err) => setError(err?.message ?? String(err)))
+      .finally(() => setLoading(false))
+  }, [searchActive, user])
 
   // ── Month-scoped events for sidebar counts ──
   const monthStart = toIsoDate(startOfMonth(currentDate))
@@ -206,8 +261,19 @@ export default function App() {
     setSelectedDate(t)
   }
 
-  // Swipe navigation for the calendar grid
-  useSwipeNav(calendarBodyRef, { onPrev: handlePrev, onNext: handleNext })
+  // Swipe navigation for the calendar grid — with predictive pre-fetch
+  const handleSwipeDirection = useCallback((dir) => {
+    if (searchActive) return
+    if (dir === 'next') {
+      // Pre-fetch one month beyond the normal +3 window
+      fetchMonthBg(new Date(currentDate.getFullYear(), currentDate.getMonth() + 4, 1))
+    } else {
+      // Pre-fetch one month behind
+      fetchMonthBg(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1))
+    }
+  }, [currentDate, searchActive, fetchMonthBg])
+
+  useSwipeNav(calendarBodyRef, { onPrev: handlePrev, onNext: handleNext, onDirection: handleSwipeDirection })
 
   const toggleFilter = (id) => {
     setActiveFilters((prev) => {
@@ -241,7 +307,8 @@ export default function App() {
     }
   }
 
-  const filtersHideEverything = !loading && monthEvents.length > 0 && filteredMonthCount === 0
+  const monthCached = fetchedMonths.has(currentMonthKey)
+  const filtersHideEverything = !loading && monthCached && monthEvents.length > 0 && filteredMonthCount === 0
 
   const showToast = useCallback((msg) => {
     setToast(msg)
@@ -339,7 +406,10 @@ export default function App() {
     setUser(null)
     setCurrentView('calendar')
     setAllEvents([])
-    fetchedRangesRef.current = []
+    fetchedMonthsRef.current = new Set()
+    fetchingRef.current = new Set()
+    setFetchedMonths(new Set())
+    searchFetchedRef.current = false
     seeded.current = false
     clearDirectory()
   }
@@ -413,6 +483,7 @@ export default function App() {
                   onEventClick={openEdit}
                   events={filteredEvents}
                   eventTypes={eventTypes}
+                  skeleton={!monthCached && !loading}
                 />
               )}
               {view === 'week' && (

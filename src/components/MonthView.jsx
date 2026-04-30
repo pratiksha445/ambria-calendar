@@ -7,7 +7,7 @@ import { useLanguage } from '../i18n/LanguageContext.jsx'
 const MAX_PILLS = 3
 const MAX_PILLS_DESKTOP = 5
 
-export default function MonthView({ currentDate, selectedDate, onSelectDate, onEventClick, events, eventTypes = [] }) {
+export default function MonthView({ currentDate, selectedDate, onSelectDate, onEventClick, events, eventTypes = [], skeleton = false }) {
   const { dowHeaders } = useLanguage()
   const today = new Date()
   const days = buildMonthGrid(currentDate)
@@ -67,6 +67,13 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, onE
                 {d.getDate()}
               </span>
               <div className="day-pills">
+                {/* Skeleton shimmer when month data hasn't loaded */}
+                {skeleton && totalOnDay === 0 && d.getMonth() === monthIndex && (
+                  <>
+                    <div className="pill-skeleton" />
+                    <div className="pill-skeleton pill-skeleton-short" />
+                  </>
+                )}
                 {/* Villa spanning segments first */}
                 {villaSegs.slice(0, spanCount).map((seg) => {
                   const venue = VENUE_BY_ID['villa']

@@ -11,10 +11,10 @@ const VELOCITY_THRESHOLD = 0.3 // px/ms — quick flick override
 
 const HINT_KEY = 'ambria_swipe_hint_seen'
 
-export default function useSwipeNav(elRef, { onPrev, onNext }) {
+export default function useSwipeNav(elRef, { onPrev, onNext, onDirection }) {
   // Keep callbacks in a ref so the event handlers always see the latest
-  const cb = useRef({ onPrev, onNext })
-  useEffect(() => { cb.current = { onPrev, onNext } }, [onPrev, onNext])
+  const cb = useRef({ onPrev, onNext, onDirection })
+  useEffect(() => { cb.current = { onPrev, onNext, onDirection } }, [onPrev, onNext, onDirection])
 
   const gesture = useRef(null) // active gesture state
 
@@ -61,6 +61,8 @@ export default function useSwipeNav(elRef, { onPrev, onNext }) {
           }
           g.locked = true
           el.setPointerCapture(e.pointerId)
+          // Signal swipe direction for predictive pre-fetch
+          cb.current.onDirection?.(dx < 0 ? 'next' : 'prev')
         }
       }
 

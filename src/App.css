@@ -627,6 +627,26 @@
 }
 .day-cell.selected .day-extra { color: var(--ambria-accent); }
 
+/* Skeleton shimmer pills (shown while month data loads) */
+.pill-skeleton {
+  height: 14px;
+  border-radius: 3px;
+  width: 85%;
+  margin: 0 auto;
+  background: linear-gradient(90deg,
+    var(--ambria-border) 25%, transparent 50%, var(--ambria-border) 75%);
+  background-size: 200% 100%;
+  animation: pill-shimmer 1.5s ease-in-out infinite;
+}
+.pill-skeleton-short { width: 60%; }
+@keyframes pill-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+@media (min-width: 768px) {
+  .pill-skeleton { height: 16px; }
+}
+
 /* Villa multi-day spanning segments */
 .villa-seg {
   cursor: pointer;
