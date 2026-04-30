@@ -139,6 +139,10 @@ const notMenu = (f) => !f.booking_status || !MENU_PACKAGES.has(f.booking_status)
 const noCatMenu = (f) => NO_CAT_TYPES.has(f.menu_type)
 const notMenuOrNoCat = (f) => notMenu(f) || noCatMenu(f)
 const noCatMenuHelper = (f) => noCatMenu(f) ? 'Not applicable for Only Chaat / Only Fruit' : ''
+const decorOutdoor = (f) => f.decor_status === 'Outdoor'
+const decorOutdoorHelper = (f) => decorOutdoor(f) ? 'Not applicable for Outdoor — handled externally' : ''
+const entOutdoor = (f) => f.entertainment_status === 'Outdoor'
+const entOutdoorHelper = (f) => entOutdoor(f) ? 'Not applicable for Outdoor — handled externally' : ''
 const menuCatOptions = (f) => {
   if (f.menu_type === 'Non-Veg') return [...NON_VEG_CATS, 'Customised']
   if (f.menu_type === 'Veg' || f.menu_type === 'Jain') return [...VEG_CATS, 'Customised']
@@ -286,14 +290,16 @@ function ownVenueSections(venue, dynamicTypes, dynamicElements) {
         TM('Varmala Time', 'varmala_time', false),
         TM('Pheras Time', 'pheras_time', false, { inlineCheckbox: { key: 'pheras_next_day', label: '+1' } }),
         S('Decor Status', 'decor_status', DECOR_STATUSES, false),
-        S('Decor Category', 'function_category', FUNCTION_CATEGORIES, false),
+        S('Decor Category', 'function_category', FUNCTION_CATEGORIES, false, { disabledWhen: decorOutdoor, helperText: decorOutdoorHelper }),
         T('Pending Payment — Decor %', 'payment_remaining_decor', false, {
           filterFn: percentFilter, filterError: 'Only numbers 0-100',
           suffix: '%', inputMode: 'numeric',
+          disabledWhen: decorOutdoor, helperText: decorOutdoorHelper,
         }),
         { type: 'user-select', label: 'Delivery Person (Decor)', key: 'decor_delivery_person', required: false,
           userFilter: { department: 'Decor Sales', salesTypes: ['In-house', 'In-house + Outdoor'] },
           userEmptyMsg: 'No Decor Sales users available. Add users in Manage Users.',
+          disabledWhen: decorOutdoor, helperText: decorOutdoorHelper,
         },
       ],
     },
@@ -303,14 +309,16 @@ function ownVenueSections(venue, dynamicTypes, dynamicElements) {
       collapsible: true,
       fields: [
         S('Entertainment Status', 'entertainment_status', ENTERTAINMENT_STATUSES, false),
-        { type: 'multiselect', label: 'Elements', key: 'elements', options: dynamicElements || ELEMENT_OPTIONS_FALLBACK, required: false },
+        { type: 'multiselect', label: 'Elements', key: 'elements', options: dynamicElements || ELEMENT_OPTIONS_FALLBACK, required: false, disabledWhen: entOutdoor, helperText: entOutdoorHelper },
         T('Pending Payment — Ent %', 'payment_remaining_ent', false, {
           filterFn: percentFilter, filterError: 'Only numbers 0-100',
           suffix: '%', inputMode: 'numeric',
+          disabledWhen: entOutdoor, helperText: entOutdoorHelper,
         }),
         { type: 'user-select', label: 'Delivery Person (Entertainment)', key: 'ent_delivery_person', required: false,
           userFilter: { department: 'Entertainment Sales', salesTypes: ['In-house', 'In-house + Outdoor'] },
           userEmptyMsg: 'No Entertainment Sales users available. Add users in Manage Users.',
+          disabledWhen: entOutdoor, helperText: entOutdoorHelper,
         },
       ],
     },

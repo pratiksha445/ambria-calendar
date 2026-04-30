@@ -301,6 +301,7 @@ const hi = {
   'Only Chaat': 'केवल चाट',
   'Only Fruit': 'केवल फल',
   'Not applicable for Only Chaat / Only Fruit': 'केवल चाट / केवल फल के लिए लागू नहीं',
+  'Not applicable for Outdoor — handled externally': 'आउटडोर के लिए लागू नहीं — बाहरी रूप से संभाला गया',
   'Chaat': 'चाट',
   'MV': 'MV',
   'MNV': 'MNV',

@@ -301,6 +301,7 @@ const en = {
   'Only Chaat': 'Only Chaat',
   'Only Fruit': 'Only Fruit',
   'Not applicable for Only Chaat / Only Fruit': 'Not applicable for Only Chaat / Only Fruit',
+  'Not applicable for Outdoor — handled externally': 'Not applicable for Outdoor — handled externally',
   'Chaat': 'Chaat',
   'MV': 'MV',
   'MNV': 'MNV',

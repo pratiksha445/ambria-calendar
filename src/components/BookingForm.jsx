@@ -135,6 +135,18 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
       if (key === 'menu_type') {
         next.menu_cat = ''
       }
+      if (key === 'decor_status' && value === 'Outdoor') {
+        next.function_category = ''
+        next.payment_remaining_decor = ''
+        next.decor_delivery_person = ''
+        next.decor_delivery_person_id = null
+      }
+      if (key === 'entertainment_status' && value === 'Outdoor') {
+        next.elements = []
+        next.payment_remaining_ent = ''
+        next.ent_delivery_person = ''
+        next.ent_delivery_person_id = null
+      }
       if (key === 'site_availability' && value !== 'Others') {
         next.site_availability_other = ''
       }

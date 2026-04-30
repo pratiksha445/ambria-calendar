@@ -141,6 +141,10 @@ export default function Field({ field, form, value, onChange, error, readOnly, a
           {t(field.label)}
           {(field.required || (field.requiredWhen && field.requiredWhen(form))) && !disabled && <span className="required-star"> *</span>}
         </label>
+        {field.helperText && (() => {
+          const ht = typeof field.helperText === 'function' ? field.helperText(form) : field.helperText
+          return ht ? <div className="field-helper">{t(ht)}</div> : null
+        })()}
         <div className="multiselect-grid">
           {opts.map((opt) => (
             <label key={opt.value} className={`multiselect-chip ${selected.includes(opt.value) ? 'selected' : ''} ${disabled ? 'disabled' : ''}`}>
