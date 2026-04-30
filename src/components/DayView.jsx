@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { toIsoDate } from '../lib/dates.js'
 import { VENUES } from '../config/venues.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
@@ -8,13 +8,14 @@ export default function DayView({ selectedDate, events, onEdit, onDelete, onAdd,
   const [expandedId, setExpandedId] = useState(null)
   const { t, formatDayHeader } = useLanguage()
   const iso = toIsoDate(selectedDate)
-  const dayEvents = events.filter((e) => e.date === iso)
+  const dayEvents = useMemo(() => events.filter((e) => e.date === iso), [events, iso])
 
-  const grouped = VENUES
+  const grouped = useMemo(() => VENUES
     .map((v) => ({ venue: v, list: dayEvents.filter((e) => e.venue_id === v.id) }))
-    .filter((g) => g.list.length > 0)
+    .filter((g) => g.list.length > 0),
+    [dayEvents])
 
-  const toggle = (id) => setExpandedId((prev) => (prev === id ? null : id))
+  const toggle = useCallback((id) => setExpandedId((prev) => (prev === id ? null : id)), [])
 
   return (
     <div className="day-view">

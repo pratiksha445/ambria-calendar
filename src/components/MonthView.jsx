@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { buildMonthGrid, isSameDay, toIsoDate } from '../lib/dates.js'
 import { VENUE_BY_ID } from '../config/venues.js'
 import { getEventTypeAbbr } from '../lib/eventTypes.js'
@@ -11,7 +12,7 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, eve
   const today = new Date()
   const days = buildMonthGrid(currentDate)
   const monthIndex = currentDate.getMonth()
-  const eventsByDay = groupByDate(events)
+  const eventsByDay = useMemo(() => groupByDate(events), [events])
   const wide = window.innerWidth >= 768
 
   return (
@@ -51,7 +52,7 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, eve
                   const venue = VENUE_BY_ID[ev.venue_id]
                   return (
                     <div
-                      key={`${ev.id}-${i}`}
+                      key={`${ev.id}-${ev.updated_at}`}
                       className="day-pill"
                       style={{
                         background: venue?.color ?? '#ccc',

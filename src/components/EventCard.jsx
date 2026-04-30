@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { memo, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { VENUE_BY_ID, SHIFT_BADGE } from '../config/venues.js'
 import { formatTime12 } from '../lib/dates.js'
@@ -8,7 +8,7 @@ import { loadElementLabels, getElementLabel } from '../lib/elements.js'
 
 const OWN_VENUES = new Set(['ap', 'am', 'ae', 'ar'])
 
-export default function EventCard({ event, expanded = false, onToggle, onEdit, onDelete, user }) {
+export default memo(function EventCard({ event, expanded = false, onToggle, onEdit, onDelete, user }) {
   const { t, lang, formatShortDate } = useLanguage()
   const [elementLabels, setElementLabels] = useState({})
   const venue = VENUE_BY_ID[event.venue_id]
@@ -345,7 +345,7 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
       </div>
     </article>
   )
-}
+})
 
 function getPaymentColor(pct) {
   const n = Number(pct)

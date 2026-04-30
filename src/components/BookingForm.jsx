@@ -8,9 +8,9 @@ import {
 import { autoTitle } from '../lib/autoTitle.js'
 import { sanitizeText, sanitizePhone, sanitizePax } from '../lib/sanitize.js'
 import { createEvent, updateEvent, deleteEvent } from '../lib/events.js'
-import { fetchActiveEventTypes } from '../lib/eventTypes.js'
-import { fetchActiveUsers, fetchFilteredUsers } from '../lib/users.js'
-import { fetchActiveElements, getElementLabel } from '../lib/elements.js'
+import { fetchFilteredUsers } from '../lib/users.js'
+import { getElementLabel } from '../lib/elements.js'
+import { useDirectory } from '../contexts/DirectoryContext.jsx'
 import { getEditableSections, getLockedFieldKeys } from '../lib/sectionPermissions.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 import Field from './Field.jsx'
@@ -26,6 +26,7 @@ function blankForm(venueId, defaults = {}) {
 
 export default function BookingForm({ initial, onSaved, onDeleted, onClose, user }) {
   const { t, lang } = useLanguage()
+  const { eventTypes: dirEventTypes, users: dirUsers, elements: dirElements } = useDirectory()
   const editing = !!(initial && initial.id)
   const readOnly = editing && initial?.source !== 'manual'
 
@@ -45,12 +46,20 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
   const [deleting, setDeleting] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [submitError, setSubmitError] = useState(null)
-  const [dynamicEventTypes, setDynamicEventTypes] = useState(null)
-  const [dynamicElements, setDynamicElements] = useState(null)
-  const [activeUsers, setActiveUsers] = useState([])
   const [filteredUsersMap, setFilteredUsersMap] = useState({})
   const [collapsedSections, setCollapsedSections] = useState({})
   const [lockToast, setLockToast] = useState(false)
+
+  // Derive dropdown data from DirectoryContext (cached, stale-while-revalidate)
+  const dynamicEventTypes = useMemo(
+    () => dirEventTypes.length > 0 ? dirEventTypes.map((t) => ({ name: t.name, abbreviation: t.abbreviation || '' })) : null,
+    [dirEventTypes],
+  )
+  const dynamicElements = useMemo(
+    () => dirElements.length > 0 ? dirElements.map((el) => ({ value: el.name, label: getElementLabel(el.name, lang, { [el.name]: el.name_hi }) })) : null,
+    [dirElements, lang],
+  )
+  const activeUsers = dirUsers
 
   // Section-level edit permissions (AP/AM/AE/AR only, editing only)
   const editableSections = useMemo(
@@ -62,20 +71,6 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
     setLockToast(true)
     setTimeout(() => setLockToast(false), 2500)
   }
-
-  useEffect(() => {
-    fetchActiveEventTypes()
-      .then((types) => setDynamicEventTypes(types.map((t) => ({ name: t.name, abbreviation: t.abbreviation || '' }))))
-      .catch(() => setDynamicEventTypes(null))
-    fetchActiveUsers()
-      .then(setActiveUsers)
-      .catch(() => setActiveUsers([]))
-    fetchActiveElements()
-      .then((rows) => setDynamicElements(
-        rows.map((el) => ({ value: el.name, label: getElementLabel(el.name, lang, { [el.name]: el.name_hi }) }))
-      ))
-      .catch(() => setDynamicElements(null))
-  }, [])
 
   const sections = useMemo(() => getFormConfig(venueId, dynamicEventTypes, dynamicElements), [venueId, dynamicEventTypes, dynamicElements])
 

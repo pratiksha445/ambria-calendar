@@ -16,9 +16,9 @@ import EventTypeManagement from './components/EventTypeManagement.jsx'
 import CategoryManagement from './components/CategoryManagement.jsx'
 import ManageElements from './components/ManageElements.jsx'
 import { fetchEvents, deleteEvent, bulkDeleteMonth } from './lib/events.js'
-import { fetchActiveEventTypes } from './lib/eventTypes.js'
 import { seedIfEmpty } from './lib/seedEvents.js'
-import { startOfMonth, endOfMonth, toIsoDate, addDays } from './lib/dates.js'
+import { useDirectory } from './contexts/DirectoryContext.jsx'
+import { startOfMonth, endOfMonth, startOfWeek, toIsoDate, addDays } from './lib/dates.js'
 import { VENUES, applyDynamic } from './config/venues.js'
 import { fetchActiveCategories } from './lib/categories.js'
 import { logAction } from './lib/audit.js'
@@ -27,6 +27,16 @@ import useSwipeNav from './hooks/useSwipeNav.js'
 import './App.css'
 
 const ALL_SOURCES = ['crm', 'manual']
+
+// ── Range-bounded fetch helpers ──
+function isRangeCovered(from, to, ranges) {
+  return ranges.some(([rFrom, rTo]) => rFrom <= from && rTo >= to)
+}
+
+function mergeEvents(existing, incoming, from, to) {
+  const kept = existing.filter((e) => e.date < from || e.date > to)
+  return [...kept, ...incoming]
+}
 
 function getStoredUser() {
   try {
@@ -43,7 +53,7 @@ export default function App() {
   const [selectedDate, setSelectedDate] = useState(() => new Date())
   const [view, setView] = useState('month')
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [events, setEvents] = useState([])
+  const [allEvents, setAllEvents] = useState([])
   const [activeFilters, setActiveFilters] = useState(() => new Set(VENUES.map((v) => v.id)))
   const [activeSources, setActiveSources] = useState(() => new Set(ALL_SOURCES))
   const [venueKey, setVenueKey] = useState(0)
@@ -51,15 +61,16 @@ export default function App() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [modal, setModal] = useState(null) // null | { mode: 'new'|'edit', event? }
-  const [reloadKey, setReloadKey] = useState(0)
   const [toast, setToast] = useState(null)
   const [confirmBulk, setConfirmBulk] = useState(false)
   const [needsPinChange, setNeedsPinChange] = useState(false)
   const [changePinOpen, setChangePinOpen] = useState(false)
   const [dayModalDate, setDayModalDate] = useState(null)
   const [exportModal, setExportModal] = useState(null) // null | { from, to }
-  const [eventTypes, setEventTypes] = useState([])
+  const { eventTypes, refresh: refreshDirectory, clear: clearDirectory } = useDirectory()
   const calendarBodyRef = useRef(null)
+  const fetchedRangesRef = useRef([])
+  const seeded = useRef(false)
 
   // Load dynamic categories from Supabase — falls back to hardcoded defaults on failure
   useEffect(() => {
@@ -75,26 +86,45 @@ export default function App() {
       .catch(() => {/* offline — keep hardcoded defaults */})
   }, [user])
 
-  // Load event types for abbreviation lookup on calendar pills
-  useEffect(() => {
-    if (!user) return
-    fetchActiveEventTypes()
-      .then(setEventTypes)
-      .catch(() => {})
-  }, [user, reloadKey])
+  // ── Date-range-bounded event fetching ──
+  const searchActive = !!search.trim()
+  const [fetchFrom, fetchTo] = useMemo(() => {
+    if (searchActive) {
+      const now = new Date()
+      return [toIsoDate(addDays(now, -365)), toIsoDate(addDays(now, 365))]
+    }
+    if (view === 'month') {
+      return [
+        toIsoDate(addDays(startOfMonth(currentDate), -7)),
+        toIsoDate(addDays(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1), 7)),
+      ]
+    }
+    if (view === 'week') {
+      const ws = startOfWeek(currentDate)
+      return [toIsoDate(addDays(ws, -7)), toIsoDate(addDays(ws, 13))]
+    }
+    return [toIsoDate(addDays(selectedDate, -3)), toIsoDate(addDays(selectedDate, 3))]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view, currentDate.getTime(), toIsoDate(selectedDate), searchActive])
 
   useEffect(() => {
     if (!user) return
+    if (isRangeCovered(fetchFrom, fetchTo, fetchedRangesRef.current)) return
     let cancelled = false
     async function load() {
+      if (!seeded.current) {
+        await seedIfEmpty()
+        seeded.current = true
+      }
       setLoading(true)
       setError(null)
       try {
-        await seedIfEmpty()
-        const start = toIsoDate(startOfMonth(currentDate))
-        const end = toIsoDate(endOfMonth(currentDate))
-        const rows = await fetchEvents(start, end)
-        if (!cancelled) setEvents(rows)
+        const rows = await fetchEvents(fetchFrom, fetchTo)
+        if (import.meta.env.DEV) console.log(`[ambria fetch] range=${fetchFrom}..${fetchTo} count=${rows.length}`)
+        if (!cancelled) {
+          setAllEvents((prev) => mergeEvents(prev, rows, fetchFrom, fetchTo))
+          fetchedRangesRef.current = [...fetchedRangesRef.current, [fetchFrom, fetchTo]]
+        }
       } catch (err) {
         console.error('[ambria] load failed', err)
         if (!cancelled) setError(err?.message ?? String(err))
@@ -104,8 +134,7 @@ export default function App() {
     }
     load()
     return () => { cancelled = true }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentDate.getFullYear(), currentDate.getMonth(), reloadKey, user])
+  }, [fetchFrom, fetchTo, user])
 
   const abbrMap = useMemo(() => {
     const m = {}
@@ -113,10 +142,18 @@ export default function App() {
     return m
   }, [eventTypes])
 
+  // ── Month-scoped events for sidebar counts ──
+  const monthStart = toIsoDate(startOfMonth(currentDate))
+  const monthEnd = toIsoDate(endOfMonth(currentDate))
+  const monthEvents = useMemo(
+    () => allEvents.filter((e) => e.date >= monthStart && e.date <= monthEnd),
+    [allEvents, monthStart, monthEnd],
+  )
+
   const filteredEvents = useMemo(() => {
     const q = search.trim().toLowerCase()
     const words = q ? q.split(/\s+/).filter(Boolean) : []
-    return events.filter((ev) => {
+    return allEvents.filter((ev) => {
       if (!activeFilters.has(ev.venue_id)) return false
       if (!activeSources.has(ev.source)) return false
       if (!words.length) return true
@@ -127,7 +164,12 @@ export default function App() {
       ].filter(Boolean).join(' ').toLowerCase()
       return words.every((w) => hay.includes(w))
     })
-  }, [events, activeFilters, activeSources, search, abbrMap])
+  }, [allEvents, activeFilters, activeSources, search, abbrMap])
+
+  const filteredMonthCount = useMemo(
+    () => filteredEvents.filter((e) => e.date >= monthStart && e.date <= monthEnd).length,
+    [filteredEvents, monthStart, monthEnd],
+  )
 
   const handlePrev = () => {
     if (view === 'month') {
@@ -198,12 +240,12 @@ export default function App() {
     }
   }
 
-  const filtersHideEverything = !loading && events.length > 0 && filteredEvents.length === 0
+  const filtersHideEverything = !loading && monthEvents.length > 0 && filteredMonthCount === 0
 
-  const showToast = (msg) => {
+  const showToast = useCallback((msg) => {
     setToast(msg)
     setTimeout(() => setToast(null), 2000)
-  }
+  }, [])
 
   const openNew = () => {
     const iso = toIsoDate(selectedDate)
@@ -214,39 +256,47 @@ export default function App() {
     const iso = toIsoDate(d)
     setModal({ mode: 'new', event: { date: iso } })
   }
-  const openEdit = (ev) => {
+  const openEdit = useCallback((ev) => {
     if (!ev) return
     setModal({ mode: 'edit', event: ev })
-  }
+  }, [])
   const closeModal = () => setModal(null)
   const handleSaved = (row) => {
     setModal(null)
     showToast(t('Booking saved'))
+    if (row) {
+      setAllEvents((prev) => {
+        const idx = prev.findIndex((e) => e.id === row.id)
+        if (idx >= 0) return prev.map((e) => (e.id === row.id ? row : e))
+        return [...prev, row]
+      })
+    }
     if (row?.date) {
       const d = new Date(row.date)
       setSelectedDate(d)
       if (d.getMonth() !== currentDate.getMonth() ||
           d.getFullYear() !== currentDate.getFullYear()) {
         setCurrentDate(d)
-        return // useEffect will refetch for the new month
       }
     }
-    setReloadKey((k) => k + 1)
   }
   const handleDeleted = () => {
+    const deletedId = modal?.event?.id
     setModal(null)
     showToast(t('Booking deleted'))
-    setReloadKey((k) => k + 1)
+    if (deletedId) {
+      setAllEvents((prev) => prev.filter((e) => e.id !== deletedId))
+    }
   }
-  const handleCardDelete = async (ev) => {
+  const handleCardDelete = useCallback(async (ev) => {
     try {
       await deleteEvent(ev.id, user)
       showToast(t('Event deleted'))
-      setReloadKey((k) => k + 1)
+      setAllEvents((prev) => prev.filter((e) => e.id !== ev.id))
     } catch (err) {
       console.error('[ambria] card delete failed', err)
     }
-  }
+  }, [user, t, showToast])
 
   const handleExport = () => {
     const from = toIsoDate(startOfMonth(currentDate))
@@ -267,7 +317,7 @@ export default function App() {
       await bulkDeleteMonth(start, end, user)
       setConfirmBulk(false)
       showToast(t('All events in {month} cleared', { month: formatMonthYear(currentDate) }))
-      setReloadKey((k) => k + 1)
+      setAllEvents((prev) => prev.filter((e) => e.date < start || e.date > end))
     } catch (err) {
       console.error('[ambria] bulk delete failed', err)
     }
@@ -277,6 +327,7 @@ export default function App() {
   const handleLogin = (u, pinChange) => {
     setUser(u)
     setNeedsPinChange(!!pinChange)
+    refreshDirectory(true)
   }
 
   const handleLogout = async () => {
@@ -286,6 +337,10 @@ export default function App() {
     localStorage.removeItem('ambria_user')
     setUser(null)
     setCurrentView('calendar')
+    setAllEvents([])
+    fetchedRangesRef.current = []
+    seeded.current = false
+    clearDirectory()
   }
 
   const handleNavigate = (v) => {
@@ -303,8 +358,8 @@ export default function App() {
 
   const canClearMonth = user.role === 'admin'
 
-  const manualCount = events.filter((e) => e.source === 'manual').length
-  const crmCount = events.filter((e) => e.source !== 'manual').length
+  const manualCount = monthEvents.filter((e) => e.source === 'manual').length
+  const crmCount = monthEvents.filter((e) => e.source !== 'manual').length
 
   return (
     <div className="app">
@@ -319,9 +374,9 @@ export default function App() {
         onSelectNoVenues={selectNoVenues}
         activeSources={activeSources}
         onToggleSource={toggleSource}
-        events={events}
-        totalCount={events.length}
-        shownCount={filteredEvents.length}
+        events={monthEvents}
+        totalCount={monthEvents.length}
+        shownCount={filteredMonthCount}
         user={user}
         currentView={currentView}
         onNavigate={handleNavigate}
@@ -397,7 +452,7 @@ export default function App() {
       </div>
       <DayModal
         date={dayModalDate}
-        events={events}
+        events={allEvents}
         onClose={() => setDayModalDate(null)}
         onAdd={openNewFromDate}
         onEdit={(ev) => { setDayModalDate(null); openEdit(ev) }}

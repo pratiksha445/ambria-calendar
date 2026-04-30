@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { startOfWeek, addDays, isSameDay, toIsoDate } from '../lib/dates.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 
@@ -5,10 +6,10 @@ export default function WeekView({ currentDate, selectedDate, onSelectDate, even
   const { dayLabel } = useLanguage()
   const weekStart = startOfWeek(currentDate)
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
-  const eventsByDay = events.reduce((acc, ev) => {
+  const eventsByDay = useMemo(() => events.reduce((acc, ev) => {
     (acc[ev.date] = acc[ev.date] || []).push(ev)
     return acc
-  }, {})
+  }, {}), [events])
 
   return (
     <div className="week-view">

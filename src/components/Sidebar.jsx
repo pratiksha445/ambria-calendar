@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { VENUES } from '../config/venues.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 
@@ -29,14 +30,14 @@ export default function Sidebar({
   onChangePin,
 }) {
   const { t, lang, setLang, theme, toggleTheme } = useLanguage()
-  const venueCounts = events.reduce((acc, ev) => {
+  const venueCounts = useMemo(() => events.reduce((acc, ev) => {
     acc[ev.venue_id] = (acc[ev.venue_id] ?? 0) + 1
     return acc
-  }, {})
-  const sourceCounts = events.reduce((acc, ev) => {
+  }, {}), [events])
+  const sourceCounts = useMemo(() => events.reduce((acc, ev) => {
     acc[ev.source] = (acc[ev.source] ?? 0) + 1
     return acc
-  }, {})
+  }, {}), [events])
 
   return (
     <>
