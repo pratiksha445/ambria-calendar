@@ -574,6 +574,10 @@ function aeeSections(_venue, dynamicTypes, dynamicElements) {
         guestName(),
         phoneReq(),
         salesPersonField(),
+        { type: 'user-select', label: 'Delivery Person', key: 'delivery_person', required: false,
+          userFilter: { department: 'Entertainment Sales' },
+          userEmptyMsg: 'No Entertainment Sales users available. Add users in Manage Users.',
+        },
         { type: 'multiselect', label: 'Elements', key: 'elements', options: dynamicElements || ELEMENT_OPTIONS_FALLBACK, required: true, fullWidth: true },
         T('Pending Payment %', 'payment_remaining_venue', true, {
           filterFn: percentFilter, filterError: 'Only numbers 0-100',
@@ -726,7 +730,8 @@ export const FIELD_MAP = {
   aee: [
     'venue_name', 'venue_type', 'location', 'event_type', 'event_type_other',
     'shift', 'date', 'time',
-    'guest_name', 'phone', 'sales_person', 'sales_person_id', 'elements',
+    'guest_name', 'phone', 'sales_person', 'sales_person_id',
+    'delivery_person', 'delivery_person_id', 'elements',
     'payment_remaining_venue', 'payment_timing', 'notes',
   ],
   ws: [
