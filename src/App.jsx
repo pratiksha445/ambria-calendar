@@ -35,7 +35,12 @@ function isRangeCovered(from, to, ranges) {
 }
 
 function mergeEvents(existing, incoming, from, to) {
-  const kept = existing.filter((e) => e.date < from || e.date > to)
+  const incomingIds = new Set(incoming.map((e) => e.id))
+  const kept = existing.filter((e) => {
+    if (incomingIds.has(e.id)) return false
+    if (e.date >= from && e.date <= to) return false
+    return true
+  })
   return [...kept, ...incoming]
 }
 

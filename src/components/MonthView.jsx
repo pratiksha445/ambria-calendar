@@ -83,11 +83,6 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, onE
                         color: venue?.textColor ?? '#fff',
                       }}
                       title={buildPillTooltip(seg.event, eventTypes)}
-                      role="button"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        onEventClick?.(seg.event)
-                      }}
                     >
                       {seg.showLabel ? villaSpanLabel(seg.event) : '\u00A0'}
                     </div>

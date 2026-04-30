@@ -312,6 +312,18 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
           )}
 
           {/* Villa fields */}
+          {event.venue_id === 'villa' && event.check_in_date && (
+            <div className="detail-row">
+              <span className="k">{t('Check-In')}</span>
+              <span className="v">{formatShortDate(event.check_in_date)}{event.check_in_time ? ` · ${formatTime12(event.check_in_time)}` : ''}</span>
+            </div>
+          )}
+          {event.venue_id === 'villa' && event.check_out_date && (
+            <div className="detail-row">
+              <span className="k">{t('Check-Out')}</span>
+              <span className="v">{formatShortDate(event.check_out_date)}{event.check_out_time ? ` · ${formatTime12(event.check_out_time)}` : ''}</span>
+            </div>
+          )}
           {event.pool_included && (
             <div className="detail-row"><span className="k">{t('Pool Included')}</span><span className="v">{t(event.pool_included)}</span></div>
           )}

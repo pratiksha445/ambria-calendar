@@ -33,16 +33,16 @@ function filterPayloadByCategory(payload) {
 }
 
 /**
- * Fetch events whose `date` falls within [startDate, endDate] (inclusive).
+ * Fetch events whose `date` falls within [startDate, endDate] (inclusive),
+ * plus Villa events whose stay (check_in_date → check_out_date) overlaps the range.
  * Dates are ISO strings (YYYY-MM-DD).
  */
 export async function fetchEvents(startDate, endDate) {
   const { data, error } = await supabase
     .from('events')
     .select('*')
-    .gte('date', startDate)
-    .lte('date', endDate)
     .is('deleted_at', null)
+    .or(`and(date.gte.${startDate},date.lte.${endDate}),and(venue_id.eq.villa,check_in_date.lte.${endDate},check_out_date.gte.${startDate})`)
     .order('date', { ascending: true })
     .order('time', { ascending: true, nullsFirst: true })
 
