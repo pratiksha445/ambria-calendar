@@ -25,7 +25,7 @@ export const SHIFTS = ['Morning', 'Lunch', 'Sundowner', 'Dinner']
 export const BOOKING_STATUSES = [
   'Only Rental', 'VM', 'VD', 'VE', 'VDE', 'VME', 'VMD', 'VMDE',
 ]
-export const MENU_TYPES = ['Veg', 'Non-Veg', 'Jain']
+export const MENU_TYPES = ['Veg', 'Non-Veg', 'Jain', 'Only Chaat', 'Only Fruit']
 export const MENU_CATS = ['MV', 'MNV', 'DMV', 'DMNV', 'MCV', 'MCNV', 'LV', 'LNV', 'Customised']
 export const VEG_CATS = ['MV', 'DMV', 'MCV', 'LV']
 export const NON_VEG_CATS = ['MNV', 'DMNV', 'MCNV', 'LNV']
@@ -134,7 +134,11 @@ const venueNameFilter = (v) => v.replace(/[^a-zA-Z0-9\s.,\-'&()#]/g, '')
 // ---------- Conditional helpers ----------
 
 const MENU_PACKAGES = new Set(['VM', 'VME', 'VMD', 'VMDE'])
+const NO_CAT_TYPES = new Set(['Only Chaat', 'Only Fruit'])
 const notMenu = (f) => !f.booking_status || !MENU_PACKAGES.has(f.booking_status)
+const noCatMenu = (f) => NO_CAT_TYPES.has(f.menu_type)
+const notMenuOrNoCat = (f) => notMenu(f) || noCatMenu(f)
+const noCatMenuHelper = (f) => noCatMenu(f) ? 'Not applicable for Only Chaat / Only Fruit' : ''
 const menuCatOptions = (f) => {
   if (f.menu_type === 'Non-Veg') return [...NON_VEG_CATS, 'Customised']
   if (f.menu_type === 'Veg' || f.menu_type === 'Jain') return [...VEG_CATS, 'Customised']
@@ -244,7 +248,7 @@ function ownVenueSections(venue, dynamicTypes, dynamicElements) {
         { ...roomsField(), inlineCheckbox: { key: 'liquor', label: 'Liquor' } },
         // Row 7: Menu Type | Menu Category
         S('Menu Type', 'menu_type', MENU_TYPES, true, { disabledWhen: notMenu }),
-        S('Menu Category', 'menu_cat', MENU_CATS, true, { disabledWhen: notMenu, getOptions: menuCatOptions }),
+        S('Menu Category', 'menu_cat', MENU_CATS, true, { disabledWhen: notMenuOrNoCat, getOptions: menuCatOptions, helperText: noCatMenuHelper }),
         // Row 8: Payment Status | Pending Payment %
         S('Payment Status', 'payment_timing', PAYMENT_TIMINGS),
         T('Pending Payment %', 'payment_remaining_venue', true, {
@@ -486,7 +490,7 @@ function acSections(_venue, dynamicTypes) {
       title: 'Menu',
       fields: [
         S('Menu Type', 'menu_type', MENU_TYPES),
-        S('Menu Category', 'menu_cat', MENU_CATS, true, { getOptions: menuCatOptions }),
+        S('Menu Category', 'menu_cat', MENU_CATS, true, { disabledWhen: noCatMenu, getOptions: menuCatOptions, helperText: noCatMenuHelper }),
       ],
     },
     {

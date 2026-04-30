@@ -332,7 +332,10 @@ export default function Field({ field, form, value, onChange, error, readOnly, a
         {t(field.label)}
         {(field.required || (field.requiredWhen && field.requiredWhen(form))) && !disabled && <span className="required-star"> *</span>}
       </label>
-      {field.helperText && <div className="field-helper">{t(field.helperText)}</div>}
+      {field.helperText && (() => {
+        const ht = typeof field.helperText === 'function' ? field.helperText(form) : field.helperText
+        return ht ? <div className="field-helper">{t(ht)}</div> : null
+      })()}
       {control}
       {displayError && <div className="field-error">{t(displayError)}</div>}
     </div>
