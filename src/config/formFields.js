@@ -548,7 +548,7 @@ function aeeSections(_venue, dynamicTypes) {
         guestName(),
         phoneReq(),
         salesPersonField(),
-        { type: 'user-select', label: 'Delivery Person', key: 'delivery_person', required: false,
+        { type: 'user-select', label: 'Delivery Person', key: 'delivery_person', required: true,
           userFilter: { department: 'Entertainment Sales' },
           userEmptyMsg: 'No Entertainment Sales users available. Add users in Manage Users.',
         },
@@ -802,8 +802,8 @@ export function getSlotFields(venueId, dynamicTypes, dynamicElements) {
       ...eventTypeFields(dynamicTypes),
       S('Shift', 'shift', SHIFTS),
       TM('Time', 'time'),
-      T('Pax', 'pax', false, { filterFn: paxFilter, filterError: 'Only numbers allowed', inputMode: 'numeric' }),
-      { type: 'multiselect', label: 'Elements', key: 'elements', options: dynamicElements || ELEMENT_OPTIONS_FALLBACK, required: false, fullWidth: true },
+      T('Pax', 'pax', true, { filterFn: paxFilter, filterError: 'Only numbers allowed', inputMode: 'numeric' }),
+      { type: 'multiselect', label: 'Elements', key: 'elements', options: dynamicElements || ELEMENT_OPTIONS_FALLBACK, required: true, fullWidth: true },
     ]
   }
   return []

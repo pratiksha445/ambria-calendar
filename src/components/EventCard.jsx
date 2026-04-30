@@ -156,18 +156,22 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
           {/* Multi-event slot rows */}
           {Array.isArray(event.event_slots) && event.event_slots.length > 1 && (
             <div className="detail-slots">
-              {event.event_slots.map((slot, i) => (
-                <div key={i} className="detail-row detail-slot-row">
-                  <span className="k">{t('Event')} {i + 1}</span>
-                  <span className="v">
-                    {[
-                      slot.event_type === 'Other' ? slot.event_type_other : slot.event_type,
-                      slot.shift,
-                      slot.pax ? `${slot.pax} pax` : null,
-                    ].filter(Boolean).join(' · ')}
-                  </span>
-                </div>
-              ))}
+              {event.event_slots.map((slot, i) => {
+                const parts = [
+                  slot.event_type === 'Other' ? slot.event_type_other : slot.event_type,
+                  slot.shift,
+                  slot.pax ? `${slot.pax} pax` : null,
+                ]
+                if (event.venue_id === 'aee' && Array.isArray(slot.elements) && slot.elements.length > 0) {
+                  parts.push(slot.elements.join(', '))
+                }
+                return (
+                  <div key={i} className="detail-row detail-slot-row">
+                    <span className="k">{t('Event')} {i + 1}</span>
+                    <span className="v">{parts.filter(Boolean).join(' · ')}</span>
+                  </div>
+                )
+              })}
             </div>
           )}
           {event.location && (
@@ -190,6 +194,25 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
                 </a>
               </span>
             </div>
+          )}
+
+          {/* ── AEE-specific fields ── */}
+          {event.venue_id === 'aee' && event.pax != null && event.pax !== '' && (
+            <div className="detail-row"><span className="k">{t('Pax')}</span><span className="v">{event.pax}</span></div>
+          )}
+          {event.venue_id === 'aee' && Array.isArray(event.elements) && event.elements.length > 0
+            && !(Array.isArray(event.event_slots) && event.event_slots.length > 1) && (
+            <div className="detail-row detail-elements">
+              <span className="k">{t('Elements')}</span>
+              <div className="v element-chips">
+                {event.elements.map((el) => (
+                  <span key={el} className="element-chip">{getElementLabel(el, lang, elementLabels)}</span>
+                ))}
+              </div>
+            </div>
+          )}
+          {event.venue_id === 'aee' && event.delivery_person && (
+            <div className="detail-row"><span className="k">{t('Delivery Person')}</span><span className="v">{event.delivery_person}</span></div>
           )}
 
           {/* ── Venue section (own-venue only) ── */}
