@@ -387,20 +387,14 @@ function addSections(_venue, dynamicTypes) {
     {
       title: 'Venue',
       fields: [
-        // Row 1: Venue Name | Venue Type
         venueNameField(),
         S('Venue Type', 'venue_type', VENUE_TYPES),
-        // Row 2: Location (full width)
         T('Location', 'location', false, { placeholder: 'Google Maps link or address', mapLink: true }),
       ],
     },
     {
-      title: 'Event',
+      title: 'Booking',
       fields: [
-        // Row 3: Event Type | Shift
-        ...eventTypeFields(dynamicTypes),
-        S('Shift', 'shift', SHIFTS),
-        // Row 4: Status | Site Availability
         statusField,
         S('Site Availability', 'site_availability', SITE_AVAILABILITIES, false),
         {
@@ -410,32 +404,19 @@ function addSections(_venue, dynamicTypes) {
           showWhen: isSiteOther,
           fullWidth: true,
         },
-        // Row 5: Date | Time
         D('Date', 'date'),
-        TM('Time', 'time'),
       ],
     },
+    { title: 'Events', type: 'event-slots', fields: [] },
     {
-      title: 'Decor',
+      title: 'Guest & Team',
       fields: [
-        // Row 6: Decor Type | Color Theme
-        S('Decor Type', 'decor_type', DECOR_TYPES),
-        T('Color Theme', 'color_theme', false),
-      ],
-    },
-    {
-      title: 'Guest',
-      fields: [
-        // Row 1: Guest Name | Guest Phone
         guestName(),
         phoneReq(),
-        // Row 2: Pax | Sales Person
-        paxField(),
         { ...salesPersonField(),
           userFilter: { department: 'Decor Sales', salesTypes: ['Outdoor', 'In-house + Outdoor'] },
           userEmptyMsg: 'No Decor Sales (Outdoor) users available. Add users in Manage Users.',
         },
-        // Row 3: Execution Person | Operation Manager
         { type: 'user-select', label: 'Execution Person', key: 'execution_person', required: true,
           userFilter: { department: 'Decor Sales', salesTypes: ['Outdoor', 'In-house + Outdoor'] },
           userEmptyMsg: 'No Decor Sales (Outdoor) users available. Add users in Manage Users.',
@@ -444,20 +425,22 @@ function addSections(_venue, dynamicTypes) {
           userFilter: { department: 'Decor Operations' },
           userEmptyMsg: 'No Decor Operations users available. Add users in Manage Users.',
         },
-        // Row 4: Venue Manager Name | Venue Manager Number
         T('Venue Manager Name', 'venue_manager_name', false, {
           filterFn: nameFilter, filterError: 'Only letters allowed',
         }),
         T('Venue Manager Number', 'venue_manager_number', false, {
           filterFn: phoneWithPlusFilter, filterError: 'Only + and numbers allowed', inputMode: 'numeric',
         }),
-        // Row 5: Payment Status | Pending Payment %
+      ],
+    },
+    {
+      title: 'Payment',
+      fields: [
         S('Payment Status', 'payment_timing', PAYMENT_TIMINGS),
         T('Pending Payment %', 'payment_remaining_venue', true, {
           filterFn: percentFilter, filterError: 'Only numbers 0-100',
           suffix: '%', inputMode: 'numeric',
         }),
-        // Row 6: Notes (full width)
         notesField,
       ],
     },
@@ -471,20 +454,14 @@ function acSections(_venue, dynamicTypes) {
     {
       title: 'Venue',
       fields: [
-        // Row 1: Venue Name | Venue Type
         venueNameField(),
         S('Venue Type', 'venue_type', VENUE_TYPES),
-        // Row 2: Location (full width)
         T('Location', 'location', false, { placeholder: 'Google Maps link or address', mapLink: true }),
       ],
     },
     {
-      title: 'Event',
+      title: 'Booking',
       fields: [
-        // Row 3: Event Type | Shift
-        ...eventTypeFields(dynamicTypes),
-        S('Shift', 'shift', SHIFTS),
-        // Row 4: Status | Site Availability
         statusField,
         S('Site Availability', 'site_availability', SITE_AVAILABILITIES, false),
         {
@@ -494,22 +471,15 @@ function acSections(_venue, dynamicTypes) {
           showWhen: isSiteOther,
           fullWidth: true,
         },
-        // Row 5: Date | Time
         D('Date', 'date'),
-        TM('Time', 'time'),
       ],
     },
+    { title: 'Events', type: 'event-slots', fields: [] },
     {
-      title: 'Menu',
+      title: 'Guest & Team',
       fields: [
-        S('Menu Type', 'menu_type', MENU_TYPES),
-        S('Menu Category', 'menu_cat', MENU_CATS, true, { disabledWhen: noCatMenu, getOptions: menuCatOptions, helperText: noCatMenuHelper }),
-      ],
-    },
-    {
-      title: 'Guest',
-      fields: [
-        // Row 1: Sales Person | Service Head
+        guestName(),
+        phoneReq(),
         { ...salesPersonField(),
           userFilter: { department: 'Catering Sales', salesTypes: ['Outdoor', 'In-house + Outdoor'] },
           userEmptyMsg: 'No Catering Sales (Outdoor) users available. Add users in Manage Users.',
@@ -518,29 +488,26 @@ function acSections(_venue, dynamicTypes) {
           userFilter: { department: 'F&B Service' },
           userEmptyMsg: 'No F&B Service users available. Add users in Manage Users.',
         },
-        // Row 2: Kitchen Head | Pax
         { type: 'user-select', label: 'Kitchen Head', key: 'kitchen_head', required: true,
           userFilter: { department: 'Kitchen' },
           userEmptyMsg: 'No Kitchen users available. Add users in Manage Users.',
         },
-        paxField(),
-        // Row 3: Venue Manager Name | Venue Manager Number
         T('Venue Manager Name', 'venue_manager_name', false, {
           filterFn: nameFilter, filterError: 'Only letters allowed',
         }),
         T('Venue Manager Number', 'venue_manager_number', false, {
           filterFn: phoneWithPlusFilter, filterError: 'Only + and numbers allowed', inputMode: 'numeric',
         }),
-        // Row 4: Guest Name | Guest Phone
-        guestName(),
-        phoneReq(),
-        // Row 5: Pending Payment % | Payment Status
+      ],
+    },
+    {
+      title: 'Payment',
+      fields: [
         T('Pending Payment %', 'payment_remaining_venue', true, {
           filterFn: percentFilter, filterError: 'Only numbers 0-100',
           suffix: '%', inputMode: 'numeric',
         }),
         S('Payment Status', 'payment_timing', PAYMENT_TIMINGS),
-        // Row 6: Notes (full width)
         notesField,
       ],
     },
@@ -548,7 +515,7 @@ function acSections(_venue, dynamicTypes) {
 }
 
 // AEE — external venue events & entertainment
-function aeeSections(_venue, dynamicTypes, dynamicElements) {
+function aeeSections(_venue, dynamicTypes) {
   return [
     {
       title: 'Venue',
@@ -559,17 +526,15 @@ function aeeSections(_venue, dynamicTypes, dynamicElements) {
       ],
     },
     {
-      title: 'Event',
+      title: 'Booking',
       fields: [
-        ...eventTypeFields(dynamicTypes),
-        S('Shift', 'shift', SHIFTS),
         statusField,
         D('Date', 'date'),
-        TM('Time', 'time'),
       ],
     },
+    { title: 'Events', type: 'event-slots', fields: [] },
     {
-      title: 'Guest',
+      title: 'Guest & Team',
       fields: [
         guestName(),
         phoneReq(),
@@ -578,7 +543,11 @@ function aeeSections(_venue, dynamicTypes, dynamicElements) {
           userFilter: { department: 'Entertainment Sales' },
           userEmptyMsg: 'No Entertainment Sales users available. Add users in Manage Users.',
         },
-        { type: 'multiselect', label: 'Elements', key: 'elements', options: dynamicElements || ELEMENT_OPTIONS_FALLBACK, required: true, fullWidth: true },
+      ],
+    },
+    {
+      title: 'Payment',
+      fields: [
         T('Pending Payment %', 'payment_remaining_venue', true, {
           filterFn: percentFilter, filterError: 'Only numbers 0-100',
           suffix: '%', inputMode: 'numeric',
@@ -717,6 +686,7 @@ export const FIELD_MAP = {
     'operation_manager', 'operation_manager_id',
     'venue_manager_name', 'venue_manager_number',
     'payment_remaining_venue', 'payment_timing', 'notes',
+    'event_slots',
   ],
   ac: [
     'venue_name', 'venue_type', 'location', 'event_type', 'event_type_other',
@@ -726,13 +696,15 @@ export const FIELD_MAP = {
     'service_head', 'service_head_id', 'kitchen_head', 'kitchen_head_id',
     'venue_manager_name', 'venue_manager_number',
     'payment_remaining_venue', 'payment_timing', 'notes',
+    'event_slots',
   ],
   aee: [
     'venue_name', 'venue_type', 'location', 'event_type', 'event_type_other',
     'shift', 'date', 'time',
-    'guest_name', 'phone', 'sales_person', 'sales_person_id',
+    'guest_name', 'phone', 'pax', 'sales_person', 'sales_person_id',
     'delivery_person', 'delivery_person_id', 'elements',
     'payment_remaining_venue', 'payment_timing', 'notes',
+    'event_slots',
   ],
   ws: [
     'service_type', 'service_type_other', 'vendor_name', 'vendor_phone',
@@ -768,6 +740,7 @@ export const ALL_SAVEABLE_KEYS = [
   'tender_name', 'event_type_text', 'end_date',
   'service_type', 'service_type_other', 'vendor_name', 'vendor_phone',
   'service_head', 'service_head_id', 'kitchen_head', 'kitchen_head_id',
+  'event_slots',
 ]
 
 // ---------- Public API ----------
@@ -790,6 +763,40 @@ export function getFormConfig(venueId, dynamicTypes, dynamicElements) {
   if (!venue) return []
   const build = BUILDERS[venueId]
   return build ? build(venue, dynamicTypes, dynamicElements) : []
+}
+
+// Per-slot field definitions for ADD/AC/AEE event-slot cards.
+export function getSlotFields(venueId, dynamicTypes, dynamicElements) {
+  if (venueId === 'add') {
+    return [
+      ...eventTypeFields(dynamicTypes),
+      S('Shift', 'shift', SHIFTS),
+      TM('Time', 'time'),
+      T('Pax', 'pax', true, { filterFn: paxFilter, filterError: 'Only numbers allowed', inputMode: 'numeric' }),
+      S('Decor Type', 'decor_type', DECOR_TYPES),
+      T('Color Theme', 'color_theme', false),
+    ]
+  }
+  if (venueId === 'ac') {
+    return [
+      ...eventTypeFields(dynamicTypes),
+      S('Shift', 'shift', SHIFTS),
+      TM('Time', 'time'),
+      T('Pax', 'pax', true, { filterFn: paxFilter, filterError: 'Only numbers allowed', inputMode: 'numeric' }),
+      S('Menu Type', 'menu_type', MENU_TYPES),
+      S('Menu Category', 'menu_cat', MENU_CATS, true, { disabledWhen: noCatMenu, getOptions: menuCatOptions, helperText: noCatMenuHelper }),
+    ]
+  }
+  if (venueId === 'aee') {
+    return [
+      ...eventTypeFields(dynamicTypes),
+      S('Shift', 'shift', SHIFTS),
+      TM('Time', 'time'),
+      T('Pax', 'pax', false, { filterFn: paxFilter, filterError: 'Only numbers allowed', inputMode: 'numeric' }),
+      { type: 'multiselect', label: 'Elements', key: 'elements', options: dynamicElements || ELEMENT_OPTIONS_FALLBACK, required: false, fullWidth: true },
+    ]
+  }
+  return []
 }
 
 // Flatten sections to a single field list — convenient for validation.

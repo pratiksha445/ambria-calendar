@@ -77,6 +77,14 @@ export function autoTitle(form) {
   }
 
   // add, ac, aee — external venue bookings
+  const slots = Array.isArray(form.event_slots) ? form.event_slots : []
+  if (slots.length > 1) {
+    const types = slots.map((s) => s.event_type === 'Other' ? (s.event_type_other || '') : (s.event_type || ''))
+    let typeStr = types.slice(0, 2).filter(Boolean).join('+')
+    if (slots.length > 2) typeStr += `+${slots.length - 2}`
+    const shifts = slots.slice(0, 2).map((s) => shiftInitial(s.shift)).filter(Boolean).join('+')
+    return joinPipes([firstName(form.guest_name), typeStr, form.venue_name, shifts])
+  }
   return joinPipes([
     firstName(form.guest_name),
     eventTypeLabel(form),

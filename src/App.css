@@ -1915,6 +1915,72 @@
   gap: 10px;
 }
 
+/* Event slot cards (ADD/AC/AEE multi-event) */
+.slot-card {
+  border: 1px solid var(--ambria-border);
+  border-left: 3px solid var(--ambria-accent);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  background: var(--ambria-bg);
+}
+.slot-card-error { border-color: var(--ambria-danger, #e53e3e); }
+.slot-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.slot-card-label {
+  font-weight: 600;
+  font-size: 0.82rem;
+  color: var(--ambria-muted);
+}
+.slot-delete-btn {
+  background: none;
+  border: none;
+  color: var(--ambria-danger, #e53e3e);
+  font-size: 1.2rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.slot-delete-btn:hover { background: rgba(229, 62, 62, 0.1); }
+.slot-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+.slot-grid .field-multiselect { grid-column: 1 / -1; }
+@media (min-width: 480px) {
+  .slot-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (min-width: 768px) {
+  .slot-grid { grid-template-columns: repeat(3, 1fr); }
+}
+.add-slot-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: 1.5px solid var(--ambria-accent);
+  color: var(--ambria-accent);
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 4px;
+}
+.add-slot-btn:hover { background: var(--ambria-accent); color: #fff; }
+
+/* Slot detail rows in EventCard expanded view */
+.detail-slot-row {
+  padding-left: 8px;
+  border-left: 2px solid var(--ambria-border);
+}
+
 .field-group {
   grid-column: 1 / -1;
   display: grid;

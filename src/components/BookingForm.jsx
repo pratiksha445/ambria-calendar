@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { VENUES, VENUE_BY_ID } from '../config/venues.js'
 import {
-  getFormConfig, getAllFields, isFieldRequired,
+  getFormConfig, getAllFields, getSlotFields, isFieldRequired,
   FIELD_MAP, ALL_SAVEABLE_KEYS, STATUSES,
   parsePhoneCode, getCodeFromValue,
 } from '../config/formFields.js'
@@ -14,6 +14,26 @@ import { useDirectory } from '../contexts/DirectoryContext.jsx'
 import { getEditableSections, getLockedFieldKeys } from '../lib/sectionPermissions.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 import Field from './Field.jsx'
+
+const SLOT_CATEGORIES = new Set(['add', 'ac', 'aee'])
+const MAX_SLOTS = 5
+const SLOT_KEYS = {
+  add: ['event_type', 'event_type_other', 'shift', 'time', 'pax', 'decor_type', 'color_theme'],
+  ac:  ['event_type', 'event_type_other', 'shift', 'time', 'pax', 'menu_type', 'menu_cat'],
+  aee: ['event_type', 'event_type_other', 'shift', 'time', 'pax', 'elements'],
+}
+
+function emptySlot(venueId) {
+  const obj = {}
+  for (const k of SLOT_KEYS[venueId] || []) obj[k] = k === 'elements' ? [] : ''
+  return obj
+}
+
+function buildSlotsFromTopLevel(form, venueId) {
+  const slot = {}
+  for (const k of SLOT_KEYS[venueId] || []) slot[k] = form[k] ?? (k === 'elements' ? [] : '')
+  return [slot]
+}
 
 function blankForm(venueId, defaults = {}) {
   return {
@@ -49,6 +69,14 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
   const [filteredUsersMap, setFilteredUsersMap] = useState({})
   const [collapsedSections, setCollapsedSections] = useState({})
   const [lockToast, setLockToast] = useState(false)
+  const [eventSlots, setEventSlots] = useState(() => {
+    if (!SLOT_CATEGORIES.has(venueId)) return []
+    if (editing && Array.isArray(initial.event_slots) && initial.event_slots.length > 0) {
+      return initial.event_slots
+    }
+    if (editing) return buildSlotsFromTopLevel(initial, venueId)
+    return [emptySlot(venueId)]
+  })
 
   // Derive dropdown data from DirectoryContext (cached, stale-while-revalidate)
   const dynamicEventTypes = useMemo(
@@ -96,7 +124,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
       )
     ).then((results) => setFilteredUsersMap(Object.fromEntries(results)))
   }, [filterKeysStr])
-  const computedTitle = useMemo(() => autoTitle({ ...form, venue_id: venueId }), [form, venueId])
+  const computedTitle = useMemo(() => autoTitle({ ...form, venue_id: venueId, event_slots: eventSlots }), [form, venueId, eventSlots])
   const displayTitle = manualTitle ?? computedTitle
 
   const getUsersForField = (field) => {
@@ -116,8 +144,38 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
       notes: prev.notes,
     }))
     setErrors({})
+    if (SLOT_CATEGORIES.has(venueId)) setEventSlots([emptySlot(venueId)])
+    else setEventSlots([])
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [venueId])
+
+  const setSlotField = (index, key, value) => {
+    setEventSlots((prev) => {
+      const next = [...prev]
+      next[index] = { ...next[index], [key]: value }
+      if (key === 'menu_type') next[index].menu_cat = ''
+      if (key === 'event_type' && value !== 'Other') next[index].event_type_other = ''
+      return next
+    })
+    setErrors((prev) => {
+      const errKey = `slot_${index}_${key}`
+      if (!prev[errKey]) return prev
+      const { [errKey]: _gone, ...rest } = prev
+      return rest
+    })
+  }
+
+  const addSlot = () => {
+    if (eventSlots.length >= MAX_SLOTS) return
+    setEventSlots((prev) => [...prev, emptySlot(venueId)])
+  }
+
+  const removeSlot = (index) => {
+    if (index === 0) return
+    setEventSlots((prev) => prev.filter((_, i) => i !== index))
+  }
+
+  const hasSlotErrors = (si) => Object.keys(errors).some((k) => k.startsWith(`slot_${si}_`))
 
   const setField = (key, value) => {
     setForm((prev) => {
@@ -196,12 +254,34 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
         }
       }
     }
+
+    // Slot-level validation for ADD/AC/AEE
+    const slotFieldDefs = SLOT_CATEGORIES.has(venueId) ? getSlotFields(venueId, dynamicEventTypes, dynamicElements) : []
+    for (let si = 0; si < eventSlots.length; si++) {
+      const slot = eventSlots[si]
+      for (const field of slotFieldDefs) {
+        if (field.showWhen && !field.showWhen(slot)) continue
+        if (field.disabledWhen && field.disabledWhen(slot)) continue
+        const v = slot[field.key]
+        const isEmpty = Array.isArray(v) ? v.length === 0 : (v === undefined || v === null || v === '')
+        if (isFieldRequired(field, slot) && isEmpty) {
+          nextErrors[`slot_${si}_${field.key}`] = 'Required'
+        }
+      }
+    }
+
     setErrors(nextErrors)
 
     const errorKeys = Object.keys(nextErrors)
     if (errorKeys.length > 0) {
       // Build descriptive error listing the field labels
+      const slotAllFields = slotFieldDefs.length > 0 ? slotFieldDefs : []
       const labels = errorKeys.map((key) => {
+        const slotMatch = key.match(/^slot_(\d+)_(.+)$/)
+        if (slotMatch) {
+          const sf = slotAllFields.find((fd) => fd.key === slotMatch[2])
+          return `Event ${Number(slotMatch[1]) + 1}: ${sf ? t(sf.label) : slotMatch[2]}`
+        }
         const f = all.find((fd) => fd.key === key)
         return f ? t(f.label) : key
       })
@@ -297,6 +377,28 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
     // Villa stores check-in date as `date` for calendar placement.
     if (venueId === 'villa' && payload.check_in_date) {
       payload.date = payload.check_in_date
+    }
+
+    // Slot[0] → top-level sync for backward compatibility (calendar pills, search, etc.)
+    if (SLOT_CATEGORIES.has(venueId) && eventSlots.length > 0) {
+      payload.event_slots = eventSlots
+      const s0 = eventSlots[0]
+      payload.event_type = s0.event_type || null
+      payload.event_type_other = s0.event_type_other || null
+      payload.shift = s0.shift || null
+      payload.time = s0.time || null
+      payload.pax = sanitizePax(s0.pax)
+      if (venueId === 'add') {
+        payload.decor_type = s0.decor_type || null
+        payload.color_theme = s0.color_theme || null
+      }
+      if (venueId === 'ac') {
+        payload.menu_type = s0.menu_type || null
+        payload.menu_cat = s0.menu_cat || null
+      }
+      if (venueId === 'aee') {
+        payload.elements = Array.isArray(s0.elements) && s0.elements.length > 0 ? s0.elements : null
+      }
     }
 
     // Final defensive strip: only keep keys valid for this category + meta
@@ -431,6 +533,50 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
           // Section lock: if editableSections is a Set and this titled section is not in it
           const sectionLocked = editableSections && section.title && !editableSections.has(section.title)
           const sectionReadOnly = readOnly || sectionLocked
+
+          // Event-slots section — render slot cards instead of normal fields
+          if (section.type === 'event-slots' && SLOT_CATEGORIES.has(venueId)) {
+            const slotFields = getSlotFields(venueId, dynamicEventTypes, dynamicElements)
+            return (
+              <div key={sectionKey} className="form-section">
+                <div className="form-section-title">{t('Events')}</div>
+                {eventSlots.map((slot, slotIdx) => (
+                  <div
+                    key={slotIdx}
+                    className={`slot-card ${hasSlotErrors(slotIdx) ? 'slot-card-error' : ''}`}
+                    style={{ borderLeftColor: VENUE_BY_ID[venueId]?.color }}
+                  >
+                    <div className="slot-card-header">
+                      <span className="slot-card-label">{t('Event')} {slotIdx + 1}</span>
+                      {slotIdx > 0 && !sectionReadOnly && (
+                        <button type="button" className="slot-delete-btn" onClick={() => removeSlot(slotIdx)} aria-label={`Delete Event ${slotIdx + 1}`}>×</button>
+                      )}
+                    </div>
+                    <div className="slot-grid">
+                      {slotFields.map((field) => {
+                        if (field.showWhen && !field.showWhen(slot)) return null
+                        return (
+                          <Field
+                            key={field.key}
+                            field={field}
+                            form={slot}
+                            value={slot[field.key]}
+                            onChange={(key, val) => setSlotField(slotIdx, key, val)}
+                            error={errors[`slot_${slotIdx}_${field.key}`]}
+                            readOnly={sectionReadOnly}
+                            activeUsers={[]}
+                          />
+                        )
+                      })}
+                    </div>
+                  </div>
+                ))}
+                {eventSlots.length < MAX_SLOTS && !sectionReadOnly && (
+                  <button type="button" className="add-slot-btn" onClick={addSlot}>+ {t('Add Event')}</button>
+                )}
+              </div>
+            )
+          }
 
           return (
           <div key={sectionKey} className={`form-section ${section.prominent ? 'form-section-prominent' : ''} ${sectionLocked ? 'form-section-locked' : ''}`}>

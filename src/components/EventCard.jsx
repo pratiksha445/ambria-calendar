@@ -153,6 +153,23 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
           {event.venue_type && (
             <div className="detail-row"><span className="k">{t('Type')}</span><span className="v">{t(event.venue_type)}</span></div>
           )}
+          {/* Multi-event slot rows */}
+          {Array.isArray(event.event_slots) && event.event_slots.length > 1 && (
+            <div className="detail-slots">
+              {event.event_slots.map((slot, i) => (
+                <div key={i} className="detail-row detail-slot-row">
+                  <span className="k">{t('Event')} {i + 1}</span>
+                  <span className="v">
+                    {[
+                      slot.event_type === 'Other' ? slot.event_type_other : slot.event_type,
+                      slot.shift,
+                      slot.pax ? `${slot.pax} pax` : null,
+                    ].filter(Boolean).join(' · ')}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
           {event.location && (
             <div className="detail-row event-detail-location">
               <span className="k">{t('Location')}</span>
