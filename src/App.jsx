@@ -22,6 +22,7 @@ import { startOfMonth, endOfMonth, toIsoDate, addDays } from './lib/dates.js'
 import { VENUES, applyDynamic } from './config/venues.js'
 import { fetchActiveCategories } from './lib/categories.js'
 import { logAction } from './lib/audit.js'
+import { getStoredSession, applySession, clearSession } from './lib/supabase.js'
 import { useLanguage } from './i18n/LanguageContext.jsx'
 import useSwipeNav from './hooks/useSwipeNav.js'
 import './App.css'
@@ -29,10 +30,8 @@ import './App.css'
 const ALL_SOURCES = ['crm', 'manual']
 
 function getStoredUser() {
-  try {
-    const s = localStorage.getItem('ambria_user')
-    return s ? JSON.parse(s) : null
-  } catch { return null }
+  const session = getStoredSession()
+  return session?.user ?? null
 }
 
 export default function App() {
@@ -54,12 +53,48 @@ export default function App() {
   const [reloadKey, setReloadKey] = useState(0)
   const [toast, setToast] = useState(null)
   const [confirmBulk, setConfirmBulk] = useState(false)
-  const [needsPinChange, setNeedsPinChange] = useState(false)
   const [changePinOpen, setChangePinOpen] = useState(false)
   const [dayModalDate, setDayModalDate] = useState(null)
   const [exportModal, setExportModal] = useState(null) // null | { from, to }
   const [eventTypes, setEventTypes] = useState([])
   const calendarBodyRef = useRef(null)
+
+  // Boot: apply stored JWT to Supabase client
+  useEffect(() => {
+    const session = getStoredSession()
+    if (session) applySession(session.access_token)
+  }, [])
+
+  // Proactive session expiry timer
+  useEffect(() => {
+    if (!user) return
+    const session = getStoredSession()
+    if (!session) return
+    const msUntilExpiry = (session.expires_at - 60) * 1000 - Date.now()
+    if (msUntilExpiry <= 0) {
+      forceLogout()
+      return
+    }
+    const timer = setTimeout(forceLogout, msUntilExpiry)
+    return () => clearTimeout(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user])
+
+  // Listen for 401 / JWT-expired from the Supabase fetch interceptor
+  useEffect(() => {
+    const handler = () => forceLogout()
+    window.addEventListener('ambria:session-expired', handler)
+    return () => window.removeEventListener('ambria:session-expired', handler)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const forceLogout = useCallback(async () => {
+    await clearSession()
+    setUser(null)
+    setCurrentView('calendar')
+    setToast('Your session expired — please sign in again.')
+    setTimeout(() => setToast(null), 4000)
+  }, [])
 
   // Load dynamic categories from Supabase — falls back to hardcoded defaults on failure
   useEffect(() => {
@@ -274,16 +309,15 @@ export default function App() {
   }
 
   // Auth handlers
-  const handleLogin = (u, pinChange) => {
+  const handleLogin = (u) => {
     setUser(u)
-    setNeedsPinChange(!!pinChange)
   }
 
   const handleLogout = async () => {
     if (user) {
       await logAction(user.id, user.name, 'logout', 'session', null, { summary: 'Logged out' })
     }
-    localStorage.removeItem('ambria_user')
+    await clearSession()
     setUser(null)
     setCurrentView('calendar')
   }
@@ -294,12 +328,15 @@ export default function App() {
   }
 
   // Show login screen if not authenticated
-  if (!user) return <LoginScreen onLogin={handleLogin} />
+  if (!user) return (
+    <>
+      <LoginScreen onLogin={handleLogin} />
+      {toast && <div className="toast">{toast}</div>}
+    </>
+  )
 
-  // Forced PIN change on first login with default PIN
-  if (needsPinChange) {
-    return <SetPinScreen user={user} onComplete={() => setNeedsPinChange(false)} />
-  }
+  // NOTE: Forced PIN change on first login is disabled until the login() RPC
+  // returns a needs_pin_change flag. SetPinScreen is kept for that future use.
 
   const canClearMonth = user.role === 'admin'
 

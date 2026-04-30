@@ -89,7 +89,7 @@ export default function SetPinScreen({ user, onComplete }) {
       await logAction(user.id, user.name, 'set_pin', 'user', user.id, { summary: 'Set initial PIN', initial: true })
       onComplete()
     } catch (err) {
-      setError(err?.message ?? String(err))
+      setError(err?.message || 'PIN setup will be re-enabled in the next deploy — contact the dev.')
     } finally {
       setSaving(false)
     }

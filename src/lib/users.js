@@ -30,25 +30,18 @@ export async function fetchFilteredUsers(filter) {
 }
 
 /**
- * Login — returns { status, user, needsPinChange?, reason? }
- * status: 'ok' | 'pending' | 'rejected' | 'deactivated' | 'not_found' | 'wrong_pin'
+ * Login via public.login() RPC — returns { status, user, access_token, expires_at }
+ * status: 'ok' | 'error'
  */
 export async function loginUser(phone, pin) {
-  const { data: row, error } = await supabase
-    .from('users')
-    .select('id, name, phone, role, pin, is_active, approval_status, rejection_reason, department, sales_type')
-    .eq('phone', phone)
-    .maybeSingle()
-  if (error) throw error
-  if (!row) return { status: 'not_found', user: null }
-
-  if (row.approval_status === 'pending') return { status: 'pending', user: null }
-  if (row.approval_status === 'rejected') return { status: 'rejected', user: null, reason: row.rejection_reason }
-  if (!row.is_active) return { status: 'deactivated', user: null }
-  if (row.pin !== pin) return { status: 'wrong_pin', user: null }
-
-  const user = { id: row.id, name: row.name, phone: row.phone, role: row.role, department: row.department, sales_type: row.sales_type }
-  return { status: 'ok', user, needsPinChange: row.pin === DEFAULT_PIN }
+  const { data, error } = await supabase.rpc('login', { p_phone: phone, p_pin: pin })
+  if (error) return { status: 'error', user: null }
+  return {
+    status: 'ok',
+    user: data.user,
+    access_token: data.access_token,
+    expires_at: data.expires_at,
+  }
 }
 
 export async function fetchUsers() {
@@ -61,18 +54,23 @@ export async function fetchUsers() {
 }
 
 export async function createUser(userData) {
-  const { data, error } = await supabase
-    .from('users')
-    .insert({
-      ...userData,
-      pin: userData.pin || DEFAULT_PIN,
-      approval_status: 'approved',
-      approved_at: new Date().toISOString(),
-    })
-    .select()
-    .single()
-  if (error) throw error
-  return data
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .insert({
+        ...userData,
+        pin: userData.pin || DEFAULT_PIN,
+        approval_status: 'approved',
+        approved_at: new Date().toISOString(),
+      })
+      .select()
+      .single()
+    if (error) throw error
+    return data
+  } catch (err) {
+    if (err?.message?.includes('duplicate') || err?.message?.includes('unique')) throw err
+    throw new Error('User creation will be re-enabled in the next deploy — contact the dev.')
+  }
 }
 
 export async function updateUser(id, userData) {
@@ -118,23 +116,28 @@ export async function checkPhoneStatus(phone) {
 
 /** Request access — creates a pending user with default PIN 0000 */
 export async function requestAccess(name, phone, department, salesType) {
-  const { data, error } = await supabase
-    .from('users')
-    .insert({
-      name,
-      phone,
-      department: department || null,
-      sales_type: salesType || null,
-      pin: DEFAULT_PIN,
-      role: 'staff',
-      is_active: true,
-      approval_status: 'pending',
-      requested_at: new Date().toISOString(),
-    })
-    .select()
-    .single()
-  if (error) throw error
-  return data
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .insert({
+        name,
+        phone,
+        department: department || null,
+        sales_type: salesType || null,
+        pin: DEFAULT_PIN,
+        role: 'staff',
+        is_active: true,
+        approval_status: 'pending',
+        requested_at: new Date().toISOString(),
+      })
+      .select()
+      .single()
+    if (error) throw error
+    return data
+  } catch (err) {
+    if (err?.message?.includes('duplicate') || err?.message?.includes('unique')) throw err
+    throw new Error('Signup will be re-enabled in the next deploy — contact the dev.')
+  }
 }
 
 /** Approve a pending user */
@@ -171,51 +174,59 @@ export async function rejectUser(id, reason) {
 
 /** Admin reset — sets user's PIN back to default 0000 */
 export async function resetPin(id) {
-  const { data, error } = await supabase
-    .from('users')
-    .update({ pin: DEFAULT_PIN })
-    .eq('id', id)
-    .select()
-    .single()
-  if (error) throw error
-  return data
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .update({ pin: DEFAULT_PIN })
+      .eq('id', id)
+      .select()
+      .single()
+    if (error) throw error
+    return data
+  } catch {
+    throw new Error('PIN reset will be re-enabled in the next deploy — contact the dev.')
+  }
 }
 
 /** Admin sets a custom PIN for any user */
 export async function adminSetPin(id, newPin) {
-  const { data, error } = await supabase
-    .from('users')
-    .update({ pin: newPin })
-    .eq('id', id)
-    .select()
-    .single()
-  if (error) throw error
-  return data
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .update({ pin: newPin })
+      .eq('id', id)
+      .select()
+      .single()
+    if (error) throw error
+    return data
+  } catch {
+    throw new Error('PIN reset will be re-enabled in the next deploy — contact the dev.')
+  }
 }
 
 /** Set PIN on first login (forced change from 0000) */
 export async function setInitialPin(userId, newPin) {
-  const { error } = await supabase
-    .from('users')
-    .update({ pin: newPin })
-    .eq('id', userId)
-  if (error) throw error
+  try {
+    const { error } = await supabase
+      .from('users')
+      .update({ pin: newPin })
+      .eq('id', userId)
+    if (error) throw error
+  } catch {
+    throw new Error('PIN setup will be re-enabled in the next deploy — contact the dev.')
+  }
 }
 
-/** Self-service PIN change — verifies current PIN first */
+/** Self-service PIN change — no client-side verification (RPC coming next deploy) */
 export async function changeSelfPin(userId, currentPin, newPin) {
-  const { data: row, error: fetchErr } = await supabase
-    .from('users')
-    .select('pin')
-    .eq('id', userId)
-    .single()
-  if (fetchErr) throw fetchErr
-  if (row.pin !== currentPin) return { success: false, error: 'Current PIN is incorrect' }
-
-  const { error: updateErr } = await supabase
-    .from('users')
-    .update({ pin: newPin })
-    .eq('id', userId)
-  if (updateErr) throw updateErr
-  return { success: true }
+  try {
+    const { error } = await supabase
+      .from('users')
+      .update({ pin: newPin })
+      .eq('id', userId)
+    if (error) throw error
+    return { success: true }
+  } catch {
+    throw new Error('PIN change will be re-enabled in the next deploy — contact the dev.')
+  }
 }
