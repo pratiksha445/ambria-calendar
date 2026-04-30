@@ -50,7 +50,14 @@ export default function DayModal({ date, events, onClose, onAdd, onEdit, onDelet
   if (!date) return null
 
   const iso = toIsoDate(date)
-  const dayEvents = events.filter((e) => e.date === iso)
+  const dayEvents = events.filter((e) => {
+    if (e.date === iso) return true
+    // Villa multi-day: include if this day falls within the stay
+    if (e.venue_id === 'villa' && e.check_in_date && e.check_out_date
+        && e.check_out_date > e.check_in_date
+        && iso >= e.check_in_date && iso <= e.check_out_date) return true
+    return false
+  })
 
   // Apply modal-local filters
   const filtered = dayEvents.filter((ev) => {

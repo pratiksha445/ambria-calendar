@@ -8,7 +8,14 @@ export default function DayView({ selectedDate, events, onEdit, onDelete, onAdd,
   const [expandedId, setExpandedId] = useState(null)
   const { t, formatDayHeader } = useLanguage()
   const iso = toIsoDate(selectedDate)
-  const dayEvents = useMemo(() => events.filter((e) => e.date === iso), [events, iso])
+  const dayEvents = useMemo(() => events.filter((e) => {
+    if (e.date === iso) return true
+    // Villa multi-day: include if this day falls within the stay
+    if (e.venue_id === 'villa' && e.check_in_date && e.check_out_date
+        && e.check_out_date > e.check_in_date
+        && iso >= e.check_in_date && iso <= e.check_out_date) return true
+    return false
+  }), [events, iso])
 
   const grouped = useMemo(() => VENUES
     .map((v) => ({ venue: v, list: dayEvents.filter((e) => e.venue_id === v.id) }))

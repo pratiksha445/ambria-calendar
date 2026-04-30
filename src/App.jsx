@@ -405,6 +405,7 @@ export default function App() {
                   currentDate={currentDate}
                   selectedDate={selectedDate}
                   onSelectDate={handleSelectDate}
+                  onEventClick={openEdit}
                   events={filteredEvents}
                   eventTypes={eventTypes}
                 />

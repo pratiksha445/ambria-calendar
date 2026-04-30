@@ -626,6 +626,59 @@
 }
 .day-cell.selected .day-extra { color: var(--ambria-accent); }
 
+/* Villa multi-day spanning segments */
+.villa-seg {
+  cursor: pointer;
+  margin-left: -3px;
+  margin-right: -3px;
+  width: calc(100% + 6px);
+}
+.villa-seg-start {
+  border-radius: 3px 0 0 3px;
+  margin-left: 0;
+  width: calc(100% + 3px);
+}
+.villa-seg-end {
+  border-radius: 0 3px 3px 0;
+  margin-right: 0;
+  width: calc(100% + 3px);
+}
+.villa-seg-single {
+  border-radius: 3px;
+  margin-left: 0;
+  margin-right: 0;
+  width: 100%;
+}
+.villa-seg-mid {
+  border-radius: 0;
+}
+@media (min-width: 768px) {
+  .villa-seg {
+    margin-left: -5px;
+    margin-right: -5px;
+    width: calc(100% + 10px);
+  }
+  .villa-seg-start {
+    margin-left: 0;
+    width: calc(100% + 5px);
+    border-radius: 4px 0 0 4px;
+  }
+  .villa-seg-end {
+    margin-right: 0;
+    width: calc(100% + 5px);
+    border-radius: 0 4px 4px 0;
+  }
+  .villa-seg-single {
+    margin-left: 0;
+    margin-right: 0;
+    width: 100%;
+    border-radius: 4px;
+  }
+  .villa-seg-mid {
+    border-radius: 0;
+  }
+}
+
 /* ---------- Event list (shared by month/week) ---------- */
 
 .event-list {

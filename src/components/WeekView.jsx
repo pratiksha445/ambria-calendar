@@ -6,17 +6,39 @@ export default function WeekView({ currentDate, selectedDate, onSelectDate, even
   const { dayLabel } = useLanguage()
   const weekStart = startOfWeek(currentDate)
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
-  const eventsByDay = useMemo(() => events.reduce((acc, ev) => {
-    (acc[ev.date] = acc[ev.date] || []).push(ev)
-    return acc
-  }, {}), [events])
+
+  // Count events per day, including Villa events that span through the day
+  const countByDay = useMemo(() => {
+    const map = {}
+    for (const d of days) {
+      const iso = toIsoDate(d)
+      map[iso] = 0
+    }
+    for (const ev of events) {
+      // Villa multi-day: count on every day within the stay
+      if (ev.venue_id === 'villa' && ev.check_in_date && ev.check_out_date && ev.check_out_date > ev.check_in_date) {
+        for (const d of days) {
+          const iso = toIsoDate(d)
+          if (iso >= ev.check_in_date && iso <= ev.check_out_date) {
+            map[iso] = (map[iso] || 0) + 1
+          }
+        }
+      } else {
+        // Normal single-day event
+        if (map[ev.date] !== undefined) {
+          map[ev.date] = (map[ev.date] || 0) + 1
+        }
+      }
+    }
+    return map
+  }, [events, days])
 
   return (
     <div className="week-view">
       <div className="week-strip">
         {days.map((d) => {
           const iso = toIsoDate(d)
-          const count = (eventsByDay[iso] ?? []).length
+          const count = countByDay[iso] || 0
           const isSelected = isSameDay(d, selectedDate)
           return (
             <button
