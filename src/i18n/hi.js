@@ -239,10 +239,12 @@ const hi = {
   'Aura Lawn': 'ऑरा लॉन',
   'Aura Glass House + Lawn': 'ऑरा ग्लास हाउस + लॉन',
   'Aura Glasshouse': 'ऑरा ग्लासहाउस',
+  'Aura Porch': 'ऑरा पोर्च',
   'Valencia Glass House': 'वैलेंसिया ग्लास हाउस',
   'Valencia Glass House + Lawn': 'वैलेंसिया ग्लास हाउस + लॉन',
   'Valencia Glass House + Lawn + Poolside': 'वैलेंसिया ग्लास हाउस + लॉन + पूलसाइड',
   'Valencia Lawn + Poolside': 'वैलेंसिया लॉन + पूलसाइड',
+  'Valencia Porch': 'वैलेंसिया पोर्च',
 
   // ── उप-वेन्यू नाम — AR ──
   'Restro-Lawn': 'रेस्ट्रो-लॉन',

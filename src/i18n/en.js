@@ -239,10 +239,12 @@ const en = {
   'Aura Lawn': 'Aura Lawn',
   'Aura Glass House + Lawn': 'Aura Glass House + Lawn',
   'Aura Glasshouse': 'Aura Glasshouse',
+  'Aura Porch': 'Aura Porch',
   'Valencia Glass House': 'Valencia Glass House',
   'Valencia Glass House + Lawn': 'Valencia Glass House + Lawn',
   'Valencia Glass House + Lawn + Poolside': 'Valencia Glass House + Lawn + Poolside',
   'Valencia Lawn + Poolside': 'Valencia Lawn + Poolside',
+  'Valencia Porch': 'Valencia Porch',
 
   // ── Sub-venue names — AR ──
   'Restro-Lawn': 'Restro-Lawn',
