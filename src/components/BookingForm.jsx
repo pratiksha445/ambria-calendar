@@ -65,7 +65,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
 
   useEffect(() => {
     fetchActiveEventTypes()
-      .then((types) => setDynamicEventTypes(types.map((t) => t.name)))
+      .then((types) => setDynamicEventTypes(types.map((t) => ({ name: t.name, abbreviation: t.abbreviation || '' }))))
       .catch(() => setDynamicEventTypes(null))
     fetchActiveUsers()
       .then(setActiveUsers)
@@ -127,7 +127,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
   const setField = (key, value) => {
     setForm((prev) => {
       const next = { ...prev, [key]: value }
-      if (key === 'booking_status' && value !== 'VMD' && value !== 'VMD + Outdoor Ent') {
+      if (key === 'booking_status' && value !== 'VMDD' && value !== 'VMD + Outdoor Ent') {
         next.menu_type = ''
         next.menu_cat = ''
         next.fp_status = ''
@@ -180,8 +180,8 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
       }
 
       // Dropdown validation — reject values not in the options list
-      if (field.type === 'select' && field.options && v && v !== '') {
-        const validValues = field.options.map((o) => typeof o === 'object' ? o.value : o)
+      if ((field.type === 'select' || field.type === 'searchable-select') && field.options && v && v !== '') {
+        const validValues = field.options.map((o) => typeof o === 'object' ? (o.value ?? o) : o)
         if (!validValues.includes(v)) {
           nextErrors[field.key] = 'Invalid selection'
         }
@@ -260,7 +260,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
         }
       } else if (key === 'pax' || key === 'rooms') {
         payload[key] = sanitizePax(raw)
-      } else if (fieldDef && (fieldDef.type === 'date' || fieldDef.type === 'time' || fieldDef.type === 'select')) {
+      } else if (fieldDef && (fieldDef.type === 'date' || fieldDef.type === 'time' || fieldDef.type === 'select' || fieldDef.type === 'searchable-select')) {
         payload[key] = raw || null
       } else if (fieldDef?.type === 'multiselect') {
         payload[key] = Array.isArray(raw) && raw.length > 0 ? raw : null

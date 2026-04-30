@@ -281,7 +281,7 @@ const hi = {
   'Lunch': 'दोपहर',
   'Sundowner': 'शाम',
   'Dinner': 'रात',
-  'VMD': 'VMD',
+  'VMDD': 'VMDD',
   'Only Rental': 'केवल रेंटल',
   'Rental + In-Decor': 'रेंटल + इन-डेकोर',
   'Rental + In-Ent': 'रेंटल + इन-एंटरटेनमेंट',

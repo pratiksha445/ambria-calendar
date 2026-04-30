@@ -23,7 +23,7 @@ export const EVENT_TYPES = [
 export const STATUSES = ['Confirmed', 'Tentative']
 export const SHIFTS = ['Morning', 'Lunch', 'Sundowner', 'Dinner']
 export const BOOKING_STATUSES = [
-  'VMD', 'Only Rental', 'Rental + In-Decor', 'Rental + In-Ent', 'Rental + Chaat',
+  'VMDD', 'Only Rental', 'Rental + In-Decor', 'Rental + In-Ent', 'Rental + Chaat',
   'Rental + Add on Food', 'Rental + Outdoor Catering', 'Rental + Outdoor Decor', 'VMD + Outdoor Ent',
 ]
 export const MENU_TYPES = ['Veg', 'Non-Veg', 'Jain']
@@ -133,7 +133,7 @@ const venueNameFilter = (v) => v.replace(/[^a-zA-Z0-9\s.,\-'&()#]/g, '')
 
 // ---------- Conditional helpers ----------
 
-const notVMD = (f) => f.booking_status && f.booking_status !== 'VMD' && f.booking_status !== 'VMD + Outdoor Ent'
+const notVMD = (f) => f.booking_status && f.booking_status !== 'VMDD' && f.booking_status !== 'VMD + Outdoor Ent'
 const menuCatOptions = (f) => {
   if (f.menu_type === 'Non-Veg') return [...NON_VEG_CATS, 'Customised']
   if (f.menu_type === 'Veg' || f.menu_type === 'Jain') return [...VEG_CATS, 'Customised']
@@ -179,10 +179,29 @@ const tenderNameField = () => T('Tender Name', 'tender_name', true, {
   filterFn: nameFilter, filterError: 'Only letters allowed',
 })
 
-function eventTypeFields(dynamicTypes) {
+function eventTypeFields(dynamicTypes, { searchable = false } = {}) {
   const options = dynamicTypes && dynamicTypes.length > 0 ? dynamicTypes : EVENT_TYPES
+  const eventTypeField = searchable
+    ? {
+        type: 'searchable-select',
+        label: 'Event Type',
+        key: 'event_type',
+        required: true,
+        options: options.map((o) => {
+          if (typeof o === 'object' && o.abbreviation) {
+            return {
+              value: o.name,
+              label: `${o.name} (${o.abbreviation})`,
+              searchTerms: [o.abbreviation],
+            }
+          }
+          const name = typeof o === 'object' ? o.name : o
+          return { value: name, label: name }
+        }),
+      }
+    : S('Event Type', 'event_type', options.map((o) => typeof o === 'object' ? o.name : o))
   return [
-    S('Event Type', 'event_type', options),
+    eventTypeField,
     {
       ...T('Specify Event Type', 'event_type_other', true, {
         placeholder: 'Describe the event',
@@ -203,7 +222,7 @@ function ownVenueSections(venue, dynamicTypes, dynamicElements) {
       fields: [
         // Row 1: Sub-Venue | Event Type
         S('Sub-Venue', 'sub_venue', venue.subVenues),
-        ...eventTypeFields(dynamicTypes),
+        ...eventTypeFields(dynamicTypes, { searchable: true }),
         // Row 2: Package Type | Status
         S('Package Type', 'booking_status', BOOKING_STATUSES),
         statusField,

@@ -281,7 +281,7 @@ const en = {
   'Lunch': 'Lunch',
   'Sundowner': 'Sundowner',
   'Dinner': 'Dinner',
-  'VMD': 'VMD',
+  'VMDD': 'VMDD',
   'Only Rental': 'Only Rental',
   'Rental + In-Decor': 'Rental + In-Decor',
   'Rental + In-Ent': 'Rental + In-Ent',

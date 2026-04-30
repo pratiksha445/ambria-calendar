@@ -14,14 +14,34 @@ function MenuIcon() {
   )
 }
 
+// Auto-generate abbreviation from a name
+function generateAbbr(name, existingAbbrs) {
+  if (!name) return ''
+  const words = name.trim().split(/\s+/)
+  let abbr
+  if (words.length > 1) {
+    abbr = words.slice(0, 4).map((w) => w[0]).join('').toUpperCase()
+  } else {
+    abbr = name.trim().slice(0, 3).toUpperCase()
+  }
+  if (!existingAbbrs.has(abbr)) return abbr
+  for (let i = 2; i <= 9; i++) {
+    const candidate = abbr + i
+    if (candidate.length <= 5 && !existingAbbrs.has(candidate)) return candidate
+  }
+  return abbr // return base; admin will see collision error and pick manually
+}
+
 export default function EventTypeManagement({ currentUser, showToast, onMenu }) {
   const { t } = useLanguage()
   const [items, setItems] = useState([])
   const [newName, setNewName] = useState('')
   const [newNameHi, setNewNameHi] = useState('')
+  const [newAbbr, setNewAbbr] = useState('')
   const [editingId, setEditingId] = useState(null)
   const [editName, setEditName] = useState('')
   const [editNameHi, setEditNameHi] = useState('')
+  const [editAbbr, setEditAbbr] = useState('')
   const [adding, setAdding] = useState(false)
   const [savingId, setSavingId] = useState(null)
   const [search, setSearch] = useState('')
@@ -37,24 +57,41 @@ export default function EventTypeManagement({ currentUser, showToast, onMenu }) 
 
   const filtered = items.filter((item) =>
     item.name.toLowerCase().includes(search.toLowerCase()) ||
-    (item.name_hi || '').includes(search)
+    (item.name_hi || '').includes(search) ||
+    (item.abbreviation || '').toLowerCase().includes(search.toLowerCase())
   )
+
+  const existingAbbrs = new Set(items.map((it) => (it.abbreviation || '').toUpperCase()))
+
+  const handleNameBlur = () => {
+    if (!newAbbr && newName.trim()) {
+      setNewAbbr(generateAbbr(newName, existingAbbrs))
+    }
+  }
 
   const handleAdd = async (e) => {
     e.preventDefault()
     const name = newName.trim()
+    const abbr = newAbbr.trim().toUpperCase()
     if (!name) return
+    if (!abbr) { setError(t('Abbreviation is required')); return }
+    if (abbr.length > 5) { setError(t('Abbreviation must be 5 characters or less')); return }
     if (items.some((it) => it.name.toLowerCase() === name.toLowerCase())) {
       setError(t('Event type already exists'))
+      return
+    }
+    if (items.some((it) => (it.abbreviation || '').toUpperCase() === abbr && it.id !== editingId)) {
+      setError(t('Abbreviation already in use'))
       return
     }
     setAdding(true)
     setError(null)
     try {
-      const row = await createEventType(name, newNameHi.trim(), currentUser)
+      const row = await createEventType(name, newNameHi.trim(), abbr, currentUser)
       setItems((prev) => [...prev, row].sort((a, b) => a.name.localeCompare(b.name)))
       setNewName('')
       setNewNameHi('')
+      setNewAbbr('')
       showToast?.(t('Event type added'))
     } catch (err) {
       console.error(err)
@@ -68,11 +105,18 @@ export default function EventTypeManagement({ currentUser, showToast, onMenu }) 
 
   const handleSaveEdit = async (id) => {
     const name = editName.trim()
+    const abbr = editAbbr.trim().toUpperCase()
     if (!name) return
+    if (!abbr) { setError(t('Abbreviation is required')); return }
+    if (abbr.length > 5) { setError(t('Abbreviation must be 5 characters or less')); return }
+    if (items.some((it) => (it.abbreviation || '').toUpperCase() === abbr && it.id !== id)) {
+      setError(t('Abbreviation already in use'))
+      return
+    }
     setSavingId(id)
     setError(null)
     try {
-      const row = await updateEventType(id, { name, name_hi: editNameHi.trim() || null }, currentUser)
+      const row = await updateEventType(id, { name, name_hi: editNameHi.trim() || null, abbreviation: abbr }, currentUser)
       setItems((prev) => prev.map((it) => it.id === id ? { ...it, ...row } : it).sort((a, b) => a.name.localeCompare(b.name)))
       setEditingId(null)
       showToast?.(t('Event type renamed'))
@@ -107,6 +151,7 @@ export default function EventTypeManagement({ currentUser, showToast, onMenu }) 
     setEditingId(item.id)
     setEditName(item.name)
     setEditNameHi(item.name_hi || '')
+    setEditAbbr(item.abbreviation || '')
   }
 
   const isProtected = (item) => item.name === 'Other' || item.is_protected
@@ -135,8 +180,17 @@ export default function EventTypeManagement({ currentUser, showToast, onMenu }) 
           type="text"
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
+          onBlur={handleNameBlur}
           placeholder={t('New event type name…')}
           className="et-add-input"
+        />
+        <input
+          type="text"
+          value={newAbbr}
+          onChange={(e) => setNewAbbr(e.target.value.toUpperCase().slice(0, 5))}
+          placeholder={t('Abbr')}
+          className="et-add-input et-add-abbr"
+          maxLength={5}
         />
         <input
           type="text"
@@ -173,6 +227,15 @@ export default function EventTypeManagement({ currentUser, showToast, onMenu }) 
                   />
                   <input
                     type="text"
+                    value={editAbbr}
+                    onChange={(e) => setEditAbbr(e.target.value.toUpperCase().slice(0, 5))}
+                    placeholder={t('Abbr')}
+                    className="et-edit-abbr"
+                    maxLength={5}
+                    onKeyDown={(e) => { if (e.key === 'Enter') handleSaveEdit(item.id) }}
+                  />
+                  <input
+                    type="text"
                     value={editNameHi}
                     onChange={(e) => setEditNameHi(e.target.value)}
                     placeholder={t('Hindi Name')}
@@ -186,6 +249,7 @@ export default function EventTypeManagement({ currentUser, showToast, onMenu }) 
               ) : (
                 <>
                   <span className="et-name">{item.name}</span>
+                  {item.abbreviation && <span className="et-abbr-badge">{item.abbreviation}</span>}
                   {item.name_hi && <span className="element-name-hi">{item.name_hi}</span>}
                 </>
               )}

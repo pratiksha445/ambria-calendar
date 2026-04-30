@@ -5,6 +5,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { COUNTRY_CODES } from '../config/formFields.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
+import SearchableSelect from './SearchableSelect.jsx'
 
 export default function Field({ field, form, value, onChange, error, readOnly, activeUsers }) {
   const { t } = useLanguage()
@@ -62,6 +63,16 @@ export default function Field({ field, form, value, onChange, error, readOnly, a
           return <option key={val} value={val}>{t(label)}</option>
         })}
       </select>
+    )
+  } else if (field.type === 'searchable-select') {
+    control = (
+      <SearchableSelect
+        id={id}
+        value={effectiveValue}
+        options={field.options || []}
+        disabled={disabled}
+        onChange={(val) => onChange(field.key, val)}
+      />
     )
   } else if (field.type === 'textarea') {
     control = (

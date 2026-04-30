@@ -27,7 +27,7 @@ export async function fetchActiveEventTypes() {
   return data ?? []
 }
 
-export async function createEventType(name, nameHi, user) {
+export async function createEventType(name, nameHi, abbreviation, user) {
   const { data: existing, error: sortErr } = await withTimeout(
     supabase.from('event_types').select('sort_order').order('sort_order', { ascending: false }).limit(1)
   )
@@ -35,12 +35,12 @@ export async function createEventType(name, nameHi, user) {
   const nextOrder = (existing?.[0]?.sort_order ?? 0) + 1
 
   const { data, error } = await withTimeout(
-    supabase.from('event_types').insert({ name, name_hi: nameHi || null, sort_order: nextOrder }).select().single()
+    supabase.from('event_types').insert({ name, name_hi: nameHi || null, abbreviation: abbreviation || null, sort_order: nextOrder }).select().single()
   )
   if (error) throw error
 
   if (user) {
-    logAction(user.id, user.name, 'create', 'event_type', data.id, { summary: `Added event type: ${name}`, name }).catch(() => {})
+    logAction(user.id, user.name, 'create', 'event_type', data.id, { summary: `Added event type: ${name}`, name, abbreviation }).catch(() => {})
   }
   return data
 }
