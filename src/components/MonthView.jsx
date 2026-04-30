@@ -1,11 +1,12 @@
 import { buildMonthGrid, isSameDay, toIsoDate } from '../lib/dates.js'
 import { VENUE_BY_ID } from '../config/venues.js'
+import { getEventTypeAbbr } from '../lib/eventTypes.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 
 const MAX_PILLS = 3
 const MAX_PILLS_DESKTOP = 5
 
-export default function MonthView({ currentDate, selectedDate, onSelectDate, events }) {
+export default function MonthView({ currentDate, selectedDate, onSelectDate, events, eventTypes = [] }) {
   const { dowHeaders } = useLanguage()
   const today = new Date()
   const days = buildMonthGrid(currentDate)
@@ -48,6 +49,8 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, eve
               <div className="day-pills">
                 {visible.map((ev, i) => {
                   const venue = VENUE_BY_ID[ev.venue_id]
+                  const abbr = getEventTypeAbbr(ev.event_type, ev.event_type_other, eventTypes)
+                  const fullType = ev.event_type === 'Other' ? (ev.event_type_other || 'Other') : (ev.event_type || '')
                   return (
                     <div
                       key={`${ev.id}-${i}`}
@@ -56,8 +59,9 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, eve
                         background: venue?.color ?? '#ccc',
                         color: venue?.textColor ?? '#fff',
                       }}
+                      title={fullType}
                     >
-                      {pillText(ev)}
+                      {pillText(ev, abbr)}
                     </div>
                   )
                 })}
@@ -78,19 +82,20 @@ function groupByDate(events) {
   }, {})
 }
 
-/** Build short pill label: "(L) Sharma" or "7P Gupta" */
-function pillText(ev) {
+/** Build short pill label: "(L) WD Sharma" or "7P WD Gupta" */
+function pillText(ev, abbr) {
   const name = ev.guest_name || ev.tender_name || ''
   const first = name.split(/\s+/)[0] || ''
+  const tag = abbr ? `${abbr} ` : ''
 
   if (ev.shift) {
-    return `(${ev.shift[0]}) ${first}`
+    return `(${ev.shift[0]}) ${tag}${first}`
   }
   if (ev.time) {
     const h = parseInt(ev.time.split(':')[0], 10)
     const suffix = h >= 12 ? 'P' : 'A'
     const hr = h === 0 ? 12 : h > 12 ? h - 12 : h
-    return `${hr}${suffix} ${first}`
+    return `${hr}${suffix} ${tag}${first}`
   }
-  return first || ev.venue_name || '—'
+  return `${tag}${first}` || ev.venue_name || '—'
 }

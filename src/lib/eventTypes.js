@@ -1,6 +1,24 @@
 import { supabase } from './supabase.js'
 import { logAction } from './audit.js'
 
+/**
+ * Look up abbreviation for an event type name from the cached list.
+ * Handles "Other" event type by deriving from event_type_other text.
+ * Fallback: 3-letter uppercase slice if no abbreviation found.
+ */
+export function getEventTypeAbbr(eventTypeName, eventTypeOther, eventTypesList) {
+  if (!eventTypeName) return ''
+  if (eventTypeName === 'Other') {
+    const other = (eventTypeOther || '').trim()
+    if (!other) return 'OTH'
+    const words = other.split(/\s+/).filter(Boolean)
+    if (words.length > 1) return words.map(w => w[0]).slice(0, 4).join('').toUpperCase()
+    return other.slice(0, 3).toUpperCase()
+  }
+  const match = (eventTypesList || []).find(et => et.name === eventTypeName)
+  return match?.abbreviation || eventTypeName.slice(0, 3).toUpperCase()
+}
+
 function withTimeout(promise, ms = 10000) {
   let timer
   return Promise.race([

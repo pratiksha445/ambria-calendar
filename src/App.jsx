@@ -16,6 +16,7 @@ import EventTypeManagement from './components/EventTypeManagement.jsx'
 import CategoryManagement from './components/CategoryManagement.jsx'
 import ManageElements from './components/ManageElements.jsx'
 import { fetchEvents, deleteEvent, bulkDeleteMonth } from './lib/events.js'
+import { fetchActiveEventTypes } from './lib/eventTypes.js'
 import { seedIfEmpty } from './lib/seedEvents.js'
 import { startOfMonth, endOfMonth, toIsoDate, addDays } from './lib/dates.js'
 import { VENUES, applyDynamic } from './config/venues.js'
@@ -57,6 +58,7 @@ export default function App() {
   const [changePinOpen, setChangePinOpen] = useState(false)
   const [dayModalDate, setDayModalDate] = useState(null)
   const [exportModal, setExportModal] = useState(null) // null | { from, to }
+  const [eventTypes, setEventTypes] = useState([])
   const calendarBodyRef = useRef(null)
 
   // Load dynamic categories from Supabase — falls back to hardcoded defaults on failure
@@ -72,6 +74,14 @@ export default function App() {
       })
       .catch(() => {/* offline — keep hardcoded defaults */})
   }, [user])
+
+  // Load event types for abbreviation lookup on calendar pills
+  useEffect(() => {
+    if (!user) return
+    fetchActiveEventTypes()
+      .then(setEventTypes)
+      .catch(() => {})
+  }, [user, reloadKey])
 
   useEffect(() => {
     if (!user) return
@@ -97,6 +107,12 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentDate.getFullYear(), currentDate.getMonth(), reloadKey, user])
 
+  const abbrMap = useMemo(() => {
+    const m = {}
+    for (const et of eventTypes) if (et.abbreviation) m[et.name] = et.abbreviation
+    return m
+  }, [eventTypes])
+
   const filteredEvents = useMemo(() => {
     const q = search.trim().toLowerCase()
     const words = q ? q.split(/\s+/).filter(Boolean) : []
@@ -107,10 +123,11 @@ export default function App() {
       const hay = [
         ev.guest_name, ev.tender_name, ev.title, ev.venue_name,
         ev.sales_person, ev.event_type, ev.sub_venue,
+        ev.event_type && abbrMap[ev.event_type],
       ].filter(Boolean).join(' ').toLowerCase()
       return words.every((w) => hay.includes(w))
     })
-  }, [events, activeFilters, activeSources, search])
+  }, [events, activeFilters, activeSources, search, abbrMap])
 
   const handlePrev = () => {
     if (view === 'month') {
@@ -338,6 +355,7 @@ export default function App() {
                   selectedDate={selectedDate}
                   onSelectDate={handleSelectDate}
                   events={filteredEvents}
+                  eventTypes={eventTypes}
                 />
               )}
               {view === 'week' && (
