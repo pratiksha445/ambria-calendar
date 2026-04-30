@@ -5,6 +5,7 @@ import { useLanguage } from '../i18n/LanguageContext.jsx'
 
 const MAX_PILLS = 3
 const MAX_PILLS_DESKTOP = 5
+const OWN_VENUES = new Set(['ap', 'am', 'ae', 'ar'])
 
 export default function MonthView({ currentDate, selectedDate, onSelectDate, events, eventTypes = [] }) {
   const { dowHeaders } = useLanguage()
@@ -49,8 +50,9 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, eve
               <div className="day-pills">
                 {visible.map((ev, i) => {
                   const venue = VENUE_BY_ID[ev.venue_id]
-                  const abbr = getEventTypeAbbr(ev.event_type, ev.event_type_other, eventTypes)
-                  const fullType = ev.event_type === 'Other' ? (ev.event_type_other || 'Other') : (ev.event_type || '')
+                  const isOwn = OWN_VENUES.has(ev.venue_id)
+                  const label = isOwn ? buildOwnPill(ev, eventTypes) : pillText(ev)
+                  const tip = isOwn ? buildOwnTooltip(ev, eventTypes) : (ev.guest_name || ev.tender_name || ev.venue_name || '')
                   return (
                     <div
                       key={`${ev.id}-${i}`}
@@ -59,9 +61,9 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, eve
                         background: venue?.color ?? '#ccc',
                         color: venue?.textColor ?? '#fff',
                       }}
-                      title={fullType}
+                      title={tip}
                     >
-                      {pillText(ev, abbr)}
+                      {label}
                     </div>
                   )
                 })}
@@ -82,20 +84,39 @@ function groupByDate(events) {
   }, {})
 }
 
-/** Build short pill label: "(L) WD Sharma" or "7P WD Gupta" */
-function pillText(ev, abbr) {
+const SHIFT_INITIALS = { Morning: 'M', Lunch: 'L', Sundowner: 'S', Dinner: 'D' }
+
+/** Compact pill for AP/AM/AE/AR: "D500WD", "S250CKT", "MMEH" */
+function buildOwnPill(ev, eventTypes) {
+  const s = SHIFT_INITIALS[ev.shift] || ''
+  const p = ev.pax ? String(ev.pax).trim() : ''
+  const a = getEventTypeAbbr(ev.event_type, ev.event_type_other, eventTypes)
+  return `${s}${p}${a}` || '—'
+}
+
+/** Tooltip for AP/AM/AE/AR: "Dinner · 500 pax · Wedding" */
+function buildOwnTooltip(ev, eventTypes) {
+  const parts = []
+  if (ev.shift) parts.push(ev.shift)
+  if (ev.pax) parts.push(`${ev.pax} pax`)
+  const fullType = ev.event_type === 'Other' ? (ev.event_type_other || 'Other') : (ev.event_type || '')
+  if (fullType) parts.push(fullType)
+  return parts.join(' · ')
+}
+
+/** Pill label for non-own-venue categories: "(L) Sharma" or "7P Gupta" */
+function pillText(ev) {
   const name = ev.guest_name || ev.tender_name || ''
   const first = name.split(/\s+/)[0] || ''
-  const tag = abbr ? `${abbr} ` : ''
 
   if (ev.shift) {
-    return `(${ev.shift[0]}) ${tag}${first}`
+    return `(${ev.shift[0]}) ${first}`
   }
   if (ev.time) {
     const h = parseInt(ev.time.split(':')[0], 10)
     const suffix = h >= 12 ? 'P' : 'A'
     const hr = h === 0 ? 12 : h > 12 ? h - 12 : h
-    return `${hr}${suffix} ${tag}${first}`
+    return `${hr}${suffix} ${first}`
   }
-  return `${tag}${first}` || ev.venue_name || '—'
+  return first || ev.venue_name || '—'
 }
