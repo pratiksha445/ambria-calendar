@@ -196,8 +196,9 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
             </div>
           )}
 
-          {/* ── AEE-specific fields ── */}
-          {event.venue_id === 'aee' && event.pax != null && event.pax !== '' && (
+          {/* ── AEE-specific fields (single-event only — multi-event shows per-slot) ── */}
+          {event.venue_id === 'aee' && event.pax != null && event.pax !== ''
+            && !(Array.isArray(event.event_slots) && event.event_slots.length > 1) && (
             <div className="detail-row"><span className="k">{t('Pax')}</span><span className="v">{event.pax}</span></div>
           )}
           {event.venue_id === 'aee' && Array.isArray(event.elements) && event.elements.length > 0
@@ -210,9 +211,6 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
                 ))}
               </div>
             </div>
-          )}
-          {event.venue_id === 'aee' && event.delivery_person && (
-            <div className="detail-row"><span className="k">{t('Delivery Person')}</span><span className="v">{event.delivery_person}</span></div>
           )}
 
           {/* ── Venue section (own-venue only) ── */}

@@ -547,7 +547,10 @@ function aeeSections(_venue, dynamicTypes) {
       fields: [
         guestName(),
         phoneReq(),
-        salesPersonField(),
+        { ...salesPersonField(),
+          userFilter: { department: 'Entertainment Sales' },
+          userEmptyMsg: 'No Entertainment Sales users available. Add users in Manage Users.',
+        },
         { type: 'user-select', label: 'Delivery Person', key: 'delivery_person', required: true,
           userFilter: { department: 'Entertainment Sales' },
           userEmptyMsg: 'No Entertainment Sales users available. Add users in Manage Users.',
