@@ -23,6 +23,7 @@ const COLUMNS = [
   { key: 'menu_cat', header: 'Menu Category' },
   { key: 'fp_status', header: 'FP Status' },
   { key: 'rooms', header: 'Rooms' },
+  { key: 'liquor', header: 'Liquor' },
   { key: 'decor_status', header: 'Decor Status' },
   { key: 'entertainment_status', header: 'Entertainment Status' },
   { key: 'function_category', header: 'Decor Category' },
@@ -97,6 +98,7 @@ export function exportEventsToExcel(events, filename) {
       if (col.key === 'service_type') {
         return Array.isArray(ev.service_type) ? ev.service_type.join('; ') : ''
       }
+      if (col.key === 'liquor') return ev.liquor ? 'Yes' : 'No'
       if (col.key === 'source') return (ev.source || '').toUpperCase()
       if (col.key.startsWith('payment_remaining_')) {
         const val = ev[col.key]

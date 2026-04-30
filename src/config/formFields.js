@@ -219,7 +219,8 @@ function ownVenueSections(venue, dynamicTypes, dynamicElements) {
         // Row 6: FP | Rooms
         S('FP', 'fp_status', FP_STATUSES, true, { disabledWhen: notVMD }),
         roomsField(),
-        // Row 7: Menu Type | Menu Category
+        // Row 7: Liquor | Menu Type
+        CB('Liquor', 'liquor'),
         S('Menu Type', 'menu_type', MENU_TYPES, true, { disabledWhen: notVMD }),
         S('Menu Category', 'menu_cat', MENU_CATS, true, { disabledWhen: notVMD, getOptions: menuCatOptions }),
         // Row 8: Payment Status | Pending Payment %
@@ -642,7 +643,7 @@ function wsSections(_venue, dynamicTypes) {
 const VENUE_FIELD_KEYS = [
   'sub_venue', 'event_type', 'event_type_other', 'shift', 'date', 'time',
   'decor_time', 'chaat_time', 'baraat_time', 'wind_up_time', 'wind_up_next_day', 'varmala_time', 'pheras_time', 'pheras_next_day',
-  'booking_status', 'menu_type', 'menu_cat', 'fp_status', 'rooms',
+  'booking_status', 'menu_type', 'menu_cat', 'fp_status', 'rooms', 'liquor',
   'decor_status', 'entertainment_status', 'function_category', 'elements',
   'delivery_person', 'delivery_person_id', 'decor_delivery_person', 'decor_delivery_person_id',
   'ent_delivery_person', 'ent_delivery_person_id', 'operation_manager', 'operation_manager_id',
@@ -704,7 +705,7 @@ export const FIELD_MAP = {
 export const ALL_SAVEABLE_KEYS = [
   'sub_venue', 'event_type', 'event_type_other', 'shift', 'date', 'time',
   'decor_time', 'chaat_time', 'baraat_time', 'wind_up_time', 'wind_up_next_day', 'varmala_time', 'pheras_time', 'pheras_next_day',
-  'booking_status', 'menu_type', 'menu_cat', 'fp_status', 'rooms',
+  'booking_status', 'menu_type', 'menu_cat', 'fp_status', 'rooms', 'liquor',
   'decor_status', 'entertainment_status', 'function_category', 'elements',
   'delivery_person', 'delivery_person_id', 'decor_delivery_person', 'decor_delivery_person_id',
   'ent_delivery_person', 'ent_delivery_person_id', 'operation_manager', 'operation_manager_id',

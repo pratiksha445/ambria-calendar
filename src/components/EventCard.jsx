@@ -189,6 +189,9 @@ export default function EventCard({ event, expanded = false, onToggle, onEdit, o
           {event.rooms != null && event.rooms !== '' && (
             <div className="detail-row"><span className="k">{t('Rooms')}</span><span className="v">{event.rooms}</span></div>
           )}
+          {isOwnVenue && (
+            <div className="detail-row"><span className="k">{t('Liquor')}</span><span className="v">{event.liquor ? t('Yes') : t('No')}</span></div>
+          )}
           {event.menu_type && (
             <div className="detail-row"><span className="k">{t('Menu Type')}</span><span className="v">{t(event.menu_type)}</span></div>
           )}
