@@ -7,8 +7,9 @@ import { logAction } from '../lib/audit.js'
 import { COUNTRY_CODES, getCodeFromValue, parsePhoneCode, DEPARTMENTS, SALES_TYPES, SALES_DEPARTMENTS } from '../config/formFields.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 
-const ROLES = ['admin', 'staff']
-const ROLE_COLORS = { admin: '#E85D75', staff: '#95A5A6' }
+const ROLES = ['admin', 'gm', 'staff']
+const ROLE_COLORS = { admin: '#E85D75', gm: '#7C3AED', staff: '#95A5A6' }
+const ROLE_LABELS = { admin: 'Admin', gm: 'GM', staff: 'Staff' }
 const TABS = ['all', 'pending', 'approved', 'rejected']
 
 function MenuIcon() {
@@ -91,6 +92,10 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
   const [rejectingId, setRejectingId] = useState(null)
   const [rejectReason, setRejectReason] = useState('')
   const [rejectedOpen, setRejectedOpen] = useState(false)
+  // Role change inline UI
+  const [changingRoleFor, setChangingRoleFor] = useState(null)
+  const [pendingRole, setPendingRole] = useState('')
+  const [confirmRoleChange, setConfirmRoleChange] = useState(null)
 
   useEffect(() => { loadUsers() }, [])
 
@@ -288,6 +293,42 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
     } catch (err) { console.error(err) }
   }
 
+  // Inline role change
+  const startRoleChange = (user) => {
+    setChangingRoleFor(user.id)
+    setPendingRole(user.role)
+    setConfirmRoleChange(null)
+  }
+
+  const cancelRoleChange = () => {
+    setChangingRoleFor(null)
+    setPendingRole('')
+    setConfirmRoleChange(null)
+  }
+
+  const handleRoleSelect = (user, newRole) => {
+    if (newRole === user.role) { cancelRoleChange(); return }
+    setPendingRole(newRole)
+    setConfirmRoleChange(user)
+  }
+
+  const confirmAndSaveRole = async () => {
+    const user = confirmRoleChange
+    if (!user) return
+    const oldRole = user.role
+    try {
+      await updateUser(user.id, { role: pendingRole })
+      await logAction(currentUser.id, currentUser.name, 'update', 'user', user.id, {
+        summary: `Changed role for ${user.name} from ${ROLE_LABELS[oldRole]} to ${ROLE_LABELS[pendingRole]}`,
+        name: user.name,
+        changes: [{ field: 'role', field_label: 'Role', old_value: ROLE_LABELS[oldRole], new_value: ROLE_LABELS[pendingRole] }],
+      }, currentUser.role)
+      cancelRoleChange()
+      showToast?.(t('Role updated'))
+      await loadUsers()
+    } catch (err) { console.error(err) }
+  }
+
   const formatDate = (d) =>
     d ? new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : ''
 
@@ -298,12 +339,16 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
     )
   }
 
-  const renderUserCard = (u, section) => (
+  const renderUserCard = (u, section) => {
+    const isSelf = u.id === currentUser.id
+    const isChangingRole = changingRoleFor === u.id
+
+    return (
     <div key={u.id} className={`user-row ${!u.is_active ? 'inactive' : ''}`}>
       <div className="user-info">
         <div className="user-name-line">
           <span className="user-name">{u.name}</span>
-          <span className="role-badge" style={{ background: ROLE_COLORS[u.role] }}>{t(u.role)}</span>
+          <span className="role-badge" style={{ background: ROLE_COLORS[u.role] }}>{t(ROLE_LABELS[u.role] || u.role)}</span>
           {renderApprovalBadge(u.approval_status)}
           {!u.is_active && u.approval_status === 'approved' && <span className="status-badge-inactive">{t('Inactive')}</span>}
         </div>
@@ -368,6 +413,30 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
         )}
         {section === 'approved' && (
           <>
+            {/* Inline role change */}
+            {isChangingRole ? (
+              <div className="role-change-row">
+                <select
+                  className="role-change-select"
+                  value={pendingRole}
+                  onChange={(e) => handleRoleSelect(u, e.target.value)}
+                >
+                  {ROLES.map((r) => (
+                    <option key={r} value={r}>{ROLE_LABELS[r]}</option>
+                  ))}
+                </select>
+                <button className="btn-xs btn-ghost" onClick={cancelRoleChange}>{t('Cancel')}</button>
+              </div>
+            ) : (
+              <button
+                className="btn-ghost btn-sm"
+                onClick={() => startRoleChange(u)}
+                disabled={isSelf}
+                title={isSelf ? t('You cannot change your own role') : ''}
+              >
+                {t('Change Role')}
+              </button>
+            )}
             <button className="btn-ghost btn-sm" onClick={() => openEdit(u)}>{t('Edit')}</button>
             <button className="btn-ghost btn-sm" onClick={() => handleToggle(u)}>
               {t(u.is_active ? 'Deactivate' : 'Activate')}
@@ -412,7 +481,8 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
         )}
       </div>
     </div>
-  )
+    )
+  }
 
   return (
     <div className="panel-page">
@@ -511,6 +581,27 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
         {filtered.length === 0 && <div className="empty-state">{t('No users found')}</div>}
       </div>
 
+      {/* Role change confirmation modal */}
+      {confirmRoleChange && (
+        <div className="modal-root" role="dialog" aria-modal="true">
+          <div className="modal-backdrop" onClick={cancelRoleChange} />
+          <div className="panel-form-card role-confirm-card">
+            <h3>{t('Change Role')}</h3>
+            <p className="role-confirm-text">
+              {t('Change {name} from {old} to {new}? This affects what they can edit and access.', {
+                name: confirmRoleChange.name,
+                old: ROLE_LABELS[confirmRoleChange.role],
+                new: ROLE_LABELS[pendingRole],
+              })}
+            </p>
+            <div className="panel-form-actions">
+              <button type="button" className="btn-ghost" onClick={cancelRoleChange}>{t('Cancel')}</button>
+              <button type="button" className="btn-save" onClick={confirmAndSaveRole}>{t('Confirm')}</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {editing && (
         <div className="modal-root" role="dialog" aria-modal="true">
           <div className="modal-backdrop" onClick={() => setEditing(null)} />
@@ -606,7 +697,7 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
                 <label className="field-label">{t('Role')}</label>
                 <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}>
                   {ROLES.map((r) => (
-                    <option key={r} value={r}>{t(r.charAt(0).toUpperCase() + r.slice(1))}</option>
+                    <option key={r} value={r}>{t(ROLE_LABELS[r])}</option>
                   ))}
                 </select>
               </div>

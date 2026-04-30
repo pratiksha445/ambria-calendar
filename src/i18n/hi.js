@@ -583,6 +583,11 @@ const hi = {
   'pending': 'लंबित',
   'approved': 'स्वीकृत',
   'rejected': 'अस्वीकृत',
+  'Change Role': 'भूमिका बदलें',
+  'Role updated': 'भूमिका अपडेट की गई',
+  'You cannot change your own role': 'आप अपनी भूमिका नहीं बदल सकते',
+  'Change {name} from {old} to {new}? This affects what they can edit and access.': '{name} की भूमिका {old} से {new} बदलें? इससे उनकी संपादन और पहुँच प्रभावित होगी।',
+  'GM': 'GM',
 
   // ── ऑडिट लॉग ──
   'All users': 'सभी उपयोगकर्ता',

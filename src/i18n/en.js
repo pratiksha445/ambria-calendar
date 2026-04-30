@@ -583,6 +583,11 @@ const en = {
   'pending': 'pending',
   'approved': 'approved',
   'rejected': 'rejected',
+  'Change Role': 'Change Role',
+  'Role updated': 'Role updated',
+  'You cannot change your own role': 'You cannot change your own role',
+  'Change {name} from {old} to {new}? This affects what they can edit and access.': 'Change {name} from {old} to {new}? This affects what they can edit and access.',
+  'GM': 'GM',
 
   // ── Audit log ──
   'All users': 'All users',
