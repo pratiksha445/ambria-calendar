@@ -45,7 +45,7 @@ export function autoTitle(form) {
     const parts = [fn || '—']
     if (form.sub_venue) parts.push(form.sub_venue)
     if (form.pax) parts.push(`${form.pax}pax`)
-    return parts.join(' — ')
+    return parts.join(' | ')
   }
 
   if (venueId === 'tender') {

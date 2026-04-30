@@ -403,7 +403,7 @@ function buildPrimary(event, formatShortDate, t) {
     const parts = [event.guest_name]
     if (event.sub_venue) parts.push(t(event.sub_venue))
     if (event.pax) parts.push(`${event.pax}pax`)
-    return parts.filter(Boolean).join(' — ')
+    return parts.filter(Boolean).join(' | ')
   }
   // Multi-event external venue bookings
   if (Array.isArray(event.event_slots) && event.event_slots.length > 1) {
