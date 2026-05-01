@@ -185,9 +185,7 @@ function buildSpanMap(events, gridDays) {
 }
 
 function villaSpanLabel(ev) {
-  const sv = VILLA_SV[ev.sub_venue] || (ev.sub_venue ? ev.sub_venue.replace(/\s+/g, '').slice(0, 3).toUpperCase() : '')
-  const p = ev.pax ? ` · ${ev.pax}` : ''
-  return `${sv}${p}` || '—'
+  return ev.sub_venue || '—'
 }
 
 // ── Normal event helpers ──
@@ -210,19 +208,6 @@ function customAbbr(text) {
   return words.map(w => w[0]).join('').slice(0, 4).toUpperCase()
 }
 
-const VILLA_SV = { 'AP Kothi': 'APK', 'AM Kothi': 'AMK', 'AE Kothi': 'AEK', 'Sukoon': 'SUK' }
-
-function villaSubVenueAbbr(sv) {
-  return VILLA_SV[sv] || (sv ? sv.replace(/\s+/g, '').slice(0, 4).toUpperCase() : '')
-}
-
-function formatListLabel(items, abbrFn, max) {
-  if (!items || items.length === 0) return ''
-  const first = items.slice(0, max).map(abbrFn)
-  const suffix = items.length > max ? '+' : ''
-  return first.join('+') + suffix
-}
-
 function buildPillLabel(ev, eventTypes) {
   const s = SHIFT_INITIALS[ev.shift] || ''
   const p = ev.pax ? String(ev.pax).trim() : ''
@@ -231,10 +216,16 @@ function buildPillLabel(ev, eventTypes) {
     case 'ap': case 'am': case 'ae': case 'ar':
       return `${s}${p}${getEventTypeAbbr(ev.event_type, ev.event_type_other, eventTypes)}` || '—'
 
-    case 'add': case 'ac':
+    case 'add':
+      if (Array.isArray(ev.event_slots) && ev.event_slots.length > 1) {
+        return `${ev.venue_name || '?'} (${ev.event_slots.length})`
+      }
+      return `${s}${p}${getEventTypeAbbr(ev.event_type, ev.event_type_other, eventTypes)}` || '—'
+
+    case 'ac':
       if (Array.isArray(ev.event_slots) && ev.event_slots.length > 1) {
         const totalPax = ev.event_slots.reduce((sum, sl) => sum + (Number(sl.pax) || 0), 0)
-        return `${s}${totalPax || ''}ME`
+        return `${ev.venue_name || '?'} ${totalPax || ''}`
       }
       return `${s}${p}${getEventTypeAbbr(ev.event_type, ev.event_type_other, eventTypes)}` || '—'
 
@@ -246,24 +237,19 @@ function buildPillLabel(ev, eventTypes) {
     }
 
     case 'villa':
-      return `${villaSubVenueAbbr(ev.sub_venue)}${p}` || '—'
+      return ev.sub_venue || '—'
 
     case 'aee': {
       if (Array.isArray(ev.event_slots) && ev.event_slots.length > 1) {
-        const totalPax = ev.event_slots.reduce((sum, sl) => sum + (Number(sl.pax) || 0), 0)
-        return `${s}${totalPax || ''}ME`
+        return `${ev.venue_name || '?'} (${ev.event_slots.length})`
       }
-      if (ev.elements && ev.elements.length > 0) {
-        return formatListLabel(ev.elements, customAbbr, 2)
-      }
-      return getEventTypeAbbr(ev.event_type, ev.event_type_other, eventTypes) || '—'
+      return `${s}${p}${getEventTypeAbbr(ev.event_type, ev.event_type_other, eventTypes)}` || '—'
     }
 
     case 'ws': {
       const types = ev.service_type
-      if (!types || types.length === 0) return '—'
-      const expanded = types.map(t => t === 'Others' && ev.service_type_other ? ev.service_type_other : t)
-      return formatListLabel(expanded, customAbbr, 2) || '—'
+      if (!types || types.length === 0) return 'WS'
+      return `${types.length} Svc`
     }
 
     default:
