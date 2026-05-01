@@ -734,6 +734,10 @@ const hi = {
   'Pending Payment': 'बकाया भुगतान',
   'Payment Status': 'भुगतान स्थिति',
 
+  // ── तिथि सत्यापन ──
+  'Date cannot be in the past': 'तिथि बीते हुए समय में नहीं हो सकती',
+  'Cannot create bookings for past dates': 'बीती हुई तिथियों के लिए बुकिंग नहीं बनाई जा सकती',
+
 }
 
 export default hi

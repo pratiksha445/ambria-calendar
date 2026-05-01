@@ -734,6 +734,10 @@ const en = {
   'Pending Payment': 'Pending Payment',
   'Payment Status': 'Payment Status',
 
+  // ── Date validation ──
+  'Date cannot be in the past': 'Date cannot be in the past',
+  'Cannot create bookings for past dates': 'Cannot create bookings for past dates',
+
 }
 
 export default en

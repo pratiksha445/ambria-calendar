@@ -49,6 +49,17 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
   const { eventTypes: dirEventTypes, users: dirUsers, elements: dirElements } = useDirectory()
   const editing = !!(initial && initial.id)
   const readOnly = editing && initial?.source !== 'manual'
+  const todayStr = useMemo(() => {
+    const d = new Date()
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  }, [])
+  // For new bookings, inject min=today on primary date pickers
+  const augmentField = (f) => {
+    if (!editing && f.type === 'date' && (f.key === 'date' || f.key === 'check_in_date')) {
+      return { ...f, min: todayStr }
+    }
+    return f
+  }
 
   const [venueId, setVenueId] = useState(() => initial?.venue_id ?? '')
   const [form, setForm] = useState(() => {
@@ -274,6 +285,17 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
         if (isFieldRequired(field, slot) && isEmpty) {
           nextErrors[`slot_${si}_${field.key}`] = 'Required'
         }
+      }
+    }
+
+    // Past-date validation
+    const primaryDateKey = venueId === 'villa' ? 'check_in_date' : 'date'
+    const dateVal = form[primaryDateKey]
+    if (dateVal && dateVal < todayStr) {
+      if (!editing) {
+        nextErrors[primaryDateKey] = 'Date cannot be in the past'
+      } else if (dateVal !== initial?.[primaryDateKey]) {
+        nextErrors[primaryDateKey] = 'Date cannot be in the past'
       }
     }
 
@@ -774,7 +796,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
                       {field.fields.map((f) => (
                         <Field
                           key={f.key}
-                          field={f}
+                          field={augmentField(f)}
                           form={form}
                           value={form[f.key]}
                           onChange={setField}
@@ -789,7 +811,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
                 return (
                   <Field
                     key={field.key}
-                    field={field}
+                    field={augmentField(field)}
                     form={form}
                     value={form[field.key]}
                     onChange={setField}
@@ -868,6 +890,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
                     className="postpone-date-input"
                     value={postponeDate}
                     onChange={(e) => onPostponeDateChange(e.target.value)}
+                    min={todayStr}
                   />
                 </div>
                 <div className="postpone-date-group">
@@ -879,7 +902,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
                     className="postpone-date-input"
                     value={postponeEndDate}
                     onChange={(e) => setPostponeEndDate(e.target.value)}
-                    min={postponeDate || undefined}
+                    min={postponeDate || todayStr}
                   />
                 </div>
               </div>
@@ -891,6 +914,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
                   className="postpone-date-input"
                   value={postponeDate}
                   onChange={(e) => setPostponeDate(e.target.value)}
+                  min={todayStr}
                 />
               </>
             )}
