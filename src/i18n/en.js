@@ -720,6 +720,20 @@ const en = {
   'No matching event types': 'No matching event types',
   'Cannot delete the Other event type': 'Cannot delete the Other event type',
 
+  // ── Event List ──
+  'Event List': 'Event List',
+  'Download Excel': 'Download Excel',
+  'All Statuses': 'All Statuses',
+  'Search guest, venue, sales person…': 'Search guest, venue, sales person…',
+  'selected': 'selected',
+  'Total': 'Total',
+  'No events found for {month} {year}': 'No events found for {month} {year}',
+  'End Date': 'End Date',
+  'Guest Name': 'Guest Name',
+  'Venue Name': 'Venue Name',
+  'Pending Payment': 'Pending Payment',
+  'Payment Status': 'Payment Status',
+
 }
 
 export default en

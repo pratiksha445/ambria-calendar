@@ -720,6 +720,20 @@ const hi = {
   'No matching event types': 'कोई मिलता इवेंट प्रकार नहीं',
   'Cannot delete the Other event type': '"अन्य" इवेंट प्रकार हटाया नहीं जा सकता',
 
+  // ── इवेंट सूची ──
+  'Event List': 'इवेंट सूची',
+  'Download Excel': 'एक्सेल डाउनलोड',
+  'All Statuses': 'सभी स्थितियाँ',
+  'Search guest, venue, sales person…': 'अतिथि, वेन्यू, विक्रेता खोजें…',
+  'selected': 'चयनित',
+  'Total': 'कुल',
+  'No events found for {month} {year}': '{month} {year} के लिए कोई इवेंट नहीं मिला',
+  'End Date': 'अंतिम तिथि',
+  'Guest Name': 'अतिथि नाम',
+  'Venue Name': 'वेन्यू नाम',
+  'Pending Payment': 'बकाया भुगतान',
+  'Payment Status': 'भुगतान स्थिति',
+
 }
 
 export default hi

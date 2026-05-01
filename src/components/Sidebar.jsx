@@ -175,6 +175,21 @@ export default function Sidebar({
           )}
           {user?.role === 'admin' && (
             <button
+              className={`nav-item ${currentView === 'event-list' ? 'active' : ''}`}
+              onClick={() => onNavigate('event-list')}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
+                <line x1="8" y1="10" x2="16" y2="10" />
+                <line x1="8" y1="14" x2="16" y2="14" />
+                <line x1="8" y1="18" x2="12" y2="18" />
+              </svg>
+              {t('Event List')}
+            </button>
+          )}
+          {user?.role === 'admin' && (
+            <button
               className={`nav-item ${currentView === 'audit' ? 'active' : ''}`}
               onClick={() => onNavigate('audit')}
             >

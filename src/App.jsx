@@ -16,6 +16,7 @@ import EventTypeManagement from './components/EventTypeManagement.jsx'
 import CategoryManagement from './components/CategoryManagement.jsx'
 import ManageElements from './components/ManageElements.jsx'
 import VenueManagers from './components/VenueManagers.jsx'
+import EventList from './components/EventList.jsx'
 import { fetchEvents, deleteEvent, bulkDeleteMonth } from './lib/events.js'
 import { getEventTypeAbbr } from './lib/eventTypes.js'
 import { seedIfEmpty } from './lib/seedEvents.js'
@@ -536,6 +537,9 @@ export default function App() {
         )}
         {currentView === 'venue-managers' && user.role === 'admin' && (
           <VenueManagers currentUser={user} showToast={showToast} onMenu={() => setSidebarOpen(true)} />
+        )}
+        {currentView === 'event-list' && user.role === 'admin' && (
+          <EventList currentUser={user} showToast={showToast} onMenu={() => setSidebarOpen(true)} />
         )}
       </div>
       <DayModal
