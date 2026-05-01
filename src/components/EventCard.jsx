@@ -8,11 +8,24 @@ import { loadElementLabels, getElementLabel } from '../lib/elements.js'
 
 const OWN_VENUES = new Set(['ap', 'am', 'ae', 'ar'])
 
+function getSortedSlots(event) {
+  if (!Array.isArray(event.event_slots) || event.event_slots.length <= 1) return null
+  return [...event.event_slots].sort((a, b) => {
+    if (!a.time && !b.time) return 0
+    if (!a.time) return 1
+    if (!b.time) return -1
+    return a.time.localeCompare(b.time)
+  })
+}
+
 export default memo(function EventCard({ event, expanded = false, onToggle, onEdit, onDelete, user }) {
   const { t, lang, formatShortDate } = useLanguage()
   const [elementLabels, setElementLabels] = useState({})
   const venue = VENUE_BY_ID[event.venue_id]
-  const shiftBadge = event.shift ? SHIFT_BADGE[event.shift] : null
+  const isMultiEvent = Array.isArray(event.event_slots) && event.event_slots.length > 1
+  const sortedSlots = isMultiEvent ? getSortedSlots(event) : null
+  const earliestTime = sortedSlots?.[0]?.time
+  const shiftBadge = !isMultiEvent && event.shift ? SHIFT_BADGE[event.shift] : null
   const primary = buildPrimary(event, formatShortDate, t)
   const [confirmDel, setConfirmDel] = useState(false)
   const canModify = canAccessBooking(user, event)
@@ -82,7 +95,11 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
             <div className="event-card-stack">
               <span className="event-primary">{primary}</span>
               <div className="event-card-meta">
-                {event.time && isOwnVenue ? (
+                {isMultiEvent && earliestTime ? (
+                  <span className="event-time event-time-tap" onClick={openTimePopup}>
+                    {formatTime12(earliestTime)}<span className="time-expand-hint">&#9662;</span>
+                  </span>
+                ) : event.time && isOwnVenue ? (
                   <span className="event-time event-time-tap" onClick={openTimePopup}>
                     {formatTime12(event.time)}
                   </span>
@@ -139,6 +156,34 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
             <div className="time-popup-row"><span className="time-popup-label">{t('Wind Up')}</span><span>{formatTime12(event.wind_up_time) || '\u2014'}{event.wind_up_next_day && <span className="next-day-badge">+1</span>}</span></div>
             <div className="time-popup-row"><span className="time-popup-label">{t('Varmala')}</span><span>{formatTime12(event.varmala_time) || '\u2014'}</span></div>
             <div className="time-popup-row"><span className="time-popup-label">{t('Pheras')}</span><span>{formatTime12(event.pheras_time) || '\u2014'}{event.pheras_next_day && <span className="next-day-badge">+1</span>}</span></div>
+          </div>
+        </>,
+        document.body
+      )}
+
+      {showTimePopup && isMultiEvent && sortedSlots && createPortal(
+        <>
+          <div className="time-popup-backdrop" onClick={() => setShowTimePopup(false)} />
+          <div
+            className="time-popup"
+            style={{ top: popupPos.top, left: popupPos.left }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {sortedSlots.map((slot, i) => {
+              const sb = slot.shift ? SHIFT_BADGE[slot.shift] : null
+              const type = slot.event_type === 'Other' ? (slot.event_type_other || '') : (slot.event_type || '')
+              return (
+                <div key={i} className="time-popup-row slot-time-row">
+                  {sb ? (
+                    <span className="slot-shift-dot" style={{ background: sb.color }}>{sb.short}</span>
+                  ) : (
+                    <span className="slot-shift-dot slot-shift-empty" />
+                  )}
+                  <span className="slot-time-val">{formatTime12(slot.time) || '\u2014'}</span>
+                  <span className="slot-type-label">{type}</span>
+                </div>
+              )
+            })}
           </div>
         </>,
         document.body

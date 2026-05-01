@@ -1083,6 +1083,45 @@
   letter-spacing: 0.04em;
 }
 
+/* Multi-event time expand hint (▾ chevron) */
+.time-expand-hint {
+  font-size: 8px;
+  margin-left: 3px;
+  opacity: 0.6;
+  vertical-align: middle;
+}
+
+/* Multi-event slot time popup rows */
+.slot-time-row {
+  justify-content: flex-start !important;
+  gap: 10px;
+}
+.slot-shift-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.slot-shift-empty {
+  background: var(--ambria-muted);
+  opacity: 0.3;
+}
+.slot-time-val {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  min-width: 72px;
+}
+.slot-type-label {
+  color: var(--ambria-muted);
+  font-weight: 500;
+}
+
 /* Next-day badge (+1) in time popup */
 .next-day-badge {
   display: inline-block;
