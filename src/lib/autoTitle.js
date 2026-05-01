@@ -81,10 +81,14 @@ export function autoTitle(form) {
   if (slots.length > 1) {
     return joinPipes([firstName(form.guest_name), 'Multi-Event', form.venue_name])
   }
+  // Slot fields (pax, event_type) live in event_slots[0] during editing;
+  // top-level form fields are only synced at save time.
+  const s0 = slots[0] || {}
+  const pax = s0.pax || form.pax
   return joinPipes([
     firstName(form.guest_name),
-    eventTypeLabel(form),
-    form.pax ? `${form.pax}pax` : '',
+    eventTypeLabel({ event_type: s0.event_type || form.event_type, event_type_other: s0.event_type_other || form.event_type_other }),
+    pax ? `${pax}pax` : '',
     form.venue_name,
   ])
 }
