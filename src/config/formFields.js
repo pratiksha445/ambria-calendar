@@ -656,7 +656,10 @@ function wsSections(_venue, dynamicTypes) {
         phoneReq(),
         paxField(),
         S('Guest Category', 'guest_category', GUEST_CATEGORIES, true),
-        salesPersonField(),
+        { ...salesPersonField(),
+          userFilter: { department: 'Wedding Services' },
+          userEmptyMsg: 'No Wedding Services users available. Add users in Manage Users.',
+        },
         T('Pending Payment %', 'payment_remaining_venue', true, {
           filterFn: percentFilter, filterError: 'Only numbers 0-100',
           suffix: '%', inputMode: 'numeric',
