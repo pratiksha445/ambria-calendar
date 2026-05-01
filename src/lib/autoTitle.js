@@ -3,7 +3,9 @@
 // Salutations (Mr., Mrs., Ms., Dr., Shri, Smt — with or without trailing dot)
 // are stripped; we use the first non-salutation word as the "first name".
 //
-// Shift shortforms: M=Morning, L=Lunch, S=Sundowner, D=Dinner.
+// When a translation function (t) is provided, translatable parts
+// (event types, shift initials, pax suffix, Multi-Event) are localized.
+// User-entered data (names, venue names) stays as-is.
 
 const SALUTATIONS = new Set([
   'mr', 'mrs', 'ms', 'dr', 'shri', 'smt',
@@ -20,21 +22,33 @@ function firstName(name) {
   return parts[0] ?? ''
 }
 
-function shiftInitial(shift) {
+function shiftInitial(shift, t) {
   if (!shift) return ''
+  if (t) return t(`shift_short_${shift}`) || shift.charAt(0).toUpperCase()
   return shift.charAt(0).toUpperCase() // Morning→M, Lunch→L, Sundowner→S, Dinner→D
 }
 
-function eventTypeLabel(form) {
-  if (form.event_type === 'Other') return form.event_type_other || ''
-  return form.event_type || ''
+function eventTypeLabel(form, t) {
+  const raw = form.event_type === 'Other'
+    ? (form.event_type_other || '')
+    : (form.event_type || '')
+  if (!raw) return ''
+  // Translate known event types; user-entered "Other" text stays as-is
+  if (t && form.event_type !== 'Other') return t(raw)
+  return raw
+}
+
+function paxLabel(pax, t) {
+  if (!pax) return ''
+  if (t) return `${pax}${t('pax_suffix')}`
+  return `${pax}pax`
 }
 
 function joinPipes(parts) {
   return parts.map((p) => (p ?? '').toString().trim()).filter(Boolean).join(' | ')
 }
 
-export function autoTitle(form) {
+export function autoTitle(form, t) {
   if (!form || !form.venue_id) return ''
 
   const venueId = form.venue_id
@@ -44,15 +58,16 @@ export function autoTitle(form) {
     if (!fn && !form.sub_venue) return ''
     const parts = [fn || '—']
     if (form.sub_venue) parts.push(form.sub_venue)
-    if (form.pax) parts.push(`${form.pax}pax`)
+    if (form.pax) parts.push(paxLabel(form.pax, t))
     return parts.join(' | ')
   }
 
   if (venueId === 'tender') {
+    const etRaw = eventTypeLabel(form, t) || form.event_type_text || ''
     return joinPipes([
       firstName(form.tender_name),
-      eventTypeLabel(form) || form.event_type_text || '',
-      form.pax ? `${form.pax}pax` : '',
+      etRaw,
+      paxLabel(form.pax, t),
       form.venue_name,
     ])
   }
@@ -60,9 +75,9 @@ export function autoTitle(form) {
   if (venueId === 'ap' || venueId === 'am' || venueId === 'ae' || venueId === 'ar') {
     return joinPipes([
       firstName(form.guest_name),
-      eventTypeLabel(form),
-      form.pax ? `${form.pax}pax` : '',
-      shiftInitial(form.shift),
+      eventTypeLabel(form, t),
+      paxLabel(form.pax, t),
+      shiftInitial(form.shift, t),
       form.menu_cat,
     ])
   }
@@ -70,8 +85,8 @@ export function autoTitle(form) {
   if (venueId === 'ws') {
     return joinPipes([
       firstName(form.guest_name),
-      eventTypeLabel(form),
-      form.pax ? `${form.pax}pax` : '',
+      eventTypeLabel(form, t),
+      paxLabel(form.pax, t),
       form.venue_name,
     ])
   }
@@ -79,7 +94,8 @@ export function autoTitle(form) {
   // add, ac, aee — external venue bookings
   const slots = Array.isArray(form.event_slots) ? form.event_slots : []
   if (slots.length > 1) {
-    return joinPipes([firstName(form.guest_name), 'Multi-Event', form.venue_name])
+    const multiLabel = t ? t('Multi-Event') : 'Multi-Event'
+    return joinPipes([firstName(form.guest_name), multiLabel, form.venue_name])
   }
   // Slot fields (pax, event_type) live in event_slots[0] during editing;
   // top-level form fields are only synced at save time.
@@ -87,8 +103,8 @@ export function autoTitle(form) {
   const pax = s0.pax || form.pax
   return joinPipes([
     firstName(form.guest_name),
-    eventTypeLabel({ event_type: s0.event_type || form.event_type, event_type_other: s0.event_type_other || form.event_type_other }),
-    pax ? `${pax}pax` : '',
+    eventTypeLabel({ event_type: s0.event_type || form.event_type, event_type_other: s0.event_type_other || form.event_type_other }, t),
+    paxLabel(pax, t),
     form.venue_name,
   ])
 }

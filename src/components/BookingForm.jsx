@@ -142,7 +142,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
       )
     ).then((results) => setFilteredUsersMap(Object.fromEntries(results)))
   }, [filterKeysStr])
-  const computedTitle = useMemo(() => autoTitle({ ...form, venue_id: venueId, event_slots: eventSlots }), [form, venueId, eventSlots])
+  const computedTitle = useMemo(() => autoTitle({ ...form, venue_id: venueId, event_slots: eventSlots }, t), [form, venueId, eventSlots, t])
   const displayTitle = manualTitle ?? computedTitle
 
   const getUsersForField = (field) => {

@@ -738,6 +738,10 @@ const en = {
   'Date cannot be in the past': 'Date cannot be in the past',
   'Cannot create bookings for past dates': 'Cannot create bookings for past dates',
 
+  // ── Auto-title i18n ──
+  'pax_suffix': 'pax',
+  'Multi-Event': 'Multi-Event',
+
 }
 
 export default en

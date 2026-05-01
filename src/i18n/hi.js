@@ -738,6 +738,10 @@ const hi = {
   'Date cannot be in the past': 'तिथि बीते हुए समय में नहीं हो सकती',
   'Cannot create bookings for past dates': 'बीती हुई तिथियों के लिए बुकिंग नहीं बनाई जा सकती',
 
+  // ── ऑटो-टाइटल i18n ──
+  'pax_suffix': 'पैक्स',
+  'Multi-Event': 'मल्टी-इवेंट',
+
 }
 
 export default hi
