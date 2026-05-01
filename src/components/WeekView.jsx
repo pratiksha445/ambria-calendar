@@ -23,6 +23,14 @@ export default function WeekView({ currentDate, selectedDate, onSelectDate, even
             map[iso] = (map[iso] || 0) + 1
           }
         }
+      // TND multi-day: count on every day within the date range
+      } else if (ev.venue_id === 'tender' && ev.date && ev.end_date && ev.end_date > ev.date) {
+        for (const d of days) {
+          const iso = toIsoDate(d)
+          if (iso >= ev.date && iso <= ev.end_date) {
+            map[iso] = (map[iso] || 0) + 1
+          }
+        }
       } else {
         // Normal single-day event
         if (map[ev.date] !== undefined) {

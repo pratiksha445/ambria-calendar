@@ -14,6 +14,10 @@ export default function DayView({ selectedDate, events, onEdit, onDelete, onAdd,
     if (e.venue_id === 'villa' && e.check_in_date && e.check_out_date
         && e.check_out_date > e.check_in_date
         && iso >= e.check_in_date && iso <= e.check_out_date) return true
+    // TND multi-day: include if this day falls within the date range
+    if (e.venue_id === 'tender' && e.date && e.end_date
+        && e.end_date > e.date
+        && iso >= e.date && iso <= e.end_date) return true
     return false
   }), [events, iso])
 

@@ -71,7 +71,11 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
   const [lockToast, setLockToast] = useState(false)
   const [showPostponeModal, setShowPostponeModal] = useState(false)
   const [postponeDate, setPostponeDate] = useState('')
+  const [postponeEndDate, setPostponeEndDate] = useState('')
   const [pendingPayload, setPendingPayload] = useState(null)
+  const [showCancelModal, setShowCancelModal] = useState(false)
+  const [cancelMode, setCancelMode] = useState('entire')
+  const [cancelFromDate, setCancelFromDate] = useState('')
   const [eventSlots, setEventSlots] = useState(() => {
     if (!SLOT_CATEGORIES.has(venueId)) return []
     if (editing && Array.isArray(initial.event_slots) && initial.event_slots.length > 0) {
@@ -434,8 +438,22 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
     if (editing && form.status === 'Postponed' && initial?.status !== 'Postponed') {
       setPendingPayload(payload)
       setPostponeDate('')
+      setPostponeEndDate('')
       setShowPostponeModal(true)
       return
+    }
+
+    // Intercept: status changing TO Cancelled on multi-day Villa/TND → show cancel modal
+    if (editing && form.status === 'Cancelled' && initial?.status !== 'Cancelled') {
+      const isMultiDayVilla = venueId === 'villa' && initial.check_in_date && initial.check_out_date && initial.check_out_date > initial.check_in_date
+      const isMultiDayTnd = venueId === 'tender' && initial.date && initial.end_date && initial.end_date > initial.date
+      if (isMultiDayVilla || isMultiDayTnd) {
+        setPendingPayload(payload)
+        setCancelMode('entire')
+        setCancelFromDate('')
+        setShowCancelModal(true)
+        return
+      }
     }
 
     setSaving(true)
@@ -452,29 +470,50 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
     }
   }
 
+  const isoFromDate = (d) => {
+    const y = d.getFullYear()
+    const m = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    return `${y}-${m}-${day}`
+  }
+
+  // Auto-fill postpone end date when start date changes (preserve duration)
+  const onPostponeDateChange = (newStart) => {
+    setPostponeDate(newStart)
+    if (!newStart) { setPostponeEndDate(''); return }
+    if (venueId === 'villa' && initial.check_in_date && initial.check_out_date) {
+      const origDays = Math.round((new Date(initial.check_out_date + 'T00:00:00') - new Date(initial.check_in_date + 'T00:00:00')) / 86400000)
+      const nd = new Date(newStart + 'T00:00:00')
+      nd.setDate(nd.getDate() + origDays)
+      setPostponeEndDate(isoFromDate(nd))
+    } else if (venueId === 'tender' && initial.date && initial.end_date) {
+      const origDays = Math.round((new Date(initial.end_date + 'T00:00:00') - new Date(initial.date + 'T00:00:00')) / 86400000)
+      const nd = new Date(newStart + 'T00:00:00')
+      nd.setDate(nd.getDate() + origDays)
+      setPostponeEndDate(isoFromDate(nd))
+    }
+  }
+
   const confirmPostpone = async () => {
     if (!postponeDate || !pendingPayload) return
     setSaving(true)
     setShowPostponeModal(false)
     try {
       const payload = { ...pendingPayload }
-      payload.postponed_from_date = initial.date
       payload.postponed_at = new Date().toISOString()
-      payload.date = postponeDate
 
-      // Villa: shift check_out_date by the same duration as the original stay
-      if (venueId === 'villa' && initial.check_in_date && initial.check_out_date) {
-        const cin = new Date(initial.check_in_date + 'T00:00:00')
-        const cout = new Date(initial.check_out_date + 'T00:00:00')
-        const stayDays = Math.round((cout - cin) / (24 * 60 * 60 * 1000))
+      if (venueId === 'villa') {
+        payload.postponed_from_date = initial.check_in_date || initial.date
         payload.check_in_date = postponeDate
-        payload.date = postponeDate // Villa date = check_in_date
-        const newCout = new Date(postponeDate + 'T00:00:00')
-        newCout.setDate(newCout.getDate() + stayDays)
-        const y = newCout.getFullYear()
-        const m = String(newCout.getMonth() + 1).padStart(2, '0')
-        const d = String(newCout.getDate()).padStart(2, '0')
-        payload.check_out_date = `${y}-${m}-${d}`
+        payload.date = postponeDate
+        payload.check_out_date = postponeEndDate || postponeDate
+      } else if (venueId === 'tender') {
+        payload.postponed_from_date = initial.date
+        payload.date = postponeDate
+        payload.end_date = postponeEndDate || null
+      } else {
+        payload.postponed_from_date = initial.date
+        payload.date = postponeDate
       }
 
       const row = await updateEvent(initial.id, payload, user)
@@ -492,7 +531,74 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
     setShowPostponeModal(false)
     setPendingPayload(null)
     setPostponeDate('')
-    // Revert status to what it was before
+    setPostponeEndDate('')
+    setField('status', initial?.status || 'Confirmed')
+  }
+
+  const confirmCancel = async () => {
+    if (!pendingPayload) return
+    setSaving(true)
+    setShowCancelModal(false)
+    try {
+      if (cancelMode === 'entire') {
+        // Cancel entire booking
+        const row = await updateEvent(initial.id, pendingPayload, user)
+        onSaved?.(row)
+      } else {
+        // Partial cancel — split into truncated original + new cancelled portion
+        if (!cancelFromDate) return
+
+        const dayBefore = new Date(cancelFromDate + 'T00:00:00')
+        dayBefore.setDate(dayBefore.getDate() - 1)
+        const dayBeforeIso = isoFromDate(dayBefore)
+
+        // 1. Truncate original booking (keep its current status)
+        const truncPayload = { ...pendingPayload }
+        truncPayload.status = initial.status // restore original status
+        if (venueId === 'villa') {
+          truncPayload.check_out_date = cancelFromDate
+        } else {
+          truncPayload.end_date = dayBeforeIso
+        }
+        await updateEvent(initial.id, truncPayload, user)
+
+        // 2. Create new cancelled portion
+        const cancelledPayload = { ...pendingPayload }
+        cancelledPayload.status = 'Cancelled'
+        // Clear postpone metadata on the split
+        cancelledPayload.postponed_from_date = null
+        cancelledPayload.postponed_at = null
+        if (venueId === 'villa') {
+          cancelledPayload.check_in_date = cancelFromDate
+          cancelledPayload.date = cancelFromDate
+          cancelledPayload.check_out_date = initial.check_out_date
+        } else {
+          cancelledPayload.date = cancelFromDate
+          cancelledPayload.end_date = initial.end_date
+        }
+        // Remove id so createEvent generates a new one
+        delete cancelledPayload.id
+        cancelledPayload.source = 'manual'
+        cancelledPayload.created_by = user?.id || null
+
+        const newRow = await createEvent(cancelledPayload, user)
+        // Return the original (truncated) row to refresh the UI
+        onSaved?.({ ...initial, ...truncPayload, _splitCreatedId: newRow.id })
+      }
+    } catch (err) {
+      console.error('[ambria] cancel save failed', err)
+      setSubmitError(err?.message ?? String(err))
+    } finally {
+      setSaving(false)
+      setPendingPayload(null)
+    }
+  }
+
+  const cancelCancelModal = () => {
+    setShowCancelModal(false)
+    setPendingPayload(null)
+    setCancelFromDate('')
+    setCancelMode('entire')
     setField('status', initial?.status || 'Confirmed')
   }
 
@@ -751,23 +857,45 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
           <div className="postpone-modal" onClick={(e) => e.stopPropagation()}>
             <h3>{t('Postpone Event')}</h3>
             <p>{t('Select the new date for this event')}</p>
-            <label className="postpone-date-label">
-              {venueId === 'villa' ? t('New check-in date') : t('New date')}
-            </label>
-            <input
-              type="date"
-              className="postpone-date-input"
-              value={postponeDate}
-              onChange={(e) => setPostponeDate(e.target.value)}
-            />
+            {(venueId === 'villa' || venueId === 'tender') ? (
+              <div className="postpone-date-row">
+                <div className="postpone-date-group">
+                  <label className="postpone-date-label">
+                    {venueId === 'villa' ? t('New check-in date') : t('New start date')}
+                  </label>
+                  <input
+                    type="date"
+                    className="postpone-date-input"
+                    value={postponeDate}
+                    onChange={(e) => onPostponeDateChange(e.target.value)}
+                  />
+                </div>
+                <div className="postpone-date-group">
+                  <label className="postpone-date-label">
+                    {venueId === 'villa' ? t('New check-out date') : t('New end date')}
+                  </label>
+                  <input
+                    type="date"
+                    className="postpone-date-input"
+                    value={postponeEndDate}
+                    onChange={(e) => setPostponeEndDate(e.target.value)}
+                    min={postponeDate || undefined}
+                  />
+                </div>
+              </div>
+            ) : (
+              <>
+                <label className="postpone-date-label">{t('New date')}</label>
+                <input
+                  type="date"
+                  className="postpone-date-input"
+                  value={postponeDate}
+                  onChange={(e) => setPostponeDate(e.target.value)}
+                />
+              </>
+            )}
             <div className="postpone-actions">
-              <button
-                type="button"
-                className="btn-ghost"
-                onClick={cancelPostpone}
-              >
-                {t('Cancel')}
-              </button>
+              <button type="button" className="btn-ghost" onClick={cancelPostpone}>{t('Cancel')}</button>
               <button
                 type="button"
                 className="btn-save"
@@ -775,6 +903,62 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
                 onClick={confirmPostpone}
               >
                 {t('Confirm Postpone')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showCancelModal && (
+        <div className="postpone-overlay" onClick={cancelCancelModal}>
+          <div className="postpone-modal" onClick={(e) => e.stopPropagation()}>
+            <h3>{t('Cancel Booking')}</h3>
+            <p>
+              {venueId === 'villa'
+                ? t('This booking spans {start} to {end}. Cancel from which date?')
+                    .replace('{start}', initial.check_in_date).replace('{end}', initial.check_out_date)
+                : t('This booking spans {start} to {end}. Cancel from which date?')
+                    .replace('{start}', initial.date).replace('{end}', initial.end_date)
+              }
+            </p>
+            <div className="cancel-options">
+              <label className="cancel-option">
+                <input type="radio" name="cancelMode" value="entire" checked={cancelMode === 'entire'} onChange={() => setCancelMode('entire')} />
+                <span>{t('Cancel entire booking')}</span>
+              </label>
+              <label className="cancel-option">
+                <input type="radio" name="cancelMode" value="partial" checked={cancelMode === 'partial'} onChange={() => setCancelMode('partial')} />
+                <span>{t('Cancel from a specific date')}</span>
+              </label>
+            </div>
+            {cancelMode === 'partial' && (
+              <div className="cancel-date-section">
+                <label className="postpone-date-label">{t('Cancel from date')}</label>
+                <input
+                  type="date"
+                  className="postpone-date-input"
+                  value={cancelFromDate}
+                  onChange={(e) => setCancelFromDate(e.target.value)}
+                  min={(() => {
+                    const start = venueId === 'villa' ? initial.check_in_date : initial.date
+                    if (!start) return undefined
+                    const d = new Date(start + 'T00:00:00')
+                    d.setDate(d.getDate() + 1)
+                    return isoFromDate(d)
+                  })()}
+                  max={venueId === 'villa' ? initial.check_out_date : initial.end_date}
+                />
+              </div>
+            )}
+            <div className="postpone-actions">
+              <button type="button" className="btn-ghost" onClick={cancelCancelModal}>{t('Go Back')}</button>
+              <button
+                type="button"
+                className="btn-cancel-confirm"
+                disabled={saving || (cancelMode === 'partial' && !cancelFromDate)}
+                onClick={confirmCancel}
+              >
+                {t('Confirm Cancel')}
               </button>
             </div>
           </div>

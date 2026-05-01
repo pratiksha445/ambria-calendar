@@ -4413,9 +4413,63 @@ input, select, textarea {
   box-sizing: border-box;
 }
 
+.postpone-date-row {
+  display: flex;
+  gap: 10px;
+}
+.postpone-date-group {
+  flex: 1;
+  min-width: 0;
+}
+
 .postpone-actions {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
   margin-top: 18px;
+}
+
+/* ---------- Cancel modal ---------- */
+
+.cancel-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.cancel-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--ambria-ink);
+  cursor: pointer;
+}
+
+.cancel-option input[type="radio"] {
+  accent-color: var(--ambria-accent);
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+
+.cancel-date-section {
+  margin-bottom: 4px;
+}
+
+.btn-cancel-confirm {
+  background: #dc3545;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-cancel-confirm:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

@@ -15,10 +15,10 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, onE
   const eventsByDay = useMemo(() => groupByDate(events), [events])
   const wide = window.innerWidth >= 768
 
-  // Villa multi-day spans: build a map of isoDate → [{ event, isStart, isEnd, showLabel }]
+  // Multi-day spans (Villa + TND): isoDate → [{ event, isStart, isEnd }]
   // and a Set of event IDs that participate in spans (to exclude from normal pills)
-  const { villaSpanMap, villaSpanIds } = useMemo(
-    () => buildVillaSpanMap(events, days),
+  const { spanMap, spanIds } = useMemo(
+    () => buildSpanMap(events, days),
     [events, days],
   )
 
@@ -33,18 +33,18 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, onE
         {days.map((d, i) => {
           const iso = toIsoDate(d)
           const allDayEvents = eventsByDay[iso] ?? []
-          // Separate villa span events from normal events
-          const regularEvents = villaSpanIds.size > 0
-            ? allDayEvents.filter((ev) => !villaSpanIds.has(ev.id))
+          // Separate span events from normal events
+          const regularEvents = spanIds.size > 0
+            ? allDayEvents.filter((ev) => !spanIds.has(ev.id))
             : allDayEvents
-          const villaSegs = villaSpanMap[iso] ?? []
+          const spanSegs = spanMap[iso] ?? []
 
           const limit = wide ? MAX_PILLS_DESKTOP : MAX_PILLS
-          // Villa spans take priority slots, then regular pills fill remaining
-          const spanCount = Math.min(villaSegs.length, limit)
+          // Spans take priority slots, then regular pills fill remaining
+          const spanCount = Math.min(spanSegs.length, limit)
           const regularLimit = Math.max(0, limit - spanCount)
           const visibleRegular = regularEvents.slice(0, regularLimit)
-          const totalOnDay = villaSegs.length + regularEvents.length
+          const totalOnDay = spanSegs.length + regularEvents.length
           const visibleTotal = spanCount + visibleRegular.length
           const extra = totalOnDay - visibleTotal
 
@@ -74,9 +74,9 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, onE
                     <div className="pill-skeleton pill-skeleton-short" />
                   </>
                 )}
-                {/* Villa spanning segments first */}
-                {villaSegs.slice(0, spanCount).map((seg) => {
-                  const venue = VENUE_BY_ID['villa']
+                {/* Multi-day spanning segments first (Villa + TND) */}
+                {spanSegs.slice(0, spanCount).map((seg) => {
+                  const venue = VENUE_BY_ID[seg.event.venue_id]
                   const posClass = seg.isStart && seg.isEnd ? 'villa-seg-single'
                     : seg.isStart ? 'villa-seg-start'
                     : seg.isEnd ? 'villa-seg-end'
@@ -87,12 +87,12 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, onE
                       key={`vs-${seg.event.id}`}
                       className={`day-pill villa-seg ${posClass}${statusClass}`}
                       style={{
-                        background: venue?.color ?? '#9A6BBE',
+                        background: venue?.color ?? '#ccc',
                         color: venue?.textColor ?? '#fff',
                       }}
                       title={buildPillTooltip(seg.event, eventTypes)}
                     >
-                      {villaSpanLabel(seg.event)}
+                      {seg.event.venue_id === 'villa' ? villaSpanLabel(seg.event) : buildPillLabel(seg.event, eventTypes)}
                     </div>
                   )
                 })}
@@ -124,33 +124,43 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, onE
   )
 }
 
-// ── Villa spanning helpers ──
+// ── Multi-day spanning helpers (Villa + TND) ──
 
-function buildVillaSpanMap(events, gridDays) {
-  const villaSpanMap = {} // { [isoDate]: [{ event, isStart, isEnd, showLabel }] }
-  const villaSpanIds = new Set()
+function getSpanDates(ev) {
+  if (ev.venue_id === 'villa') {
+    const cin = ev.check_in_date || ev.date
+    const cout = ev.check_out_date
+    return (cin && cout && cout > cin) ? [cin, cout] : null
+  }
+  if (ev.venue_id === 'tender') {
+    const cin = ev.date
+    const cout = ev.end_date
+    return (cin && cout && cout > cin) ? [cin, cout] : null
+  }
+  return null
+}
+
+function buildSpanMap(events, gridDays) {
+  const spanMap = {} // { [isoDate]: [{ event, isStart, isEnd }] }
+  const spanIds = new Set()
   const gridIsos = gridDays.map(toIsoDate)
   const gridSet = new Set(gridIsos)
   const firstGridIso = gridIsos[0]
   const lastGridIso = gridIsos[gridIsos.length - 1]
 
-  // Collect valid Villa spans
+  // Collect valid spans (Villa + TND)
   const spans = []
   for (const ev of events) {
-    if (ev.venue_id !== 'villa') continue
-    const cin = ev.check_in_date || ev.date
-    const cout = ev.check_out_date
-    if (!cin || !cout || cout <= cin) continue
-    spans.push(ev)
-    villaSpanIds.add(ev.id)
+    const dates = getSpanDates(ev)
+    if (!dates) continue
+    spans.push({ ev, cin: dates[0], cout: dates[1] })
+    spanIds.add(ev.id)
   }
 
-  // Sort by check-in date for consistent rendering order
-  spans.sort((a, b) => (a.check_in_date || a.date).localeCompare(b.check_in_date || b.date))
+  // Sort by start date for consistent rendering order
+  spans.sort((a, b) => a.cin.localeCompare(b.cin))
 
-  for (const ev of spans) {
-    const cin = ev.check_in_date || ev.date
-    const cout = ev.check_out_date
+  for (const { ev, cin, cout } of spans) {
     // Clamp iteration to visible grid range
     const iterStart = cin < firstGridIso ? firstGridIso : cin
     const iterEnd = cout > lastGridIso ? lastGridIso : cout
@@ -160,8 +170,8 @@ function buildVillaSpanMap(events, gridDays) {
     while (d <= end) {
       const iso = toIsoDate(d)
       if (gridSet.has(iso)) {
-        if (!villaSpanMap[iso]) villaSpanMap[iso] = []
-        villaSpanMap[iso].push({
+        if (!spanMap[iso]) spanMap[iso] = []
+        spanMap[iso].push({
           event: ev,
           isStart: iso === cin,
           isEnd: iso === cout,
@@ -171,7 +181,7 @@ function buildVillaSpanMap(events, gridDays) {
     }
   }
 
-  return { villaSpanMap, villaSpanIds }
+  return { spanMap, spanIds }
 }
 
 function villaSpanLabel(ev) {
@@ -287,6 +297,9 @@ function buildPillTooltip(ev, eventTypes) {
       const ft = ev.event_type === 'Other' ? (ev.event_type_other || 'Other')
         : (ev.event_type || ev.event_type_text || '')
       if (ft) parts.push(ft)
+      if (ev.date && ev.end_date && ev.end_date > ev.date) {
+        parts.push(`${ev.date} → ${ev.end_date}`)
+      }
       return parts.join(' · ')
     }
 
