@@ -4473,3 +4473,326 @@ input, select, textarea {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* ========== Venue Managers page ========== */
+
+.vm-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.vm-search {
+  flex: 1;
+  min-width: 180px;
+  padding: 8px 12px;
+  border: 1px solid var(--ambria-border);
+  border-radius: 8px;
+  font-size: 0.88rem;
+  background: var(--ambria-card);
+  color: var(--ambria-ink);
+}
+.vm-search:focus { outline: none; border-color: var(--ambria-accent); }
+.vm-filter-select {
+  padding: 8px 10px;
+  border: 1px solid var(--ambria-border);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  background: var(--ambria-card);
+  color: var(--ambria-ink);
+}
+.vm-date-input {
+  padding: 7px 8px;
+  border: 1px solid var(--ambria-border);
+  border-radius: 8px;
+  font-size: 0.82rem;
+  background: var(--ambria-card);
+  color: var(--ambria-ink);
+  max-width: 140px;
+}
+.vm-date-sep {
+  color: var(--ambria-muted);
+  font-size: 0.85rem;
+}
+.vm-group-btn {
+  padding: 8px 14px;
+  border: 1px solid var(--ambria-border);
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  background: var(--ambria-card);
+  color: var(--ambria-ink);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.vm-group-btn.vm-group-active {
+  background: var(--ambria-accent);
+  color: #fff;
+  border-color: var(--ambria-accent);
+}
+.vm-export-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border: 1px solid var(--ambria-border);
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  background: var(--ambria-card);
+  color: var(--ambria-ink);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.vm-export-btn:hover { border-color: var(--ambria-accent); }
+
+.vm-empty {
+  text-align: center;
+  padding: 48px 16px;
+  color: var(--ambria-muted);
+  font-size: 0.95rem;
+}
+
+/* ── Table header (desktop) ── */
+.vm-table-header {
+  display: none;
+}
+@media (min-width: 768px) {
+  .vm-table-header {
+    display: grid;
+    grid-template-columns: 2fr 1fr 2fr 1fr 1.2fr 1.5fr 1fr 0.8fr;
+    gap: 8px;
+    padding: 8px 14px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ambria-muted);
+    border-bottom: 1px solid var(--ambria-border);
+  }
+}
+
+/* ── Row (card on mobile, grid on desktop) ── */
+.vm-row {
+  appearance: none;
+  border: none;
+  background: var(--ambria-card);
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--ambria-border);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.vm-row:hover { background: var(--ambria-hover); }
+.vm-row:active { background: var(--ambria-active); }
+
+@media (min-width: 768px) {
+  .vm-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 2fr 1fr 1.2fr 1.5fr 1fr 0.8fr;
+    gap: 8px;
+    align-items: center;
+    padding: 10px 14px;
+  }
+}
+
+.vm-row-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.vm-mgr-name {
+  font-weight: 700;
+  font-size: 0.9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.vm-mgr-phone {
+  font-size: 0.8rem;
+  color: var(--ambria-accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+.vm-dept-badge {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+.vm-row-venue {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  font-size: 0.85rem;
+}
+.vm-row-venue > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.vm-loc-link {
+  font-size: 0.75rem;
+  color: var(--ambria-accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+.vm-loc-text {
+  font-size: 0.75rem;
+  color: var(--ambria-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.vm-row-date {
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+.vm-row-type {
+  font-size: 0.82rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.vm-row-guest {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  font-size: 0.85rem;
+}
+.vm-row-guest > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.vm-guest-phone {
+  font-size: 0.75rem;
+  color: var(--ambria-muted);
+}
+.vm-row-sales {
+  font-size: 0.82rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Grouped view ── */
+.vm-group-card {
+  border-bottom: 1px solid var(--ambria-border);
+}
+.vm-group-row {
+  appearance: none;
+  border: none;
+  background: var(--ambria-card);
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  padding: 12px 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  align-items: center;
+  position: relative;
+}
+.vm-group-row:hover { background: var(--ambria-hover); }
+.vm-group-meta {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.vm-group-count {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ambria-secondary);
+}
+.vm-group-date {
+  font-size: 0.75rem;
+  color: var(--ambria-muted);
+}
+.vm-group-venues {
+  font-size: 0.78rem;
+  color: var(--ambria-muted);
+  flex-basis: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.vm-chevron {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.7rem;
+  color: var(--ambria-muted);
+  transition: transform 0.15s ease;
+}
+.vm-chevron.open { transform: translateY(-50%) rotate(180deg); }
+.vm-group-expand {
+  border-top: 1px solid var(--ambria-border);
+  background: var(--ambria-bg);
+}
+.vm-group-expand .vm-row {
+  padding-left: 28px;
+}
+
+/* ── Pagination ── */
+.vm-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 0;
+}
+.vm-pagination button {
+  padding: 6px 14px;
+  border: 1px solid var(--ambria-border);
+  border-radius: 6px;
+  background: var(--ambria-card);
+  color: var(--ambria-ink);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.vm-pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.vm-pagination span {
+  font-size: 0.82rem;
+  color: var(--ambria-muted);
+}
+
+/* ── Mobile card tweaks ── */
+@media (max-width: 767px) {
+  .vm-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .vm-search { min-width: unset; }
+  .vm-date-input { max-width: unset; flex: 1; }
+  .vm-export-label { display: none; }
+  .vm-table-header { display: none; }
+  .vm-row {
+    border-radius: 10px;
+    margin-bottom: 8px;
+    border: 1px solid var(--ambria-border);
+    box-shadow: var(--ambria-shadow-pill);
+  }
+}

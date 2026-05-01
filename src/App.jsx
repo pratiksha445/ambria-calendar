@@ -15,6 +15,7 @@ import AuditLog from './components/AuditLog.jsx'
 import EventTypeManagement from './components/EventTypeManagement.jsx'
 import CategoryManagement from './components/CategoryManagement.jsx'
 import ManageElements from './components/ManageElements.jsx'
+import VenueManagers from './components/VenueManagers.jsx'
 import { fetchEvents, deleteEvent, bulkDeleteMonth } from './lib/events.js'
 import { getEventTypeAbbr } from './lib/eventTypes.js'
 import { seedIfEmpty } from './lib/seedEvents.js'
@@ -532,6 +533,9 @@ export default function App() {
         )}
         {currentView === 'elements' && user.role === 'admin' && (
           <ManageElements currentUser={user} showToast={showToast} onMenu={() => setSidebarOpen(true)} />
+        )}
+        {currentView === 'venue-managers' && user.role === 'admin' && (
+          <VenueManagers currentUser={user} showToast={showToast} onMenu={() => setSidebarOpen(true)} />
         )}
       </div>
       <DayModal
