@@ -4561,7 +4561,7 @@ input, select, textarea {
 @media (min-width: 768px) {
   .vm-table-header {
     display: grid;
-    grid-template-columns: 2fr 1fr 2fr 1fr 1.2fr 1.5fr 1fr 0.8fr;
+    grid-template-columns: 2fr 1fr 2fr 1fr 1.5fr 1fr;
     gap: 8px;
     padding: 8px 14px;
     font-size: 0.72rem;
@@ -4595,7 +4595,7 @@ input, select, textarea {
 @media (min-width: 768px) {
   .vm-row {
     display: grid;
-    grid-template-columns: 2fr 1fr 2fr 1fr 1.2fr 1.5fr 1fr 0.8fr;
+    grid-template-columns: 2fr 1fr 2fr 1fr 1.5fr 1fr;
     gap: 8px;
     align-items: center;
     padding: 10px 14px;
@@ -4659,12 +4659,6 @@ input, select, textarea {
 }
 .vm-row-date {
   font-size: 0.82rem;
-  white-space: nowrap;
-}
-.vm-row-type {
-  font-size: 0.82rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
 }
 .vm-row-guest {

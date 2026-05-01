@@ -7,7 +7,7 @@ const PAGE_SIZE = 25
 
 const DEPT_LABEL = { add: 'Decor', ac: 'Cuisine' }
 const DEPT_COLOR = { add: '#D4B83D', ac: '#E74C3C' }
-const STATUS_CLASS = { Confirmed: 'status-confirmed', Tentative: 'status-tentative', Cancelled: 'status-cancelled', Postponed: 'status-postponed' }
+
 
 function MenuIcon() {
   return (
@@ -50,17 +50,11 @@ function mapsUrl(loc) {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc)}`
 }
 
-function eventTypeLabel(ev) {
-  if (Array.isArray(ev.event_slots) && ev.event_slots.length > 1) return 'Multi-Event'
-  if (ev.event_type === 'Other') return ev.event_type_other || 'Other'
-  return ev.event_type || ''
-}
-
 function exportCsv(rows, t) {
   const headers = [
     'Venue Manager Name', 'Venue Manager Number', 'Department', 'Venue Name',
-    'Venue Type', 'Location', 'Event Date', 'Event Type', 'Guest Name',
-    'Guest Phone', 'Sales Person', 'Status',
+    'Venue Type', 'Location', 'Event Date', 'Guest Name',
+    'Guest Phone', 'Sales Person',
   ]
   const escape = (v) => {
     const s = String(v ?? '')
@@ -72,8 +66,8 @@ function exportCsv(rows, t) {
       escape(r.venue_manager_name), escape(r.venue_manager_number),
       escape(DEPT_LABEL[r.venue_id] || r.venue_id), escape(r.venue_name),
       escape(r.venue_type), escape(r.location), escape(r.date),
-      escape(eventTypeLabel(r)), escape(r.guest_name), escape(r.phone),
-      escape(r.sales_person), escape(r.status),
+      escape(r.guest_name), escape(r.phone),
+      escape(r.sales_person),
     ].join(','))
   }
   const blob = new Blob([lines.join('\n')], { type: 'text/csv' })
@@ -268,10 +262,8 @@ export default function VenueManagers({ currentUser, showToast, onMenu }) {
             <span>{t('Department')}</span>
             <span>{t('Venue')}</span>
             <span>{t('Date')}</span>
-            <span>{t('Event Type')}</span>
             <span>{t('Guest')}</span>
             <span>{t('Sales Person')}</span>
-            <span>{t('Status')}</span>
           </div>
           {pagedRows.map((r) => (
             <Row key={r.id} r={r} t={t} formatShortDate={formatShortDate} onEdit={() => setEditModal(r)} />
@@ -325,13 +317,11 @@ function Row({ r, t, formatShortDate, onEdit }) {
         )}
       </div>
       <span className="vm-row-date">{formatDate(r.date)}</span>
-      <span className="vm-row-type">{eventTypeLabel(r)}</span>
       <div className="vm-row-guest">
         <span>{r.guest_name || '—'}</span>
         {r.phone && <span className="vm-guest-phone">{r.phone}</span>}
       </div>
       <span className="vm-row-sales">{r.sales_person || '—'}</span>
-      <span className={`status-badge ${STATUS_CLASS[r.status] || ''}`}>{t(r.status || '')}</span>
     </button>
   )
 }
