@@ -40,6 +40,20 @@ export function formatTime12(timeStr) {
   return `${h}:${m} ${ampm}`
 }
 
+/** Compact time: "HH:MM" → "h:mmAM/PM" (no space before AM/PM) */
+export function formatTimeCompact(timeStr) {
+  if (!timeStr || typeof timeStr !== 'string') return ''
+  const parts = timeStr.slice(0, 5).split(':')
+  if (parts.length < 2) return ''
+  let h = parseInt(parts[0], 10)
+  const m = parts[1]
+  if (isNaN(h)) return ''
+  const ampm = h >= 12 ? 'PM' : 'AM'
+  if (h === 0) h = 12
+  else if (h > 12) h -= 12
+  return `${h}:${m}${ampm}`
+}
+
 const SHORT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 

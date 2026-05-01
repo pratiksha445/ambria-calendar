@@ -547,6 +547,7 @@ function aeeSections(_venue, dynamicTypes) {
       fields: [
         guestName(),
         phoneReq(),
+        S('Guest Category', 'guest_category', GUEST_CATEGORIES, false),
         { ...salesPersonField(),
           userFilter: { department: 'Entertainment Sales' },
           userEmptyMsg: 'No Entertainment Sales users available. Add users in Manage Users.',
@@ -714,7 +715,7 @@ export const FIELD_MAP = {
   aee: [
     'venue_name', 'venue_type', 'location', 'event_type', 'event_type_other',
     'shift', 'date', 'time',
-    'guest_name', 'phone', 'pax', 'sales_person', 'sales_person_id',
+    'guest_name', 'phone', 'pax', 'guest_category', 'sales_person', 'sales_person_id',
     'delivery_person', 'delivery_person_id', 'elements',
     'payment_remaining_venue', 'payment_timing', 'notes',
     'event_slots',

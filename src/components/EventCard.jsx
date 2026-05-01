@@ -1,7 +1,7 @@
 import { memo, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { VENUE_BY_ID, SHIFT_BADGE } from '../config/venues.js'
-import { formatTime12 } from '../lib/dates.js'
+import { formatTime12, formatTimeCompact } from '../lib/dates.js'
 import { canAccessBooking } from '../lib/sectionPermissions.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 import { loadElementLabels, getElementLabel } from '../lib/elements.js'
@@ -146,8 +146,8 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
 
       <div className="event-card-details" aria-hidden={!expanded}>
         <div className="event-card-details-inner">
-          {/* External venue fields (ADD/AC/AEE/Tender) */}
-          {event.venue_name && (
+          {/* External venue fields (Tender/WS — ADD/AC/AEE venue shown in title) */}
+          {event.venue_name && event.venue_id !== 'add' && event.venue_id !== 'ac' && event.venue_id !== 'aee' && (
             <div className="detail-row"><span className="k">{t('Venue')}</span><span className="v">{event.venue_name}</span></div>
           )}
           {event.venue_type && (
@@ -159,11 +159,19 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
               {event.event_slots.map((slot, i) => {
                 const parts = [
                   slot.event_type === 'Other' ? slot.event_type_other : slot.event_type,
-                  slot.shift,
+                  slot.shift ? slot.shift.charAt(0).toUpperCase() : null,
                   slot.pax ? `${slot.pax} pax` : null,
                 ]
                 if (event.venue_id === 'aee' && Array.isArray(slot.elements) && slot.elements.length > 0) {
                   parts.push(slot.elements.join(', '))
+                }
+                if (event.venue_id === 'add') {
+                  if (slot.decor_type) parts.push(slot.decor_type)
+                  if (slot.color_theme) parts.push(slot.color_theme)
+                }
+                if (event.venue_id === 'ac') {
+                  if (slot.menu_type) parts.push(slot.menu_type)
+                  if (slot.menu_cat) parts.push(slot.menu_cat)
                 }
                 return (
                   <div key={i} className="detail-row detail-slot-row">
@@ -230,11 +238,14 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
           {isOwnVenue && (
             <div className="detail-row"><span className="k">{t('Liquor')}</span><span className="v">{event.liquor ? t('Yes') : t('No')}</span></div>
           )}
-          {event.menu_type && (
+          {event.menu_type && !(event.venue_id === 'ac' && Array.isArray(event.event_slots) && event.event_slots.length > 1) && (
             <div className="detail-row"><span className="k">{t('Menu Type')}</span><span className="v">{t(event.menu_type)}</span></div>
           )}
-          {event.menu_cat && (
+          {event.menu_cat && !(event.venue_id === 'ac' && Array.isArray(event.event_slots) && event.event_slots.length > 1) && (
             <div className="detail-row"><span className="k">{t('Menu Category')}</span><span className="v">{t(event.menu_cat)}</span></div>
+          )}
+          {event.venue_id === 'aee' && event.sales_person && (
+            <div className="detail-row"><span className="k">{t('Sales Person')}</span><span className="v">{event.sales_person}</span></div>
           )}
           {event.delivery_person && (
             <div className="detail-row"><span className="k">{t('Delivery Person')}</span><span className="v">{event.delivery_person}</span></div>
@@ -259,7 +270,7 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
           {event.operation_manager && (
             <div className="detail-row"><span className="k">{t('F&B Service Manager')}</span><span className="v">{event.operation_manager}</span></div>
           )}
-          {isOwnVenue && event.guest_category && (
+          {(isOwnVenue || event.venue_id === 'aee') && event.guest_category && (
             <div className="detail-row"><span className="k">{t('Guest Category')}</span><span className="v">{t(event.guest_category)}</span></div>
           )}
           {isOwnVenue && event.status && (
@@ -428,7 +439,12 @@ function buildPrimary(event, formatShortDate, t) {
   }
   // Multi-event external venue bookings
   if (Array.isArray(event.event_slots) && event.event_slots.length > 1) {
-    return joinPipes([event.guest_name, 'Multi-Event', event.venue_name])
+    const slotParts = event.event_slots.map((s) => {
+      const type = s.event_type === 'Other' ? (s.event_type_other || '') : (s.event_type ? t(s.event_type) : '')
+      const time = formatTimeCompact(s.time)
+      return time ? `${type} ${time}` : type
+    }).filter(Boolean)
+    return joinPipes([event.guest_name, slotParts.join(' + '), event.venue_name])
   }
   return joinPipes([
     event.guest_name,
