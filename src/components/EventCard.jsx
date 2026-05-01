@@ -198,6 +198,12 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
           {event.venue_type && (
             <div className="detail-row"><span className="k">{t('Type')}</span><span className="v">{t(event.venue_type)}</span></div>
           )}
+          {event.venue_id === 'ac' && event.site_availability && (
+            <div className="detail-row">
+              <span className="k">{t('Site Availability')}</span>
+              <span className="v">{event.site_availability === 'Others' ? (event.site_availability_other || t('Others')) : t(event.site_availability)}</span>
+            </div>
+          )}
           {/* Multi-event slot rows */}
           {Array.isArray(event.event_slots) && event.event_slots.length > 1 && (
             <div className="detail-slots">
@@ -291,6 +297,9 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
           )}
           {event.delivery_person && (
             <div className="detail-row"><span className="k">{t('Delivery Person')}</span><span className="v">{event.delivery_person}</span></div>
+          )}
+          {event.venue_id === 'ac' && event.service_head && (
+            <div className="detail-row"><span className="k">{t('Service Head')}</span><span className="v">{event.service_head}</span></div>
           )}
           {isOwnVenue && (event.payment_remaining_venue != null && event.payment_remaining_venue !== '') && (
             <div className="detail-row detail-payment">

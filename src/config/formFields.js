@@ -472,7 +472,7 @@ function acSections(_venue, dynamicTypes) {
       title: 'Booking',
       fields: [
         statusField,
-        S('Site Availability', 'site_availability', SITE_AVAILABILITIES, false),
+        S('Site Availability', 'site_availability', SITE_AVAILABILITIES, true),
         {
           ...T('Specify', 'site_availability_other', true, {
             placeholder: 'Describe availability',
