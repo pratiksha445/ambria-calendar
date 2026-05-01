@@ -631,14 +631,6 @@ function wsSections(_venue, dynamicTypes) {
           showWhen: isServiceOther,
           fullWidth: true,
         },
-        T('Vendor Name', 'vendor_name', true, {
-          filterFn: nameFilter, filterError: 'Only letters allowed',
-        }),
-        {
-          type: 'phone', label: 'Vendor Phone', key: 'vendor_phone', required: true,
-          filterFn: phoneFilter, filterError: 'Only numbers allowed',
-          placeholder: '98765 43210', inputMode: 'tel',
-        },
       ],
     },
     {
@@ -736,7 +728,7 @@ export const FIELD_MAP = {
     'event_slots',
   ],
   ws: [
-    'service_type', 'service_type_other', 'vendor_name', 'vendor_phone',
+    'service_type', 'service_type_other',
     'venue_name', 'location', 'event_type', 'event_type_other',
     'date', 'time',
     'guest_name', 'phone', 'guest_category', 'sales_person', 'sales_person_id',
