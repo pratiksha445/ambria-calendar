@@ -635,7 +635,7 @@ function wsSections(_venue, dynamicTypes) {
           filterFn: nameFilter, filterError: 'Only letters allowed',
         }),
         {
-          type: 'phone', label: 'Vendor Phone', key: 'vendor_phone', required: false,
+          type: 'phone', label: 'Vendor Phone', key: 'vendor_phone', required: true,
           filterFn: phoneFilter, filterError: 'Only numbers allowed',
           placeholder: '98765 43210', inputMode: 'tel',
         },
