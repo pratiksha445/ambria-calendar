@@ -357,7 +357,8 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
           {event.entertainment_status && (
             <div className="detail-row"><span className="k">{t('Entertainment Status')}</span><span className="v">{t(event.entertainment_status)}</span></div>
           )}
-          {Array.isArray(event.elements) && event.elements.length > 0 && (
+          {Array.isArray(event.elements) && event.elements.length > 0
+            && !(event.venue_id === 'aee' && Array.isArray(event.event_slots) && event.event_slots.length > 1) && (
             <div className="detail-row detail-elements">
               <span className="k">{t('Elements')}</span>
               <div className="v element-chips">
