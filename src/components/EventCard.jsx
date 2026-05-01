@@ -64,9 +64,12 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
     setShowTimePopup((prev) => !prev)
   }
 
+  const isCancelled = event.status === 'Cancelled'
+  const isPostponed = event.status === 'Postponed'
+
   return (
     <article
-      className={`event-card ${expanded ? 'expanded' : ''}`}
+      className={`event-card ${expanded ? 'expanded' : ''}${isCancelled ? ' cancelled' : ''}${isPostponed ? ' postponed' : ''}`}
       style={{ borderLeftColor: venue?.color ?? '#ccc' }}
     >
       {confirmDel ? (
@@ -338,7 +341,10 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
             <div className="detail-row"><span className="k">{t('Guest Category')}</span><span className="v">{t(event.guest_category)}</span></div>
           )}
           {isOwnVenue && event.status && (
-            <div className="detail-row"><span className="k">{t('Status')}</span><span className="v">{t(event.status)}</span></div>
+            <div className="detail-row"><span className="k">{t('Status')}</span><span className="v"><span className={`status-badge status-${event.status.toLowerCase()}`}>{t(event.status)}</span></span></div>
+          )}
+          {isOwnVenue && event.postponed_from_date && (
+            <div className="detail-row"><span className="k">{t('Postponed From')}</span><span className="v">{formatShortDate(event.postponed_from_date)}</span></div>
           )}
 
           {/* ── Decor section ── */}
@@ -463,7 +469,10 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
           )}
 
           {!isOwnVenue && event.status && (
-            <div className="detail-row"><span className="k">{t('Status')}</span><span className="v">{t(event.status)}</span></div>
+            <div className="detail-row"><span className="k">{t('Status')}</span><span className="v"><span className={`status-badge status-${event.status.toLowerCase()}`}>{t(event.status)}</span></span></div>
+          )}
+          {!isOwnVenue && event.postponed_from_date && (
+            <div className="detail-row"><span className="k">{t('Postponed From')}</span><span className="v">{formatShortDate(event.postponed_from_date)}</span></div>
           )}
           {event.notes && (
             <div className="event-card-notes"><span className="k">{t('Notes')}</span><span className="v">{event.notes}</span></div>

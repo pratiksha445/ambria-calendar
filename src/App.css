@@ -4285,3 +4285,130 @@ input, select, textarea {
   opacity: 1;
   transition: opacity 400ms ease;
 }
+
+/* ---------- Cancelled / Postponed pill styles ---------- */
+
+.pill-cancelled {
+  opacity: 0.45;
+  text-decoration: line-through;
+}
+
+.pill-postponed {
+  border: 1.5px dashed currentColor;
+  opacity: 0.75;
+}
+
+.pill-pp {
+  font-size: 7px;
+  font-weight: 900;
+  background: rgba(255,255,255,0.35);
+  border-radius: 3px;
+  padding: 0 2px;
+  margin-left: 3px;
+  vertical-align: middle;
+  letter-spacing: 0.03em;
+}
+
+/* ---------- Cancelled / Postponed event card styles ---------- */
+
+.event-card.cancelled .event-card-primary {
+  text-decoration: line-through;
+  opacity: 0.55;
+}
+.event-card.cancelled {
+  opacity: 0.6;
+}
+
+.event-card.postponed {
+  border-style: dashed;
+}
+
+/* ---------- Status badges ---------- */
+
+.status-badge {
+  display: inline-block;
+  font-size: 0.6rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  vertical-align: middle;
+  margin-left: 6px;
+}
+
+.status-confirmed {
+  background: #d4edda;
+  color: #155724;
+}
+.status-tentative {
+  background: #fff3cd;
+  color: #856404;
+}
+.status-cancelled {
+  background: #f8d7da;
+  color: #721c24;
+}
+.status-postponed {
+  background: #e2e3f1;
+  color: #383d6e;
+}
+
+/* ---------- Postpone modal ---------- */
+
+.postpone-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.postpone-modal {
+  background: var(--ambria-card);
+  border-radius: 14px;
+  padding: 24px;
+  width: 90%;
+  max-width: 340px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.18);
+}
+
+.postpone-modal h3 {
+  margin: 0 0 6px;
+  font-size: 1.1rem;
+  color: var(--ambria-ink);
+}
+
+.postpone-modal p {
+  margin: 0 0 16px;
+  font-size: 0.85rem;
+  color: var(--ambria-muted);
+}
+
+.postpone-date-label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ambria-secondary);
+  margin-bottom: 6px;
+}
+
+.postpone-date-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--ambria-border);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  background: var(--ambria-bg);
+  color: var(--ambria-ink);
+  box-sizing: border-box;
+}
+
+.postpone-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}

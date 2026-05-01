@@ -81,10 +81,11 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, onE
                     : seg.isStart ? 'villa-seg-start'
                     : seg.isEnd ? 'villa-seg-end'
                     : 'villa-seg-mid'
+                  const statusClass = seg.event.status === 'Cancelled' ? ' pill-cancelled' : seg.event.status === 'Postponed' ? ' pill-postponed' : ''
                   return (
                     <div
                       key={`vs-${seg.event.id}`}
-                      className={`day-pill villa-seg ${posClass}`}
+                      className={`day-pill villa-seg ${posClass}${statusClass}`}
                       style={{
                         background: venue?.color ?? '#9A6BBE',
                         color: venue?.textColor ?? '#fff',
@@ -98,17 +99,18 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, onE
                 {/* Regular pills */}
                 {visibleRegular.map((ev) => {
                   const venue = VENUE_BY_ID[ev.venue_id]
+                  const statusClass = ev.status === 'Cancelled' ? ' pill-cancelled' : ev.status === 'Postponed' ? ' pill-postponed' : ''
                   return (
                     <div
                       key={`${ev.id}-${ev.updated_at}`}
-                      className="day-pill"
+                      className={`day-pill${statusClass}`}
                       style={{
                         background: venue?.color ?? '#ccc',
                         color: venue?.textColor ?? '#fff',
                       }}
                       title={buildPillTooltip(ev, eventTypes)}
                     >
-                      {buildPillLabel(ev, eventTypes)}
+                      {buildPillLabel(ev, eventTypes)}{ev.status === 'Postponed' && <span className="pill-pp">PP</span>}
                     </div>
                   )
                 })}

@@ -69,6 +69,9 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
   const [filteredUsersMap, setFilteredUsersMap] = useState({})
   const [collapsedSections, setCollapsedSections] = useState({})
   const [lockToast, setLockToast] = useState(false)
+  const [showPostponeModal, setShowPostponeModal] = useState(false)
+  const [postponeDate, setPostponeDate] = useState('')
+  const [pendingPayload, setPendingPayload] = useState(null)
   const [eventSlots, setEventSlots] = useState(() => {
     if (!SLOT_CATEGORIES.has(venueId)) return []
     if (editing && Array.isArray(initial.event_slots) && initial.event_slots.length > 0) {
@@ -424,9 +427,19 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
     setSubmitError(null)
     if (!venueId) { setSubmitError(t('Please select a category')); return }
     if (!validate()) return
+
+    const payload = buildPayload()
+
+    // Intercept: status changing TO Postponed → show date-picker modal
+    if (editing && form.status === 'Postponed' && initial?.status !== 'Postponed') {
+      setPendingPayload(payload)
+      setPostponeDate('')
+      setShowPostponeModal(true)
+      return
+    }
+
     setSaving(true)
     try {
-      const payload = buildPayload()
       const row = editing
         ? await updateEvent(initial.id, payload, user)
         : await createEvent(payload, user)
@@ -437,6 +450,50 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
     } finally {
       setSaving(false)
     }
+  }
+
+  const confirmPostpone = async () => {
+    if (!postponeDate || !pendingPayload) return
+    setSaving(true)
+    setShowPostponeModal(false)
+    try {
+      const payload = { ...pendingPayload }
+      payload.postponed_from_date = initial.date
+      payload.postponed_at = new Date().toISOString()
+      payload.date = postponeDate
+
+      // Villa: shift check_out_date by the same duration as the original stay
+      if (venueId === 'villa' && initial.check_in_date && initial.check_out_date) {
+        const cin = new Date(initial.check_in_date + 'T00:00:00')
+        const cout = new Date(initial.check_out_date + 'T00:00:00')
+        const stayDays = Math.round((cout - cin) / (24 * 60 * 60 * 1000))
+        payload.check_in_date = postponeDate
+        payload.date = postponeDate // Villa date = check_in_date
+        const newCout = new Date(postponeDate + 'T00:00:00')
+        newCout.setDate(newCout.getDate() + stayDays)
+        const y = newCout.getFullYear()
+        const m = String(newCout.getMonth() + 1).padStart(2, '0')
+        const d = String(newCout.getDate()).padStart(2, '0')
+        payload.check_out_date = `${y}-${m}-${d}`
+      }
+
+      const row = await updateEvent(initial.id, payload, user)
+      onSaved?.(row)
+    } catch (err) {
+      console.error('[ambria] postpone save failed', err)
+      setSubmitError(err?.message ?? String(err))
+    } finally {
+      setSaving(false)
+      setPendingPayload(null)
+    }
+  }
+
+  const cancelPostpone = () => {
+    setShowPostponeModal(false)
+    setPendingPayload(null)
+    setPostponeDate('')
+    // Revert status to what it was before
+    setField('status', initial?.status || 'Confirmed')
   }
 
   const onDelete = async () => {
@@ -688,6 +745,41 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
           </button>
         )}
       </div>
+
+      {showPostponeModal && (
+        <div className="postpone-overlay" onClick={cancelPostpone}>
+          <div className="postpone-modal" onClick={(e) => e.stopPropagation()}>
+            <h3>{t('Postpone Event')}</h3>
+            <p>{t('Select the new date for this event')}</p>
+            <label className="postpone-date-label">
+              {venueId === 'villa' ? t('New check-in date') : t('New date')}
+            </label>
+            <input
+              type="date"
+              className="postpone-date-input"
+              value={postponeDate}
+              onChange={(e) => setPostponeDate(e.target.value)}
+            />
+            <div className="postpone-actions">
+              <button
+                type="button"
+                className="btn-ghost"
+                onClick={cancelPostpone}
+              >
+                {t('Cancel')}
+              </button>
+              <button
+                type="button"
+                className="btn-save"
+                disabled={!postponeDate || saving}
+                onClick={confirmPostpone}
+              >
+                {t('Confirm Postpone')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </form>
   )
 }

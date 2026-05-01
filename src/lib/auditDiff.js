@@ -83,7 +83,7 @@ function getFieldDef(venueId, key) {
 // Keys to skip in diffs (internal, auto-generated, or _id shadow fields)
 const SKIP_KEYS = new Set([
   'id', 'created_at', 'updated_at', 'deleted_at', 'source', 'created_by',
-  'venue_id', 'title', 'status', 'phone_code',
+  'venue_id', 'title', 'phone_code',
 ])
 
 /**

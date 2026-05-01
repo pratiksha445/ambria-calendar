@@ -250,6 +250,7 @@ const hi = {
   'Restro-Lawn': 'रेस्ट्रो-लॉन',
   'Restro Glass House': 'रेस्ट्रो ग्लास हाउस',
   'Rooftop': 'रूफटॉप',
+  'Cafe': 'कैफ़े',
   'Restro Lawn + Glass House': 'रेस्ट्रो लॉन + ग्लास हाउस',
   'Restro Lawn + Rooftop': 'रेस्ट्रो लॉन + रूफटॉप',
 
@@ -285,6 +286,14 @@ const hi = {
   // ── ड्रॉपडाउन विकल्प ──
   'Confirmed': 'कन्फ़र्म',
   'Tentative': 'अनिश्चित',
+  'Cancelled': 'रद्द',
+  'Postponed': 'स्थगित',
+  'Postponed From': 'पूर्व तिथि',
+  'Postpone Event': 'इवेंट स्थगित करें',
+  'Select the new date for this event': 'इस इवेंट के लिए नई तारीख चुनें',
+  'New check-in date': 'नई चेक-इन तारीख',
+  'New date': 'नई तारीख',
+  'Confirm Postpone': 'स्थगित करें',
   'Morning': 'सुबह',
   'Lunch': 'दोपहर',
   'Sundowner': 'शाम',

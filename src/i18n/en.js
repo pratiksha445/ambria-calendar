@@ -250,6 +250,7 @@ const en = {
   'Restro-Lawn': 'Restro-Lawn',
   'Restro Glass House': 'Restro Glass House',
   'Rooftop': 'Rooftop',
+  'Cafe': 'Cafe',
   'Restro Lawn + Glass House': 'Restro Lawn + Glass House',
   'Restro Lawn + Rooftop': 'Restro Lawn + Rooftop',
 
@@ -285,6 +286,14 @@ const en = {
   // ── Dropdown options ──
   'Confirmed': 'Confirmed',
   'Tentative': 'Tentative',
+  'Cancelled': 'Cancelled',
+  'Postponed': 'Postponed',
+  'Postponed From': 'Postponed From',
+  'Postpone Event': 'Postpone Event',
+  'Select the new date for this event': 'Select the new date for this event',
+  'New check-in date': 'New check-in date',
+  'New date': 'New date',
+  'Confirm Postpone': 'Confirm Postpone',
   'Morning': 'Morning',
   'Lunch': 'Lunch',
   'Sundowner': 'Sundowner',

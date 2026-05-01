@@ -20,7 +20,7 @@ export const EVENT_TYPES = [
   'Other',
 ]
 
-export const STATUSES = ['Confirmed', 'Tentative']
+export const STATUSES = ['Confirmed', 'Tentative', 'Cancelled', 'Postponed']
 export const SHIFTS = ['Morning', 'Lunch', 'Sundowner', 'Dinner']
 export const BOOKING_STATUSES = [
   'Only Rental', 'VM', 'VD', 'VE', 'VDE', 'VME', 'VMD', 'VMDE',
@@ -682,6 +682,7 @@ const VENUE_FIELD_KEYS = [
   'ent_delivery_person', 'ent_delivery_person_id', 'operation_manager', 'operation_manager_id',
   'payment_remaining_venue', 'payment_remaining_decor', 'payment_remaining_ent', 'payment_timing',
   'guest_name', 'phone', 'pax', 'guest_category', 'sales_person', 'sales_person_id', 'notes',
+  'postponed_from_date', 'postponed_at',
 ]
 
 export const FIELD_MAP = {
@@ -695,6 +696,7 @@ export const FIELD_MAP = {
     'pool_included', 'meal_included', 'added_service',
     'guest_name', 'phone', 'pax', 'extra_bedding', 'guest_category', 'sales_person', 'sales_person_id',
     'payment_remaining_venue', 'payment_timing', 'notes',
+    'postponed_from_date', 'postponed_at',
   ],
   add: [
     'venue_name', 'venue_type', 'location', 'event_type', 'event_type_other',
@@ -705,6 +707,7 @@ export const FIELD_MAP = {
     'operation_manager', 'operation_manager_id',
     'venue_manager_name', 'venue_manager_number',
     'payment_remaining_venue', 'payment_timing', 'notes',
+    'postponed_from_date', 'postponed_at',
     'event_slots',
   ],
   ac: [
@@ -715,6 +718,7 @@ export const FIELD_MAP = {
     'service_head', 'service_head_id', 'kitchen_head', 'kitchen_head_id',
     'venue_manager_name', 'venue_manager_number',
     'payment_remaining_venue', 'payment_timing', 'notes',
+    'postponed_from_date', 'postponed_at',
     'event_slots',
   ],
   aee: [
@@ -723,6 +727,7 @@ export const FIELD_MAP = {
     'guest_name', 'phone', 'pax', 'guest_category', 'sales_person', 'sales_person_id',
     'delivery_person', 'delivery_person_id', 'elements',
     'payment_remaining_venue', 'payment_timing', 'notes',
+    'postponed_from_date', 'postponed_at',
     'event_slots',
   ],
   ws: [
@@ -731,11 +736,13 @@ export const FIELD_MAP = {
     'date', 'time',
     'guest_name', 'phone', 'guest_category', 'sales_person', 'sales_person_id',
     'payment_remaining_venue', 'payment_timing', 'notes',
+    'postponed_from_date', 'postponed_at',
   ],
   tender: [
     'venue_name', 'location', 'event_type_text', 'date', 'end_date',
     'tender_name', 'phone', 'guest_category',
     'payment_remaining_venue', 'payment_timing', 'notes',
+    'postponed_from_date', 'postponed_at',
   ],
 }
 
@@ -760,6 +767,7 @@ export const ALL_SAVEABLE_KEYS = [
   'service_type', 'service_type_other', 'vendor_name', 'vendor_phone',
   'service_head', 'service_head_id', 'kitchen_head', 'kitchen_head_id',
   'event_slots',
+  'postponed_from_date', 'postponed_at',
 ]
 
 // ---------- Public API ----------
