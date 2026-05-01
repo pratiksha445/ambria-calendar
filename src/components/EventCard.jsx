@@ -198,10 +198,31 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
           {event.venue_type && (
             <div className="detail-row"><span className="k">{t('Type')}</span><span className="v">{t(event.venue_type)}</span></div>
           )}
-          {event.venue_id === 'ac' && event.site_availability && (
+          {(event.venue_id === 'ac' || event.venue_id === 'add') && event.site_availability && (
             <div className="detail-row">
               <span className="k">{t('Site Availability')}</span>
               <span className="v">{event.site_availability === 'Others' ? (event.site_availability_other || t('Others')) : t(event.site_availability)}</span>
+            </div>
+          )}
+          {event.location && (
+            <div className="detail-row event-detail-location">
+              <span className="k">{t('Location')}</span>
+              <span className="v">
+                {event.location}
+                <a
+                  href={getMapsUrl(event.location)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="map-pin-btn inline"
+                  aria-label="Open in Google Maps"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                    <circle cx="12" cy="10" r="3" />
+                  </svg>
+                </a>
+              </span>
             </div>
           )}
           {/* Multi-event slot rows */}
@@ -233,26 +254,15 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
               })}
             </div>
           )}
-          {event.location && (
-            <div className="detail-row event-detail-location">
-              <span className="k">{t('Location')}</span>
-              <span className="v">
-                {event.location}
-                <a
-                  href={getMapsUrl(event.location)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="map-pin-btn inline"
-                  aria-label="Open in Google Maps"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                    <circle cx="12" cy="10" r="3" />
-                  </svg>
-                </a>
-              </span>
-            </div>
+
+          {/* ── ADD single-event: Decor Type, Color Theme ── */}
+          {event.venue_id === 'add' && event.decor_type
+            && !(Array.isArray(event.event_slots) && event.event_slots.length > 1) && (
+            <div className="detail-row"><span className="k">{t('Decor Type')}</span><span className="v">{t(event.decor_type)}</span></div>
+          )}
+          {event.venue_id === 'add' && event.color_theme
+            && !(Array.isArray(event.event_slots) && event.event_slots.length > 1) && (
+            <div className="detail-row"><span className="k">{t('Color Theme')}</span><span className="v">{event.color_theme}</span></div>
           )}
 
           {/* ── Single-event pax for ADD/AEE (multi-event shows per-slot) ── */}
@@ -301,6 +311,9 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
           {event.venue_id === 'ac' && event.service_head && (
             <div className="detail-row"><span className="k">{t('Service Head')}</span><span className="v">{event.service_head}</span></div>
           )}
+          {event.venue_id === 'add' && event.execution_person && (
+            <div className="detail-row"><span className="k">{t('Execution Person')}</span><span className="v">{event.execution_person}</span></div>
+          )}
           {isOwnVenue && (event.payment_remaining_venue != null && event.payment_remaining_venue !== '') && (
             <div className="detail-row detail-payment">
               <span className="k">{t('Pending Payment')}</span>
@@ -319,7 +332,7 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
             <div className="detail-row"><span className="k">{t('Payment Status')}</span><span className="v">{t(event.payment_timing)}</span></div>
           )}
           {event.operation_manager && (
-            <div className="detail-row"><span className="k">{t('F&B Service Manager')}</span><span className="v">{event.operation_manager}</span></div>
+            <div className="detail-row"><span className="k">{t(event.venue_id === 'add' ? 'Operation Manager' : 'F&B Service Manager')}</span><span className="v">{event.operation_manager}</span></div>
           )}
           {(isOwnVenue || event.venue_id === 'aee') && event.guest_category && (
             <div className="detail-row"><span className="k">{t('Guest Category')}</span><span className="v">{t(event.guest_category)}</span></div>
