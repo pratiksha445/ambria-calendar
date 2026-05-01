@@ -147,6 +147,9 @@ export default function DayModal({ date, events, onClose, onAdd, onEdit, onDelet
         </div>
 
         <div className="day-modal-filters">
+          <button className="add-booking-pill" onClick={() => onAdd(date)}>
+            {t('+ Add Booking')}
+          </button>
           <div className="day-modal-filter-row">
             <input
               type="search"
@@ -161,9 +164,6 @@ export default function DayModal({ date, events, onClose, onAdd, onEdit, onDelet
               ))}
             </select>
           </div>
-          <button className="add-booking-pill" onClick={() => onAdd(date)}>
-            {t('+ Add Booking')}
-          </button>
         </div>
 
         <div className="day-modal-body" ref={bodyRef}>
