@@ -1,7 +1,7 @@
 import { memo, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { VENUE_BY_ID, SHIFT_BADGE } from '../config/venues.js'
-import { formatTime12, formatTimeCompact } from '../lib/dates.js'
+import { formatTime12 } from '../lib/dates.js'
 import { canAccessBooking } from '../lib/sectionPermissions.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 import { loadElementLabels, getElementLabel } from '../lib/elements.js'
@@ -289,9 +289,6 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
           {event.menu_cat && !(event.venue_id === 'ac' && Array.isArray(event.event_slots) && event.event_slots.length > 1) && (
             <div className="detail-row"><span className="k">{t('Menu Category')}</span><span className="v">{t(event.menu_cat)}</span></div>
           )}
-          {event.venue_id === 'aee' && event.sales_person && (
-            <div className="detail-row"><span className="k">{t('Sales Person')}</span><span className="v">{event.sales_person}</span></div>
-          )}
           {event.delivery_person && (
             <div className="detail-row"><span className="k">{t('Delivery Person')}</span><span className="v">{event.delivery_person}</span></div>
           )}
@@ -484,12 +481,7 @@ function buildPrimary(event, formatShortDate, t) {
   }
   // Multi-event external venue bookings
   if (Array.isArray(event.event_slots) && event.event_slots.length > 1) {
-    const slotParts = event.event_slots.map((s) => {
-      const type = s.event_type === 'Other' ? (s.event_type_other || '') : (s.event_type ? t(s.event_type) : '')
-      const time = formatTimeCompact(s.time)
-      return time ? `${type} ${time}` : type
-    }).filter(Boolean)
-    return joinPipes([event.guest_name, slotParts.join(' + '), event.venue_name])
+    return joinPipes([event.guest_name, 'Multi-Event', event.venue_name])
   }
   return joinPipes([
     event.guest_name,

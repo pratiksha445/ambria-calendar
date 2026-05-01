@@ -5,8 +5,6 @@
 //
 // Shift shortforms: M=Morning, L=Lunch, S=Sundowner, D=Dinner.
 
-import { formatTimeCompact } from './dates.js'
-
 const SALUTATIONS = new Set([
   'mr', 'mrs', 'ms', 'dr', 'shri', 'smt',
   'mr.', 'mrs.', 'ms.', 'dr.',
@@ -83,12 +81,7 @@ export function autoTitle(form) {
   // add, ac, aee — external venue bookings
   const slots = Array.isArray(form.event_slots) ? form.event_slots : []
   if (slots.length > 1) {
-    const slotParts = slots.map((s) => {
-      const type = s.event_type === 'Other' ? (s.event_type_other || '') : (s.event_type || '')
-      const time = formatTimeCompact(s.time)
-      return time ? `${type} ${time}` : type
-    }).filter(Boolean)
-    return joinPipes([firstName(form.guest_name), slotParts.join(' + '), form.venue_name])
+    return joinPipes([firstName(form.guest_name), 'Multi-Event', form.venue_name])
   }
   return joinPipes([
     firstName(form.guest_name),
