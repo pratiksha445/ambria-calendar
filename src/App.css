@@ -946,6 +946,13 @@
   font-variant-numeric: tabular-nums;
 }
 
+.event-pax {
+  flex-shrink: 0;
+  font-weight: 600;
+  color: var(--ambria-secondary);
+  white-space: nowrap;
+}
+
 .event-sales {
   flex-shrink: 0;
   font-weight: 500;

@@ -51,7 +51,8 @@ export function autoTitle(form) {
   if (venueId === 'tender') {
     return joinPipes([
       firstName(form.tender_name),
-      form.event_type_text,
+      eventTypeLabel(form) || form.event_type_text || '',
+      form.pax ? `${form.pax}pax` : '',
       form.venue_name,
     ])
   }

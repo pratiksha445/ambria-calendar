@@ -228,8 +228,12 @@ function buildPillLabel(ev, eventTypes) {
       }
       return `${s}${p}${getEventTypeAbbr(ev.event_type, ev.event_type_other, eventTypes)}` || '—'
 
-    case 'tender':
-      return `${s}${p}${customAbbr(ev.event_type_text)}` || '—'
+    case 'tender': {
+      const etAbbr = ev.event_type
+        ? getEventTypeAbbr(ev.event_type, ev.event_type_other, eventTypes)
+        : customAbbr(ev.event_type_text)
+      return `${p}${etAbbr}` || '—'
+    }
 
     case 'villa':
       return `${villaSubVenueAbbr(ev.sub_venue)}${p}` || '—'
@@ -279,9 +283,10 @@ function buildPillTooltip(ev, eventTypes) {
 
     case 'tender': {
       const parts = []
-      if (ev.shift) parts.push(ev.shift)
       if (ev.pax) parts.push(`${ev.pax} pax`)
-      if (ev.event_type_text) parts.push(ev.event_type_text)
+      const ft = ev.event_type === 'Other' ? (ev.event_type_other || 'Other')
+        : (ev.event_type || ev.event_type_text || '')
+      if (ft) parts.push(ft)
       return parts.join(' · ')
     }
 

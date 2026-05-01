@@ -114,6 +114,9 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
                     {t(`shift_short_${event.shift}`)}
                   </span>
                 )}
+                {event.venue_id === 'tender' && event.pax != null && event.pax !== '' && (
+                  <span className="event-pax">{event.pax} pax</span>
+                )}
                 {event.sales_person && (
                   <span className="event-sales">{event.sales_person}</span>
                 )}
@@ -228,6 +231,32 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
               </span>
             </div>
           )}
+          {/* ── Tender-specific detail rows ── */}
+          {event.venue_id === 'tender' && event.date && (
+            <div className="detail-row"><span className="k">{t('Start Date')}</span><span className="v">{formatShortDate(event.date)}</span></div>
+          )}
+          {event.venue_id === 'tender' && event.end_date && (
+            <div className="detail-row"><span className="k">{t('End Date')}</span><span className="v">{formatShortDate(event.end_date)}</span></div>
+          )}
+          {event.venue_id === 'tender' && (event.event_type || event.event_type_text) && (
+            <div className="detail-row">
+              <span className="k">{t('Event Type')}</span>
+              <span className="v">{event.event_type === 'Other' ? (event.event_type_other || 'Other') : (event.event_type ? t(event.event_type) : event.event_type_text)}</span>
+            </div>
+          )}
+          {event.venue_id === 'tender' && event.pax != null && event.pax !== '' && (
+            <div className="detail-row"><span className="k">{t('Pax')}</span><span className="v">{event.pax}</span></div>
+          )}
+          {event.venue_id === 'tender' && event.tender_name && (
+            <div className="detail-row"><span className="k">{t('Tender Name')}</span><span className="v">{event.tender_name}</span></div>
+          )}
+          {event.venue_id === 'tender' && event.phone && (
+            <div className="detail-row"><span className="k">{t('Phone')}</span><span className="v">{event.phone}</span></div>
+          )}
+          {event.venue_id === 'tender' && event.sales_person && (
+            <div className="detail-row"><span className="k">{t('Sales Person')}</span><span className="v">{event.sales_person}</span></div>
+          )}
+
           {/* Multi-event slot rows */}
           {Array.isArray(event.event_slots) && event.event_slots.length > 1 && (
             <div className="detail-slots">
@@ -503,7 +532,14 @@ function getPaymentColor(pct) {
 
 function buildPrimary(event, formatShortDate, t) {
   if (event.venue_id === 'tender') {
-    return joinPipes([event.tender_name, event.event_type_text, event.venue_name])
+    const etLabel = event.event_type === 'Other' ? event.event_type_other
+      : (event.event_type || event.event_type_text || '')
+    return joinPipes([
+      event.tender_name,
+      etLabel,
+      event.pax ? `${event.pax}pax` : null,
+      event.venue_name,
+    ])
   }
   if (event.venue_id === 'villa') {
     const parts = [event.guest_name]

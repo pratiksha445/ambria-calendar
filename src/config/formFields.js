@@ -575,15 +575,15 @@ function aeeSections(_venue, dynamicTypes) {
   ]
 }
 
-// Tender — free text event, optional phone, no shift/pax/sales
-function tenderSections(_venue, _dynamicTypes) {
+// Tender — unified event-type dropdown, pax, sales person, mandatory phone
+function tenderSections(_venue, dynamicTypes) {
   return [
     {
       title: 'Tender',
       fields: [
         venueNameField(),
         T('Location', 'location', false, { placeholder: 'Google Maps link or address', mapLink: true }),
-        T('Event Type', 'event_type_text', true, { placeholder: 'e.g. Wedding Catering' }),
+        ...eventTypeFields(dynamicTypes),
         statusField,
       ],
     },
@@ -598,7 +598,12 @@ function tenderSections(_venue, _dynamicTypes) {
       title: 'Contact',
       fields: [
         tenderNameField(),
-        phoneOpt(),
+        paxField(),
+        phoneReq(),
+        { ...salesPersonField(),
+          userFilter: { department: 'Tender' },
+          userEmptyMsg: 'No Tender department users available. Add users in Manage Users.',
+        },
         S('Guest Category', 'guest_category', GUEST_CATEGORIES, true),
         T('Pending Payment %', 'payment_remaining_venue', true, {
           filterFn: percentFilter, filterError: 'Only numbers 0-100',
@@ -739,8 +744,9 @@ export const FIELD_MAP = {
     'postponed_from_date', 'postponed_at',
   ],
   tender: [
-    'venue_name', 'location', 'event_type_text', 'date', 'end_date',
-    'tender_name', 'phone', 'guest_category',
+    'venue_name', 'location', 'event_type', 'event_type_other', 'event_type_text',
+    'date', 'end_date',
+    'tender_name', 'phone', 'pax', 'sales_person', 'sales_person_id', 'guest_category',
     'payment_remaining_venue', 'payment_timing', 'notes',
     'postponed_from_date', 'postponed_at',
   ],
