@@ -255,8 +255,8 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
             </div>
           )}
 
-          {/* ── AEE-specific fields (single-event only — multi-event shows per-slot) ── */}
-          {event.venue_id === 'aee' && event.pax != null && event.pax !== ''
+          {/* ── Single-event pax for ADD/AEE (multi-event shows per-slot) ── */}
+          {(event.venue_id === 'aee' || event.venue_id === 'add') && event.pax != null && event.pax !== ''
             && !(Array.isArray(event.event_slots) && event.event_slots.length > 1) && (
             <div className="detail-row"><span className="k">{t('Pax')}</span><span className="v">{event.pax}</span></div>
           )}
@@ -492,6 +492,14 @@ function buildPrimary(event, formatShortDate, t) {
   // Multi-event external venue bookings
   if (Array.isArray(event.event_slots) && event.event_slots.length > 1) {
     return joinPipes([event.guest_name, 'Multi-Event', event.venue_name])
+  }
+  // ADD/AC/AEE single-event: Name | EventType | VenueName (no pax, no menu_cat)
+  if (event.venue_id === 'add' || event.venue_id === 'ac' || event.venue_id === 'aee') {
+    return joinPipes([
+      event.guest_name,
+      event.event_type === 'Other' ? event.event_type_other : (event.event_type ? t(event.event_type) : null),
+      event.venue_name,
+    ])
   }
   return joinPipes([
     event.guest_name,
