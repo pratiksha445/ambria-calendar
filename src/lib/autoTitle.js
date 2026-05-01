@@ -68,13 +68,10 @@ export function autoTitle(form) {
   }
 
   if (venueId === 'ws') {
-    const services = Array.isArray(form.service_type) ? form.service_type : []
-    const serviceLabel = services
-      .map((s) => s === 'Others' ? (form.service_type_other || 'Others') : s)
-      .join(', ')
     return joinPipes([
       firstName(form.guest_name),
-      serviceLabel,
+      eventTypeLabel(form),
+      form.pax ? `${form.pax}pax` : '',
       form.venue_name,
     ])
   }
@@ -87,7 +84,7 @@ export function autoTitle(form) {
   return joinPipes([
     firstName(form.guest_name),
     eventTypeLabel(form),
+    form.pax ? `${form.pax}pax` : '',
     form.venue_name,
-    shiftInitial(form.shift),
   ])
 }

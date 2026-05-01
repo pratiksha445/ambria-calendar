@@ -654,6 +654,7 @@ function wsSections(_venue, dynamicTypes) {
       fields: [
         guestName(),
         phoneReq(),
+        paxField(),
         S('Guest Category', 'guest_category', GUEST_CATEGORIES, true),
         salesPersonField(),
         T('Pending Payment %', 'payment_remaining_venue', true, {
@@ -731,7 +732,7 @@ export const FIELD_MAP = {
     'service_type', 'service_type_other',
     'venue_name', 'location', 'event_type', 'event_type_other',
     'date', 'time',
-    'guest_name', 'phone', 'guest_category', 'sales_person', 'sales_person_id',
+    'guest_name', 'phone', 'pax', 'guest_category', 'sales_person', 'sales_person_id',
     'payment_remaining_venue', 'payment_timing', 'notes',
     'postponed_from_date', 'postponed_at',
   ],
