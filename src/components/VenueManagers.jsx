@@ -7,7 +7,11 @@ const PAGE_SIZE = 25
 
 const DEPT_LABEL = { add: 'Decor', ac: 'Cuisine' }
 const DEPT_COLOR = { add: '#D4B83D', ac: '#E74C3C' }
-
+const CAT_TABS = [
+  { id: '', label: 'All' },
+  { id: 'add', label: 'ADD' },
+  { id: 'ac', label: 'AC' },
+]
 
 function MenuIcon() {
   return (
@@ -80,7 +84,7 @@ function exportCsv(rows, t) {
 }
 
 export default function VenueManagers({ currentUser, showToast, onMenu }) {
-  const { t, formatShortDate } = useLanguage()
+  const { t } = useLanguage()
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(false)
   const [category, setCategory] = useState('')
@@ -114,6 +118,13 @@ export default function VenueManagers({ currentUser, showToast, onMenu }) {
   }, [category, dateFrom, dateTo])
 
   useEffect(() => { loadData() }, [loadData])
+
+  // Tab counts (from full rows, before search filter)
+  const tabCounts = useMemo(() => {
+    const c = { '': rows.length, add: 0, ac: 0 }
+    for (const r of rows) { c[r.venue_id] = (c[r.venue_id] || 0) + 1 }
+    return c
+  }, [rows])
 
   // Client-side search filter
   const filtered = useMemo(() => {
@@ -162,7 +173,7 @@ export default function VenueManagers({ currentUser, showToast, onMenu }) {
 
   useEffect(() => { setPage(0) }, [search, category, dateFrom, dateTo, grouped])
 
-  const onSaved = (row) => {
+  const onSaved = () => {
     setEditModal(null)
     loadData()
     showToast?.(t('Booking saved'))
@@ -188,25 +199,41 @@ export default function VenueManagers({ currentUser, showToast, onMenu }) {
         </button>
       </div>
 
-      {/* Filters */}
-      <div className="vm-filters">
+      {/* Category tabs */}
+      <div className="vm-tabs" role="tablist">
+        {CAT_TABS.map((tab) => (
+          <button
+            key={tab.id}
+            role="tab"
+            aria-selected={category === tab.id}
+            className={`vm-tab ${category === tab.id ? 'active' : ''}`}
+            onClick={() => setCategory(tab.id)}
+          >
+            {t(tab.label)}
+            <span className="vm-tab-count">{tabCounts[tab.id] || 0}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Search */}
+      <div className="panel-search vm-search-wrap">
         <input
           type="search"
-          className="vm-search"
           placeholder={t('Search manager, venue, guest…')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <select className="vm-filter-select" value={category} onChange={(e) => setCategory(e.target.value)}>
-          <option value="">{t('All Categories')}</option>
-          <option value="add">{t('ADD — Decor')}</option>
-          <option value="ac">{t('AC — Cuisine')}</option>
-        </select>
-        <input type="date" className="vm-date-input" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
-        <span className="vm-date-sep">–</span>
-        <input type="date" className="vm-date-input" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
+      </div>
+
+      {/* Date range + group toggle */}
+      <div className="vm-controls">
+        <div className="vm-date-row">
+          <input type="date" className="vm-date-input" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
+          <span className="vm-date-sep">–</span>
+          <input type="date" className="vm-date-input" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
+        </div>
         <button
-          className={`vm-group-btn ${grouped ? 'vm-group-active' : ''}`}
+          className={`vm-group-chip ${grouped ? 'active' : ''}`}
           onClick={() => setGrouped((g) => !g)}
         >
           {grouped ? t('Show all bookings') : t('Group by Manager')}
@@ -221,7 +248,7 @@ export default function VenueManagers({ currentUser, showToast, onMenu }) {
       ) : grouped ? (
         /* ── Grouped view ── */
         <div className="vm-list">
-          {pagedGroups.map((g, gi) => {
+          {pagedGroups.map((g) => {
             const key = `${g.name}|${g.number}`
             const isOpen = expandedGroup === key
             const venueDisplay = g.venues.length <= 3 ? g.venues.join(', ') : `${g.venues.slice(0, 3).join(', ')} +${g.venues.length - 3} more`
@@ -245,7 +272,7 @@ export default function VenueManagers({ currentUser, showToast, onMenu }) {
                 {isOpen && (
                   <div className="vm-group-expand">
                     {g.bookings.map((r) => (
-                      <Row key={r.id} r={r} t={t} formatShortDate={formatShortDate} onEdit={() => setEditModal(r)} />
+                      <Card key={r.id} r={r} t={t} onEdit={() => setEditModal(r)} />
                     ))}
                   </div>
                 )}
@@ -266,7 +293,7 @@ export default function VenueManagers({ currentUser, showToast, onMenu }) {
             <span>{t('Sales Person')}</span>
           </div>
           {pagedRows.map((r) => (
-            <Row key={r.id} r={r} t={t} formatShortDate={formatShortDate} onEdit={() => setEditModal(r)} />
+            <Card key={r.id} r={r} t={t} onEdit={() => setEditModal(r)} />
           ))}
         </div>
       )}
@@ -293,17 +320,26 @@ export default function VenueManagers({ currentUser, showToast, onMenu }) {
   )
 }
 
-function Row({ r, t, formatShortDate, onEdit }) {
+/* Card renders as a structured card on mobile, grid row on desktop */
+function Card({ r, t, onEdit }) {
   const dept = DEPT_LABEL[r.venue_id] || r.venue_id
   return (
-    <button className="vm-row" onClick={onEdit}>
+    <button className="vm-row" style={{ '--vm-dept-color': DEPT_COLOR[r.venue_id] || '#999' }} onClick={onEdit}>
+      {/* Line 1: Name + dept badge */}
       <div className="vm-row-main">
-        <span className="vm-mgr-name">{r.venue_manager_name}</span>
+        <div className="vm-card-name-line">
+          <span className="vm-mgr-name">{r.venue_manager_name}</span>
+          <span className="vm-dept-badge" style={{ background: DEPT_COLOR[r.venue_id] || '#999' }}>{t(dept)}</span>
+        </div>
         {r.venue_manager_number && (
           <a href={`tel:${r.venue_manager_number}`} className="vm-mgr-phone" onClick={(e) => e.stopPropagation()}>{r.venue_manager_number}</a>
         )}
       </div>
-      <span className="vm-dept-badge" style={{ background: DEPT_COLOR[r.venue_id] || '#999' }}>{t(dept)}</span>
+      {/* Desktop-only dept badge (separate grid cell) */}
+      <span className="vm-dept-badge-cell">
+        <span className="vm-dept-badge" style={{ background: DEPT_COLOR[r.venue_id] || '#999' }}>{t(dept)}</span>
+      </span>
+      {/* Line 2: Venue + location */}
       <div className="vm-row-venue">
         <span>{r.venue_name || '—'}</span>
         {r.location && (
@@ -316,11 +352,13 @@ function Row({ r, t, formatShortDate, onEdit }) {
           )
         )}
       </div>
+      {/* Line 3: Date + Guest */}
       <span className="vm-row-date">{formatDate(r.date)}</span>
       <div className="vm-row-guest">
         <span>{r.guest_name || '—'}</span>
         {r.phone && <span className="vm-guest-phone">{r.phone}</span>}
       </div>
+      {/* Line 4: Sales Person */}
       <span className="vm-row-sales">{r.sales_person || '—'}</span>
     </button>
   )

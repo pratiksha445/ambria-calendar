@@ -4476,34 +4476,71 @@ input, select, textarea {
 
 /* ========== Venue Managers page ========== */
 
-.vm-filters {
+/* ── Category tabs (match um-tabs) ── */
+.vm-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 8px 0 4px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.vm-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid var(--ambria-border);
+  border-radius: 999px;
+  background: var(--ambria-card);
+  color: var(--ambria-ink);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.vm-tab:hover {
+  border-color: var(--ambria-accent);
+  color: var(--ambria-accent);
+}
+.vm-tab.active {
+  background: var(--ambria-accent);
+  border-color: var(--ambria-accent);
+  color: #fff;
+}
+.vm-tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.08);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+.vm-tab.active .vm-tab-count {
+  background: var(--ambria-tab-count-active-bg);
+}
+
+/* ── Search (reuse panel-search pattern) ── */
+.vm-search-wrap { padding: 8px 0; }
+
+/* ── Controls row: dates + group chip ── */
+.vm-controls {
   display: flex;
   gap: 8px;
-  flex-wrap: wrap;
   align-items: center;
-  margin-bottom: 16px;
+  flex-wrap: wrap;
+  padding-bottom: 12px;
 }
-.vm-search {
-  flex: 1;
-  min-width: 180px;
-  padding: 8px 12px;
-  border: 1px solid var(--ambria-border);
-  border-radius: 8px;
-  font-size: 0.88rem;
-  background: var(--ambria-card);
-  color: var(--ambria-ink);
-}
-.vm-search:focus { outline: none; border-color: var(--ambria-accent); }
-.vm-filter-select {
-  padding: 8px 10px;
-  border: 1px solid var(--ambria-border);
-  border-radius: 8px;
-  font-size: 0.85rem;
-  background: var(--ambria-card);
-  color: var(--ambria-ink);
+.vm-date-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
 }
 .vm-date-input {
-  padding: 7px 8px;
+  padding: 6px 8px;
   border: 1px solid var(--ambria-border);
   border-radius: 8px;
   font-size: 0.82rem;
@@ -4515,22 +4552,25 @@ input, select, textarea {
   color: var(--ambria-muted);
   font-size: 0.85rem;
 }
-.vm-group-btn {
-  padding: 8px 14px;
+.vm-group-chip {
+  padding: 6px 12px;
   border: 1px solid var(--ambria-border);
-  border-radius: 8px;
-  font-size: 0.82rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
   font-weight: 600;
   background: var(--ambria-card);
   color: var(--ambria-ink);
   cursor: pointer;
   white-space: nowrap;
 }
-.vm-group-btn.vm-group-active {
+.vm-group-chip:hover { border-color: var(--ambria-accent); color: var(--ambria-accent); }
+.vm-group-chip.active {
   background: var(--ambria-accent);
   color: #fff;
   border-color: var(--ambria-accent);
 }
+
+/* ── Export button ── */
 .vm-export-btn {
   display: flex;
   align-items: center;
@@ -4547,6 +4587,7 @@ input, select, textarea {
 }
 .vm-export-btn:hover { border-color: var(--ambria-accent); }
 
+/* ── Empty state ── */
 .vm-empty {
   text-align: center;
   padding: 48px 16px;
@@ -4554,7 +4595,7 @@ input, select, textarea {
   font-size: 0.95rem;
 }
 
-/* ── Table header (desktop) ── */
+/* ── Table header (desktop only) ── */
 .vm-table-header {
   display: none;
 }
@@ -4573,7 +4614,7 @@ input, select, textarea {
   }
 }
 
-/* ── Row (card on mobile, grid on desktop) ── */
+/* ── Row / Card ── */
 .vm-row {
   appearance: none;
   border: none;
@@ -4599,8 +4640,18 @@ input, select, textarea {
     gap: 8px;
     align-items: center;
     padding: 10px 14px;
+    border-left: none;
+    border-radius: 0;
+    margin-bottom: 0;
+    box-shadow: none;
   }
+  /* On desktop, hide the inline badge inside the name line —
+     department gets its own grid cell */
+  .vm-card-name-line .vm-dept-badge { display: none; }
+  /* Show standalone dept badge (separate grid cell on desktop) */
+  .vm-row > .vm-dept-badge-cell { display: flex; align-items: center; }
 }
+.vm-dept-badge-cell { display: none; }
 
 .vm-row-main {
   display: flex;
@@ -4608,18 +4659,24 @@ input, select, textarea {
   gap: 2px;
   min-width: 0;
 }
+.vm-card-name-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
 .vm-mgr-name {
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .vm-mgr-phone {
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   color: var(--ambria-accent);
   text-decoration: none;
-  font-weight: 500;
+  font-weight: 600;
 }
 .vm-dept-badge {
   display: inline-block;
@@ -4773,21 +4830,39 @@ input, select, textarea {
   color: var(--ambria-muted);
 }
 
-/* ── Mobile card tweaks ── */
+/* ── Mobile card layout ── */
 @media (max-width: 767px) {
-  .vm-filters {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .vm-search { min-width: unset; }
-  .vm-date-input { max-width: unset; flex: 1; }
   .vm-export-label { display: none; }
   .vm-table-header { display: none; }
+  .vm-date-input { max-width: unset; flex: 1; }
+  .vm-date-row { flex: 1; }
+  .vm-controls { flex-wrap: wrap; }
+
   .vm-row {
-    border-radius: 10px;
+    border-radius: 12px;
     margin-bottom: 8px;
     border: 1px solid var(--ambria-border);
+    border-left: 4px solid var(--vm-dept-color, var(--ambria-border));
     box-shadow: var(--ambria-shadow-pill);
+    padding: 14px 16px;
+  }
+
+  .vm-group-card {
+    border-bottom: none;
+    margin-bottom: 8px;
+  }
+  .vm-group-row {
+    border-radius: 12px;
+    border: 1px solid var(--ambria-border);
+    box-shadow: var(--ambria-shadow-pill);
+  }
+  .vm-group-expand {
+    border-radius: 0 0 12px 12px;
+    margin-top: -8px;
+    padding-top: 8px;
+  }
+  .vm-group-expand .vm-row {
+    border-left-width: 4px;
   }
 }
 
