@@ -334,7 +334,7 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
           {event.operation_manager && (
             <div className="detail-row"><span className="k">{t(event.venue_id === 'add' ? 'Operation Manager' : 'F&B Service Manager')}</span><span className="v">{event.operation_manager}</span></div>
           )}
-          {(isOwnVenue || event.venue_id === 'aee') && event.guest_category && (
+          {event.guest_category && (
             <div className="detail-row"><span className="k">{t('Guest Category')}</span><span className="v">{t(event.guest_category)}</span></div>
           )}
           {isOwnVenue && event.status && (

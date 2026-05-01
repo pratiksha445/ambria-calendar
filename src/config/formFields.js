@@ -264,7 +264,7 @@ function ownVenueSections(venue, dynamicTypes, dynamicElements) {
         phoneReq(),
         // Row 10: Pax | Guest Category
         paxField(),
-        S('Guest Category', 'guest_category', GUEST_CATEGORIES, false),
+        S('Guest Category', 'guest_category', GUEST_CATEGORIES, true),
         // Row 11: Sales Person
         { ...salesPersonField(),
           userFilter: { department: 'Venue Sales', salesTypes: ['In-house', 'In-house + Outdoor'] },
@@ -371,6 +371,7 @@ function villaSections(venue, dynamicTypes) {
         guestName(),
         phoneReq(),
         paxField(),
+        S('Guest Category', 'guest_category', GUEST_CATEGORIES, true),
         T('Extra Bedding', 'extra_bedding', true, {
           filterFn: paxFilter, filterError: 'Only numbers allowed', inputMode: 'numeric',
         }),
@@ -422,6 +423,7 @@ function addSections(_venue, dynamicTypes) {
       fields: [
         guestName(),
         phoneReq(),
+        S('Guest Category', 'guest_category', GUEST_CATEGORIES, true),
         { ...salesPersonField(),
           userFilter: { department: 'Decor Sales', salesTypes: ['Outdoor', 'In-house + Outdoor'] },
           userEmptyMsg: 'No Decor Sales (Outdoor) users available. Add users in Manage Users.',
@@ -489,6 +491,7 @@ function acSections(_venue, dynamicTypes) {
       fields: [
         guestName(),
         phoneReq(),
+        S('Guest Category', 'guest_category', GUEST_CATEGORIES, true),
         { ...salesPersonField(),
           userFilter: { department: 'Catering Sales', salesTypes: ['Outdoor', 'In-house + Outdoor'] },
           userEmptyMsg: 'No Catering Sales (Outdoor) users available. Add users in Manage Users.',
@@ -547,7 +550,7 @@ function aeeSections(_venue, dynamicTypes) {
       fields: [
         guestName(),
         phoneReq(),
-        S('Guest Category', 'guest_category', GUEST_CATEGORIES, false),
+        S('Guest Category', 'guest_category', GUEST_CATEGORIES, true),
         { ...salesPersonField(),
           userFilter: { department: 'Entertainment Sales' },
           userEmptyMsg: 'No Entertainment Sales users available. Add users in Manage Users.',
@@ -596,6 +599,7 @@ function tenderSections(_venue, _dynamicTypes) {
       fields: [
         tenderNameField(),
         phoneOpt(),
+        S('Guest Category', 'guest_category', GUEST_CATEGORIES, true),
         T('Pending Payment %', 'payment_remaining_venue', true, {
           filterFn: percentFilter, filterError: 'Only numbers 0-100',
           suffix: '%', inputMode: 'numeric',
@@ -653,6 +657,7 @@ function wsSections(_venue, dynamicTypes) {
       fields: [
         guestName(),
         phoneReq(),
+        S('Guest Category', 'guest_category', GUEST_CATEGORIES, true),
         salesPersonField(),
         T('Pending Payment %', 'payment_remaining_venue', true, {
           filterFn: percentFilter, filterError: 'Only numbers 0-100',
@@ -688,14 +693,14 @@ export const FIELD_MAP = {
     'sub_venue', 'event_type', 'event_type_other',
     'check_in_date', 'check_out_date', 'check_in_time', 'check_out_time',
     'pool_included', 'meal_included', 'added_service',
-    'guest_name', 'phone', 'pax', 'extra_bedding', 'sales_person', 'sales_person_id',
+    'guest_name', 'phone', 'pax', 'extra_bedding', 'guest_category', 'sales_person', 'sales_person_id',
     'payment_remaining_venue', 'payment_timing', 'notes',
   ],
   add: [
     'venue_name', 'venue_type', 'location', 'event_type', 'event_type_other',
     'shift', 'date', 'time', 'site_availability', 'site_availability_other',
     'decor_type', 'color_theme',
-    'guest_name', 'phone', 'pax', 'sales_person', 'sales_person_id',
+    'guest_name', 'phone', 'pax', 'guest_category', 'sales_person', 'sales_person_id',
     'execution_person', 'execution_person_id',
     'operation_manager', 'operation_manager_id',
     'venue_manager_name', 'venue_manager_number',
@@ -706,7 +711,7 @@ export const FIELD_MAP = {
     'venue_name', 'venue_type', 'location', 'event_type', 'event_type_other',
     'shift', 'date', 'time', 'site_availability', 'site_availability_other',
     'menu_type', 'menu_cat',
-    'guest_name', 'phone', 'pax', 'sales_person', 'sales_person_id',
+    'guest_name', 'phone', 'pax', 'guest_category', 'sales_person', 'sales_person_id',
     'service_head', 'service_head_id', 'kitchen_head', 'kitchen_head_id',
     'venue_manager_name', 'venue_manager_number',
     'payment_remaining_venue', 'payment_timing', 'notes',
@@ -724,12 +729,12 @@ export const FIELD_MAP = {
     'service_type', 'service_type_other', 'vendor_name', 'vendor_phone',
     'venue_name', 'location', 'event_type', 'event_type_other',
     'date', 'time',
-    'guest_name', 'phone', 'sales_person', 'sales_person_id',
+    'guest_name', 'phone', 'guest_category', 'sales_person', 'sales_person_id',
     'payment_remaining_venue', 'payment_timing', 'notes',
   ],
   tender: [
     'venue_name', 'location', 'event_type_text', 'date', 'end_date',
-    'tender_name', 'phone',
+    'tender_name', 'phone', 'guest_category',
     'payment_remaining_venue', 'payment_timing', 'notes',
   ],
 }
