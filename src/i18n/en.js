@@ -774,6 +774,11 @@ const en = {
   'Service Staff': 'Service Staff',
   'Quality': 'Quality',
   'Hygiene': 'Hygiene',
+  'Bridal Entry': 'Bridal Entry',
+  'Groom Entry': 'Groom Entry',
+  'Jaimala': 'Jaimala',
+  'Artist Quality': 'Artist Quality',
+  'Product Quality': 'Product Quality',
 
   // ── Date validation ──
   'Date cannot be in the past': 'Date cannot be in the past',

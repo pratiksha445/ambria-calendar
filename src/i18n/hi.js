@@ -775,6 +775,11 @@ const hi = {
   'Service Staff': 'सेवा स्टाफ़',
   'Quality': 'गुणवत्ता',
   'Hygiene': 'स्वच्छता',
+  'Bridal Entry': 'ब्राइडल एंट्री',
+  'Groom Entry': 'ग्रूम एंट्री',
+  'Jaimala': 'जयमाला',
+  'Artist Quality': 'आर्टिस्ट क्वालिटी',
+  'Product Quality': 'प्रोडक्ट क्वालिटी',
 
   'Date cannot be in the past': 'तिथि बीते हुए समय में नहीं हो सकती',
   'Cannot create bookings for past dates': 'बीती हुई तिथियों के लिए बुकिंग नहीं बनाई जा सकती',

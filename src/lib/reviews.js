@@ -38,9 +38,21 @@ const AC_RATING_FIELDS = [
   { key: 'rating_poc_availability', label: 'POC Availability' },
 ]
 
+const AEE_RATING_FIELDS = [
+  { key: 'rating_baraat', label: 'Baraat' },
+  { key: 'rating_bridal_entry', label: 'Bridal Entry' },
+  { key: 'rating_groom_entry', label: 'Groom Entry' },
+  { key: 'rating_jaimala', label: 'Jaimala' },
+  { key: 'rating_artist_quality', label: 'Artist Quality' },
+  { key: 'rating_product_quality', label: 'Product Quality' },
+  { key: 'rating_timely_execution', label: 'Timely Execution' },
+  { key: 'rating_poc_availability', label: 'POC Availability' },
+]
+
 export function getRatingFields(venueId) {
   if (venueId === 'add') return ADD_RATING_FIELDS
   if (venueId === 'ac') return AC_RATING_FIELDS
+  if (venueId === 'aee') return AEE_RATING_FIELDS
   return VENUE_RATING_FIELDS
 }
 
@@ -113,6 +125,14 @@ function buildPayload(reviewData, user) {
     base.rating_hygiene = reviewData.rating_hygiene
     base.rating_transport = reviewData.rating_transport
     base.rating_timely_execution = reviewData.rating_timely_execution
+  } else if (reviewData._venueId === 'aee') {
+    base.rating_baraat = reviewData.rating_baraat
+    base.rating_bridal_entry = reviewData.rating_bridal_entry
+    base.rating_groom_entry = reviewData.rating_groom_entry
+    base.rating_jaimala = reviewData.rating_jaimala
+    base.rating_artist_quality = reviewData.rating_artist_quality
+    base.rating_product_quality = reviewData.rating_product_quality
+    base.rating_timely_execution = reviewData.rating_timely_execution
   } else {
     // Venue-specific columns (AP/AM/AE/AR)
     base.rating_food = reviewData.rating_food
@@ -181,9 +201,9 @@ export function canEditReview(user, event) {
 
 /**
  * Check if an event is eligible for review.
- * Must be AP/AM/AE/AR/ADD/AC and event date < today.
+ * Must be AP/AM/AE/AR/ADD/AC/AEE and event date < today.
  */
-const REVIEWABLE_VENUES = new Set(['ap', 'am', 'ae', 'ar', 'add', 'ac'])
+const REVIEWABLE_VENUES = new Set(['ap', 'am', 'ae', 'ar', 'add', 'ac', 'aee'])
 
 export function isReviewable(event) {
   if (!event) return false
@@ -198,7 +218,7 @@ export function isReviewable(event) {
  */
 export function getQuickRating(review, venueId) {
   if (!review) return 0
-  if (venueId === 'add' || venueId === 'ac') {
+  if (venueId === 'add' || venueId === 'ac' || venueId === 'aee') {
     const fields = getRatingFields(venueId)
     const vals = fields
       .map((f) => review[f.key])
