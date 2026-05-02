@@ -3,7 +3,7 @@ import {
   fetchCategories, createCategory, updateCategory,
   deleteCategory, reorderCategories,
 } from '../lib/categories.js'
-import { applyDynamic } from '../config/venues.js'
+import { applyDynamic, contrastText } from '../config/venues.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 
 const SYSTEM_IDS = new Set(['ap', 'am', 'ae', 'ar', 'villa', 'add', 'ac', 'aee', 'tender'])
@@ -11,9 +11,9 @@ const SYSTEM_IDS = new Set(['ap', 'am', 'ae', 'ar', 'villa', 'add', 'ac', 'aee',
 const CATEGORY_TYPES = ['venue', 'service', 'villa', 'tender', 'custom']
 
 const PRESET_COLORS = [
-  '#E0C84E', '#E08E45', '#B08560', '#6088B5', '#9A6BBE',
-  '#5FA8C4', '#D8728A', '#AD7EA5', '#68B078', '#E85D75',
-  '#7CB9E8', '#B4A7D6',
+  '#FFE263', '#FF9430', '#A3785E', '#9CAF88', '#944547',
+  '#ADD8E6', '#D8728A', '#AD7EA5', '#2F4C39', '#FFB8B0',
+  '#E85D75', '#7CB9E8', '#B4A7D6',
 ]
 
 function MenuIcon() {
@@ -308,7 +308,7 @@ export default function CategoryManagement({ currentUser, showToast, onMenu }) {
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9" /></svg>
                   </button>
                 </div>
-                <span className="cat-pill" style={{ background: cat.color, color: '#fff' }}>
+                <span className="cat-pill" style={{ background: cat.color, color: contrastText(cat.color) }}>
                   {cat.short_code}
                 </span>
                 <div className="cat-info">

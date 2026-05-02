@@ -368,7 +368,7 @@ export default function EventList({ currentUser, showToast, onMenu }) {
                       checked={selectedCats.has(v.id)}
                       onChange={() => toggleCat(v.id)}
                     />
-                    <span className="el-cat-badge" style={{ background: v.color }}>{v.short}</span>
+                    <span className="el-cat-badge" style={{ background: v.color, color: v.textColor }}>{v.short}</span>
                     <span>{t(v.name)}</span>
                   </label>
                 ))}
@@ -410,7 +410,7 @@ export default function EventList({ currentUser, showToast, onMenu }) {
               const c = catCounts[v.short]
               if (!c) return null
               return (
-                <span key={v.id} className="el-cat-chip" style={{ background: v.color }}>
+                <span key={v.id} className="el-cat-chip" style={{ background: v.color, color: v.textColor }}>
                   {v.short}: {c}
                 </span>
               )
@@ -467,7 +467,7 @@ export default function EventList({ currentUser, showToast, onMenu }) {
                     </td>
                     <td>{formatDate(getEndDate(ev))}</td>
                     <td>
-                      <span className="el-venue-badge" style={{ background: venue?.color || '#999' }}>
+                      <span className="el-venue-badge" style={{ background: venue?.color || '#999', color: venue?.textColor || '#fff' }}>
                         {venue?.short || ev.venue_id}
                       </span>
                     </td>

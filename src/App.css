@@ -5008,7 +5008,6 @@ input, select, textarea {
   display: inline-block;
   padding: 1px 6px;
   border-radius: 4px;
-  color: #fff;
   font-size: 0.72rem;
   font-weight: 700;
 }
@@ -5041,7 +5040,6 @@ input, select, textarea {
   display: inline-block;
   padding: 2px 8px;
   border-radius: 4px;
-  color: #fff;
   font-size: 0.72rem;
   font-weight: 700;
 }
@@ -5098,7 +5096,6 @@ input, select, textarea {
   display: inline-block;
   padding: 2px 8px;
   border-radius: 4px;
-  color: #fff;
   font-size: 0.72rem;
   font-weight: 700;
 }

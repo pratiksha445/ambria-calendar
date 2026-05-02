@@ -6,7 +6,8 @@ import BookingModal from './BookingModal.jsx'
 const PAGE_SIZE = 25
 
 const DEPT_LABEL = { add: 'Decor', ac: 'Cuisine' }
-const DEPT_COLOR = { add: '#D4B83D', ac: '#E74C3C' }
+const DEPT_COLOR = { add: '#ADD8E6', ac: '#D8728A' }
+const DEPT_TEXT = { add: '#1A1A1A', ac: '#fff' }
 const CAT_TABS = [
   { id: '', label: 'All' },
   { id: 'add', label: 'ADD' },
@@ -261,7 +262,7 @@ export default function VenueManagers({ currentUser, showToast, onMenu }) {
                   </div>
                   <div className="vm-group-meta">
                     {[...g.departments].map((d) => (
-                      <span key={d} className="vm-dept-badge" style={{ background: d === 'Decor' ? DEPT_COLOR.add : DEPT_COLOR.ac }}>{t(d)}</span>
+                      <span key={d} className="vm-dept-badge" style={{ background: d === 'Decor' ? DEPT_COLOR.add : DEPT_COLOR.ac, color: d === 'Decor' ? DEPT_TEXT.add : DEPT_TEXT.ac }}>{t(d)}</span>
                     ))}
                     <span className="vm-group-count">{g.count} {t('bookings')}</span>
                     <span className="vm-group-date">{t('Last')}: {formatDate(g.lastDate)}</span>
@@ -329,7 +330,7 @@ function Card({ r, t, onEdit }) {
       <div className="vm-row-main">
         <div className="vm-card-name-line">
           <span className="vm-mgr-name">{r.venue_manager_name}</span>
-          <span className="vm-dept-badge" style={{ background: DEPT_COLOR[r.venue_id] || '#999' }}>{t(dept)}</span>
+          <span className="vm-dept-badge" style={{ background: DEPT_COLOR[r.venue_id] || '#999', color: DEPT_TEXT[r.venue_id] || '#fff' }}>{t(dept)}</span>
         </div>
         {r.venue_manager_number && (
           <a href={`tel:${r.venue_manager_number}`} className="vm-mgr-phone" onClick={(e) => e.stopPropagation()}>{r.venue_manager_number}</a>
@@ -337,7 +338,7 @@ function Card({ r, t, onEdit }) {
       </div>
       {/* Desktop-only dept badge (separate grid cell) */}
       <span className="vm-dept-badge-cell">
-        <span className="vm-dept-badge" style={{ background: DEPT_COLOR[r.venue_id] || '#999' }}>{t(dept)}</span>
+        <span className="vm-dept-badge" style={{ background: DEPT_COLOR[r.venue_id] || '#999', color: DEPT_TEXT[r.venue_id] || '#fff' }}>{t(dept)}</span>
       </span>
       {/* Line 2: Venue + location */}
       <div className="vm-row-venue">
