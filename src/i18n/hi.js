@@ -768,6 +768,13 @@ const hi = {
   'Light': 'लाइट',
   'Timely Execution': 'समय पर निष्पादन',
   'Cleanliness': 'साफ़-सफ़ाई',
+  'Beverages': 'पेय पदार्थ',
+  'Main Course': 'मुख्य भोजन',
+  'Pre-dining': 'प्री-डाइनिंग',
+  'Desserts': 'मिठाई',
+  'Service Staff': 'सेवा स्टाफ़',
+  'Quality': 'गुणवत्ता',
+  'Hygiene': 'स्वच्छता',
 
   'Date cannot be in the past': 'तिथि बीते हुए समय में नहीं हो सकती',
   'Cannot create bookings for past dates': 'बीती हुई तिथियों के लिए बुकिंग नहीं बनाई जा सकती',

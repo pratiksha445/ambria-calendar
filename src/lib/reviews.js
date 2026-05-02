@@ -24,8 +24,23 @@ const ADD_RATING_FIELDS = [
   { key: 'rating_poc_availability', label: 'POC Availability' },
 ]
 
+const AC_RATING_FIELDS = [
+  { key: 'rating_chaat', label: 'Chaat' },
+  { key: 'rating_beverages', label: 'Beverages' },
+  { key: 'rating_main_course', label: 'Main Course' },
+  { key: 'rating_pre_dining', label: 'Pre-dining' },
+  { key: 'rating_desserts', label: 'Desserts' },
+  { key: 'rating_service_staff', label: 'Service Staff' },
+  { key: 'rating_quality', label: 'Quality' },
+  { key: 'rating_hygiene', label: 'Hygiene' },
+  { key: 'rating_transport', label: 'Transport' },
+  { key: 'rating_timely_execution', label: 'Timely Execution' },
+  { key: 'rating_poc_availability', label: 'POC Availability' },
+]
+
 export function getRatingFields(venueId) {
   if (venueId === 'add') return ADD_RATING_FIELDS
+  if (venueId === 'ac') return AC_RATING_FIELDS
   return VENUE_RATING_FIELDS
 }
 
@@ -80,7 +95,6 @@ function buildPayload(reviewData, user) {
   }
 
   if (reviewData._venueId === 'add') {
-    // ADD-specific columns
     base.rating_furniture = reviewData.rating_furniture
     base.rating_structure_fabric = reviewData.rating_structure_fabric
     base.rating_floral = reviewData.rating_floral
@@ -88,6 +102,17 @@ function buildPayload(reviewData, user) {
     base.rating_light = reviewData.rating_light
     base.rating_timely_execution = reviewData.rating_timely_execution
     base.rating_cleanliness = reviewData.rating_cleanliness
+  } else if (reviewData._venueId === 'ac') {
+    base.rating_chaat = reviewData.rating_chaat
+    base.rating_beverages = reviewData.rating_beverages
+    base.rating_main_course = reviewData.rating_main_course
+    base.rating_pre_dining = reviewData.rating_pre_dining
+    base.rating_desserts = reviewData.rating_desserts
+    base.rating_service_staff = reviewData.rating_service_staff
+    base.rating_quality = reviewData.rating_quality
+    base.rating_hygiene = reviewData.rating_hygiene
+    base.rating_transport = reviewData.rating_transport
+    base.rating_timely_execution = reviewData.rating_timely_execution
   } else {
     // Venue-specific columns (AP/AM/AE/AR)
     base.rating_food = reviewData.rating_food
@@ -146,14 +171,19 @@ export function canEditReview(user, event) {
     if (event.execution_person_id && event.execution_person_id === user.id) return true
     if (event.operation_manager_id && event.operation_manager_id === user.id) return true
   }
+  // AC: service head and kitchen head can also edit
+  if (event.venue_id === 'ac') {
+    if (event.service_head_id && event.service_head_id === user.id) return true
+    if (event.kitchen_head_id && event.kitchen_head_id === user.id) return true
+  }
   return false
 }
 
 /**
  * Check if an event is eligible for review.
- * Must be AP/AM/AE/AR/ADD and event date < today.
+ * Must be AP/AM/AE/AR/ADD/AC and event date < today.
  */
-const REVIEWABLE_VENUES = new Set(['ap', 'am', 'ae', 'ar', 'add'])
+const REVIEWABLE_VENUES = new Set(['ap', 'am', 'ae', 'ar', 'add', 'ac'])
 
 export function isReviewable(event) {
   if (!event) return false
@@ -164,17 +194,15 @@ export function isReviewable(event) {
 
 /**
  * Get a quick-glance rating for the review summary.
- * Venue reviews: rating_overall. ADD reviews: average of all ADD ratings.
+ * Venue reviews: rating_overall. ADD/AC reviews: average of category ratings.
  */
 export function getQuickRating(review, venueId) {
   if (!review) return 0
-  if (venueId === 'add') {
-    const vals = [
-      review.rating_furniture, review.rating_structure_fabric,
-      review.rating_floral, review.rating_transport,
-      review.rating_light, review.rating_timely_execution,
-      review.rating_cleanliness, review.rating_poc_availability,
-    ].filter((v) => v != null && v > 0)
+  if (venueId === 'add' || venueId === 'ac') {
+    const fields = getRatingFields(venueId)
+    const vals = fields
+      .map((f) => review[f.key])
+      .filter((v) => v != null && v > 0)
     if (vals.length === 0) return 0
     return Math.round(vals.reduce((a, b) => a + b, 0) / vals.length)
   }

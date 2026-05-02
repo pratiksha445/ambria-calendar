@@ -767,6 +767,13 @@ const en = {
   'Light': 'Light',
   'Timely Execution': 'Timely Execution',
   'Cleanliness': 'Cleanliness',
+  'Beverages': 'Beverages',
+  'Main Course': 'Main Course',
+  'Pre-dining': 'Pre-dining',
+  'Desserts': 'Desserts',
+  'Service Staff': 'Service Staff',
+  'Quality': 'Quality',
+  'Hygiene': 'Hygiene',
 
   // ── Date validation ──
   'Date cannot be in the past': 'Date cannot be in the past',
