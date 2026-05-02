@@ -760,6 +760,13 @@ const en = {
   'POC Availability': 'POC Availability',
   'Completed': 'Completed',
   'Unknown': 'Unknown',
+  'Furniture': 'Furniture',
+  'Structure + Fabric': 'Structure + Fabric',
+  'Floral': 'Floral',
+  'Transport': 'Transport',
+  'Light': 'Light',
+  'Timely Execution': 'Timely Execution',
+  'Cleanliness': 'Cleanliness',
 
   // ── Date validation ──
   'Date cannot be in the past': 'Date cannot be in the past',

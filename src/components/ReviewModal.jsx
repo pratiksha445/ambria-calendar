@@ -1,23 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
-import { fetchReview, upsertReview, canEditReview } from '../lib/reviews.js'
+import { fetchReview, upsertReview, canEditReview, getRatingFields } from '../lib/reviews.js'
 import { VENUE_BY_ID } from '../config/venues.js'
-
-const RATING_FIELDS = [
-  { key: 'rating_food', label: 'Food' },
-  { key: 'rating_service', label: 'Service' },
-  { key: 'rating_decor', label: 'Decor' },
-  { key: 'rating_entertainment', label: 'Entertainment' },
-  { key: 'rating_housekeeping', label: 'Housekeeping' },
-  { key: 'rating_valet', label: 'Valet' },
-  { key: 'rating_overall', label: 'Overall' },
-  { key: 'rating_poc_availability', label: 'POC Availability' },
-]
 
 function StarRating({ value, onChange, readonly }) {
   const handleClick = (star) => {
     if (readonly) return
-    // Tap same star → deselect (go to star below, or 0 if star 1)
     if (value === star) {
       onChange(star - 1)
     } else {
@@ -50,10 +38,11 @@ export default function ReviewModal({ open, event, user, onClose, onReviewSaved 
   const [review, setReview] = useState(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [form, setForm] = useState(getEmptyForm())
+  const [form, setForm] = useState({})
   const [dragY, setDragY] = useState(0)
   const dragRef = useRef({ startY: 0, tracking: false })
 
+  const ratingFields = event ? getRatingFields(event.venue_id) : []
   const canEdit = canEditReview(user, event)
   const isExistingReview = !!review
 
@@ -62,24 +51,18 @@ export default function ReviewModal({ open, event, user, onClose, onReviewSaved 
     setLoading(true)
     setDragY(0)
     dragRef.current = { startY: 0, tracking: false }
+    const fields = getRatingFields(event.venue_id)
     fetchReview(event.id)
       .then((r) => {
         setReview(r)
         if (r) {
-          setForm({
-            review_payment_status: r.review_payment_status,
-            rating_food: r.rating_food,
-            rating_service: r.rating_service,
-            rating_decor: r.rating_decor,
-            rating_entertainment: r.rating_entertainment,
-            rating_housekeeping: r.rating_housekeeping,
-            rating_valet: r.rating_valet,
-            rating_overall: r.rating_overall,
-            rating_poc_availability: r.rating_poc_availability,
-            remark: r.remark || '',
-          })
+          const f = { review_payment_status: r.review_payment_status, remark: r.remark || '' }
+          for (const fd of fields) f[fd.key] = r[fd.key] || 0
+          setForm(f)
         } else {
-          setForm(getEmptyForm())
+          const f = { review_payment_status: '', remark: '' }
+          for (const fd of fields) f[fd.key] = 0
+          setForm(f)
         }
       })
       .catch((err) => console.error('[ambria] fetch review failed', err))
@@ -106,13 +89,10 @@ export default function ReviewModal({ open, event, user, onClose, onReviewSaved 
 
   const venue = VENUE_BY_ID[event.venue_id]
   const isCancelled = event.status === 'Cancelled'
-
-  // Determine mode: readOnly view or editable form
-  const showForm = canEdit && (!isExistingReview || canEdit)
-  const readOnly = !canEdit || (isExistingReview && !canEdit)
+  const showForm = canEdit
 
   const isFormValid = form.review_payment_status &&
-    RATING_FIELDS.every((f) => form[f.key] >= 1)
+    ratingFields.every((f) => form[f.key] >= 1)
 
   const handleSubmit = async () => {
     if (!isFormValid || saving) return
@@ -123,6 +103,7 @@ export default function ReviewModal({ open, event, user, onClose, onReviewSaved 
         id: review?.id,
         event_id: event.id,
         event_title: event.title,
+        _venueId: event.venue_id,
       }, user)
       setReview(data)
       onReviewSaved?.(event.id, data)
@@ -190,6 +171,7 @@ export default function ReviewModal({ open, event, user, onClose, onReviewSaved 
               </span>
               <span>{formatShortDate(event.date)}</span>
               {event.sub_venue && <span>· {t(event.sub_venue)}</span>}
+              {event.venue_name && event.venue_id === 'add' && <span>· {event.venue_name}</span>}
             </div>
           </div>
 
@@ -218,12 +200,12 @@ export default function ReviewModal({ open, event, user, onClose, onReviewSaved 
                 </select>
               </div>
 
-              {/* Ratings */}
-              {RATING_FIELDS.map((f) => (
+              {/* Ratings — category-aware */}
+              {ratingFields.map((f) => (
                 <div key={f.key} className="review-rating-field">
                   <span className="review-rating-label">{t(f.label)} <span className="review-required">*</span></span>
                   <StarRating
-                    value={form[f.key]}
+                    value={form[f.key] || 0}
                     onChange={(val) => setRating(f.key, val)}
                     readonly={false}
                   />
@@ -262,10 +244,10 @@ export default function ReviewModal({ open, event, user, onClose, onReviewSaved 
                 </span>
               </div>
 
-              {RATING_FIELDS.map((f) => (
+              {ratingFields.map((f) => (
                 <div key={f.key} className="review-rating-field">
                   <span className="review-rating-label">{t(f.label)}</span>
-                  <StarRating value={review[f.key]} readonly />
+                  <StarRating value={review[f.key] || 0} readonly />
                 </div>
               ))}
 
@@ -293,19 +275,4 @@ export default function ReviewModal({ open, event, user, onClose, onReviewSaved 
       </div>
     </div>
   )
-}
-
-function getEmptyForm() {
-  return {
-    review_payment_status: '',
-    rating_food: 0,
-    rating_service: 0,
-    rating_decor: 0,
-    rating_entertainment: 0,
-    rating_housekeeping: 0,
-    rating_valet: 0,
-    rating_overall: 0,
-    rating_poc_availability: 0,
-    remark: '',
-  }
 }

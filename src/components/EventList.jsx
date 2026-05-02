@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 import { VENUES, VENUE_BY_ID } from '../config/venues.js'
 import BookingModal from './BookingModal.jsx'
-import { fetchReviewsByEventIds, isReviewable } from '../lib/reviews.js'
+import { fetchReviewsByEventIds, isReviewable, getQuickRating } from '../lib/reviews.js'
 import * as XLSX from 'xlsx'
 
 const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December']
@@ -97,7 +97,7 @@ function getReviewStatus(ev, reviewMap) {
 function getOverallRating(ev, reviewMap) {
   if (!isReviewable(ev)) return ''
   const review = reviewMap.get(ev.id)
-  return review ? review.rating_overall : ''
+  return review ? getQuickRating(review, ev.venue_id) : ''
 }
 
 function monthRange(year, month) {

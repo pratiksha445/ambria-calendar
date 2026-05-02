@@ -5,7 +5,7 @@ import { formatTime12 } from '../lib/dates.js'
 import { canAccessBooking } from '../lib/sectionPermissions.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 import { loadElementLabels, getElementLabel } from '../lib/elements.js'
-import { isReviewable } from '../lib/reviews.js'
+import { isReviewable, getQuickRating } from '../lib/reviews.js'
 
 const OWN_VENUES = new Set(['ap', 'am', 'ae', 'ar'])
 
@@ -513,9 +513,10 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
             <div className="event-card-notes"><span className="k">{t('Notes')}</span><span className="v">{event.notes}</span></div>
           )}
 
-          {/* ── Review summary (completed AP/AM/AE/AR only) ── */}
+          {/* ── Review summary (completed reviewable events) ── */}
           {isReviewable(event) && reviewMap?.has(event.id) && (() => {
             const rev = reviewMap.get(event.id)
+            const quickRating = getQuickRating(rev, event.venue_id)
             return (
               <div className="review-summary-section">
                 <div className="detail-section-heading">{t('REVIEW')}</div>
@@ -523,7 +524,7 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
                   <span className="review-summary-label">{t('Overall')}</span>
                   <span className="review-summary-stars">
                     {[1,2,3,4,5].map((s) => (
-                      <span key={s} className={`review-star-sm ${s <= rev.rating_overall ? 'star-gold' : 'star-grey'}`}>&#9733;</span>
+                      <span key={s} className={`review-star-sm ${s <= quickRating ? 'star-gold' : 'star-grey'}`}>&#9733;</span>
                     ))}
                   </span>
                 </div>

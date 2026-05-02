@@ -761,6 +761,13 @@ const hi = {
   'POC Availability': 'POC उपलब्धता',
   'Completed': 'पूर्ण',
   'Unknown': 'अज्ञात',
+  'Furniture': 'फर्नीचर',
+  'Structure + Fabric': 'स्ट्रक्चर + फैब्रिक',
+  'Floral': 'फ्लोरल',
+  'Transport': 'ट्रांसपोर्ट',
+  'Light': 'लाइट',
+  'Timely Execution': 'समय पर निष्पादन',
+  'Cleanliness': 'साफ़-सफ़ाई',
 
   'Date cannot be in the past': 'तिथि बीते हुए समय में नहीं हो सकती',
   'Cannot create bookings for past dates': 'बीती हुई तिथियों के लिए बुकिंग नहीं बनाई जा सकती',
