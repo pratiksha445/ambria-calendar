@@ -17,7 +17,9 @@ import CategoryManagement from './components/CategoryManagement.jsx'
 import ManageElements from './components/ManageElements.jsx'
 import VenueManagers from './components/VenueManagers.jsx'
 import EventList from './components/EventList.jsx'
+import ReviewModal from './components/ReviewModal.jsx'
 import { fetchEvents, deleteEvent, bulkDeleteMonth } from './lib/events.js'
+import { fetchReviewsByEventIds, isReviewable } from './lib/reviews.js'
 import { getEventTypeAbbr } from './lib/eventTypes.js'
 import { seedIfEmpty } from './lib/seedEvents.js'
 import { useDirectory } from './contexts/DirectoryContext.jsx'
@@ -75,6 +77,8 @@ export default function App() {
   const [changePinOpen, setChangePinOpen] = useState(false)
   const [dayModalDate, setDayModalDate] = useState(null)
   const [exportModal, setExportModal] = useState(null) // null | { from, to }
+  const [reviewModal, setReviewModal] = useState(null) // null | event
+  const [reviewMap, setReviewMap] = useState(() => new Map())
   const { eventTypes, eventTypeAbbrByName, refresh: refreshDirectory, clear: clearDirectory } = useDirectory()
   const calendarBodyRef = useRef(null)
   const fetchedMonthsRef = useRef(new Set())
@@ -198,6 +202,16 @@ export default function App() {
       .catch((err) => setError(err?.message ?? String(err)))
       .finally(() => setLoading(false))
   }, [searchActive, user])
+
+  // ── Fetch reviews for reviewable events ──
+  useEffect(() => {
+    if (!user) return
+    const reviewableIds = allEvents.filter(isReviewable).map((e) => e.id)
+    if (reviewableIds.length === 0) return
+    fetchReviewsByEventIds(reviewableIds)
+      .then((map) => setReviewMap(map))
+      .catch((err) => console.error('[ambria] fetch reviews failed', err))
+  }, [allEvents, user])
 
   // ── Month-scoped events for sidebar counts ──
   const monthStart = toIsoDate(startOfMonth(currentDate))
@@ -379,6 +393,19 @@ export default function App() {
     setExportModal({ from: iso, to: iso })
   }
 
+  const openReview = useCallback((ev) => {
+    setReviewModal(ev)
+  }, [])
+
+  const handleReviewSaved = useCallback((eventId, reviewData) => {
+    setReviewMap((prev) => {
+      const next = new Map(prev)
+      next.set(eventId, reviewData)
+      return next
+    })
+    showToast(t('Review submitted'))
+  }, [t, showToast])
+
   const handleClearMonth = () => setConfirmBulk(true)
   const executeBulkDelete = async () => {
     const start = toIsoDate(startOfMonth(currentDate))
@@ -504,6 +531,8 @@ export default function App() {
                     onDelete={handleCardDelete}
                     onAdd={openNew}
                     user={user}
+                    reviewMap={reviewMap}
+                    onReview={openReview}
                   />
                 </>
               )}
@@ -515,6 +544,8 @@ export default function App() {
                   onDelete={handleCardDelete}
                   onAdd={openNew}
                   user={user}
+                  reviewMap={reviewMap}
+                  onReview={openReview}
                 />
               )}
             </main>
@@ -551,6 +582,8 @@ export default function App() {
         onDelete={handleCardDelete}
         onExport={handleExportDay}
         user={user}
+        reviewMap={reviewMap}
+        onReview={(ev) => { setDayModalDate(null); openReview(ev) }}
       />
       <BookingModal
         open={!!modal}
@@ -559,6 +592,13 @@ export default function App() {
         onSaved={handleSaved}
         onDeleted={handleDeleted}
         user={user}
+      />
+      <ReviewModal
+        open={!!reviewModal}
+        event={reviewModal}
+        user={user}
+        onClose={() => setReviewModal(null)}
+        onReviewSaved={handleReviewSaved}
       />
       <ExportModal
         open={!!exportModal}

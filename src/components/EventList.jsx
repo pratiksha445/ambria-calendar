@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 import { VENUES, VENUE_BY_ID } from '../config/venues.js'
 import BookingModal from './BookingModal.jsx'
+import { fetchReviewsByEventIds, isReviewable } from '../lib/reviews.js'
 import * as XLSX from 'xlsx'
 
 const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December']
@@ -88,6 +89,17 @@ function truncate(s, max) {
   return s.length > max ? s.substring(0, max) + '…' : s
 }
 
+function getReviewStatus(ev, reviewMap) {
+  if (!isReviewable(ev)) return 'N/A'
+  return reviewMap.has(ev.id) ? 'Reviewed' : 'Pending'
+}
+
+function getOverallRating(ev, reviewMap) {
+  if (!isReviewable(ev)) return ''
+  const review = reviewMap.get(ev.id)
+  return review ? review.rating_overall : ''
+}
+
 function monthRange(year, month) {
   const start = `${year}-${String(month + 1).padStart(2, '0')}-01`
   const last = new Date(year, month + 1, 0).getDate()
@@ -107,6 +119,7 @@ export default function EventList({ currentUser, showToast, onMenu }) {
   const [search, setSearch] = useState('')
   const [editModal, setEditModal] = useState(null)
   const [catDropdownOpen, setCatDropdownOpen] = useState(false)
+  const [reviewMap, setReviewMap] = useState(() => new Map())
 
   const monthLabel = `${MONTH_NAMES[month]} ${year}`
 
@@ -138,6 +151,15 @@ export default function EventList({ currentUser, showToast, onMenu }) {
   }, [year, month])
 
   useEffect(() => { loadData() }, [loadData])
+
+  // Fetch reviews for reviewable events
+  useEffect(() => {
+    const reviewableIds = rows.filter(isReviewable).map((e) => e.id)
+    if (reviewableIds.length === 0) { setReviewMap(new Map()); return }
+    fetchReviewsByEventIds(reviewableIds)
+      .then((map) => setReviewMap(map))
+      .catch(() => {})
+  }, [rows])
 
   // Filter + sort
   const filtered = useMemo(() => {
@@ -212,7 +234,7 @@ export default function EventList({ currentUser, showToast, onMenu }) {
     const headers = [
       '#', 'Date', 'End Date', 'Category', 'Sub-Venue', 'Guest Name', 'Phone',
       'Event Type', 'Shift', 'Pax', 'Venue Name', 'Sales Person', 'Guest Category',
-      'Status', 'Payment Status', 'Pending Payment', 'Notes',
+      'Status', 'Payment Status', 'Pending Payment', 'Review Status', 'Overall Rating', 'Notes',
     ]
 
     const dataRows = filtered.map((ev, i) => [
@@ -232,6 +254,8 @@ export default function EventList({ currentUser, showToast, onMenu }) {
       ev.status || '',
       ev.payment_timing || '',
       getPayment(ev),
+      getReviewStatus(ev, reviewMap),
+      getOverallRating(ev, reviewMap),
       ev.notes || '',
     ])
 
@@ -421,6 +445,7 @@ export default function EventList({ currentUser, showToast, onMenu }) {
                 <th>{t('Status')}</th>
                 <th>{t('Payment Status')}</th>
                 <th>{t('Pending Payment')}</th>
+                <th>{t('Review')}</th>
                 <th>{t('Notes')}</th>
               </tr>
             </thead>
@@ -466,6 +491,14 @@ export default function EventList({ currentUser, showToast, onMenu }) {
                     </td>
                     <td>{ev.payment_timing || ''}</td>
                     <td>{getPayment(ev)}</td>
+                    <td>
+                      {(() => {
+                        const rs = getReviewStatus(ev, reviewMap)
+                        if (rs === 'Reviewed') return <span className="el-review-done">{t('✓ Reviewed')}</span>
+                        if (rs === 'Pending') return <span className="el-review-pending">{t('Pending')}</span>
+                        return '—'
+                      })()}
+                    </td>
                     <td title={ev.notes || ''}>{truncate(ev.notes, 50)}</td>
                   </tr>
                 )

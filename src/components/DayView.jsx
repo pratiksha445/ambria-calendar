@@ -4,7 +4,7 @@ import { VENUES } from '../config/venues.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 import EventCard from './EventCard.jsx'
 
-export default function DayView({ selectedDate, events, onEdit, onDelete, onAdd, user }) {
+export default function DayView({ selectedDate, events, onEdit, onDelete, onAdd, user, reviewMap, onReview }) {
   const [expandedId, setExpandedId] = useState(null)
   const { t, formatDayHeader } = useLanguage()
   const iso = toIsoDate(selectedDate)
@@ -57,6 +57,8 @@ export default function DayView({ selectedDate, events, onEdit, onDelete, onAdd,
                 onEdit={onEdit}
                 onDelete={onDelete}
                 user={user}
+                reviewMap={reviewMap}
+                onReview={onReview}
               />
             ))}
           </section>

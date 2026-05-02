@@ -735,6 +735,33 @@ const hi = {
   'Payment Status': 'भुगतान स्थिति',
 
   // ── तिथि सत्यापन ──
+  // ── पोस्ट-इवेंट रिव्यू ──
+  'Review': 'रिव्यू',
+  'Reviewed': 'रिव्यू हो गया',
+  'Review pending': 'रिव्यू बाकी',
+  '✓ Reviewed': '✓ रिव्यू हो गया',
+  'Add Review': 'रिव्यू जोड़ें',
+  'View Review': 'रिव्यू देखें',
+  'Submit Review': 'रिव्यू सबमिट करें',
+  'Update Review': 'रिव्यू अपडेट करें',
+  'Review submitted': 'रिव्यू सबमिट हो गया',
+  'Event Review': 'इवेंट रिव्यू',
+  'REVIEW': 'रिव्यू',
+  'View full review': 'पूरा रिव्यू देखें',
+  'This event was cancelled': 'यह इवेंट रद्द कर दिया गया था',
+  'No review yet. The delivery person or sales person assigned to this event can submit a review.': 'अभी तक कोई रिव्यू नहीं। इस इवेंट के लिए नियुक्त डिलीवरी पर्सन या सेल्स पर्सन रिव्यू सबमिट कर सकते हैं।',
+  'Submitted by {name} on {date}': '{name} द्वारा {date} को सबमिट किया गया',
+  'Any additional comments about the event...': 'इवेंट के बारे में कोई अतिरिक्त टिप्पणी...',
+  'Remark': 'टिप्पणी',
+  'Food': 'खाना',
+  'Service': 'सेवा',
+  'Housekeeping': 'हाउसकीपिंग',
+  'Valet': 'वैलेट',
+  'Overall': 'कुल मिलाकर',
+  'POC Availability': 'POC उपलब्धता',
+  'Completed': 'पूर्ण',
+  'Unknown': 'अज्ञात',
+
   'Date cannot be in the past': 'तिथि बीते हुए समय में नहीं हो सकती',
   'Cannot create bookings for past dates': 'बीती हुई तिथियों के लिए बुकिंग नहीं बनाई जा सकती',
 

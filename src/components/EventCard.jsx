@@ -5,6 +5,7 @@ import { formatTime12 } from '../lib/dates.js'
 import { canAccessBooking } from '../lib/sectionPermissions.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 import { loadElementLabels, getElementLabel } from '../lib/elements.js'
+import { isReviewable } from '../lib/reviews.js'
 
 const OWN_VENUES = new Set(['ap', 'am', 'ae', 'ar'])
 
@@ -18,7 +19,7 @@ function getSortedSlots(event) {
   })
 }
 
-export default memo(function EventCard({ event, expanded = false, onToggle, onEdit, onDelete, user }) {
+export default memo(function EventCard({ event, expanded = false, onToggle, onEdit, onDelete, user, reviewMap, onReview }) {
   const { t, lang, formatShortDate } = useLanguage()
   const [elementLabels, setElementLabels] = useState({})
   const venue = VENUE_BY_ID[event.venue_id]
@@ -125,6 +126,11 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
                   aria-label={event.source === 'crm' ? t('CRM') : t('Manual')}
                   title={event.source === 'crm' ? t('CRM') : t('Manual')}
                 />
+                {isReviewable(event) && (
+                  reviewMap?.has(event.id)
+                    ? <span className="review-indicator review-done" title={t('Reviewed')}>&#10003;</span>
+                    : <span className="review-indicator review-pending" title={t('Review pending')}>&#9998;</span>
+                )}
               </div>
             </div>
           </button>
@@ -506,6 +512,38 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
           {event.notes && (
             <div className="event-card-notes"><span className="k">{t('Notes')}</span><span className="v">{event.notes}</span></div>
           )}
+
+          {/* ── Review summary (completed AP/AM/AE/AR only) ── */}
+          {isReviewable(event) && reviewMap?.has(event.id) && (() => {
+            const rev = reviewMap.get(event.id)
+            return (
+              <div className="review-summary-section">
+                <div className="detail-section-heading">{t('REVIEW')}</div>
+                <div className="review-summary-row">
+                  <span className="review-summary-label">{t('Overall')}</span>
+                  <span className="review-summary-stars">
+                    {[1,2,3,4,5].map((s) => (
+                      <span key={s} className={`review-star-sm ${s <= rev.rating_overall ? 'star-gold' : 'star-grey'}`}>&#9733;</span>
+                    ))}
+                  </span>
+                </div>
+                <div className="review-summary-row">
+                  <span className="review-summary-label">{t('Payment')}</span>
+                  <span className={`review-payment-badge-sm ${rev.review_payment_status === 'Completed' ? 'review-badge-green' : 'review-badge-orange'}`}>
+                    {t(rev.review_payment_status)}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  className="review-full-link"
+                  onClick={(e) => { e.stopPropagation(); onReview?.(event) }}
+                >
+                  {t('View full review')} &rarr;
+                </button>
+              </div>
+            )
+          })()}
+
           {onEdit && canModify && (
             <div className="event-card-actions">
               <button
@@ -514,6 +552,27 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
                 onClick={(e) => { e.stopPropagation(); onEdit(event) }}
               >
                 {event.source === 'manual' ? t('Edit') : t('View')}
+              </button>
+              {isReviewable(event) && (
+                <button
+                  type="button"
+                  className={`event-review-btn ${reviewMap?.has(event.id) ? 'review-btn-muted' : 'review-btn-accent'}`}
+                  onClick={(e) => { e.stopPropagation(); onReview?.(event) }}
+                >
+                  {reviewMap?.has(event.id) ? t('View Review') : t('Add Review')}
+                </button>
+              )}
+            </div>
+          )}
+          {/* Show review button even when user can't edit the booking */}
+          {isReviewable(event) && !(onEdit && canModify) && (
+            <div className="event-card-actions">
+              <button
+                type="button"
+                className={`event-review-btn ${reviewMap?.has(event.id) ? 'review-btn-muted' : 'review-btn-accent'}`}
+                onClick={(e) => { e.stopPropagation(); onReview?.(event) }}
+              >
+                {reviewMap?.has(event.id) ? t('View Review') : t('Add Review')}
               </button>
             </div>
           )}

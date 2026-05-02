@@ -4,7 +4,7 @@ import { VENUES } from '../config/venues.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 import EventCard from './EventCard.jsx'
 
-export default function DayModal({ date, events, onClose, onAdd, onEdit, onDelete, onExport, user }) {
+export default function DayModal({ date, events, onClose, onAdd, onEdit, onDelete, onExport, user, reviewMap, onReview }) {
   const { t } = useLanguage()
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('')
@@ -179,6 +179,8 @@ export default function DayModal({ date, events, onClose, onAdd, onEdit, onDelet
                 onEdit={onEdit}
                 onDelete={onDelete}
                 user={user}
+                reviewMap={reviewMap}
+                onReview={onReview}
               />
             ))
           )}
