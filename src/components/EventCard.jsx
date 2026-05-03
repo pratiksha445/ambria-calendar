@@ -128,8 +128,8 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
                 />
                 {isReviewable(event) && (
                   reviewMap?.has(event.id)
-                    ? <span className="review-indicator review-done" title={t('Reviewed')}>&#10003;</span>
-                    : <span className="review-indicator review-pending" title={t('Review pending')}>&#9998;</span>
+                    ? <span className="review-indicator review-done" title={t('Reviewed')} role="button" onClick={(e) => { e.stopPropagation(); onReview?.(event) }}>&#10003;</span>
+                    : <span className="review-indicator review-pending" title={t('Review pending')} role="button" onClick={(e) => { e.stopPropagation(); onReview?.(event) }}>&#9998;</span>
                 )}
               </div>
             </div>
@@ -203,6 +203,7 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
 
       <div className="event-card-details" aria-hidden={!expanded}>
         <div className="event-card-details-inner">
+          {!isReviewable(event) && <>
           {/* External venue fields (Tender/WS — ADD/AC/AEE venue shown in title) */}
           {event.venue_name && event.venue_id !== 'add' && event.venue_id !== 'ac' && event.venue_id !== 'aee' && (
             <div className="detail-row"><span className="k">{t('Venue')}</span><span className="v">{event.venue_name}</span></div>
@@ -515,6 +516,7 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
           {event.notes && (
             <div className="event-card-notes"><span className="k">{t('Notes')}</span><span className="v">{event.notes}</span></div>
           )}
+          </>}
 
           {/* ── Review summary (completed reviewable events) ── */}
           {isReviewable(event) && reviewMap?.has(event.id) && (() => {

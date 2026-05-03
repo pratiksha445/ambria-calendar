@@ -5170,6 +5170,7 @@ input, select, textarea {
   font-weight: 700;
   flex-shrink: 0;
   line-height: 1;
+  cursor: pointer;
 }
 .review-done {
   background: #22c55e;
