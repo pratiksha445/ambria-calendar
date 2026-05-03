@@ -133,6 +133,7 @@ const en = {
   'Check-In Time': 'Check-In Time',
   'Check-Out Time': 'Check-Out Time',
   'Pool Included': 'Pool Included',
+  'Airbnb': 'Airbnb',
   'Meal Included': 'Meal Included',
   'Added Service': 'Added Service',
   'Venue Name': 'Venue Name',

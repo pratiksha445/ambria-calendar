@@ -133,6 +133,7 @@ const hi = {
   'Check-In Time': 'चेक-इन समय',
   'Check-Out Time': 'चेक-आउट समय',
   'Pool Included': 'पूल शामिल',
+  'Airbnb': 'Airbnb',
   'Meal Included': 'भोजन शामिल',
   'Added Service': 'अतिरिक्त सेवा',
   'Venue Name': 'वेन्यू का नाम',

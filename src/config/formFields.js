@@ -358,7 +358,7 @@ function villaSections(venue, dynamicTypes) {
     {
       title: 'Inclusions',
       fields: [
-        S('Pool Included', 'pool_included', POOL_OPTIONS),
+        { ...S('Pool Included', 'pool_included', POOL_OPTIONS), inlineCheckbox: { key: 'airbnb', label: 'Airbnb' } },
         S('Meal Included', 'meal_included', MEAL_OPTIONS),
         T('Added Service', 'added_service', false, {
           placeholder: 'DJ, Bonfire, BBQ…',
@@ -694,7 +694,7 @@ export const FIELD_MAP = {
   villa: [
     'sub_venue', 'event_type', 'event_type_other',
     'check_in_date', 'check_out_date', 'check_in_time', 'check_out_time',
-    'pool_included', 'meal_included', 'added_service',
+    'pool_included', 'meal_included', 'added_service', 'airbnb',
     'guest_name', 'phone', 'pax', 'extra_bedding', 'guest_category', 'sales_person', 'sales_person_id',
     'payment_remaining_venue', 'payment_timing', 'notes',
     'postponed_from_date', 'postponed_at',
@@ -760,7 +760,7 @@ export const ALL_SAVEABLE_KEYS = [
   'payment_remaining_venue', 'payment_remaining_decor', 'payment_remaining_ent', 'payment_timing',
   'guest_name', 'phone', 'pax', 'extra_bedding', 'guest_category', 'sales_person', 'sales_person_id', 'notes',
   'check_in_date', 'check_out_date', 'check_in_time', 'check_out_time',
-  'pool_included', 'meal_included', 'added_service',
+  'pool_included', 'meal_included', 'added_service', 'airbnb',
   'venue_name', 'venue_type', 'location', 'decor_type', 'color_theme',
   'site_availability', 'site_availability_other',
   'execution_person', 'execution_person_id',

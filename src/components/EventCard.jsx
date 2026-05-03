@@ -480,6 +480,9 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
           {event.meal_included && (
             <div className="detail-row"><span className="k">{t('Meal Included')}</span><span className="v">{t(event.meal_included)}</span></div>
           )}
+          {event.airbnb && (
+            <div className="detail-row"><span className="k">{t('Airbnb')}</span><span className="v"><span className="status-badge status-confirmed">{t('Airbnb')}</span></span></div>
+          )}
           {event.added_service && (
             <div className="detail-row"><span className="k">{t('Added Service')}</span><span className="v">{event.added_service}</span></div>
           )}
@@ -605,6 +608,7 @@ function buildPrimary(event, formatShortDate, t) {
     const parts = [event.guest_name]
     if (event.sub_venue) parts.push(t(event.sub_venue))
     if (event.pax) parts.push(`${event.pax}pax`)
+    if (event.airbnb) parts.push('AB')
     return parts.filter(Boolean).join(' | ')
   }
   // Multi-event external venue bookings
