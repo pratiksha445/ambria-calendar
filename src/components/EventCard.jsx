@@ -161,10 +161,12 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
             style={{ top: popupPos.top, left: popupPos.left }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="time-popup-row"><span className="time-popup-label">{t('Assembly')}</span><span>{formatTime12(event.time) || '\u2014'}</span></div>
+            <div className="time-popup-row"><span className="time-popup-label">{t('Function Start')}</span><span>{formatTime12(event.time) || '\u2014'}</span></div>
             <div className="time-popup-row"><span className="time-popup-label">{t('Decor')}</span><span>{formatTime12(event.decor_time) || '\u2014'}</span></div>
             <div className="time-popup-row"><span className="time-popup-label">{t('Chaat')}</span><span>{formatTime12(event.chaat_time) || '\u2014'}</span></div>
-            <div className="time-popup-row"><span className="time-popup-label">{t('Baraat')}</span><span>{formatTime12(event.baraat_time) || '\u2014'}</span></div>
+            {(event.event_type === 'Wedding' || event.event_type === 'Nikah' || event.event_type === 'South Indian Wedding') && event.baraat_time && (
+              <div className="time-popup-row"><span className="time-popup-label">{t('Baraat')}</span><span>{formatTime12(event.baraat_time)}</span></div>
+            )}
             <div className="time-popup-row"><span className="time-popup-label">{t('Wind Up')}</span><span>{formatTime12(event.wind_up_time) || '\u2014'}{event.wind_up_next_day && <span className="next-day-badge">+1</span>}</span></div>
             <div className="time-popup-row"><span className="time-popup-label">{t('Varmala')}</span><span>{formatTime12(event.varmala_time) || '\u2014'}</span></div>
             <div className="time-popup-row"><span className="time-popup-label">{t('Pheras')}</span><span>{formatTime12(event.pheras_time) || '\u2014'}{event.pheras_next_day && <span className="next-day-badge">+1</span>}</span></div>

@@ -146,7 +146,7 @@ const hi = {
   'Last Name': 'अंतिम नाम',
 
   // ── फ़ॉर्म फ़ील्ड लेबल (नए) ──
-  'Assembly Time': 'असेंबली समय',
+  'Function Start Time': 'फंक्शन स्टार्ट टाइम',
   'Decor Time': 'डेकोर समय',
   'Chaat Time': 'चाट समय',
   'Baraat Time': 'बारात समय',
@@ -539,7 +539,7 @@ const hi = {
   'Decor Cat': 'डेकोर श्रे.',
   'Delivery': 'डिलीवरी',
   'Payment': 'भुगतान',
-  'Assembly': 'असेंबली',
+  'Function Start': 'फंक्शन स्टार्ट',
   'Baraat': 'बारात',
   'Wind Up': 'विंड अप',
   'Varmala': 'वरमाला',

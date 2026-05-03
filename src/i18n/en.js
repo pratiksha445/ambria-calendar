@@ -146,7 +146,7 @@ const en = {
   'Last Name': 'Last Name',
 
   // ── Form field labels (new) ──
-  'Assembly Time': 'Assembly Time',
+  'Function Start Time': 'Function Start Time',
   'Decor Time': 'Decor Time',
   'Chaat Time': 'Chaat Time',
   'Baraat Time': 'Baraat Time',
@@ -539,7 +539,7 @@ const en = {
   'Decor Cat': 'Decor Cat',
   'Delivery': 'Delivery',
   'Payment': 'Payment',
-  'Assembly': 'Assembly',
+  'Function Start': 'Function Start',
   'Baraat': 'Baraat',
   'Wind Up': 'Wind Up',
   'Varmala': 'Varmala',

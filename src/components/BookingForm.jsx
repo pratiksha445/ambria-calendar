@@ -226,6 +226,9 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
       if (key === 'event_type' && value !== 'Other') {
         next.event_type_other = ''
       }
+      if (key === 'event_type' && value !== 'Wedding' && value !== 'Nikah' && value !== 'South Indian Wedding') {
+        next.baraat_time = ''
+      }
       return next
     })
     setErrors((prev) => {

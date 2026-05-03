@@ -7,7 +7,7 @@ import { VENUE_BY_ID } from '../config/venues.js'
  */
 const COLUMNS = [
   { key: 'date', header: 'Date' },
-  { key: 'time', header: 'Assembly Time' },
+  { key: 'time', header: 'Function Start Time' },
   { key: '_category', header: 'Category' },
   { key: 'sub_venue', header: 'Sub-Venue' },
   { key: 'title', header: 'Title' },
