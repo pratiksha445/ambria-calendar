@@ -239,9 +239,7 @@ function ownVenueSections(venue, dynamicTypes, dynamicElements) {
         D('Date', 'date'),
         S('Shift', 'shift', SHIFTS),
         // Row 4: Baraat Time | Function Start Time
-        TM('Baraat Time', 'baraat_time', false, {
-          showWhen: (f) => f.event_type === 'Wedding' || f.event_type === 'Nikah' || f.event_type === 'South Indian Wedding',
-        }),
+        TM('Baraat Time', 'baraat_time', false),
         TM('Function Start Time', 'time'),
         // Row 5: Chaat Time | Wind Up Time
         TM('Chaat Time', 'chaat_time', false),
