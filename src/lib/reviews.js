@@ -49,11 +49,25 @@ const AEE_RATING_FIELDS = [
   { key: 'rating_poc_availability', label: 'POC Availability' },
 ]
 
+const VILLA_RATING_FIELDS = [
+  { key: 'rating_checkin_readiness', label: 'Check-in Readiness' },
+  { key: 'rating_housekeeping', label: 'Housekeeping' },
+  { key: 'rating_amenities', label: 'Amenities' },
+  { key: 'rating_food_service', label: 'Food & Service' },
+  { key: 'rating_team_coordination', label: 'Team Coordination' },
+]
+
 export function getRatingFields(venueId) {
   if (venueId === 'add') return ADD_RATING_FIELDS
   if (venueId === 'ac') return AC_RATING_FIELDS
   if (venueId === 'aee') return AEE_RATING_FIELDS
+  if (venueId === 'villa') return VILLA_RATING_FIELDS
   return VENUE_RATING_FIELDS
+}
+
+/** Returns true if all ratings for this category are optional (e.g. Villa). */
+export function areRatingsOptional(venueId) {
+  return venueId === 'villa'
 }
 
 /**
@@ -98,7 +112,6 @@ function buildPayload(reviewData, user) {
   const base = {
     event_id: reviewData.event_id,
     review_payment_status: reviewData.review_payment_status,
-    rating_poc_availability: reviewData.rating_poc_availability,
     remark: reviewData.remark || null,
     submitted_by: user?.id || null,
     submitted_by_name: user?.name || null,
@@ -106,7 +119,15 @@ function buildPayload(reviewData, user) {
     updated_at: new Date().toISOString(),
   }
 
-  if (reviewData._venueId === 'add') {
+  if (reviewData._venueId === 'villa') {
+    // Villa: all ratings optional — store value or null
+    base.rating_checkin_readiness = reviewData.rating_checkin_readiness || null
+    base.rating_housekeeping = reviewData.rating_housekeeping || null
+    base.rating_amenities = reviewData.rating_amenities || null
+    base.rating_food_service = reviewData.rating_food_service || null
+    base.rating_team_coordination = reviewData.rating_team_coordination || null
+  } else if (reviewData._venueId === 'add') {
+    base.rating_poc_availability = reviewData.rating_poc_availability
     base.rating_furniture = reviewData.rating_furniture
     base.rating_structure_fabric = reviewData.rating_structure_fabric
     base.rating_floral = reviewData.rating_floral
@@ -115,6 +136,7 @@ function buildPayload(reviewData, user) {
     base.rating_timely_execution = reviewData.rating_timely_execution
     base.rating_cleanliness = reviewData.rating_cleanliness
   } else if (reviewData._venueId === 'ac') {
+    base.rating_poc_availability = reviewData.rating_poc_availability
     base.rating_chaat = reviewData.rating_chaat
     base.rating_beverages = reviewData.rating_beverages
     base.rating_main_course = reviewData.rating_main_course
@@ -126,6 +148,7 @@ function buildPayload(reviewData, user) {
     base.rating_transport = reviewData.rating_transport
     base.rating_timely_execution = reviewData.rating_timely_execution
   } else if (reviewData._venueId === 'aee') {
+    base.rating_poc_availability = reviewData.rating_poc_availability
     base.rating_baraat = reviewData.rating_baraat
     base.rating_bridal_entry = reviewData.rating_bridal_entry
     base.rating_groom_entry = reviewData.rating_groom_entry
@@ -135,6 +158,7 @@ function buildPayload(reviewData, user) {
     base.rating_timely_execution = reviewData.rating_timely_execution
   } else {
     // Venue-specific columns (AP/AM/AE/AR)
+    base.rating_poc_availability = reviewData.rating_poc_availability
     base.rating_food = reviewData.rating_food
     base.rating_service = reviewData.rating_service
     base.rating_decor = reviewData.rating_decor
@@ -186,6 +210,12 @@ export function canEditReview(user, event) {
   if (user.role === 'admin') return true
   if (event.sales_person_id && event.sales_person_id === user.id) return true
   if (event.delivery_person_id && event.delivery_person_id === user.id) return true
+  // Villa: Social/Tech staff, GM of Venue Sales, GM of Management
+  if (event.venue_id === 'villa') {
+    if (user.department === 'Social/Tech') return true
+    if (user.role === 'gm' && (user.department === 'Venue Sales' || user.department === 'Management')) return true
+    return false
+  }
   // ADD: execution person and operation manager can also edit
   if (event.venue_id === 'add') {
     if (event.execution_person_id && event.execution_person_id === user.id) return true
@@ -201,15 +231,17 @@ export function canEditReview(user, event) {
 
 /**
  * Check if an event is eligible for review.
- * Must be AP/AM/AE/AR/ADD/AC/AEE and event date < today.
+ * Must be AP/AM/AE/AR/ADD/AC/AEE/Villa and event date < today.
+ * Villa uses check_in_date instead of date.
  */
-const REVIEWABLE_VENUES = new Set(['ap', 'am', 'ae', 'ar', 'add', 'ac', 'aee'])
+const REVIEWABLE_VENUES = new Set(['ap', 'am', 'ae', 'ar', 'add', 'ac', 'aee', 'villa'])
 
 export function isReviewable(event) {
   if (!event) return false
   if (!REVIEWABLE_VENUES.has(event.venue_id)) return false
   const today = new Date().toISOString().slice(0, 10)
-  return event.date < today
+  const eventDate = event.venue_id === 'villa' ? (event.check_in_date || event.date) : event.date
+  return eventDate < today
 }
 
 /**
@@ -218,7 +250,7 @@ export function isReviewable(event) {
  */
 export function getQuickRating(review, venueId) {
   if (!review) return 0
-  if (venueId === 'add' || venueId === 'ac' || venueId === 'aee') {
+  if (venueId === 'add' || venueId === 'ac' || venueId === 'aee' || venueId === 'villa') {
     const fields = getRatingFields(venueId)
     const vals = fields
       .map((f) => review[f.key])

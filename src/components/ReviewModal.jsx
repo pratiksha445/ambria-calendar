@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
-import { fetchReview, upsertReview, canEditReview, getRatingFields } from '../lib/reviews.js'
+import { fetchReview, upsertReview, canEditReview, getRatingFields, areRatingsOptional } from '../lib/reviews.js'
 import { VENUE_BY_ID } from '../config/venues.js'
 
 function StarRating({ value, onChange, readonly }) {
@@ -91,8 +91,9 @@ export default function ReviewModal({ open, event, user, onClose, onReviewSaved 
   const isCancelled = event.status === 'Cancelled'
   const showForm = canEdit
 
+  const optionalRatings = event ? areRatingsOptional(event.venue_id) : false
   const isFormValid = form.review_payment_status &&
-    ratingFields.every((f) => form[f.key] >= 1)
+    (optionalRatings || ratingFields.every((f) => form[f.key] >= 1))
 
   const handleSubmit = async () => {
     if (!isFormValid || saving) return
@@ -169,7 +170,7 @@ export default function ReviewModal({ open, event, user, onClose, onReviewSaved 
               <span className="review-venue-badge" style={{ background: venue?.color ?? '#ccc', color: venue?.textColor ?? '#fff' }}>
                 {venue?.short ?? '?'}
               </span>
-              <span>{formatShortDate(event.date)}</span>
+              <span>{formatShortDate(event.venue_id === 'villa' ? (event.check_in_date || event.date) : event.date)}</span>
               {event.sub_venue && <span>· {t(event.sub_venue)}</span>}
               {event.venue_name && event.venue_id === 'add' && <span>· {event.venue_name}</span>}
             </div>
@@ -203,7 +204,7 @@ export default function ReviewModal({ open, event, user, onClose, onReviewSaved 
               {/* Ratings — category-aware */}
               {ratingFields.map((f) => (
                 <div key={f.key} className="review-rating-field">
-                  <span className="review-rating-label">{t(f.label)} <span className="review-required">*</span></span>
+                  <span className="review-rating-label">{t(f.label)} {!optionalRatings && <span className="review-required">*</span>}</span>
                   <StarRating
                     value={form[f.key] || 0}
                     onChange={(val) => setRating(f.key, val)}
@@ -244,7 +245,9 @@ export default function ReviewModal({ open, event, user, onClose, onReviewSaved 
                 </span>
               </div>
 
-              {ratingFields.map((f) => (
+              {ratingFields
+                .filter((f) => !optionalRatings || (review[f.key] != null && review[f.key] > 0))
+                .map((f) => (
                 <div key={f.key} className="review-rating-field">
                   <span className="review-rating-label">{t(f.label)}</span>
                   <StarRating value={review[f.key] || 0} readonly />
