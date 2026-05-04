@@ -457,11 +457,8 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
               <span className="v">{event.event_type === 'Other' ? (event.event_type_other || 'Other') : t(event.event_type)}</span>
             </div>
           )}
-          {event.venue_id === 'villa' && (
-            <div className="detail-row">
-              <span className="k">{t('Extra Bedding')}</span>
-              <span className="v">{event.extra_bedding ?? 0}</span>
-            </div>
+          {event.venue_id === 'villa' && event.airbnb && (
+            <div className="detail-row"><span className="k">{t('Airbnb')}</span><span className="v"><span className="status-badge status-confirmed">{t('Airbnb')}</span></span></div>
           )}
           {event.venue_id === 'villa' && event.check_in_date && (
             <div className="detail-row">
@@ -481,11 +478,11 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
           {event.meal_included && (
             <div className="detail-row"><span className="k">{t('Meal Included')}</span><span className="v">{t(event.meal_included)}</span></div>
           )}
-          {event.airbnb && (
-            <div className="detail-row"><span className="k">{t('Airbnb')}</span><span className="v"><span className="status-badge status-confirmed">{t('Airbnb')}</span></span></div>
-          )}
           {event.added_service && (
             <div className="detail-row"><span className="k">{t('Added Service')}</span><span className="v">{event.added_service}</span></div>
+          )}
+          {event.venue_id === 'villa' && (event.extra_bedding != null && event.extra_bedding !== '' && event.extra_bedding !== 0) && (
+            <div className="detail-row"><span className="k">{t('Extra Bedding')}</span><span className="v">{event.extra_bedding}</span></div>
           )}
 
           {/* ── Payment (non-own-venue categories) ── */}

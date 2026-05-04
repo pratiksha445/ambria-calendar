@@ -53,8 +53,8 @@ export default function Field({ field, form, value, onChange, error, readOnly, a
     const options = field.getOptions ? field.getOptions(form) : field.options
     const optionValues = options.map((o) => typeof o === 'object' ? o.value : o)
     const hasLegacy = effectiveValue && !optionValues.includes(effectiveValue)
-    control = (
-      <select {...commonProps}>
+    const selectEl = (
+      <select {...commonProps} className={field.inlineCheckbox ? 'time-inline-input' : undefined}>
         <option value="">{t('— Select —')}</option>
         {hasLegacy && <option value={effectiveValue}>{t(effectiveValue)}</option>}
         {options.map((opt) => {
@@ -64,6 +64,26 @@ export default function Field({ field, form, value, onChange, error, readOnly, a
         })}
       </select>
     )
+    if (field.inlineCheckbox) {
+      const cb = field.inlineCheckbox
+      const cbChecked = !!form[cb.key]
+      control = (
+        <div className="time-inline-row">
+          {selectEl}
+          <label className={`time-inline-cb ${disabled ? 'is-disabled' : ''}`}>
+            <input
+              type="checkbox"
+              checked={cbChecked}
+              disabled={disabled}
+              onChange={(e) => onChange(cb.key, e.target.checked)}
+            />
+            <span>{cb.label}</span>
+          </label>
+        </div>
+      )
+    } else {
+      control = selectEl
+    }
   } else if (field.type === 'searchable-select') {
     control = (
       <SearchableSelect

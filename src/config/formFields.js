@@ -339,7 +339,7 @@ function villaSections(venue, dynamicTypes) {
     {
       title: 'Stay',
       fields: [
-        S('Sub-Venue', 'sub_venue', venue.subVenues),
+        { ...S('Sub-Venue', 'sub_venue', venue.subVenues), inlineCheckbox: { key: 'airbnb', label: 'Airbnb' } },
         ...eventTypeFields(dynamicTypes, { searchable: false }).map((f) =>
           f.key === 'event_type' ? { ...f, required: false } : f
         ),
@@ -358,10 +358,13 @@ function villaSections(venue, dynamicTypes) {
     {
       title: 'Inclusions',
       fields: [
-        { ...S('Pool Included', 'pool_included', POOL_OPTIONS), inlineCheckbox: { key: 'airbnb', label: 'Airbnb' } },
+        S('Pool Included', 'pool_included', POOL_OPTIONS),
         S('Meal Included', 'meal_included', MEAL_OPTIONS),
         T('Added Service', 'added_service', false, {
           placeholder: 'DJ, Bonfire, BBQ…',
+        }),
+        T('Extra Bedding', 'extra_bedding', true, {
+          filterFn: paxFilter, filterError: 'Only numbers allowed', inputMode: 'numeric',
         }),
       ],
     },
@@ -372,9 +375,6 @@ function villaSections(venue, dynamicTypes) {
         phoneReq(),
         paxField(),
         S('Guest Category', 'guest_category', GUEST_CATEGORIES, true),
-        T('Extra Bedding', 'extra_bedding', true, {
-          filterFn: paxFilter, filterError: 'Only numbers allowed', inputMode: 'numeric',
-        }),
         { ...salesPersonField(),
           userFilter: { departments: ['Venue Sales', 'Social/Tech'] },
           userEmptyMsg: 'No Venue Sales / Social/Tech users available. Add users in Manage Users.',
