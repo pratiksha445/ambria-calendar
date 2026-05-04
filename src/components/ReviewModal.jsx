@@ -38,6 +38,7 @@ export default function ReviewModal({ open, event, user, onClose, onReviewSaved 
   const [review, setReview] = useState(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState(null)
   const [form, setForm] = useState({})
   const [dragY, setDragY] = useState(0)
   const dragRef = useRef({ startY: 0, tracking: false })
@@ -98,6 +99,7 @@ export default function ReviewModal({ open, event, user, onClose, onReviewSaved 
   const handleSubmit = async () => {
     if (!isFormValid || saving) return
     setSaving(true)
+    setSaveError(null)
     try {
       const data = await upsertReview({
         ...form,
@@ -111,6 +113,7 @@ export default function ReviewModal({ open, event, user, onClose, onReviewSaved 
       onClose?.()
     } catch (err) {
       console.error('[ambria] save review failed', err)
+      setSaveError(err?.message || String(err))
     } finally {
       setSaving(false)
     }
@@ -224,6 +227,11 @@ export default function ReviewModal({ open, event, user, onClose, onReviewSaved 
                   onChange={(e) => setForm((prev) => ({ ...prev, remark: e.target.value }))}
                 />
               </div>
+
+              {/* Error */}
+              {saveError && (
+                <div className="review-save-error">{saveError}</div>
+              )}
 
               {/* Submit */}
               <button

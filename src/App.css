@@ -5418,6 +5418,17 @@ input, select, textarea {
   }
 }
 
+/* ── Review save error ── */
+.review-save-error {
+  background: var(--ambria-error-bg, #fde8e8);
+  color: var(--ambria-error-text, #b91c1c);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
 /* ── Review submit button ── */
 .review-submit-btn {
   width: 100%;
