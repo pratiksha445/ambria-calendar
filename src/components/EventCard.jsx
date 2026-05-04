@@ -304,8 +304,8 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
             <div className="detail-row"><span className="k">{t('Color Theme')}</span><span className="v">{event.color_theme}</span></div>
           )}
 
-          {/* ── Single-event pax for ADD/AEE (multi-event shows per-slot) ── */}
-          {(event.venue_id === 'aee' || event.venue_id === 'add') && event.pax != null && event.pax !== ''
+          {/* ── Single-event pax for AC/ADD/AEE (multi-event shows per-slot) ── */}
+          {(event.venue_id === 'ac' || event.venue_id === 'aee' || event.venue_id === 'add') && event.pax != null && event.pax !== ''
             && !(Array.isArray(event.event_slots) && event.event_slots.length > 1) && (
             <div className="detail-row"><span className="k">{t('Pax')}</span><span className="v">{event.pax}</span></div>
           )}
