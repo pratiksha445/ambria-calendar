@@ -139,7 +139,7 @@ export default function App() {
       // the navigation prefetch effect from firing duplicate requests
       const now = new Date()
       const keys = []
-      for (let i = 0; i <= 3; i++) {
+      for (let i = -1; i <= 3; i++) {
         const key = mKey(new Date(now.getFullYear(), now.getMonth() + i, 1))
         fetchingRef.current.add(key)
         keys.push(key)
@@ -151,7 +151,7 @@ export default function App() {
       setLoading(true)
       setError(null)
       try {
-        const from = toIsoDate(startOfMonth(now))
+        const from = toIsoDate(startOfMonth(new Date(now.getFullYear(), now.getMonth() - 1, 1)))
         const to = toIsoDate(endOfMonth(new Date(now.getFullYear(), now.getMonth() + 3, 1)))
         const rows = await fetchEvents(from, to)
         if (cancelled) return
@@ -174,12 +174,14 @@ export default function App() {
     return () => { cancelled = true }
   }, [user])
 
-  // ── Pre-fetch +3 months whenever the viewed month changes ──
+  // ── Pre-fetch +3 months ahead and 1 month behind whenever the viewed month changes ──
   useEffect(() => {
     if (!user || searchActive) return
     prefetchAhead(currentDate, 3)
+    // Prefetch 1 month behind so backward navigation is instant
+    fetchMonthBg(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1))
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentMonthKey, user, searchActive, prefetchAhead])
+  }, [currentMonthKey, user, searchActive, prefetchAhead, fetchMonthBg])
 
   // ── Search: wide-range fetch (±12 months) ──
   useEffect(() => {
@@ -323,7 +325,10 @@ export default function App() {
     }
   }
 
-  const monthCached = fetchedMonths.has(currentMonthKey)
+  // Check ref (most up-to-date, synchronously mutated on fetch complete)
+  // in addition to state (triggers re-renders) to avoid a stale-state flash
+  // where the ref has the month but the batched setState hasn't committed yet
+  const monthCached = fetchedMonthsRef.current.has(currentMonthKey) || fetchedMonths.has(currentMonthKey)
   const filtersHideEverything = !loading && monthCached && monthEvents.length > 0 && filteredMonthCount === 0
 
   const showToast = useCallback((msg) => {
