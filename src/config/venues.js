@@ -46,6 +46,30 @@ export function applyDynamic(dbRows) {
   Object.assign(VENUE_BY_ID, Object.fromEntries(VENUES.map((v) => [v.id, v])))
 }
 
+// ── AE sub-venue color variants ──
+// Aura → base AE color, Valencia → lighter shade, Full Venue → diagonal stripes
+const AE_VALENCIA = '#CCAA8A'
+
+/**
+ * Returns a pill style override { background, color } for AE sub-venue variants,
+ * or null to use the default venue color.
+ */
+export function getAeSubVenueStyle(event) {
+  if (!event || event.venue_id !== 'ae') return null
+  const sv = event.sub_venue || ''
+  if (sv.startsWith('Valencia')) {
+    return { background: AE_VALENCIA, color: '#1A1A1A' }
+  }
+  if (sv === 'Full Venue') {
+    const base = VENUE_BY_ID.ae?.color ?? '#A3785E'
+    return {
+      background: `repeating-linear-gradient(135deg, ${base}, ${base} 4px, ${AE_VALENCIA} 4px, ${AE_VALENCIA} 8px)`,
+      color: '#fff',
+    }
+  }
+  return null // Aura or unset — use default
+}
+
 // Shift badge colors — M=morning yellow, L=lunch orange, S=sundowner purple, D=dinner blue
 export const SHIFT_BADGE = {
   Morning: { short: 'M', color: '#E8B94A' },
