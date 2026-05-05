@@ -6,6 +6,7 @@ import { canAccessBooking } from '../lib/sectionPermissions.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 import { loadElementLabels, getElementLabel } from '../lib/elements.js'
 import { isReviewable, isPastEvent, getQuickRating } from '../lib/reviews.js'
+import { isPastPaymentEvent, isPaymentComplete } from '../lib/payments.js'
 
 const OWN_VENUES = new Set(['ap', 'am', 'ae', 'ar'])
 
@@ -19,7 +20,7 @@ function getSortedSlots(event) {
   })
 }
 
-export default memo(function EventCard({ event, expanded = false, onToggle, onEdit, onDelete, user, reviewMap, onReview }) {
+export default memo(function EventCard({ event, expanded = false, onToggle, onEdit, onDelete, user, reviewMap, onReview, onPayment }) {
   const { t, lang, formatShortDate } = useLanguage()
   const [elementLabels, setElementLabels] = useState({})
   const venue = VENUE_BY_ID[event.venue_id]
@@ -69,10 +70,14 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
   const isPostponed = event.status === 'Postponed'
   const past = isPastEvent(event)
   const reviewableEvent = isReviewable(event)
+  const paymentEvent = isPastPaymentEvent(event)
+  const paymentDone = paymentEvent && isPaymentComplete(event)
 
   const handleCardClick = () => {
     if (past && reviewableEvent) {
       onReview?.(event)
+    } else if (paymentEvent) {
+      onPayment?.(event)
     } else {
       onToggle?.()
     }
@@ -140,6 +145,11 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
                   reviewMap?.has(event.id)
                     ? <span className="review-indicator review-done" title={t('Reviewed')} role="button" onClick={(e) => { e.stopPropagation(); onReview?.(event) }}>&#10003;</span>
                     : <span className="review-indicator review-pending" title={t('Review pending')} role="button" onClick={(e) => { e.stopPropagation(); onReview?.(event) }}>&#9203;</span>
+                )}
+                {paymentEvent && (
+                  paymentDone
+                    ? <span className="review-indicator review-done" title={t('Payment Completed')} role="button" onClick={(e) => { e.stopPropagation(); onPayment?.(event) }}>&#10003;</span>
+                    : <span className="review-indicator review-pending" title={t('Payment pending')} role="button" onClick={(e) => { e.stopPropagation(); onPayment?.(event) }}>&#9203;</span>
                 )}
               </div>
             </div>

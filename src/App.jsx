@@ -18,6 +18,7 @@ import ManageElements from './components/ManageElements.jsx'
 import VenueManagers from './components/VenueManagers.jsx'
 import EventList from './components/EventList.jsx'
 import ReviewModal from './components/ReviewModal.jsx'
+import PaymentModal from './components/PaymentModal.jsx'
 import { fetchEvents, deleteEvent, bulkDeleteMonth } from './lib/events.js'
 import { fetchReviewsByEventIds, isReviewable } from './lib/reviews.js'
 import { getEventTypeAbbr } from './lib/eventTypes.js'
@@ -79,6 +80,7 @@ export default function App() {
   const [exportModal, setExportModal] = useState(null) // null | { from, to }
   const [reviewModal, setReviewModal] = useState(null) // null | event
   const [reviewMap, setReviewMap] = useState(() => new Map())
+  const [paymentModal, setPaymentModal] = useState(null) // null | event
   const { eventTypes, eventTypeAbbrByName, refresh: refreshDirectory, clear: clearDirectory } = useDirectory()
   const calendarBodyRef = useRef(null)
   const fetchedMonthsRef = useRef(new Set())
@@ -411,6 +413,15 @@ export default function App() {
     showToast(t('Review submitted'))
   }, [t, showToast])
 
+  const openPayment = useCallback((ev) => {
+    setPaymentModal(ev)
+  }, [])
+
+  const handlePaymentSaved = useCallback((eventId, updatedEvent) => {
+    setAllEvents((prev) => prev.map((e) => (e.id === eventId ? updatedEvent : e)))
+    showToast(t('Payment marked complete'))
+  }, [t, showToast])
+
   const handleClearMonth = () => setConfirmBulk(true)
   const executeBulkDelete = async () => {
     const start = toIsoDate(startOfMonth(currentDate))
@@ -538,6 +549,7 @@ export default function App() {
                     user={user}
                     reviewMap={reviewMap}
                     onReview={openReview}
+                    onPayment={openPayment}
                   />
                 </>
               )}
@@ -551,6 +563,7 @@ export default function App() {
                   user={user}
                   reviewMap={reviewMap}
                   onReview={openReview}
+                  onPayment={openPayment}
                 />
               )}
             </main>
@@ -589,6 +602,7 @@ export default function App() {
         user={user}
         reviewMap={reviewMap}
         onReview={(ev) => { setDayModalDate(null); openReview(ev) }}
+        onPayment={(ev) => { setDayModalDate(null); openPayment(ev) }}
       />
       <BookingModal
         open={!!modal}
@@ -604,6 +618,13 @@ export default function App() {
         user={user}
         onClose={() => setReviewModal(null)}
         onReviewSaved={handleReviewSaved}
+      />
+      <PaymentModal
+        open={!!paymentModal}
+        event={paymentModal}
+        user={user}
+        onClose={() => setPaymentModal(null)}
+        onPaymentSaved={handlePaymentSaved}
       />
       <ExportModal
         open={!!exportModal}
