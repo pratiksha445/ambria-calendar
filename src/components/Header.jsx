@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 
 const VIEWS = ['day', 'week', 'month']
@@ -14,9 +14,31 @@ export default function Header({
   onAdd,
   onExport,
   onClearMonth,
+  onSelectMonth,
 }) {
   const [menuOpen, setMenuOpen] = useState(false)
-  const { t, formatMonthYear } = useLanguage()
+  const [pickerOpen, setPickerOpen] = useState(false)
+  const [pickerYear, setPickerYear] = useState(currentDate.getFullYear())
+  const { t, formatMonthYear, shortMonths } = useLanguage()
+  const pickerRef = useRef(null)
+
+  // Sync picker year when currentDate changes externally
+  useEffect(() => {
+    if (!pickerOpen) setPickerYear(currentDate.getFullYear())
+  }, [currentDate, pickerOpen])
+
+  const togglePicker = () => {
+    if (!pickerOpen) setPickerYear(currentDate.getFullYear())
+    setPickerOpen((p) => !p)
+  }
+
+  const selectMonth = (monthIndex) => {
+    onSelectMonth?.(new Date(pickerYear, monthIndex, 1))
+    setPickerOpen(false)
+  }
+
+  const isCurrentMonth = (monthIndex) =>
+    currentDate.getFullYear() === pickerYear && currentDate.getMonth() === monthIndex
 
   return (
     <header className="app-header">
@@ -29,7 +51,56 @@ export default function Header({
           <button className="icon-btn sm" onClick={onPrev} aria-label="Previous">
             <ChevronIcon dir="left" />
           </button>
-          <span className="month-label">{formatMonthYear(currentDate)}</span>
+          <div className="month-picker-wrap" ref={pickerRef}>
+            <button
+              type="button"
+              className="month-label month-label-btn"
+              onClick={togglePicker}
+              aria-expanded={pickerOpen}
+              aria-haspopup="true"
+            >
+              {formatMonthYear(currentDate)}
+              <span className="month-chevron" aria-hidden="true">&#9662;</span>
+            </button>
+            {pickerOpen && (
+              <>
+                <div className="month-picker-backdrop" onClick={() => setPickerOpen(false)} />
+                <div className="month-picker-dropdown">
+                  <div className="month-picker-year-row">
+                    <button
+                      type="button"
+                      className="icon-btn sm"
+                      onClick={() => setPickerYear((y) => y - 1)}
+                      aria-label="Previous year"
+                    >
+                      <ChevronIcon dir="left" />
+                    </button>
+                    <span className="month-picker-year">{pickerYear}</span>
+                    <button
+                      type="button"
+                      className="icon-btn sm"
+                      onClick={() => setPickerYear((y) => y + 1)}
+                      aria-label="Next year"
+                    >
+                      <ChevronIcon dir="right" />
+                    </button>
+                  </div>
+                  <div className="month-picker-grid">
+                    {shortMonths.map((name, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        className={`month-picker-cell${isCurrentMonth(i) ? ' month-picker-active' : ''}`}
+                        onClick={() => selectMonth(i)}
+                      >
+                        {name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
           <button className="icon-btn sm" onClick={onNext} aria-label="Next">
             <ChevronIcon dir="right" />
           </button>
@@ -141,4 +212,3 @@ function TrashIcon() {
     </svg>
   )
 }
-

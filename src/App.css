@@ -73,6 +73,88 @@
   text-align: center;
   letter-spacing: -0.01em;
 }
+.month-label-btn {
+  appearance: none;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+  color: var(--ambria-ink);
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: background 0.15s ease;
+}
+.month-label-btn:hover {
+  background: var(--ambria-hover);
+}
+.month-chevron {
+  font-size: 0.6em;
+  opacity: 0.5;
+  line-height: 1;
+}
+
+/* ── Month picker dropdown ── */
+.month-picker-wrap {
+  position: relative;
+}
+.month-picker-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+}
+.month-picker-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--ambria-card);
+  border: 1px solid var(--ambria-border);
+  border-radius: 12px;
+  box-shadow: var(--ambria-shadow-dropdown);
+  z-index: 100;
+  padding: 12px;
+  width: 260px;
+}
+.month-picker-year-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.month-picker-year {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--ambria-ink);
+  user-select: none;
+}
+.month-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+.month-picker-cell {
+  appearance: none;
+  border: none;
+  background: transparent;
+  padding: 10px 4px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--ambria-ink);
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+.month-picker-cell:hover {
+  background: var(--ambria-hover);
+}
+.month-picker-cell.month-picker-active {
+  background: #E85D75;
+  color: #fff;
+}
 
 .icon-btn {
   appearance: none;
@@ -4009,6 +4091,8 @@ input, select, textarea {
     font-size: 12px;
   }
   .month-label { font-size: 0.88rem; min-width: 90px; }
+  .month-picker-dropdown { width: 230px; padding: 10px; }
+  .month-picker-cell { padding: 8px 2px; font-size: 0.78rem; }
 }
 
 /* Modal / bottom-sheet on small screens */

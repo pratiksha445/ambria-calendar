@@ -513,6 +513,7 @@ export default function App() {
               onAdd={openNew}
               onExport={handleExport}
               onClearMonth={canClearMonth ? handleClearMonth : null}
+              onSelectMonth={setCurrentDate}
             />
             <main className="app-body" ref={calendarBodyRef}>
               {error && <div className="error-banner">{error}</div>}
