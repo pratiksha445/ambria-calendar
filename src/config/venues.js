@@ -48,7 +48,7 @@ export function applyDynamic(dbRows) {
 
 // ── Sub-venue color variants (AE + AM) ──
 // Returns { background, color } override or null for default venue color.
-const AE_VALENCIA = '#CCAA8A'
+const AE_VALENCIA = '#D4BFA0'
 const AM_ALSTONIA = '#F2C99A'
 
 function stripeGradient(a, b) {
