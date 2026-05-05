@@ -17,9 +17,9 @@ export default defineConfig({
       strategies: 'generateSW',
       includeAssets: ['favicon.png', 'logo.png', 'icons/icon-192.png', 'icons/icon-512.png'],
       manifest: {
-        name: 'Ambria Calendar',
-        short_name: 'Ambria',
-        description: 'Ambria Calendar',
+        name: 'Calendar',
+        short_name: 'Calendar',
+        description: 'Calendar',
         theme_color: '#E85D75',
         background_color: '#FAFAF8',
         display: 'standalone',
