@@ -494,29 +494,17 @@
 }
 
 /* ── Sub-venue color legend (AM / AE) ── */
-.legend-toggle-btn {
-  appearance: none;
-  border: none;
-  background: transparent;
-  padding: 2px 4px;
-  cursor: pointer;
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  border-radius: 4px;
-  transition: background 0.15s ease;
-}
-.legend-toggle-btn:hover {
-  background: var(--ambria-hover);
-}
-.legend-chevron {
-  font-size: 0.6rem;
-  color: var(--ambria-muted);
-  transition: transform 0.2s ease;
+.legend-chevron-inner {
+  font-size: 0.55em;
+  margin-left: 5px;
+  opacity: 0.7;
   display: inline-block;
+  transition: transform 0.2s ease;
+  cursor: pointer;
+  vertical-align: middle;
   line-height: 1;
 }
-.legend-open .legend-chevron {
+.legend-chevron-inner.legend-open {
   transform: rotate(180deg);
 }
 .sv-legend {

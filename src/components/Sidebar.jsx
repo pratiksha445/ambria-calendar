@@ -273,18 +273,18 @@ export default function Sidebar({
                     >
                       <span className="filter-pill" style={{ background: v.color, color: v.textColor }}>
                         {v.short} — {t(v.name)}
+                        {hasLegend && (
+                          <span
+                            role="button"
+                            tabIndex={0}
+                            className={`legend-chevron-inner${legendOpen ? ' legend-open' : ''}`}
+                            onClick={(e) => toggleLegend(v.id, e)}
+                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') toggleLegend(v.id, e) }}
+                            aria-label="Toggle sub-venue legend"
+                            aria-expanded={legendOpen}
+                          >&#9662;</span>
+                        )}
                       </span>
-                      {hasLegend && (
-                        <button
-                          type="button"
-                          className={`legend-toggle-btn${legendOpen ? ' legend-open' : ''}`}
-                          onClick={(e) => toggleLegend(v.id, e)}
-                          aria-label="Toggle sub-venue legend"
-                          aria-expanded={legendOpen}
-                        >
-                          <span className="legend-chevron">&#9662;</span>
-                        </button>
-                      )}
                       <span className="filter-count">{venueCounts[v.id] ?? 0}</span>
                     </button>
                     {hasLegend && (
