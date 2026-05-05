@@ -46,29 +46,42 @@ export function applyDynamic(dbRows) {
   Object.assign(VENUE_BY_ID, Object.fromEntries(VENUES.map((v) => [v.id, v])))
 }
 
-// ── AE sub-venue color variants ──
-// Aura → base AE color, Valencia → lighter shade, Full Venue → diagonal stripes
+// ── Sub-venue color variants (AE + AM) ──
+// Returns { background, color } override or null for default venue color.
 const AE_VALENCIA = '#CCAA8A'
+const AM_ALSTONIA = '#F2C99A'
+
+function stripeGradient(a, b) {
+  return `repeating-linear-gradient(135deg, ${a}, ${a} 4px, ${b} 4px, ${b} 8px)`
+}
+
+function aeSubVenue(sv) {
+  if (sv.startsWith('Valencia')) return { background: AE_VALENCIA, color: '#1A1A1A' }
+  if (sv === 'Full Venue') return { background: stripeGradient(VENUE_BY_ID.ae?.color ?? '#A3785E', AE_VALENCIA), color: '#fff' }
+  return null
+}
+
+function amSubVenue(sv) {
+  if (sv.startsWith('Alstonia') || sv === 'Banana Tree Lawn') return { background: AM_ALSTONIA, color: '#1A1A1A' }
+  if (sv === 'Full Venue') return { background: stripeGradient(VENUE_BY_ID.am?.color ?? '#E08E45', AM_ALSTONIA), color: '#1A1A1A' }
+  return null
+}
 
 /**
- * Returns a pill style override { background, color } for AE sub-venue variants,
+ * Returns a pill style override { background, color } for sub-venue color variants,
  * or null to use the default venue color.
  */
-export function getAeSubVenueStyle(event) {
-  if (!event || event.venue_id !== 'ae') return null
+export function getSubVenueStyle(event) {
+  if (!event) return null
   const sv = event.sub_venue || ''
-  if (sv.startsWith('Valencia')) {
-    return { background: AE_VALENCIA, color: '#1A1A1A' }
-  }
-  if (sv === 'Full Venue') {
-    const base = VENUE_BY_ID.ae?.color ?? '#A3785E'
-    return {
-      background: `repeating-linear-gradient(135deg, ${base}, ${base} 4px, ${AE_VALENCIA} 4px, ${AE_VALENCIA} 8px)`,
-      color: '#fff',
-    }
-  }
-  return null // Aura or unset — use default
+  if (!sv) return null
+  if (event.venue_id === 'ae') return aeSubVenue(sv)
+  if (event.venue_id === 'am') return amSubVenue(sv)
+  return null
 }
+
+/** @deprecated Use getSubVenueStyle instead */
+export const getAeSubVenueStyle = getSubVenueStyle
 
 // Shift badge colors — M=morning yellow, L=lunch orange, S=sundowner purple, D=dinner blue
 export const SHIFT_BADGE = {

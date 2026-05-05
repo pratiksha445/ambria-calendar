@@ -1,6 +1,6 @@
 import { memo, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { VENUE_BY_ID, SHIFT_BADGE, getAeSubVenueStyle } from '../config/venues.js'
+import { VENUE_BY_ID, SHIFT_BADGE, getSubVenueStyle } from '../config/venues.js'
 import { formatTime12 } from '../lib/dates.js'
 import { canAccessBooking } from '../lib/sectionPermissions.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
@@ -24,7 +24,7 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
   const { t, lang, formatShortDate } = useLanguage()
   const [elementLabels, setElementLabels] = useState({})
   const venue = VENUE_BY_ID[event.venue_id]
-  const aeStyle = getAeSubVenueStyle(event)
+  const aeStyle = getSubVenueStyle(event)
   const isMultiEvent = Array.isArray(event.event_slots) && event.event_slots.length > 1
   const sortedSlots = isMultiEvent ? getSortedSlots(event) : null
   const earliestTime = sortedSlots?.[0]?.time

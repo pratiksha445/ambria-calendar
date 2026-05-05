@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { addDays, buildMonthGrid, isSameDay, toIsoDate } from '../lib/dates.js'
-import { VENUE_BY_ID, getAeSubVenueStyle } from '../config/venues.js'
+import { VENUE_BY_ID, getSubVenueStyle } from '../config/venues.js'
 import { getEventTypeAbbr } from '../lib/eventTypes.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 
@@ -99,7 +99,7 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, onE
                 {/* Regular pills */}
                 {visibleRegular.map((ev) => {
                   const venue = VENUE_BY_ID[ev.venue_id]
-                  const aeStyle = getAeSubVenueStyle(ev)
+                  const aeStyle = getSubVenueStyle(ev)
                   const statusClass = ev.status === 'Cancelled' ? ' pill-cancelled' : ev.status === 'Postponed' ? ' pill-postponed' : ''
                   return (
                     <div
