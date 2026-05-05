@@ -271,18 +271,22 @@ export default function Sidebar({
                       onClick={() => onToggleFilter(v.id)}
                       aria-pressed={isOn}
                     >
-                      <span className="filter-pill" style={{ background: v.color, color: v.textColor }}>
-                        {v.short} — {t(v.name)}
-                        {hasLegend && (
-                          <span
-                            role="button"
-                            tabIndex={0}
-                            className={`legend-chevron-inner${legendOpen ? ' legend-open' : ''}`}
-                            onClick={(e) => toggleLegend(v.id, e)}
-                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') toggleLegend(v.id, e) }}
-                            aria-label="Toggle sub-venue legend"
-                            aria-expanded={legendOpen}
-                          >&#9662;</span>
+                      <span className={`filter-pill${hasLegend ? ' filter-pill-legend' : ''}`} style={{ background: v.color, color: v.textColor }}>
+                        {hasLegend ? (
+                          <>
+                            <span className="filter-pill-text">{v.short} — {t(v.name)}</span>
+                            <span
+                              role="button"
+                              tabIndex={0}
+                              className={`legend-chevron-inner${legendOpen ? ' legend-open' : ''}`}
+                              onClick={(e) => toggleLegend(v.id, e)}
+                              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') toggleLegend(v.id, e) }}
+                              aria-label="Toggle sub-venue legend"
+                              aria-expanded={legendOpen}
+                            />
+                          </>
+                        ) : (
+                          <>{v.short} — {t(v.name)}</>
                         )}
                       </span>
                       <span className="filter-count">{venueCounts[v.id] ?? 0}</span>
