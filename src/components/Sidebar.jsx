@@ -1,5 +1,5 @@
-import { useMemo } from 'react'
-import { VENUES } from '../config/venues.js'
+import { useMemo, useState } from 'react'
+import { VENUES, VENUE_BY_ID, AE_VALENCIA, AM_ALSTONIA, stripeGradient } from '../config/venues.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 
 const SOURCES = [
@@ -8,6 +8,26 @@ const SOURCES = [
 ]
 
 const ROLE_COLORS = { admin: '#E85D75', staff: '#95A5A6' }
+
+// Sub-venue legend definitions for AM and AE
+const SUB_VENUE_LEGENDS = {
+  am: () => {
+    const base = VENUE_BY_ID.am?.color ?? '#E08E45'
+    return [
+      { color: base, label: 'Emerald / GH' },
+      { color: AM_ALSTONIA, label: 'Alstonia / Banana' },
+      { color: stripeGradient(base, AM_ALSTONIA), label: 'Full Venue', striped: true },
+    ]
+  },
+  ae: () => {
+    const base = VENUE_BY_ID.ae?.color ?? '#A3785E'
+    return [
+      { color: base, label: 'Aura' },
+      { color: AE_VALENCIA, label: 'Valencia' },
+      { color: stripeGradient(base, AE_VALENCIA), label: 'Full Venue', striped: true },
+    ]
+  },
+}
 
 export default function Sidebar({
   open,
@@ -30,6 +50,7 @@ export default function Sidebar({
   onChangePin,
 }) {
   const { t, lang, setLang, theme, toggleTheme } = useLanguage()
+  const [expandedLegend, setExpandedLegend] = useState({}) // { am: true, ae: false }
   const venueCounts = useMemo(() => events.reduce((acc, ev) => {
     acc[ev.venue_id] = (acc[ev.venue_id] ?? 0) + 1
     return acc
@@ -38,6 +59,11 @@ export default function Sidebar({
     acc[ev.source] = (acc[ev.source] ?? 0) + 1
     return acc
   }, {}), [events])
+
+  const toggleLegend = (id, e) => {
+    e.stopPropagation()
+    setExpandedLegend((prev) => ({ ...prev, [id]: !prev[id] }))
+  }
 
   return (
     <>
@@ -236,6 +262,8 @@ export default function Sidebar({
             <ul className="filter-list">
               {VENUES.map((v) => {
                 const isOn = activeFilters.has(v.id)
+                const hasLegend = SUB_VENUE_LEGENDS[v.id]
+                const legendOpen = !!expandedLegend[v.id]
                 return (
                   <li key={v.id}>
                     <button
@@ -246,8 +274,32 @@ export default function Sidebar({
                       <span className="filter-pill" style={{ background: v.color, color: v.textColor }}>
                         {v.short} — {t(v.name)}
                       </span>
+                      {hasLegend && (
+                        <button
+                          type="button"
+                          className={`legend-toggle-btn${legendOpen ? ' legend-open' : ''}`}
+                          onClick={(e) => toggleLegend(v.id, e)}
+                          aria-label="Toggle sub-venue legend"
+                          aria-expanded={legendOpen}
+                        >
+                          <span className="legend-chevron">&#9662;</span>
+                        </button>
+                      )}
                       <span className="filter-count">{venueCounts[v.id] ?? 0}</span>
                     </button>
+                    {hasLegend && (
+                      <div className={`sv-legend${legendOpen ? ' sv-legend-open' : ''}`}>
+                        {SUB_VENUE_LEGENDS[v.id]().map((item) => (
+                          <div key={item.label} className="sv-legend-item">
+                            <span
+                              className="sv-legend-dot"
+                              style={{ background: item.color }}
+                            />
+                            <span className="sv-legend-label">{item.label}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </li>
                 )
               })}

@@ -493,6 +493,62 @@
   flex-shrink: 0;
 }
 
+/* ── Sub-venue color legend (AM / AE) ── */
+.legend-toggle-btn {
+  appearance: none;
+  border: none;
+  background: transparent;
+  padding: 2px 4px;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 4px;
+  transition: background 0.15s ease;
+}
+.legend-toggle-btn:hover {
+  background: var(--ambria-hover);
+}
+.legend-chevron {
+  font-size: 0.6rem;
+  color: var(--ambria-muted);
+  transition: transform 0.2s ease;
+  display: inline-block;
+  line-height: 1;
+}
+.legend-open .legend-chevron {
+  transform: rotate(180deg);
+}
+.sv-legend {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.25s ease;
+  padding-left: 12px;
+}
+.sv-legend-open {
+  max-height: 100px;
+}
+.sv-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 0;
+}
+.sv-legend-item:first-child {
+  padding-top: 6px;
+}
+.sv-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.sv-legend-label {
+  font-size: 0.72rem;
+  color: var(--ambria-muted);
+  font-weight: 500;
+}
+
 /* Sidebar nav — view switcher */
 .sidebar-nav {
   padding: 8px;
