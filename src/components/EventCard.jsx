@@ -5,7 +5,7 @@ import { formatTime12 } from '../lib/dates.js'
 import { canAccessBooking } from '../lib/sectionPermissions.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 import { loadElementLabels, getElementLabel } from '../lib/elements.js'
-import { isReviewable, getQuickRating } from '../lib/reviews.js'
+import { isReviewable, isPastEvent, getQuickRating } from '../lib/reviews.js'
 
 const OWN_VENUES = new Set(['ap', 'am', 'ae', 'ar'])
 
@@ -67,6 +67,16 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
 
   const isCancelled = event.status === 'Cancelled'
   const isPostponed = event.status === 'Postponed'
+  const past = isPastEvent(event)
+  const reviewableEvent = isReviewable(event)
+
+  const handleCardClick = () => {
+    if (past && reviewableEvent) {
+      onReview?.(event)
+    } else {
+      onToggle?.()
+    }
+  }
 
   return (
     <article
@@ -86,7 +96,7 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
           <button
             type="button"
             className="event-card-row"
-            onClick={onToggle}
+            onClick={handleCardClick}
             aria-expanded={expanded}
           >
             <span
@@ -129,7 +139,7 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
                 {isReviewable(event) && (
                   reviewMap?.has(event.id)
                     ? <span className="review-indicator review-done" title={t('Reviewed')} role="button" onClick={(e) => { e.stopPropagation(); onReview?.(event) }}>&#10003;</span>
-                    : <span className="review-indicator review-pending" title={t('Review pending')} role="button" onClick={(e) => { e.stopPropagation(); onReview?.(event) }}>&#9998;</span>
+                    : <span className="review-indicator review-pending" title={t('Review pending')} role="button" onClick={(e) => { e.stopPropagation(); onReview?.(event) }}>&#9203;</span>
                 )}
               </div>
             </div>
@@ -547,7 +557,7 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
             )
           })()}
 
-          {onEdit && canModify && (
+          {onEdit && canModify && !past && (
             <div className="event-card-actions">
               <button
                 type="button"
@@ -556,7 +566,7 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
               >
                 {event.source === 'manual' ? t('Edit') : t('View')}
               </button>
-              {isReviewable(event) && (
+              {reviewableEvent && (
                 <button
                   type="button"
                   className={`event-review-btn ${reviewMap?.has(event.id) ? 'review-btn-muted' : 'review-btn-accent'}`}
@@ -567,8 +577,8 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
               )}
             </div>
           )}
-          {/* Show review button even when user can't edit the booking */}
-          {isReviewable(event) && !(onEdit && canModify) && (
+          {/* Show review button when past or user can't edit the booking */}
+          {reviewableEvent && !(onEdit && canModify && !past) && (
             <div className="event-card-actions">
               <button
                 type="button"

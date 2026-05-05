@@ -90,7 +90,8 @@ export default function ReviewModal({ open, event, user, onClose, onReviewSaved 
 
   const venue = VENUE_BY_ID[event.venue_id]
   const isCancelled = event.status === 'Cancelled'
-  const showForm = canEdit
+  // First-submitter lock: only original submitter or admin can edit existing reviews
+  const showForm = canEdit && (!isExistingReview || review.submitted_by === user?.id || user?.role === 'admin')
 
   const optionalRatings = event ? areRatingsOptional(event.venue_id) : false
   const isFormValid = form.review_payment_status &&
@@ -178,6 +179,16 @@ export default function ReviewModal({ open, event, user, onClose, onReviewSaved 
               {event.venue_name && event.venue_id === 'add' && <span>· {event.venue_name}</span>}
             </div>
           </div>
+
+          {/* Prominent reviewer name */}
+          {!loading && isExistingReview && review.submitted_by_name && (
+            <div className="review-reviewer-line">
+              {t('Reviewed by')} <strong>{review.submitted_by_name}</strong>
+              {review.submitted_at && (
+                <span className="review-reviewer-date"> · {formatShortDate(review.submitted_at.slice(0, 10))}</span>
+              )}
+            </div>
+          )}
 
           {isCancelled && (
             <div className="review-cancelled-note">
@@ -269,17 +280,11 @@ export default function ReviewModal({ open, event, user, onClose, onReviewSaved 
                 </div>
               )}
 
-              <div className="review-submitted-by">
-                {t('Submitted by {name} on {date}', {
-                  name: review.submitted_by_name || t('Unknown'),
-                  date: formatShortDate(review.submitted_at?.slice(0, 10)),
-                })}
-              </div>
             </div>
           ) : (
             /* ── No review yet, user can't submit ── */
             <div className="review-empty-msg">
-              {t('No review yet. The delivery person or sales person assigned to this event can submit a review.')}
+              {t('Review pending')}
             </div>
           )}
         </div>

@@ -5487,6 +5487,21 @@ input, select, textarea {
   padding-top: 8px;
   border-top: 1px solid var(--ambria-border);
 }
+.review-reviewer-line {
+  font-size: 0.85rem;
+  color: var(--ambria-ink);
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  background: var(--ambria-surface, #f8f9fa);
+  border-radius: 8px;
+  border-left: 3px solid var(--ambria-accent, #e67e22);
+}
+.review-reviewer-line strong {
+  font-weight: 600;
+}
+.review-reviewer-date {
+  color: var(--ambria-muted);
+}
 .review-empty-msg {
   text-align: center;
   padding: 32px 16px;

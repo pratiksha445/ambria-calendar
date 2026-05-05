@@ -230,9 +230,25 @@ export function canEditReview(user, event) {
 }
 
 /**
+ * Check whether an event's date has passed.
+ * Villa uses check_out_date, TND/WS use end_date, others use date.
+ */
+export function isPastEvent(event) {
+  if (!event) return false
+  const today = new Date().toISOString().slice(0, 10)
+  if (event.venue_id === 'villa') {
+    return (event.check_out_date || event.check_in_date || event.date) < today
+  }
+  if (event.venue_id === 'tender' || event.venue_id === 'ws') {
+    return (event.end_date || event.date) < today
+  }
+  return event.date < today
+}
+
+/**
  * Check if an event is eligible for review.
  * Must be AP/AM/AE/AR/ADD/AC/AEE/Villa and event date < today.
- * Villa uses check_in_date instead of date.
+ * Villa uses check_out_date (not check_in_date).
  */
 const REVIEWABLE_VENUES = new Set(['ap', 'am', 'ae', 'ar', 'add', 'ac', 'aee', 'villa'])
 
@@ -240,7 +256,7 @@ export function isReviewable(event) {
   if (!event) return false
   if (!REVIEWABLE_VENUES.has(event.venue_id)) return false
   const today = new Date().toISOString().slice(0, 10)
-  const eventDate = event.venue_id === 'villa' ? (event.check_in_date || event.date) : event.date
+  const eventDate = event.venue_id === 'villa' ? (event.check_out_date || event.check_in_date || event.date) : event.date
   return eventDate < today
 }
 
