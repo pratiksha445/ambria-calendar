@@ -12,7 +12,7 @@ const ROLE_COLORS = { admin: '#E85D75', staff: '#95A5A6' }
 // Sub-venue legend definitions for AM and AE
 const SUB_VENUE_LEGENDS = {
   am: () => {
-    const base = VENUE_BY_ID.am?.color ?? '#E08E45'
+    const base = VENUE_BY_ID.am?.color ?? '#f28a3a'
     return [
       { color: base, label: 'Emerald / GH' },
       { color: AM_ALSTONIA, label: 'Alstonia / Banana' },
@@ -20,7 +20,7 @@ const SUB_VENUE_LEGENDS = {
     ]
   },
   ae: () => {
-    const base = VENUE_BY_ID.ae?.color ?? '#A3785E'
+    const base = VENUE_BY_ID.ae?.color ?? '#7d3639'
     return [
       { color: base, label: 'Aura' },
       { color: AE_VALENCIA, label: 'Valencia' },

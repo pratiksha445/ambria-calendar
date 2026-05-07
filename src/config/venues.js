@@ -48,15 +48,15 @@ export function applyDynamic(dbRows) {
 
 // ── Sub-venue color variants (AE + AM) ──
 // Returns { background, color } override or null for default venue color.
-export const AE_VALENCIA = '#D4BFA0'
-export const AM_ALSTONIA = '#F2C99A'
+export const AE_VALENCIA = '#b56064'
+export const AM_ALSTONIA = '#f4c58a'
 
 export function stripeGradient(a, b) {
   return `repeating-linear-gradient(135deg, ${a}, ${a} 4px, ${b} 4px, ${b} 8px)`
 }
 
 function aeSubVenue(sv) {
-  if (sv.startsWith('Valencia')) return { background: AE_VALENCIA, color: '#1A1A1A' }
+  if (sv.startsWith('Valencia')) return { background: AE_VALENCIA, color: '#fff' }
   if (sv === 'Full Venue') return { background: stripeGradient(VENUE_BY_ID.ae?.color ?? '#7d3639', AE_VALENCIA), color: '#fff' }
   return null
 }
