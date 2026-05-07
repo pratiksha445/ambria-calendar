@@ -6,7 +6,7 @@ import BookingModal from './BookingModal.jsx'
 const PAGE_SIZE = 25
 
 const DEPT_LABEL = { add: 'Decor', ac: 'Cuisine' }
-const DEPT_COLOR = { add: '#ADD8E6', ac: '#D8728A' }
+const DEPT_COLOR = { add: '#51c6fc', ac: '#fa6eb2' }
 const DEPT_TEXT = { add: '#1A1A1A', ac: '#fff' }
 const CAT_TABS = [
   { id: '', label: 'All' },

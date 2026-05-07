@@ -11,8 +11,8 @@ const SYSTEM_IDS = new Set(['ap', 'am', 'ae', 'ar', 'villa', 'add', 'ac', 'aee',
 const CATEGORY_TYPES = ['venue', 'service', 'villa', 'tender', 'custom']
 
 const PRESET_COLORS = [
-  '#FFE263', '#FF9430', '#A3785E', '#9CAF88', '#944547',
-  '#ADD8E6', '#D8728A', '#AD7EA5', '#2F4C39', '#FFB8B0',
+  '#fadb50', '#f28a3a', '#7d3639', '#222da3', '#855b7a',
+  '#51c6fc', '#fa6eb2', '#5a1a96', '#0f6132', '#6f9164',
   '#E85D75', '#7CB9E8', '#B4A7D6',
 ]
 

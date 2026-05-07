@@ -5,16 +5,16 @@
 // in-place, every module that imports them sees the update automatically.
 
 export const VENUES = [
-  { id: 'ap',     name: 'Ambria Pushpanjali',    short: 'AP',    color: '#FFE263', textColor: '#1A1A1A', subVenues: ['Amber Lawn', 'Glass House', 'Amber Lawn + Glass House', 'Amber Lawn + Carnelian Deck', 'Glass House + Half Lawn', 'Carnelian Deck', 'Full Venue'] },
-  { id: 'am',     name: 'Ambria Manaktala',      short: 'AM',    color: '#FF9430', textColor: '#1A1A1A', subVenues: ['Emerald Lawn', 'Emerald + Glass House', 'Emerald + Banana Tree', 'Emerald + Glass House + Banana', 'Alstonia Lawn', 'Alstonia + Banana Tree', 'Alstonia + Banana Tree + Emerald', 'Glass House', 'Banana Tree Lawn', 'Full Venue'] },
-  { id: 'ae',     name: 'Ambria Exotica',        short: 'AE',    color: '#A3785E', textColor: '#fff', subVenues: ['Aura Lawn', 'Aura Glass House + Lawn', 'Aura Glasshouse', 'Aura Porch', 'Valencia Glass House', 'Valencia Glass House + Lawn', 'Valencia Glass House + Lawn + Poolside', 'Valencia Lawn + Poolside', 'Valencia Porch', 'Full Venue'] },
-  { id: 'ar',     name: 'Ambria Restro',         short: 'AR',    color: '#9CAF88', textColor: '#1A1A1A', subVenues: ['Restro-Lawn', 'Restro Glass House', 'Rooftop', 'Cafe', 'Restro Lawn + Glass House', 'Restro Lawn + Rooftop', 'Full Venue'] },
-  { id: 'villa',  name: 'Villa',                 short: 'Villa', color: '#944547', textColor: '#fff', subVenues: ['AP Kothi', 'AM Kothi', 'AE Kothi', 'Sukoon'] },
-  { id: 'add',    name: 'Ambria Design & Decor', short: 'ADD',   color: '#ADD8E6', textColor: '#1A1A1A', subVenues: [] },
-  { id: 'ac',     name: 'Ambria Cuisine',        short: 'AC',    color: '#D8728A', textColor: '#fff', subVenues: [] },
-  { id: 'aee',    name: 'Ambria Events',         short: 'AEE',   color: '#AD7EA5', textColor: '#fff', subVenues: [] },
-  { id: 'ws',     name: 'Wedding Services',      short: 'WS',    color: '#FFB8B0', textColor: '#1A1A1A', subVenues: [] },
-  { id: 'tender', name: 'Tender',                short: 'TND',   color: '#2F4C39', textColor: '#fff', subVenues: [] },
+  { id: 'ap',     name: 'Ambria Pushpanjali',    short: 'AP',    color: '#fadb50', textColor: '#1A1A1A', subVenues: ['Amber Lawn', 'Glass House', 'Amber Lawn + Glass House', 'Amber Lawn + Carnelian Deck', 'Glass House + Half Lawn', 'Carnelian Deck', 'Full Venue'] },
+  { id: 'am',     name: 'Ambria Manaktala',      short: 'AM',    color: '#f28a3a', textColor: '#fff', subVenues: ['Emerald Lawn', 'Emerald + Glass House', 'Emerald + Banana Tree', 'Emerald + Glass House + Banana', 'Alstonia Lawn', 'Alstonia + Banana Tree', 'Alstonia + Banana Tree + Emerald', 'Glass House', 'Banana Tree Lawn', 'Full Venue'] },
+  { id: 'ae',     name: 'Ambria Exotica',        short: 'AE',    color: '#7d3639', textColor: '#fff', subVenues: ['Aura Lawn', 'Aura Glass House + Lawn', 'Aura Glasshouse', 'Aura Porch', 'Valencia Glass House', 'Valencia Glass House + Lawn', 'Valencia Glass House + Lawn + Poolside', 'Valencia Lawn + Poolside', 'Valencia Porch', 'Full Venue'] },
+  { id: 'ar',     name: 'Ambria Restro',         short: 'AR',    color: '#222da3', textColor: '#fff', subVenues: ['Restro-Lawn', 'Restro Glass House', 'Rooftop', 'Cafe', 'Restro Lawn + Glass House', 'Restro Lawn + Rooftop', 'Full Venue'] },
+  { id: 'villa',  name: 'Villa',                 short: 'Villa', color: '#855b7a', textColor: '#fff', subVenues: ['AP Kothi', 'AM Kothi', 'AE Kothi', 'Sukoon'] },
+  { id: 'add',    name: 'Ambria Design & Decor', short: 'ADD',   color: '#51c6fc', textColor: '#1A1A1A', subVenues: [] },
+  { id: 'ac',     name: 'Ambria Cuisine',        short: 'AC',    color: '#fa6eb2', textColor: '#fff', subVenues: [] },
+  { id: 'aee',    name: 'Ambria Events',         short: 'AEE',   color: '#5a1a96', textColor: '#fff', subVenues: [] },
+  { id: 'ws',     name: 'Wedding Services',      short: 'WS',    color: '#6f9164', textColor: '#fff', subVenues: [] },
+  { id: 'tender', name: 'Tender',                short: 'TND',   color: '#0f6132', textColor: '#fff', subVenues: [] },
 ]
 
 export const VENUE_BY_ID = Object.fromEntries(VENUES.map((v) => [v.id, v]))
@@ -57,13 +57,13 @@ export function stripeGradient(a, b) {
 
 function aeSubVenue(sv) {
   if (sv.startsWith('Valencia')) return { background: AE_VALENCIA, color: '#1A1A1A' }
-  if (sv === 'Full Venue') return { background: stripeGradient(VENUE_BY_ID.ae?.color ?? '#A3785E', AE_VALENCIA), color: '#fff' }
+  if (sv === 'Full Venue') return { background: stripeGradient(VENUE_BY_ID.ae?.color ?? '#7d3639', AE_VALENCIA), color: '#fff' }
   return null
 }
 
 function amSubVenue(sv) {
   if (sv.startsWith('Alstonia') || sv === 'Banana Tree Lawn') return { background: AM_ALSTONIA, color: '#1A1A1A' }
-  if (sv === 'Full Venue') return { background: stripeGradient(VENUE_BY_ID.am?.color ?? '#E08E45', AM_ALSTONIA), color: '#1A1A1A' }
+  if (sv === 'Full Venue') return { background: stripeGradient(VENUE_BY_ID.am?.color ?? '#f28a3a', AM_ALSTONIA), color: '#fff' }
   return null
 }
 
