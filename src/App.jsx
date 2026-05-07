@@ -17,6 +17,7 @@ import CategoryManagement from './components/CategoryManagement.jsx'
 import ManageElements from './components/ManageElements.jsx'
 import VenueManagers from './components/VenueManagers.jsx'
 import EventList from './components/EventList.jsx'
+import Reviews from './components/Reviews.jsx'
 import ReviewModal from './components/ReviewModal.jsx'
 import PaymentModal from './components/PaymentModal.jsx'
 import { fetchEvents, deleteEvent, bulkDeleteMonth } from './lib/events.js'
@@ -590,6 +591,9 @@ export default function App() {
         )}
         {currentView === 'event-list' && user.role === 'admin' && (
           <EventList currentUser={user} showToast={showToast} onMenu={() => setSidebarOpen(true)} />
+        )}
+        {currentView === 'reviews' && user.role === 'admin' && (
+          <Reviews currentUser={user} showToast={showToast} onMenu={() => setSidebarOpen(true)} />
         )}
       </div>
       <DayModal

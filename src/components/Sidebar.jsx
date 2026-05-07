@@ -216,6 +216,19 @@ export default function Sidebar({
           )}
           {user?.role === 'admin' && (
             <button
+              className={`nav-item ${currentView === 'reviews' ? 'active' : ''}`}
+              onClick={() => onNavigate('reviews')}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
+                <polygon points="12 13 13.09 15.26 15.5 15.63 13.75 17.33 14.18 19.77 12 18.57 9.82 19.77 10.25 17.33 8.5 15.63 10.91 15.26 12 13" />
+              </svg>
+              {t('Reviews')}
+            </button>
+          )}
+          {user?.role === 'admin' && (
+            <button
               className={`nav-item ${currentView === 'audit' ? 'active' : ''}`}
               onClick={() => onNavigate('audit')}
             >

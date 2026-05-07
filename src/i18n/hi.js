@@ -789,6 +789,20 @@ const hi = {
   'pax_suffix': 'पैक्स',
   'Multi-Event': 'मल्टी-इवेंट',
 
+  // ── Reviews page ──
+  'Reviews': 'रिव्यू',
+  'Avg Rating': 'औसत रेटिंग',
+  'Reviewed By': 'रिव्यू किया',
+  'Submitted Date': 'जमा तिथि',
+  'Payment Status': 'भुगतान स्थिति',
+  'Review Status': 'रिव्यू स्थिति',
+  'No review submitted': 'कोई रिव्यू नहीं दिया गया',
+  'Search title, guest, reviewer…': 'शीर्षक, अतिथि, समीक्षक खोजें…',
+  'No events found': 'कोई इवेंट नहीं मिला',
+  'By': 'द्वारा',
+  'Event Title': 'इवेंट शीर्षक',
+  'Event Date': 'इवेंट तिथि',
+
 }
 
 export default hi

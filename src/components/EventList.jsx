@@ -141,7 +141,6 @@ export default function EventList({ currentUser, showToast, onMenu }) {
     const { data, error } = await supabase
       .from('events')
       .select('*')
-      .is('deleted_at', null)
       .or(`and(venue_id.neq.villa,venue_id.neq.tender,date.gte.${start},date.lte.${end}),and(venue_id.eq.villa,check_in_date.gte.${start},check_in_date.lte.${end}),and(venue_id.eq.tender,date.gte.${start},date.lte.${end})`)
       .order('date', { ascending: true })
 
