@@ -54,8 +54,8 @@ export default function DayModal({ date, events, onClose, onAdd, onEdit, onDelet
     if (e.date === iso) return true
     // Villa multi-day: include if this day falls within the stay
     if (e.venue_id === 'villa' && e.check_in_date && e.check_out_date
-        && e.check_out_date > e.check_in_date
-        && iso >= e.check_in_date && iso <= e.check_out_date) return true
+        && e.check_out_date >= e.check_in_date
+        && iso >= e.check_in_date && iso < e.check_out_date) return true
     // TND multi-day: include if this day falls within the date range
     if (e.venue_id === 'tender' && e.date && e.end_date
         && e.end_date > e.date

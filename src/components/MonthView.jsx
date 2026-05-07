@@ -131,7 +131,12 @@ function getSpanDates(ev) {
   if (ev.venue_id === 'villa') {
     const cin = ev.check_in_date || ev.date
     const cout = ev.check_out_date
-    return (cin && cout && cout > cin) ? [cin, cout] : null
+    if (!cin || !cout || cout < cin) return null
+    // Checkout day is departure, not a stay day — last pill is cout-1
+    const lastDay = cout > cin
+      ? toIsoDate(addDays(new Date(cout + 'T00:00:00'), -1))
+      : cin
+    return [cin, lastDay]
   }
   if (ev.venue_id === 'tender') {
     const cin = ev.date

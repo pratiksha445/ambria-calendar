@@ -19,7 +19,7 @@ export default function WeekView({ currentDate, selectedDate, onSelectDate, even
       if (ev.venue_id === 'villa' && ev.check_in_date && ev.check_out_date && ev.check_out_date > ev.check_in_date) {
         for (const d of days) {
           const iso = toIsoDate(d)
-          if (iso >= ev.check_in_date && iso <= ev.check_out_date) {
+          if (iso >= ev.check_in_date && iso < ev.check_out_date) {
             map[iso] = (map[iso] || 0) + 1
           }
         }
