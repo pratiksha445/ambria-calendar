@@ -15,9 +15,13 @@ export default function Header({
   onExport,
   onClearMonth,
   onSelectMonth,
+  killSwitch,
+  onToggleKillSwitch,
+  user,
 }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [pickerOpen, setPickerOpen] = useState(false)
+  const [ksConfirm, setKsConfirm] = useState(false)
   const [pickerYear, setPickerYear] = useState(currentDate.getFullYear())
   const { t, formatMonthYear, shortMonths } = useLanguage()
   const pickerRef = useRef(null)
@@ -40,8 +44,24 @@ export default function Header({
   const isCurrentMonth = (monthIndex) =>
     currentDate.getFullYear() === pickerYear && currentDate.getMonth() === monthIndex
 
+  const isAdmin = user?.role === 'admin'
+
+  const handleKsToggle = async () => {
+    setKsConfirm(false)
+    setMenuOpen(false)
+    await onToggleKillSwitch?.()
+  }
+
   return (
     <header className="app-header">
+      {killSwitch && isAdmin && (
+        <div className="ks-banner">
+          <span><PowerIcon /> {t('Kill Switch Active — All data hidden')}</span>
+          <button className="ks-banner-btn" onClick={() => setKsConfirm(true)}>
+            {t('Deactivate')}
+          </button>
+        </div>
+      )}
       <div className="header-row">
         <button className="icon-btn header-menu" onClick={onMenu} aria-label="Open menu">
           <MenuIcon />
@@ -134,6 +154,13 @@ export default function Header({
                       <TrashIcon />
                       {t('Clear Month')}
                     </button>
+                    <button
+                      className={`header-menu-item${killSwitch ? ' ks-active' : ' danger'}`}
+                      onClick={() => { setMenuOpen(false); setKsConfirm(true) }}
+                    >
+                      <PowerIcon />
+                      {t('Kill Switch')}
+                    </button>
                   </div>
                 </>
               )}
@@ -158,6 +185,29 @@ export default function Header({
         </div>
         <button className="today-pill" onClick={onToday}>{t('Today')}</button>
       </div>
+
+      {ksConfirm && (
+        <div className="modal-root" role="dialog" aria-modal="true">
+          <div className="modal-backdrop" onClick={() => setKsConfirm(false)} />
+          <div className="ks-confirm-card">
+            <h3>{killSwitch ? t('Deactivate Kill Switch?') : t('Activate Kill Switch?')}</h3>
+            <p>
+              {killSwitch
+                ? t('This will restore all calendar data visibility. Continue?')
+                : t('This will hide ALL calendar data from all users. No data will be deleted. Continue?')}
+            </p>
+            <div className="ks-confirm-actions">
+              <button className="btn-ghost" onClick={() => setKsConfirm(false)}>{t('Cancel')}</button>
+              <button
+                className={killSwitch ? 'btn-primary' : 'btn-danger'}
+                onClick={handleKsToggle}
+              >
+                {killSwitch ? t('Deactivate') : t('Activate')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   )
 }
@@ -209,6 +259,15 @@ function TrashIcon() {
       <path d="M10 11v6" />
       <path d="M14 11v6" />
       <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+    </svg>
+  )
+}
+
+function PowerIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18.36 6.64a9 9 0 1 1-12.73 0" />
+      <line x1="12" y1="2" x2="12" y2="12" />
     </svg>
   )
 }

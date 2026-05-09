@@ -29,6 +29,7 @@ import { startOfMonth, endOfMonth, toIsoDate, addDays } from './lib/dates.js'
 import { VENUES, applyDynamic } from './config/venues.js'
 import { fetchActiveCategories } from './lib/categories.js'
 import { logAction } from './lib/audit.js'
+import { useKillSwitch } from './contexts/KillSwitchContext.jsx'
 import { useLanguage } from './i18n/LanguageContext.jsx'
 import useSwipeNav from './hooks/useSwipeNav.js'
 import './App.css'
@@ -59,6 +60,7 @@ function getStoredUser() {
 
 export default function App() {
   const { t, formatMonthYear } = useLanguage()
+  const { killSwitch, toggleKillSwitch } = useKillSwitch()
   const [user, setUser] = useState(getStoredUser)
   const [currentView, setCurrentView] = useState('calendar')
   const [currentDate, setCurrentDate] = useState(() => new Date())
@@ -243,9 +245,13 @@ export default function App() {
     })
   }, [allEvents, activeFilters, activeSources, search, eventTypeAbbrByName])
 
+  // ── Kill Switch: hide all event data without touching the DB ──
+  const visibleEvents = killSwitch ? [] : filteredEvents
+  const visibleMonthEvents = killSwitch ? [] : monthEvents
+
   const filteredMonthCount = useMemo(
-    () => filteredEvents.filter((e) => e.date >= monthStart && e.date <= monthEnd).length,
-    [filteredEvents, monthStart, monthEnd],
+    () => visibleEvents.filter((e) => e.date >= monthStart && e.date <= monthEnd).length,
+    [visibleEvents, monthStart, monthEnd],
   )
 
   const handlePrev = () => {
@@ -332,7 +338,7 @@ export default function App() {
   // in addition to state (triggers re-renders) to avoid a stale-state flash
   // where the ref has the month but the batched setState hasn't committed yet
   const monthCached = fetchedMonthsRef.current.has(currentMonthKey) || fetchedMonths.has(currentMonthKey)
-  const filtersHideEverything = !loading && monthCached && monthEvents.length > 0 && filteredMonthCount === 0
+  const filtersHideEverything = !killSwitch && !loading && monthCached && visibleMonthEvents.length > 0 && filteredMonthCount === 0
 
   const showToast = useCallback((msg) => {
     setToast(msg)
@@ -475,8 +481,8 @@ export default function App() {
 
   const canClearMonth = user.role === 'admin'
 
-  const manualCount = monthEvents.filter((e) => e.source === 'manual').length
-  const crmCount = monthEvents.filter((e) => e.source !== 'manual').length
+  const manualCount = visibleMonthEvents.filter((e) => e.source === 'manual').length
+  const crmCount = visibleMonthEvents.filter((e) => e.source !== 'manual').length
 
   return (
     <div className="app">
@@ -491,8 +497,8 @@ export default function App() {
         onSelectNoVenues={selectNoVenues}
         activeSources={activeSources}
         onToggleSource={toggleSource}
-        events={monthEvents}
-        totalCount={monthEvents.length}
+        events={visibleMonthEvents}
+        totalCount={visibleMonthEvents.length}
         shownCount={filteredMonthCount}
         user={user}
         currentView={currentView}
@@ -515,6 +521,9 @@ export default function App() {
               onExport={handleExport}
               onClearMonth={canClearMonth ? handleClearMonth : null}
               onSelectMonth={setCurrentDate}
+              killSwitch={killSwitch}
+              onToggleKillSwitch={() => toggleKillSwitch(user)}
+              user={user}
             />
             <main className="app-body" ref={calendarBodyRef}>
               {error && <div className="error-banner">{error}</div>}
@@ -528,7 +537,7 @@ export default function App() {
                   selectedDate={selectedDate}
                   onSelectDate={handleSelectDate}
                   onEventClick={openEdit}
-                  events={filteredEvents}
+                  events={visibleEvents}
                   eventTypes={eventTypes}
                   skeleton={!monthCached && !loading}
                 />
@@ -539,12 +548,12 @@ export default function App() {
                     currentDate={currentDate}
                     selectedDate={selectedDate}
                     onSelectDate={handleSelectDate}
-                    events={filteredEvents}
+                    events={visibleEvents}
                   />
                   <div className="week-day-divider" />
                   <DayView
                     selectedDate={selectedDate}
-                    events={filteredEvents}
+                    events={visibleEvents}
                     onEdit={openEdit}
                     onDelete={handleCardDelete}
                     onAdd={openNew}
@@ -558,7 +567,7 @@ export default function App() {
               {view === 'day' && (
                 <DayView
                   selectedDate={selectedDate}
-                  events={filteredEvents}
+                  events={visibleEvents}
                   onEdit={openEdit}
                   onDelete={handleCardDelete}
                   onAdd={openNew}
@@ -575,7 +584,7 @@ export default function App() {
           <UserManagement currentUser={user} showToast={showToast} onMenu={() => setSidebarOpen(true)} />
         )}
         {currentView === 'audit' && user.role === 'admin' && (
-          <AuditLog onMenu={() => setSidebarOpen(true)} />
+          <AuditLog onMenu={() => setSidebarOpen(true)} killSwitch={killSwitch} />
         )}
         {currentView === 'event-types' && user.role === 'admin' && (
           <EventTypeManagement currentUser={user} showToast={showToast} onMenu={() => setSidebarOpen(true)} />
@@ -590,15 +599,15 @@ export default function App() {
           <VenueManagers currentUser={user} showToast={showToast} onMenu={() => setSidebarOpen(true)} />
         )}
         {currentView === 'event-list' && user.role === 'admin' && (
-          <EventList currentUser={user} showToast={showToast} onMenu={() => setSidebarOpen(true)} />
+          <EventList currentUser={user} showToast={showToast} onMenu={() => setSidebarOpen(true)} killSwitch={killSwitch} />
         )}
         {currentView === 'reviews' && user.role === 'admin' && (
-          <Reviews currentUser={user} showToast={showToast} onMenu={() => setSidebarOpen(true)} />
+          <Reviews currentUser={user} showToast={showToast} onMenu={() => setSidebarOpen(true)} killSwitch={killSwitch} />
         )}
       </div>
       <DayModal
         date={dayModalDate}
-        events={allEvents}
+        events={killSwitch ? [] : allEvents}
         onClose={() => setDayModalDate(null)}
         onAdd={openNewFromDate}
         onEdit={(ev) => { setDayModalDate(null); openEdit(ev) }}

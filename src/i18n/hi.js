@@ -785,6 +785,14 @@ const hi = {
   'Date cannot be in the past': 'तिथि बीते हुए समय में नहीं हो सकती',
   'Cannot create bookings for past dates': 'बीती हुई तिथियों के लिए बुकिंग नहीं बनाई जा सकती',
 
+  // ── किल स्विच ──
+  'Kill Switch': 'किल स्विच',
+  'Kill Switch Active — All data hidden': 'किल स्विच सक्रिय — सभी डेटा छिपा हुआ है',
+  'Activate Kill Switch?': 'किल स्विच सक्रिय करें?',
+  'Deactivate Kill Switch?': 'किल स्विच निष्क्रिय करें?',
+  'This will hide ALL calendar data from all users. No data will be deleted. Continue?': 'यह सभी उपयोगकर्ताओं से सभी कैलेंडर डेटा छिपा देगा। कोई डेटा हटाया नहीं जाएगा। जारी रखें?',
+  'This will restore all calendar data visibility. Continue?': 'यह सभी कैलेंडर डेटा की दृश्यता बहाल करेगा। जारी रखें?',
+
   // ── ऑटो-टाइटल i18n ──
   'pax_suffix': 'पैक्स',
   'Multi-Event': 'मल्टी-इवेंट',

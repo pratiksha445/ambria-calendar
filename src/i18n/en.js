@@ -785,6 +785,14 @@ const en = {
   'Date cannot be in the past': 'Date cannot be in the past',
   'Cannot create bookings for past dates': 'Cannot create bookings for past dates',
 
+  // ── Kill Switch ──
+  'Kill Switch': 'Kill Switch',
+  'Kill Switch Active — All data hidden': 'Kill Switch Active — All data hidden',
+  'Activate Kill Switch?': 'Activate Kill Switch?',
+  'Deactivate Kill Switch?': 'Deactivate Kill Switch?',
+  'This will hide ALL calendar data from all users. No data will be deleted. Continue?': 'This will hide ALL calendar data from all users. No data will be deleted. Continue?',
+  'This will restore all calendar data visibility. Continue?': 'This will restore all calendar data visibility. Continue?',
+
   // ── Auto-title i18n ──
   'pax_suffix': 'pax',
   'Multi-Event': 'Multi-Event',

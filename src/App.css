@@ -5939,3 +5939,85 @@ input, select, textarea {
   .rv-summary { flex-direction: column; align-items: flex-start; gap: 4px; }
   .rv-date-input { max-width: unset; }
 }
+
+/* ============================================================================
+   Kill Switch
+   ============================================================================ */
+
+/* ── Admin banner ── */
+.ks-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 12px;
+  background: #dc2626;
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 600;
+  border-radius: 6px;
+  margin: 0 0 6px;
+}
+.ks-banner span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ks-banner svg { flex-shrink: 0; }
+.ks-banner-btn {
+  background: rgba(255,255,255,.2);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.4);
+  border-radius: 4px;
+  padding: 3px 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.ks-banner-btn:hover { background: rgba(255,255,255,.35); }
+
+/* ── Menu item variant ── */
+.header-menu-item.ks-active {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+/* ── Confirmation dialog ── */
+.ks-confirm-card {
+  position: relative;
+  z-index: 1001;
+  background: var(--ambria-bg);
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 380px;
+  width: 90vw;
+  box-shadow: 0 8px 30px rgba(0,0,0,.25);
+  margin: auto;
+}
+.ks-confirm-card h3 {
+  margin: 0 0 8px;
+  font-size: 1.05rem;
+}
+.ks-confirm-card p {
+  margin: 0 0 20px;
+  font-size: 0.88rem;
+  color: var(--ambria-muted);
+  line-height: 1.45;
+}
+.ks-confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.btn-primary {
+  background: var(--ambria-accent, #4A90D9);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 18px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-primary:hover { opacity: .9; }
