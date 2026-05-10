@@ -107,7 +107,7 @@ function monthRange(year, month) {
   return { start, end }
 }
 
-export default function EventList({ currentUser, showToast, onMenu, killSwitch }) {
+export default function EventList({ currentUser, showToast, onMenu }) {
   const { t } = useLanguage()
   const now = new Date()
   const [year, setYear] = useState(now.getFullYear())
@@ -162,7 +162,6 @@ export default function EventList({ currentUser, showToast, onMenu, killSwitch }
 
   // Filter + sort
   const filtered = useMemo(() => {
-    if (killSwitch) return []
     let list = rows
 
     // Category filter
@@ -198,7 +197,7 @@ export default function EventList({ currentUser, showToast, onMenu, killSwitch }
     })
 
     return list
-  }, [rows, selectedCats, statusFilter, search, killSwitch])
+  }, [rows, selectedCats, statusFilter, search])
 
   // Summary stats
   const statusCounts = useMemo(() => {

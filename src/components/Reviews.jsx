@@ -54,7 +54,7 @@ function stars(n) {
   return '\u2605'.repeat(n) + '\u2606'.repeat(5 - n)
 }
 
-export default function Reviews({ currentUser, showToast, onMenu, killSwitch }) {
+export default function Reviews({ currentUser, showToast, onMenu }) {
   const { t } = useLanguage()
   const [events, setEvents] = useState([])
   const [reviewMap, setReviewMap] = useState({})
@@ -110,7 +110,6 @@ export default function Reviews({ currentUser, showToast, onMenu, killSwitch }) 
 
   // Filtering
   const filtered = useMemo(() => {
-    if (killSwitch) return []
     let list = events
 
     // Tab filter
@@ -139,7 +138,7 @@ export default function Reviews({ currentUser, showToast, onMenu, killSwitch }) 
     }
 
     return list
-  }, [events, reviewMap, tab, catFilter, statusFilter, dateFrom, dateTo, search, killSwitch])
+  }, [events, reviewMap, tab, catFilter, statusFilter, dateFrom, dateTo, search])
 
   // Summary stats
   const summary = useMemo(() => {

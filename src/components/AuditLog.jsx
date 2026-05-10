@@ -73,7 +73,7 @@ function DateInput({ value, onChange, placeholder }) {
   )
 }
 
-export default function AuditLog({ onMenu, killSwitch }) {
+export default function AuditLog({ onMenu }) {
   const { t, formatTimestampIST: formatTsIST } = useLanguage()
   const [entries, setEntries] = useState([])
   const [loading, setLoading] = useState(false)
@@ -160,7 +160,7 @@ export default function AuditLog({ onMenu, killSwitch }) {
   }
 
   // Smart search — fuzzy multi-word AND matching
-  const filteredEntries = killSwitch ? [] : entries.filter((entry) => {
+  const filteredEntries = entries.filter((entry) => {
     const q = searchText.trim().toLowerCase()
     if (!q) return true
     const words = q.split(/\s+/).filter(Boolean)
