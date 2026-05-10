@@ -75,7 +75,7 @@ function InlinePinInput({ onSave, onCancel }) {
   )
 }
 
-export default function UserManagement({ currentUser, showToast, onMenu }) {
+export default function UserManagement({ currentUser, showToast, onMenu, killSwitch }) {
   const { t } = useLanguage()
   const [users, setUsers] = useState([])
   const [search, setSearch] = useState('')
@@ -481,6 +481,20 @@ export default function UserManagement({ currentUser, showToast, onMenu }) {
         )}
       </div>
     </div>
+    )
+  }
+
+  if (killSwitch) {
+    return (
+      <div className="panel-page">
+        <div className="panel-header">
+          <button className="icon-btn header-menu" onClick={onMenu} aria-label="Open menu">
+            <MenuIcon />
+          </button>
+          <h2>{t('Manage Users')}</h2>
+        </div>
+        <div className="empty-state">{t('No data available')}</div>
+      </div>
     )
   }
 

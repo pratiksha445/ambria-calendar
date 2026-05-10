@@ -14,7 +14,7 @@ function MenuIcon() {
   )
 }
 
-export default function ManageElements({ currentUser, showToast, onMenu }) {
+export default function ManageElements({ currentUser, showToast, onMenu, killSwitch }) {
   const { t } = useLanguage()
   const [items, setItems] = useState([])
   const [newName, setNewName] = useState('')
@@ -103,6 +103,20 @@ export default function ManageElements({ currentUser, showToast, onMenu }) {
     setEditingId(item.id)
     setEditName(item.name)
     setEditNameHi(item.name_hi || '')
+  }
+
+  if (killSwitch) {
+    return (
+      <div className="panel-page">
+        <div className="panel-header">
+          <button className="icon-btn header-menu" onClick={onMenu} aria-label="Open menu">
+            <MenuIcon />
+          </button>
+          <h2>{t('Manage Elements')}</h2>
+        </div>
+        <div className="empty-state">{t('No data available')}</div>
+      </div>
+    )
   }
 
   return (

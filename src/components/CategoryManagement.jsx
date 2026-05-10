@@ -26,7 +26,7 @@ function MenuIcon() {
   )
 }
 
-export default function CategoryManagement({ currentUser, showToast, onMenu }) {
+export default function CategoryManagement({ currentUser, showToast, onMenu, killSwitch }) {
   const { t } = useLanguage()
   const [categories, setCategories] = useState([])
   const [search, setSearch] = useState('')
@@ -174,6 +174,20 @@ export default function CategoryManagement({ currentUser, showToast, onMenu }) {
     c.name.toLowerCase().includes(search.toLowerCase()) ||
     c.short_code.toLowerCase().includes(search.toLowerCase())
   )
+
+  if (killSwitch) {
+    return (
+      <div className="panel-page">
+        <div className="panel-header">
+          <button className="icon-btn header-menu" onClick={onMenu} aria-label="Open menu">
+            <MenuIcon />
+          </button>
+          <h2>{t('Categories')}</h2>
+        </div>
+        <div className="empty-state">{t('No data available')}</div>
+      </div>
+    )
+  }
 
   return (
     <div className="panel-page">

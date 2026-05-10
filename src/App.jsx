@@ -581,22 +581,22 @@ export default function App() {
           </>
         )}
         {currentView === 'users' && user.role === 'admin' && (
-          <UserManagement currentUser={user} showToast={showToast} onMenu={() => setSidebarOpen(true)} />
+          <UserManagement currentUser={user} showToast={showToast} onMenu={() => setSidebarOpen(true)} killSwitch={killSwitch} />
         )}
         {currentView === 'audit' && user.role === 'admin' && (
           <AuditLog onMenu={() => setSidebarOpen(true)} killSwitch={killSwitch} />
         )}
         {currentView === 'event-types' && user.role === 'admin' && (
-          <EventTypeManagement currentUser={user} showToast={showToast} onMenu={() => setSidebarOpen(true)} />
+          <EventTypeManagement currentUser={user} showToast={showToast} onMenu={() => setSidebarOpen(true)} killSwitch={killSwitch} />
         )}
         {currentView === 'categories' && user.role === 'admin' && (
-          <CategoryManagement currentUser={user} showToast={showToast} onMenu={() => setSidebarOpen(true)} />
+          <CategoryManagement currentUser={user} showToast={showToast} onMenu={() => setSidebarOpen(true)} killSwitch={killSwitch} />
         )}
         {currentView === 'elements' && user.role === 'admin' && (
-          <ManageElements currentUser={user} showToast={showToast} onMenu={() => setSidebarOpen(true)} />
+          <ManageElements currentUser={user} showToast={showToast} onMenu={() => setSidebarOpen(true)} killSwitch={killSwitch} />
         )}
         {currentView === 'venue-managers' && user.role === 'admin' && (
-          <VenueManagers currentUser={user} showToast={showToast} onMenu={() => setSidebarOpen(true)} />
+          <VenueManagers currentUser={user} showToast={showToast} onMenu={() => setSidebarOpen(true)} killSwitch={killSwitch} />
         )}
         {currentView === 'event-list' && user.role === 'admin' && (
           <EventList currentUser={user} showToast={showToast} onMenu={() => setSidebarOpen(true)} killSwitch={killSwitch} />

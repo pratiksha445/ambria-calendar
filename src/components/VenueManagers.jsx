@@ -84,7 +84,7 @@ function exportCsv(rows, t) {
   URL.revokeObjectURL(url)
 }
 
-export default function VenueManagers({ currentUser, showToast, onMenu }) {
+export default function VenueManagers({ currentUser, showToast, onMenu, killSwitch }) {
   const { t } = useLanguage()
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(false)
@@ -183,6 +183,18 @@ export default function VenueManagers({ currentUser, showToast, onMenu }) {
     setEditModal(null)
     loadData()
     showToast?.(t('Booking deleted'))
+  }
+
+  if (killSwitch) {
+    return (
+      <div className="panel-page vm-page">
+        <div className="panel-header">
+          <button className="icon-btn header-menu" onClick={onMenu}><MenuIcon /></button>
+          <h2>{t('Venue Managers')}</h2>
+        </div>
+        <div className="empty-state">{t('No data available')}</div>
+      </div>
+    )
   }
 
   return (
