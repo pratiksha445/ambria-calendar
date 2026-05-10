@@ -73,7 +73,7 @@ function DateInput({ value, onChange, placeholder }) {
   )
 }
 
-export default function AuditLog({ onMenu }) {
+export default function AuditLog({ onMenu, killSwitch }) {
   const { t, formatTimestampIST: formatTsIST } = useLanguage()
   const [entries, setEntries] = useState([])
   const [loading, setLoading] = useState(false)
@@ -308,6 +308,20 @@ export default function AuditLog({ onMenu }) {
     a.download = filename
     a.click()
     URL.revokeObjectURL(url)
+  }
+
+  if (killSwitch) {
+    return (
+      <div className="panel-page">
+        <div className="panel-header">
+          <button className="icon-btn header-menu" onClick={onMenu} aria-label="Open menu">
+            <MenuIcon />
+          </button>
+          <h2>{t('Audit Log')}</h2>
+        </div>
+        <div className="empty-state">{t('No data available')}</div>
+      </div>
+    )
   }
 
   return (

@@ -584,7 +584,7 @@ export default function App() {
           <UserManagement currentUser={user} showToast={showToast} onMenu={() => setSidebarOpen(true)} />
         )}
         {currentView === 'audit' && user.role === 'admin' && (
-          <AuditLog onMenu={() => setSidebarOpen(true)} />
+          <AuditLog onMenu={() => setSidebarOpen(true)} killSwitch={killSwitch} />
         )}
         {currentView === 'event-types' && user.role === 'admin' && (
           <EventTypeManagement currentUser={user} showToast={showToast} onMenu={() => setSidebarOpen(true)} />
@@ -599,10 +599,10 @@ export default function App() {
           <VenueManagers currentUser={user} showToast={showToast} onMenu={() => setSidebarOpen(true)} />
         )}
         {currentView === 'event-list' && user.role === 'admin' && (
-          <EventList currentUser={user} showToast={showToast} onMenu={() => setSidebarOpen(true)} />
+          <EventList currentUser={user} showToast={showToast} onMenu={() => setSidebarOpen(true)} killSwitch={killSwitch} />
         )}
         {currentView === 'reviews' && user.role === 'admin' && (
-          <Reviews currentUser={user} showToast={showToast} onMenu={() => setSidebarOpen(true)} />
+          <Reviews currentUser={user} showToast={showToast} onMenu={() => setSidebarOpen(true)} killSwitch={killSwitch} />
         )}
       </div>
       <DayModal

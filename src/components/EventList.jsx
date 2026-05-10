@@ -107,7 +107,7 @@ function monthRange(year, month) {
   return { start, end }
 }
 
-export default function EventList({ currentUser, showToast, onMenu }) {
+export default function EventList({ currentUser, showToast, onMenu, killSwitch }) {
   const { t } = useLanguage()
   const now = new Date()
   const [year, setYear] = useState(now.getFullYear())
@@ -318,6 +318,18 @@ export default function EventList({ currentUser, showToast, onMenu }) {
     setEditModal(null)
     loadData()
     showToast?.(t('Booking deleted'))
+  }
+
+  if (killSwitch) {
+    return (
+      <div className="panel-page el-page">
+        <div className="panel-header">
+          <button className="icon-btn header-menu" onClick={onMenu}><MenuIcon /></button>
+          <h2>{t('Event List')}</h2>
+        </div>
+        <div className="el-empty">{t('No data available')}</div>
+      </div>
+    )
   }
 
   return (

@@ -54,7 +54,7 @@ function stars(n) {
   return '\u2605'.repeat(n) + '\u2606'.repeat(5 - n)
 }
 
-export default function Reviews({ currentUser, showToast, onMenu }) {
+export default function Reviews({ currentUser, showToast, onMenu, killSwitch }) {
   const { t } = useLanguage()
   const [events, setEvents] = useState([])
   const [reviewMap, setReviewMap] = useState({})
@@ -243,6 +243,18 @@ export default function Reviews({ currentUser, showToast, onMenu }) {
   }
 
   const toggleExpand = (id) => setExpandedId((prev) => prev === id ? null : id)
+
+  if (killSwitch) {
+    return (
+      <div className="panel-page rv-page">
+        <div className="panel-header">
+          <button className="icon-btn header-menu" onClick={onMenu}><MenuIcon /></button>
+          <h2>{t('Reviews')}</h2>
+        </div>
+        <div className="el-empty">{t('No data available')}</div>
+      </div>
+    )
+  }
 
   return (
     <div className="panel-page rv-page">
