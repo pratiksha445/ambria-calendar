@@ -70,6 +70,7 @@ export default function App() {
   const [allEvents, setAllEvents] = useState([])
   const [activeFilters, setActiveFilters] = useState(() => new Set(VENUES.map((v) => v.id)))
   const [activeSources, setActiveSources] = useState(() => new Set(ALL_SOURCES))
+  const [sectionFilter, setSectionFilter] = useState(null) // null | 'decor_pending' | 'ent_pending' | 'all_filled'
   const [venueKey, setVenueKey] = useState(0)
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(false)
@@ -231,9 +232,20 @@ export default function App() {
   const filteredEvents = useMemo(() => {
     const q = search.trim().toLowerCase()
     const words = q ? q.split(/\s+/).filter(Boolean) : []
+    const ownSet = new Set(['ap', 'am', 'ae', 'ar'])
     return allEvents.filter((ev) => {
       if (!activeFilters.has(ev.venue_id)) return false
       if (!activeSources.has(ev.source)) return false
+      // Section status filter (only applies to own-venue events)
+      if (sectionFilter && ownSet.has(ev.venue_id)) {
+        const dFilled = ev.decor_status != null && ev.decor_status !== ''
+        const eFilled = ev.entertainment_status != null && ev.entertainment_status !== ''
+        if (sectionFilter === 'decor_pending' && dFilled) return false
+        if (sectionFilter === 'ent_pending' && eFilled) return false
+        if (sectionFilter === 'all_filled' && (!dFilled || !eFilled)) return false
+      }
+      // Section filter hides non-own-venue events when active (only show AP/AM/AE/AR)
+      if (sectionFilter && !ownSet.has(ev.venue_id)) return false
       if (!words.length) return true
       const hay = [
         ev.guest_name, ev.tender_name, ev.title, ev.venue_name,
@@ -243,7 +255,7 @@ export default function App() {
       ].filter(Boolean).join(' ').toLowerCase()
       return words.every((w) => hay.includes(w))
     })
-  }, [allEvents, activeFilters, activeSources, search, eventTypeAbbrByName])
+  }, [allEvents, activeFilters, activeSources, search, eventTypeAbbrByName, sectionFilter])
 
   // ── Kill Switch: hide all event data without touching the DB ──
   const visibleEvents = killSwitch ? [] : filteredEvents
@@ -497,6 +509,8 @@ export default function App() {
         onSelectNoVenues={selectNoVenues}
         activeSources={activeSources}
         onToggleSource={toggleSource}
+        sectionFilter={sectionFilter}
+        onSectionFilter={setSectionFilter}
         events={visibleMonthEvents}
         totalCount={visibleMonthEvents.length}
         shownCount={filteredMonthCount}

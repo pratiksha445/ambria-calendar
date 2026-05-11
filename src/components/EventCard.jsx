@@ -10,6 +10,8 @@ import { isPastPaymentEvent, isPaymentComplete } from '../lib/payments.js'
 
 const OWN_VENUES = new Set(['ap', 'am', 'ae', 'ar'])
 
+function isSectionFilled(val) { return val != null && val !== '' }
+
 function getSortedSlots(event) {
   if (!Array.isArray(event.event_slots) || event.event_slots.length <= 1) return null
   return [...event.event_slots].sort((a, b) => {
@@ -154,6 +156,32 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
                 )}
               </div>
             </div>
+            {isOwnVenue && (
+              <div className="section-status-icons">
+                <span
+                  className={`section-icon ${isSectionFilled(event.decor_status) ? 'section-filled' : 'section-pending'}`}
+                  title={isSectionFilled(event.decor_status) ? t('Decor filled') : t('Decor pending')}
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 21a9 9 0 0 1 0 -18c4.97 0 9 3.582 9 8c0 1.06 -.474 2.078 -1.318 2.828a4.001 4.001 0 0 1 -2.682 1.172h-2.5a2 2 0 0 0 -1 3.75a1.3 1.3 0 0 1 -1 2.25" />
+                    <circle cx="8.5" cy="10.5" r="1" fill="currentColor" stroke="none" />
+                    <circle cx="12.5" cy="7.5" r="1" fill="currentColor" stroke="none" />
+                    <circle cx="16.5" cy="10.5" r="1" fill="currentColor" stroke="none" />
+                  </svg>
+                </span>
+                <span
+                  className={`section-icon ${isSectionFilled(event.entertainment_status) ? 'section-filled' : 'section-pending'}`}
+                  title={isSectionFilled(event.entertainment_status) ? t('Entertainment filled') : t('Entertainment pending')}
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="6" cy="17" r="3" />
+                    <circle cx="16" cy="17" r="3" />
+                    <polyline points="9 17 9 4 19 4 19 17" />
+                    <line x1="9" y1="8" x2="19" y2="8" />
+                  </svg>
+                </span>
+              </div>
+            )}
           </button>
           {onDelete && canModify && user?.role === 'admin' && (
             <button

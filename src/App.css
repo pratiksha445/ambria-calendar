@@ -4458,6 +4458,95 @@ input, select, textarea {
   letter-spacing: 0.03em;
 }
 
+/* ---------- Pill section-status dots (Decor / Entertainment) ---------- */
+
+.pill-section-dots {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  display: flex;
+  gap: 1px;
+  pointer-events: none;
+}
+.pill-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  border: 1px solid var(--ambria-bg, #fff);
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+.dot-red  { background: #E24B4A; }
+.dot-green { background: #5DCAA5; }
+
+/* ---------- Event-card section-status icons (Decor / Entertainment) ---------- */
+
+.section-status-icons {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex-shrink: 0;
+  margin-left: 4px;
+  margin-right: 2px;
+}
+.section-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.section-icon svg {
+  flex-shrink: 0;
+}
+.section-pending {
+  background: rgba(226, 75, 74, 0.15);
+  color: #E24B4A;
+}
+.section-filled {
+  background: rgba(93, 202, 165, 0.15);
+  color: #5DCAA5;
+}
+
+/* ---------- Sidebar section-status filter chips ---------- */
+
+.section-filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 4px 16px 8px;
+}
+.section-chip {
+  appearance: none;
+  border: 1.5px solid var(--ambria-border);
+  border-radius: 20px;
+  background: transparent;
+  padding: 5px 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--ambria-muted);
+  transition: background 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+.section-chip:hover {
+  background: var(--ambria-hover);
+}
+.section-chip-red.active {
+  background: rgba(226, 75, 74, 0.12);
+  border-color: #E24B4A;
+  color: #E24B4A;
+}
+.section-chip-green.active {
+  background: rgba(93, 202, 165, 0.12);
+  border-color: #5DCAA5;
+  color: #5DCAA5;
+}
+
 /* ---------- Cancelled / Postponed event card styles ---------- */
 
 .event-card.cancelled .event-card-primary {
