@@ -10,7 +10,7 @@ const OWN_VENUES = new Set(['ap', 'am', 'ae', 'ar'])
 
 function isSectionFilled(val) { return val != null && val !== '' }
 
-/** Returns CSS class for the pill's section-status bottom border (mobile) + dot container (desktop) */
+/** Returns CSS class for the pill's section-status bottom border */
 function getSectionClass(ev) {
   if (!OWN_VENUES.has(ev.venue_id)) return ''
   const dFilled = isSectionFilled(ev.decor_status)
@@ -18,20 +18,6 @@ function getSectionClass(ev) {
   if (dFilled && eFilled) return ''
   if (!dFilled && !eFilled) return ' pill-sec-red'
   return ' pill-sec-amber'
-}
-
-/** Desktop-only corner dots (hidden on mobile via CSS) */
-function SectionDots({ event }) {
-  if (!OWN_VENUES.has(event.venue_id)) return null
-  const decorFilled = isSectionFilled(event.decor_status)
-  const entFilled = isSectionFilled(event.entertainment_status)
-  if (decorFilled && entFilled) return null
-  return (
-    <span className="pill-section-dots">
-      <span className={`pill-dot ${decorFilled ? 'dot-green' : 'dot-red'}`} />
-      <span className={`pill-dot ${entFilled ? 'dot-green' : 'dot-red'}`} />
-    </span>
-  )
 }
 
 export default function MonthView({ currentDate, selectedDate, onSelectDate, onEventClick, events, eventTypes = [], skeleton = false }) {
@@ -136,12 +122,10 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, onE
                       style={{
                         background: aeStyle?.background ?? venue?.color ?? '#ccc',
                         color: aeStyle?.color ?? venue?.textColor ?? '#fff',
-                        position: 'relative',
                       }}
                       title={buildPillTooltip(ev, eventTypes)}
                     >
                       {buildPillLabel(ev, eventTypes)}{ev.status === 'Postponed' && <span className="pill-pp">PP</span>}
-                      <SectionDots event={ev} />
                     </div>
                   )
                 })}
