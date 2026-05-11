@@ -10,11 +10,21 @@ const OWN_VENUES = new Set(['ap', 'am', 'ae', 'ar'])
 
 function isSectionFilled(val) { return val != null && val !== '' }
 
+/** Returns CSS class for the pill's section-status bottom border (mobile) + dot container (desktop) */
+function getSectionClass(ev) {
+  if (!OWN_VENUES.has(ev.venue_id)) return ''
+  const dFilled = isSectionFilled(ev.decor_status)
+  const eFilled = isSectionFilled(ev.entertainment_status)
+  if (dFilled && eFilled) return ''
+  if (!dFilled && !eFilled) return ' pill-sec-red'
+  return ' pill-sec-amber'
+}
+
+/** Desktop-only corner dots (hidden on mobile via CSS) */
 function SectionDots({ event }) {
   if (!OWN_VENUES.has(event.venue_id)) return null
   const decorFilled = isSectionFilled(event.decor_status)
   const entFilled = isSectionFilled(event.entertainment_status)
-  // Hide dots when both sections are filled
   if (decorFilled && entFilled) return null
   return (
     <span className="pill-section-dots">
@@ -118,10 +128,11 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, onE
                   const venue = VENUE_BY_ID[ev.venue_id]
                   const aeStyle = getSubVenueStyle(ev)
                   const statusClass = ev.status === 'Cancelled' ? ' pill-cancelled' : ev.status === 'Postponed' ? ' pill-postponed' : ''
+                  const secClass = getSectionClass(ev)
                   return (
                     <div
                       key={`${ev.id}-${ev.updated_at}`}
-                      className={`day-pill${statusClass}`}
+                      className={`day-pill${statusClass}${secClass}`}
                       style={{
                         background: aeStyle?.background ?? venue?.color ?? '#ccc',
                         color: aeStyle?.color ?? venue?.textColor ?? '#fff',
