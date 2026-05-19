@@ -25,6 +25,14 @@ const DH_SCOPE = {
   'Catering Sales':      { ownVenueSection: null,            standalone: new Set(['ac']) },
 }
 
+// GM department → venue IDs they can delete
+const GM_DELETE_SCOPE = {
+  'Venue Sales':         new Set(['ap', 'am', 'ae', 'ar', 'villa']),
+  'Decor Sales':         new Set(['add']),
+  'Catering Sales':      new Set(['ac']),
+  'Entertainment Sales': new Set(['aee']),
+}
+
 function isDH(user) {
   return user?.role === 'division_head'
 }
@@ -82,6 +90,24 @@ export function canAccessBooking(user, event) {
   // Standalone categories: staff can edit if assigned as sales_person
   if (matchesAssigned(user, event.sales_person_id, event.sales_person)) return true
 
+  return false
+}
+
+/**
+ * Returns true if the user is allowed to delete a booking.
+ * - Admin: any booking
+ * - Creator: their own booking (created_by matches user.id)
+ * - GM: department-scoped (same categories as their edit scope)
+ *       GM cannot delete tender/ws unless they are the creator
+ */
+export function canDeleteBooking(user, event) {
+  if (!user || !event) return false
+  if (user.role === 'admin') return true
+  if (event.created_by != null && user.id === event.created_by) return true
+  if (user.role === 'gm') {
+    const scope = GM_DELETE_SCOPE[user.department]
+    if (scope?.has(event.venue_id)) return true
+  }
   return false
 }
 

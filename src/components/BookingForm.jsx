@@ -11,7 +11,7 @@ import { createEvent, updateEvent, deleteEvent } from '../lib/events.js'
 import { fetchFilteredUsers } from '../lib/users.js'
 import { getElementLabel } from '../lib/elements.js'
 import { useDirectory } from '../contexts/DirectoryContext.jsx'
-import { getEditableSections, getLockedFieldKeys } from '../lib/sectionPermissions.js'
+import { getEditableSections, getLockedFieldKeys, canDeleteBooking } from '../lib/sectionPermissions.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 import Field from './Field.jsx'
 
@@ -832,7 +832,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
 
       <div className="form-footer">
         {submitError && <div className="form-error-banner">{t(submitError)}</div>}
-        {editing && !readOnly && user?.role === 'admin' && (
+        {editing && !readOnly && canDeleteBooking(user, initial) && (
           confirmDelete ? (
             <div className="confirm-delete">
               <span>{t('Delete this booking?')}</span>

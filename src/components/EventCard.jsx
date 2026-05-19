@@ -2,7 +2,7 @@ import { memo, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { VENUE_BY_ID, SHIFT_BADGE, getSubVenueStyle } from '../config/venues.js'
 import { formatTime12 } from '../lib/dates.js'
-import { canAccessBooking } from '../lib/sectionPermissions.js'
+import { canAccessBooking, canDeleteBooking } from '../lib/sectionPermissions.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 import { loadElementLabels, getElementLabel } from '../lib/elements.js'
 import { isReviewable, isPastEvent, getQuickRating } from '../lib/reviews.js'
@@ -183,7 +183,7 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
               </div>
             )}
           </button>
-          {onDelete && canModify && user?.role === 'admin' && (
+          {onDelete && canDeleteBooking(user, event) && !past && (
             <button
               type="button"
               className="card-trash-btn"
