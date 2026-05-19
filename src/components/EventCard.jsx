@@ -384,6 +384,9 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
           {event.rooms != null && event.rooms !== '' && (
             <div className="detail-row"><span className="k">{t('Rooms')}</span><span className="v">{event.rooms}</span></div>
           )}
+          {isOwnVenue && event.complimentary_plates != null && event.complimentary_plates !== '' && event.complimentary_plates !== 0 && (
+            <div className="detail-row"><span className="k">{t('Comp. Plates')}</span><span className="v">{event.complimentary_plates}</span></div>
+          )}
           {isOwnVenue && (
             <div className="detail-row"><span className="k">{t('Liquor')}</span><span className="v">{event.liquor ? t('Yes') : t('No')}</span></div>
           )}
@@ -424,6 +427,9 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
           )}
           {event.guest_category && (
             <div className="detail-row"><span className="k">{t('Guest Category')}</span><span className="v">{t(event.guest_category)}</span></div>
+          )}
+          {event.reference_guest && (
+            <div className="detail-row"><span className="k">{t('Reference Guest')}</span><span className="v">{event.reference_guest}</span></div>
           )}
           {isOwnVenue && event.status && (
             <div className="detail-row"><span className="k">{t('Status')}</span><span className="v"><span className={`status-badge status-${event.status.toLowerCase()}`}>{t(event.status)}</span></span></div>

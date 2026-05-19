@@ -232,7 +232,7 @@ export default function EventList({ currentUser, showToast, onMenu, killSwitch }
   const downloadExcel = () => {
     const headers = [
       '#', 'Date', 'End Date', 'Category', 'Sub-Venue', 'Guest Name', 'Phone',
-      'Event Type', 'Shift', 'Pax', 'Venue Name', 'Sales Person', 'Guest Category',
+      'Event Type', 'Shift', 'Pax', 'Comp. Plates', 'Venue Name', 'Sales Person', 'Guest Category', 'Reference Guest',
       'Status', 'Payment Status', 'Pending Payment', 'Review Status', 'Overall Rating', 'Notes',
     ]
 
@@ -247,9 +247,11 @@ export default function EventList({ currentUser, showToast, onMenu, killSwitch }
       getEventType(ev),
       getShift(ev),
       getPax(ev),
+      ev.complimentary_plates ?? '',
       getVenueName(ev),
       ev.sales_person || '',
       ev.guest_category || '',
+      ev.reference_guest || '',
       ev.status || '',
       ev.payment_timing || '',
       getPayment(ev),
@@ -450,9 +452,11 @@ export default function EventList({ currentUser, showToast, onMenu, killSwitch }
                 <th>{t('Event Type')}</th>
                 <th>{t('Shift')}</th>
                 <th>{t('Pax')}</th>
+                <th>{t('Comp. Plates')}</th>
                 <th>{t('Venue Name')}</th>
                 <th>{t('Sales Person')}</th>
                 <th>{t('Guest Category')}</th>
+                <th>{t('Reference Guest')}</th>
                 <th>{t('Status')}</th>
                 <th>{t('Payment Status')}</th>
                 <th>{t('Pending Payment')}</th>
@@ -492,9 +496,11 @@ export default function EventList({ currentUser, showToast, onMenu, killSwitch }
                     <td>{getEventType(ev)}</td>
                     <td>{getShift(ev)}</td>
                     <td>{getPax(ev)}</td>
+                    <td>{ev.complimentary_plates ?? ''}</td>
                     <td>{getVenueName(ev)}</td>
                     <td>{ev.sales_person || ''}</td>
                     <td>{ev.guest_category || ''}</td>
+                    <td>{ev.reference_guest || ''}</td>
                     <td>
                       <span className="el-status-badge" style={{ background: STATUS_COLORS[ev.status] || '#999' }}>
                         {t(ev.status || '')}

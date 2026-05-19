@@ -7,7 +7,7 @@ import { COUNTRY_CODES } from '../config/formFields.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 import SearchableSelect from './SearchableSelect.jsx'
 
-export default function Field({ field, form, value, onChange, error, readOnly, activeUsers }) {
+export default function Field({ field, form, value, onChange, error, readOnly, activeUsers, guestNames }) {
   const { t } = useLanguage()
   const [filterErr, setFilterErr] = useState(null)
   const timerRef = useRef(null)
@@ -238,6 +238,38 @@ export default function Field({ field, form, value, onChange, error, readOnly, a
         <datalist id={listId}>
           {hasStored && <option key="__stored" value={currentVal} />}
           {userNames.map((name) => (
+            <option key={name} value={name} />
+          ))}
+        </datalist>
+      </div>
+    )
+  } else if (field.type === 'guest-select') {
+    const listId = `guestlist-${field.key}`
+    const names = guestNames || []
+    const currentVal = commonProps.value || ''
+    const handleClear = (e) => { e.preventDefault(); e.stopPropagation(); onChange(field.key, '') }
+    control = (
+      <div className="user-select-wrap">
+        <input
+          type="text"
+          {...commonProps}
+          className="user-select-input"
+          list={listId}
+          autoComplete="off"
+          placeholder={field.placeholder ? t(field.placeholder) : t('Search guests…')}
+        />
+        <div className="user-select-icons">
+          {currentVal && !disabled && (
+            <button type="button" className="field-clear-btn" onMouseDown={handleClear} aria-label="Clear" tabIndex={-1}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          )}
+          <span className="user-select-chevron" aria-hidden="true">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </span>
+        </div>
+        <datalist id={listId}>
+          {names.map((name) => (
             <option key={name} value={name} />
           ))}
         </datalist>

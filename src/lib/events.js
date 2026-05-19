@@ -213,3 +213,18 @@ export async function deleteEvent(id, user) {
 
   return event
 }
+
+/**
+ * Fetch distinct guest names for autocomplete.
+ */
+export async function fetchDistinctGuestNames() {
+  const { data, error } = await supabase
+    .from('events')
+    .select('guest_name')
+    .is('deleted_at', null)
+    .not('guest_name', 'is', null)
+    .neq('guest_name', '')
+  if (error) throw error
+  const unique = [...new Set((data || []).map((r) => r.guest_name))].sort()
+  return unique
+}

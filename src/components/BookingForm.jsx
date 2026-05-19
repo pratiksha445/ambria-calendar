@@ -7,7 +7,7 @@ import {
 } from '../config/formFields.js'
 import { autoTitle } from '../lib/autoTitle.js'
 import { sanitizeText, sanitizePhone, sanitizePax } from '../lib/sanitize.js'
-import { createEvent, updateEvent, deleteEvent } from '../lib/events.js'
+import { createEvent, updateEvent, deleteEvent, fetchDistinctGuestNames } from '../lib/events.js'
 import { fetchFilteredUsers } from '../lib/users.js'
 import { getElementLabel } from '../lib/elements.js'
 import { useDirectory } from '../contexts/DirectoryContext.jsx'
@@ -106,6 +106,12 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
     [dirElements, lang],
   )
   const activeUsers = dirUsers
+
+  // Guest name autocomplete for Reference Guest field
+  const [guestNames, setGuestNames] = useState([])
+  useEffect(() => {
+    fetchDistinctGuestNames().then(setGuestNames).catch(() => {})
+  }, [])
 
   // Section-level edit permissions (AP/AM/AE/AR only, editing only)
   const editableSections = useMemo(
@@ -376,7 +382,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
         } else {
           payload[key] = null
         }
-      } else if (key === 'pax' || key === 'rooms') {
+      } else if (key === 'pax' || key === 'rooms' || key === 'complimentary_plates') {
         payload[key] = sanitizePax(raw)
       } else if (fieldDef && (fieldDef.type === 'date' || fieldDef.type === 'time' || fieldDef.type === 'select' || fieldDef.type === 'searchable-select')) {
         payload[key] = raw || null
@@ -803,6 +809,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
                           error={errors[f.key]}
                           readOnly={sectionReadOnly}
                           activeUsers={getUsersForField(f)}
+                          guestNames={guestNames}
                         />
                       ))}
                     </div>
@@ -818,6 +825,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
                     error={errors[field.key]}
                     readOnly={sectionReadOnly}
                     activeUsers={getUsersForField(field)}
+                    guestNames={guestNames}
                   />
                 )
               })}
