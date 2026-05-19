@@ -34,7 +34,7 @@ export const DECOR_TYPES = ['Silver', 'Gold', 'Premium']
 export const DECOR_STATUSES = ['Open', 'Meeting', 'Closure', 'Outdoor']
 export const ENTERTAINMENT_STATUSES = ['Open', 'Meeting', 'Closure', 'Outdoor']
 export const FUNCTION_CATEGORIES = ['Silver', 'Gold', 'Platinum']
-export const GUEST_CATEGORIES = ['Multi-Event Client', 'Repeat Client', 'Premium Client', 'Standard Client']
+export const GUEST_CATEGORIES = ['Multi-Event Client', 'Repeat Client', 'Premium Client', 'Standard Client', 'Reference Client']
 export const PAYMENT_TIMINGS = ['Before Event', 'On the Day', 'After Event']
 // Hardcoded fallback — used only when DB fetch fails
 export const ELEMENT_OPTIONS_FALLBACK = [
