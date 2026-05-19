@@ -262,14 +262,13 @@ function ownVenueSections(venue, dynamicTypes, dynamicElements) {
         // Row 9: Guest Name | Guest Phone
         guestName(),
         phoneReq(),
-        // Row 10: Pax + Comp. Plates | Guest Category
-        { type: 'group', key: 'pax_comp_group', columns: 2, fields: [
-          paxField(),
-          T('Comp. Plates', 'complimentary_plates', false, {
-            filterFn: paxFilter, filterError: 'Only numbers allowed', inputMode: 'numeric',
-            placeholder: '0',
-          }),
-        ]},
+        // Row 10: Pax | Comp. Plates
+        paxField(),
+        T('Comp. Plates', 'complimentary_plates', false, {
+          filterFn: paxFilter, filterError: 'Only numbers allowed', inputMode: 'numeric',
+          placeholder: '0',
+        }),
+        // Row 11: Guest Category
         S('Guest Category', 'guest_category', GUEST_CATEGORIES, true),
         { type: 'guest-select', label: 'Reference Guest', key: 'reference_guest', required: false },
         // Row 11: Sales Person
