@@ -848,9 +848,15 @@ export function getAllFields(venueId, dynamicTypes, dynamicElements) {
   )
 }
 
+// Fields required even when status is Tentative (category is enforced separately).
+const TENTATIVE_REQUIRED_KEYS = new Set(['sales_person', 'date', 'check_in_date'])
+
 // Returns true if the given field is effectively required in the current
-// form state (handles disabledWhen, showWhen, and requiredWhen).
+// form state (handles disabledWhen, showWhen, requiredWhen, and tentative mode).
 export function isFieldRequired(field, form) {
+  // Tentative bookings only require category + date + sales person
+  if (form.status === 'Tentative' && !TENTATIVE_REQUIRED_KEYS.has(field.key)) return false
+
   const req = field.requiredWhen ? field.requiredWhen(form) : field.required
   if (!req) return false
   if (field.disabledWhen && field.disabledWhen(form)) return false

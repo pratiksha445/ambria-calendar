@@ -279,17 +279,20 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
       }
     }
 
-    // Slot-level validation for ADD/AC/AEE
-    const slotFieldDefs = SLOT_CATEGORIES.has(venueId) ? getSlotFields(venueId, dynamicEventTypes, dynamicElements) : []
-    for (let si = 0; si < eventSlots.length; si++) {
-      const slot = eventSlots[si]
-      for (const field of slotFieldDefs) {
-        if (field.showWhen && !field.showWhen(slot)) continue
-        if (field.disabledWhen && field.disabledWhen(slot)) continue
-        const v = slot[field.key]
-        const isEmpty = Array.isArray(v) ? v.length === 0 : (v === undefined || v === null || v === '')
-        if (isFieldRequired(field, slot) && isEmpty) {
-          nextErrors[`slot_${si}_${field.key}`] = 'Required'
+    // Slot-level validation for ADD/AC/AEE — skip entirely for Tentative bookings
+    const isTentative = form.status === 'Tentative'
+    if (!isTentative) {
+      const slotFieldDefs = SLOT_CATEGORIES.has(venueId) ? getSlotFields(venueId, dynamicEventTypes, dynamicElements) : []
+      for (let si = 0; si < eventSlots.length; si++) {
+        const slot = eventSlots[si]
+        for (const field of slotFieldDefs) {
+          if (field.showWhen && !field.showWhen(slot)) continue
+          if (field.disabledWhen && field.disabledWhen(slot)) continue
+          const v = slot[field.key]
+          const isEmpty = Array.isArray(v) ? v.length === 0 : (v === undefined || v === null || v === '')
+          if (isFieldRequired(field, slot) && isEmpty) {
+            nextErrors[`slot_${si}_${field.key}`] = 'Required'
+          }
         }
       }
     }
@@ -310,7 +313,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
     const errorKeys = Object.keys(nextErrors)
     if (errorKeys.length > 0) {
       // Build descriptive error listing the field labels
-      const slotAllFields = slotFieldDefs.length > 0 ? slotFieldDefs : []
+      const slotAllFields = SLOT_CATEGORIES.has(venueId) ? getSlotFields(venueId, dynamicEventTypes, dynamicElements) : []
       const labels = errorKeys.map((key) => {
         const slotMatch = key.match(/^slot_(\d+)_(.+)$/)
         if (slotMatch) {

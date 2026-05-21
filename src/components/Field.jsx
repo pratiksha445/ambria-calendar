@@ -3,7 +3,7 @@
 // Supports filterFn for live input validation (strips invalid chars + shows error).
 
 import { useEffect, useRef, useState } from 'react'
-import { COUNTRY_CODES } from '../config/formFields.js'
+import { COUNTRY_CODES, isFieldRequired } from '../config/formFields.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 import SearchableSelect from './SearchableSelect.jsx'
 
@@ -159,7 +159,7 @@ export default function Field({ field, form, value, onChange, error, readOnly, a
       <div className={`field field-multiselect ${displayError ? 'has-error' : ''} ${disabled ? 'is-disabled' : ''}`}>
         <label className="field-label">
           {t(field.label)}
-          {(field.required || (field.requiredWhen && field.requiredWhen(form))) && !disabled && <span className="required-star"> *</span>}
+          {isFieldRequired(field, form) && !disabled && <span className="required-star"> *</span>}
         </label>
         {field.helperText && (() => {
           const ht = typeof field.helperText === 'function' ? field.helperText(form) : field.helperText
@@ -386,7 +386,7 @@ export default function Field({ field, form, value, onChange, error, readOnly, a
     <div className={`field ${displayError ? 'has-error' : ''} ${disabled ? 'is-disabled' : ''} ${field.fullWidth ? 'field-full-width' : ''}`}>
       <label htmlFor={id} className="field-label">
         {t(field.label)}
-        {(field.required || (field.requiredWhen && field.requiredWhen(form))) && !disabled && <span className="required-star"> *</span>}
+        {isFieldRequired(field, form) && !disabled && <span className="required-star"> *</span>}
       </label>
       {field.helperText && (() => {
         const ht = typeof field.helperText === 'function' ? field.helperText(form) : field.helperText
