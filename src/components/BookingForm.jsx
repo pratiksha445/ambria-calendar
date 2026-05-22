@@ -297,6 +297,14 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
       }
     }
 
+    // Setup / clearance date validation (AP/AM/AE/AR only)
+    if (form.setup_date && form.date && form.setup_date > form.date) {
+      nextErrors.setup_date = 'Must be on or before event date'
+    }
+    if (form.clearance_date && form.date && form.clearance_date < form.date) {
+      nextErrors.clearance_date = 'Must be on or after event date'
+    }
+
     // Past-date validation
     const primaryDateKey = venueId === 'villa' ? 'check_in_date' : 'date'
     const dateVal = form[primaryDateKey]

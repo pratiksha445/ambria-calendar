@@ -26,6 +26,9 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, onE
   const days = buildMonthGrid(currentDate)
   const monthIndex = currentDate.getMonth()
   const eventsByDay = useMemo(() => groupByDate(events), [events])
+
+  // Setup / clearance pills: map isoDate → [{ event, type: 'setup'|'clearance' }]
+  const scMap = useMemo(() => buildSetupClearanceMap(events), [events])
   const wide = window.innerWidth >= 768
 
   // Multi-day spans (Villa + TND): isoDate → [{ event, isStart, isEnd }]
@@ -52,13 +55,17 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, onE
             : allDayEvents
           const spanSegs = spanMap[iso] ?? []
 
+          const scSegs = scMap[iso] ?? []
+
           const limit = wide ? MAX_PILLS_DESKTOP : MAX_PILLS
-          // Spans take priority slots, then regular pills fill remaining
+          // Spans take priority slots, then regular pills, then setup/clearance pills
           const spanCount = Math.min(spanSegs.length, limit)
           const regularLimit = Math.max(0, limit - spanCount)
           const visibleRegular = regularEvents.slice(0, regularLimit)
-          const totalOnDay = spanSegs.length + regularEvents.length
-          const visibleTotal = spanCount + visibleRegular.length
+          const scLimit = Math.max(0, limit - spanCount - visibleRegular.length)
+          const visibleSc = scSegs.slice(0, scLimit)
+          const totalOnDay = spanSegs.length + regularEvents.length + scSegs.length
+          const visibleTotal = spanCount + visibleRegular.length + visibleSc.length
           const extra = totalOnDay - visibleTotal
 
           const isToday = isSameDay(d, today)
@@ -126,6 +133,26 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, onE
                       title={buildPillTooltip(ev, eventTypes)}
                     >
                       {buildPillLabel(ev, eventTypes)}{ev.status === 'Postponed' && <span className="pill-pp">PP</span>}
+                    </div>
+                  )
+                })}
+                {/* Setup / clearance pills */}
+                {visibleSc.map((seg) => {
+                  const venue = VENUE_BY_ID[seg.event.venue_id]
+                  const label = seg.type === 'setup'
+                    ? `S: ${(seg.event.guest_name || '').split(' ')[0] || 'Setup'}`
+                    : `C: ${(seg.event.guest_name || '').split(' ')[0] || 'Clear'}`
+                  return (
+                    <div
+                      key={`sc-${seg.type}-${seg.event.id}`}
+                      className="day-pill pill-setup-clearance"
+                      style={{
+                        background: venue?.color ?? '#ccc',
+                        color: venue?.textColor ?? '#fff',
+                      }}
+                      title={`${seg.type === 'setup' ? 'Setup' : 'Clearance'} for ${seg.event.guest_name || 'event'} on ${seg.event.date}`}
+                    >
+                      {label}
                     </div>
                   )
                 })}
@@ -215,6 +242,23 @@ function groupByDate(events) {
     (acc[ev.date] = acc[ev.date] || []).push(ev)
     return acc
   }, {})
+}
+
+/** Build map of isoDate → [{ event, type }] for setup/clearance pills */
+function buildSetupClearanceMap(events) {
+  const map = {}
+  for (const ev of events) {
+    if (!OWN_VENUES.has(ev.venue_id)) continue
+    if (ev.setup_date && ev.setup_date !== ev.date) {
+      if (!map[ev.setup_date]) map[ev.setup_date] = []
+      map[ev.setup_date].push({ event: ev, type: 'setup' })
+    }
+    if (ev.clearance_date && ev.clearance_date !== ev.date) {
+      if (!map[ev.clearance_date]) map[ev.clearance_date] = []
+      map[ev.clearance_date].push({ event: ev, type: 'clearance' })
+    }
+  }
+  return map
 }
 
 const SHIFT_INITIALS = { Morning: 'M', Lunch: 'L', Sundowner: 'S', Dinner: 'D' }

@@ -42,7 +42,7 @@ export async function fetchEvents(startDate, endDate) {
     .from('events')
     .select('*')
     .is('deleted_at', null)
-    .or(`and(date.gte.${startDate},date.lte.${endDate}),and(venue_id.eq.villa,check_in_date.lte.${endDate},check_out_date.gte.${startDate}),and(venue_id.eq.tender,date.lte.${endDate},end_date.gte.${startDate})`)
+    .or(`and(date.gte.${startDate},date.lte.${endDate}),and(venue_id.eq.villa,check_in_date.lte.${endDate},check_out_date.gte.${startDate}),and(venue_id.eq.tender,date.lte.${endDate},end_date.gte.${startDate}),and(setup_date.gte.${startDate},setup_date.lte.${endDate}),and(clearance_date.gte.${startDate},clearance_date.lte.${endDate})`)
     .order('date', { ascending: true })
     .order('time', { ascending: true, nullsFirst: true })
 

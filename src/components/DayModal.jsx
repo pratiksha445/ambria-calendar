@@ -50,18 +50,30 @@ export default function DayModal({ date, events, onClose, onAdd, onEdit, onDelet
   if (!date) return null
 
   const iso = toIsoDate(date)
-  const dayEvents = events.filter((e) => {
-    if (e.date === iso) return true
-    // Villa multi-day: include if this day falls within the stay
+  const OWN_VENUES = new Set(['ap', 'am', 'ae', 'ar'])
+  const dayEvents = []
+  for (const e of events) {
+    if (e.date === iso) { dayEvents.push(e); continue }
+    // Villa multi-day
     if (e.venue_id === 'villa' && e.check_in_date && e.check_out_date
         && e.check_out_date >= e.check_in_date
-        && iso >= e.check_in_date && iso < e.check_out_date) return true
-    // TND multi-day: include if this day falls within the date range
+        && iso >= e.check_in_date && iso < e.check_out_date) { dayEvents.push(e); continue }
+    // TND multi-day
     if (e.venue_id === 'tender' && e.date && e.end_date
         && e.end_date > e.date
-        && iso >= e.date && iso <= e.end_date) return true
-    return false
-  })
+        && iso >= e.date && iso <= e.end_date) { dayEvents.push(e); continue }
+    // Setup / clearance pills (own venues only)
+    if (OWN_VENUES.has(e.venue_id)) {
+      if (e.setup_date === iso && e.setup_date !== e.date) {
+        dayEvents.push({ ...e, _scType: 'setup' })
+        continue
+      }
+      if (e.clearance_date === iso && e.clearance_date !== e.date) {
+        dayEvents.push({ ...e, _scType: 'clearance' })
+        continue
+      }
+    }
+  }
 
   // Apply modal-local filters
   const filtered = dayEvents.filter((ev) => {

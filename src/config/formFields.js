@@ -238,6 +238,15 @@ function ownVenueSections(venue, dynamicTypes, dynamicElements) {
         // Row 3: Date | Shift
         D('Date', 'date'),
         S('Shift', 'shift', SHIFTS),
+        // Row 3.5: Setup Date | Clearance Date
+        D('Setup Date', 'setup_date', false, {
+          max: (f) => f.date || undefined,
+          placeholder: 'Day before event',
+        }),
+        D('Clearance Date', 'clearance_date', false, {
+          min: (f) => f.date || undefined,
+          placeholder: 'Day after event',
+        }),
         // Row 4: Baraat Time | Function Start Time
         TM('Baraat Time', 'baraat_time', false),
         TM('Function Start Time', 'time'),
@@ -686,7 +695,7 @@ function wsSections(_venue, dynamicTypes) {
 // ---------- Field parity: valid keys per category ----------
 
 const VENUE_FIELD_KEYS = [
-  'sub_venue', 'event_type', 'event_type_other', 'shift', 'date', 'time',
+  'sub_venue', 'event_type', 'event_type_other', 'shift', 'date', 'setup_date', 'clearance_date', 'time',
   'decor_time', 'chaat_time', 'baraat_time', 'wind_up_time', 'wind_up_next_day', 'varmala_time', 'pheras_time', 'pheras_next_day',
   'booking_status', 'menu_type', 'menu_cat', 'fp_status', 'rooms', 'liquor',
   'decor_status', 'entertainment_status', 'function_category', 'elements',
@@ -762,7 +771,7 @@ export const FIELD_MAP = {
 
 // Union of every saveable field key — used to null-out irrelevant columns.
 export const ALL_SAVEABLE_KEYS = [
-  'sub_venue', 'event_type', 'event_type_other', 'shift', 'date', 'time',
+  'sub_venue', 'event_type', 'event_type_other', 'shift', 'date', 'setup_date', 'clearance_date', 'time',
   'decor_time', 'chaat_time', 'baraat_time', 'wind_up_time', 'wind_up_next_day', 'varmala_time', 'pheras_time', 'pheras_next_day',
   'booking_status', 'menu_type', 'menu_cat', 'fp_status', 'rooms', 'liquor',
   'decor_status', 'entertainment_status', 'function_category', 'elements',

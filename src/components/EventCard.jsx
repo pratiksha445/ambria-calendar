@@ -24,6 +24,65 @@ function getSortedSlots(event) {
 
 export default memo(function EventCard({ event, expanded = false, onToggle, onEdit, onDelete, user, reviewMap, onReview, onPayment }) {
   const { t, lang, formatShortDate } = useLanguage()
+  const scType = event._scType // 'setup' | 'clearance' | undefined
+
+  // Simplified setup/clearance card — no edit, no delete, just info
+  if (scType) {
+    const scVenue = VENUE_BY_ID[event.venue_id]
+    const scLabel = scType === 'setup' ? 'SETUP' : 'CLEARANCE'
+    const scPrimary = [
+      event.guest_name,
+      event.event_type === 'Other' ? event.event_type_other : event.event_type,
+      event.pax ? `${event.pax}pax` : null,
+      event.shift?.[0],
+      event.menu_cat,
+    ].filter(Boolean).join(' | ')
+    return (
+      <article
+        className={`event-card sc-card ${expanded ? 'expanded' : ''}`}
+        style={{ borderLeftColor: scVenue?.color ?? '#ccc' }}
+      >
+        <div className="event-card-compact">
+          <button type="button" className="event-card-row" onClick={onToggle} aria-expanded={expanded}>
+            <span
+              className="event-venue-badge sc-badge"
+              style={{ background: scVenue?.color ?? '#ccc', color: scVenue?.textColor ?? '#fff' }}
+            >
+              {scType === 'setup' ? 'S' : 'C'}
+            </span>
+            <div className="event-card-stack">
+              <span className="event-primary">
+                <span className="sc-label">{scLabel}</span> {scPrimary}
+              </span>
+              <div className="event-card-meta">
+                {event.sub_venue && <span className="event-sales">{t(event.sub_venue)}</span>}
+                {event.sales_person && <span className="event-sales">{event.sales_person}</span>}
+              </div>
+            </div>
+          </button>
+        </div>
+        <div className="event-card-details" aria-hidden={!expanded}>
+          <div className="event-card-details-inner">
+            <div className="detail-row">
+              <span className="k">{scType === 'setup' ? t('Setup for') : t('Clearance for')}</span>
+              <span className="v">{scPrimary}</span>
+            </div>
+            <div className="detail-row">
+              <span className="k">{t('Event Date')}</span>
+              <span className="v">{formatShortDate(event.date)}</span>
+            </div>
+            {event.sub_venue && (
+              <div className="detail-row"><span className="k">{t('Sub-venue')}</span><span className="v">{t(event.sub_venue)}</span></div>
+            )}
+            {event.booking_status && (
+              <div className="detail-row"><span className="k">{t('Package Type')}</span><span className="v">{t(event.booking_status)}</span></div>
+            )}
+          </div>
+        </div>
+      </article>
+    )
+  }
+
   const [elementLabels, setElementLabels] = useState({})
   const venue = VENUE_BY_ID[event.venue_id]
   const aeStyle = getSubVenueStyle(event)
@@ -436,6 +495,12 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
           )}
           {isOwnVenue && event.postponed_from_date && (
             <div className="detail-row"><span className="k">{t('Postponed From')}</span><span className="v">{formatShortDate(event.postponed_from_date)}</span></div>
+          )}
+          {isOwnVenue && event.setup_date && (
+            <div className="detail-row"><span className="k">{t('Setup Date')}</span><span className="v">{formatShortDate(event.setup_date)}</span></div>
+          )}
+          {isOwnVenue && event.clearance_date && (
+            <div className="detail-row"><span className="k">{t('Clearance Date')}</span><span className="v">{formatShortDate(event.clearance_date)}</span></div>
           )}
 
           {/* ── Decor section ── */}

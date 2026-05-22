@@ -103,7 +103,9 @@ export default function Field({ field, form, value, onChange, error, readOnly, a
       />
     )
   } else if (field.type === 'date') {
-    control = <input type="date" {...commonProps} min={field.min} />
+    const dateMin = typeof field.min === 'function' ? field.min(form) : field.min
+    const dateMax = typeof field.max === 'function' ? field.max(form) : field.max
+    control = <input type="date" {...commonProps} min={dateMin} max={dateMax} />
   } else if (field.type === 'time') {
     if (field.inlineCheckbox) {
       const cb = field.inlineCheckbox
