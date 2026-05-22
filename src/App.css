@@ -2115,6 +2115,15 @@
   background: var(--ambria-bg);
 }
 
+/* Smooth field entrance when switching status (e.g. Tentative ↔ Confirmed) */
+.form-body .form-section {
+  animation: sectionFadeIn 220ms ease;
+}
+@keyframes sectionFadeIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 .form-section + .form-section { margin-top: 14px; }
 .form-section + .form-section-prominent,
 .form-section-prominent + .form-section { margin-top: 20px; }

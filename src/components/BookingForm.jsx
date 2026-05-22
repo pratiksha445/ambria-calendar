@@ -17,6 +17,16 @@ import Field from './Field.jsx'
 
 const SLOT_CATEGORIES = new Set(['add', 'ac', 'aee'])
 const MAX_SLOTS = 5
+
+// Fields visible when Status = Tentative (everything else is hidden from DOM)
+const TENTATIVE_VISIBLE_KEYS = new Set([
+  'status',
+  'date', 'check_in_date',   // check_in_date for Villa
+  'sales_person',
+  'guest_name', 'tender_name', // tender_name for Tender category
+  'phone',
+  'notes',
+])
 const SLOT_KEYS = {
   add: ['event_type', 'event_type_other', 'shift', 'time', 'pax', 'decor_type', 'color_theme'],
   ac:  ['event_type', 'event_type_other', 'shift', 'time', 'pax', 'menu_type', 'menu_cat'],
@@ -125,6 +135,7 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
   }
 
   const sections = useMemo(() => getFormConfig(venueId, dynamicEventTypes, dynamicElements), [venueId, dynamicEventTypes, dynamicElements])
+  const isTentative = form.status === 'Tentative'
 
   // Fetch filtered user lists for fields with userFilter (e.g. AP/AM/AE/AR forms)
   const filterKeysStr = useMemo(() => {
@@ -280,7 +291,6 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
     }
 
     // Slot-level validation for ADD/AC/AEE — skip entirely for Tentative bookings
-    const isTentative = form.status === 'Tentative'
     if (!isTentative) {
       const slotFieldDefs = SLOT_CATEGORIES.has(venueId) ? getSlotFields(venueId, dynamicEventTypes, dynamicElements) : []
       for (let si = 0; si < eventSlots.length; si++) {
@@ -297,12 +307,14 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
       }
     }
 
-    // Setup / clearance date validation (AP/AM/AE/AR only)
-    if (form.setup_date && form.date && form.setup_date > form.date) {
-      nextErrors.setup_date = 'Must be on or before event date'
-    }
-    if (form.clearance_date && form.date && form.clearance_date < form.date) {
-      nextErrors.clearance_date = 'Must be on or after event date'
+    // Setup / clearance date validation (AP/AM/AE/AR only, skip when tentative — fields hidden)
+    if (!isTentative) {
+      if (form.setup_date && form.date && form.setup_date > form.date) {
+        nextErrors.setup_date = 'Must be on or before event date'
+      }
+      if (form.clearance_date && form.date && form.clearance_date < form.date) {
+        nextErrors.clearance_date = 'Must be on or after event date'
+      }
     }
 
     // Past-date validation
@@ -724,10 +736,24 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
         </div>
       </div>
 
-      <div className="form-body">
+      <div className={`form-body${isTentative ? ' form-body-tentative' : ''}`}>
         {sections.map((section, si) => {
           const sectionKey = section.title || `section-${si}`
-          const isCollapsible = !!section.collapsible
+
+          // ── Tentative mode: hide entire sections with no visible fields ──
+          if (isTentative) {
+            // Always hide event-slots sections
+            if (section.type === 'event-slots') return null
+            // Filter fields to only tentative-visible ones
+            const tentativeFields = section.fields.filter((f) =>
+              f.type === 'group'
+                ? f.fields.some((gf) => TENTATIVE_VISIBLE_KEYS.has(gf.key))
+                : TENTATIVE_VISIBLE_KEYS.has(f.key)
+            )
+            if (tentativeFields.length === 0) return null
+          }
+
+          const isCollapsible = !isTentative && !!section.collapsible
           const isCollapsed = isCollapsible && collapsedSections[sectionKey] !== false
           const toggleCollapse = () => setCollapsedSections((prev) => ({
             ...prev, [sectionKey]: prev[sectionKey] === false ? true : false,
@@ -780,6 +806,15 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
             )
           }
 
+          // Determine which fields to render
+          const sectionFields = isTentative
+            ? section.fields.filter((f) =>
+                f.type === 'group'
+                  ? f.fields.some((gf) => TENTATIVE_VISIBLE_KEYS.has(gf.key))
+                  : TENTATIVE_VISIBLE_KEYS.has(f.key)
+              )
+            : section.fields
+
           return (
           <div key={sectionKey} className={`form-section ${section.prominent ? 'form-section-prominent' : ''} ${sectionLocked ? 'form-section-locked' : ''}`}>
             {section.title && (
@@ -806,11 +841,16 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
               className={`form-grid ${isCollapsed ? 'form-grid-collapsed' : ''}`}
               onClick={sectionLocked ? showLockToast : undefined}
             >
-              {section.fields.map((field) => {
+              {sectionFields.map((field) => {
                 if (field.type === 'group') {
+                  // In tentative mode, filter group children too
+                  const groupFields = isTentative
+                    ? field.fields.filter((gf) => TENTATIVE_VISIBLE_KEYS.has(gf.key))
+                    : field.fields
+                  if (groupFields.length === 0) return null
                   return (
                     <div key={field.key} className={`field-group field-group-${field.columns || 2}`}>
-                      {field.fields.map((f) => (
+                      {groupFields.map((f) => (
                         <Field
                           key={f.key}
                           field={augmentField(f)}
