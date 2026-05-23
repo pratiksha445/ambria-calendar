@@ -238,8 +238,8 @@ function ownVenueSections(venue, dynamicTypes, dynamicElements) {
         // Row 3: Date | Shift
         D('Date', 'date'),
         S('Shift', 'shift', SHIFTS),
-        // Row 3.5: Setup Date | Clearance Date
-        D('Setup Date', 'setup_date', false, {
+        // Row 3.5: Dumping Date | Clearance Date
+        D('Dumping Date', 'setup_date', false, {
           max: (f) => f.date || undefined,
           placeholder: 'Day before event',
         }),

@@ -140,7 +140,7 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, onE
                 {visibleSc.map((seg) => {
                   const venue = VENUE_BY_ID[seg.event.venue_id]
                   const label = seg.type === 'setup'
-                    ? `S: ${(seg.event.guest_name || '').split(' ')[0] || 'Setup'}`
+                    ? `D: ${(seg.event.guest_name || '').split(' ')[0] || 'Dumping'}`
                     : `C: ${(seg.event.guest_name || '').split(' ')[0] || 'Clear'}`
                   return (
                     <div
@@ -150,7 +150,7 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, onE
                         background: venue?.color ?? '#ccc',
                         color: venue?.textColor ?? '#fff',
                       }}
-                      title={`${seg.type === 'setup' ? 'Setup' : 'Clearance'} for ${seg.event.guest_name || 'event'} on ${seg.event.date}`}
+                      title={`${seg.type === 'setup' ? 'Dumping' : 'Clearance'} for ${seg.event.guest_name || 'event'} on ${seg.event.date}`}
                     >
                       {label}
                     </div>

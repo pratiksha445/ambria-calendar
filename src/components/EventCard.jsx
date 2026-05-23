@@ -64,7 +64,7 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
         <div className="event-card-details" aria-hidden={!expanded}>
           <div className="event-card-details-inner">
             <div className="detail-row">
-              <span className="k">{scType === 'setup' ? t('Setup for') : t('Clearance for')}</span>
+              <span className="k">{scType === 'setup' ? t('Dumping for') : t('Clearance for')}</span>
               <span className="v">{scPrimary}</span>
             </div>
             <div className="detail-row">
@@ -497,7 +497,7 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
             <div className="detail-row"><span className="k">{t('Postponed From')}</span><span className="v">{formatShortDate(event.postponed_from_date)}</span></div>
           )}
           {isOwnVenue && event.setup_date && (
-            <div className="detail-row"><span className="k">{t('Setup Date')}</span><span className="v">{formatShortDate(event.setup_date)}</span></div>
+            <div className="detail-row"><span className="k">{t('Dumping Date')}</span><span className="v">{formatShortDate(event.setup_date)}</span></div>
           )}
           {isOwnVenue && event.clearance_date && (
             <div className="detail-row"><span className="k">{t('Clearance Date')}</span><span className="v">{formatShortDate(event.clearance_date)}</span></div>
