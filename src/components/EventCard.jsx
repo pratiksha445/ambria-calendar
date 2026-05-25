@@ -472,7 +472,7 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
                 <div className="payment-bar">
                   <div
                     className={`payment-bar-fill ${getPaymentColor(event.payment_remaining_venue)}`}
-                    style={{ width: `${event.payment_remaining_venue}%` }}
+                    style={{ width: `${100 - Number(event.payment_remaining_venue)}%` }}
                   />
                 </div>
               </div>
@@ -521,7 +521,7 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
                 <div className="payment-bar">
                   <div
                     className={`payment-bar-fill ${getPaymentColor(event.payment_remaining_decor)}`}
-                    style={{ width: `${event.payment_remaining_decor}%` }}
+                    style={{ width: `${100 - Number(event.payment_remaining_decor)}%` }}
                   />
                 </div>
               </div>
@@ -560,7 +560,7 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
                 <div className="payment-bar">
                   <div
                     className={`payment-bar-fill ${getPaymentColor(event.payment_remaining_ent)}`}
-                    style={{ width: `${event.payment_remaining_ent}%` }}
+                    style={{ width: `${100 - Number(event.payment_remaining_ent)}%` }}
                   />
                 </div>
               </div>
@@ -614,7 +614,7 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
                 <div className="payment-bar">
                   <div
                     className={`payment-bar-fill ${getPaymentColor(event.payment_remaining_venue)}`}
-                    style={{ width: `${event.payment_remaining_venue}%` }}
+                    style={{ width: `${100 - Number(event.payment_remaining_venue)}%` }}
                   />
                 </div>
               </div>
