@@ -6131,6 +6131,136 @@ input, select, textarea {
 }
 .btn-primary:hover { opacity: .9; }
 
+/* ---------- LMS contract fetch ---------- */
+
+.lms-fetch-section {
+  padding: 0 0 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.lms-fetch-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--ambria-card);
+  border: 1px solid var(--ambria-border);
+  border-radius: 8px;
+  color: var(--ambria-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color .15s, color .15s;
+  align-self: flex-start;
+}
+.lms-fetch-btn:hover:not(:disabled) {
+  border-color: var(--ambria-accent);
+  color: var(--ambria-accent);
+}
+.lms-fetch-btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+.lms-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--ambria-border);
+  border-top-color: var(--ambria-accent);
+  border-radius: 50%;
+  animation: lms-spin .6s linear infinite;
+}
+@keyframes lms-spin { to { transform: rotate(360deg); } }
+
+.lms-error {
+  font-size: 0.75rem;
+  color: var(--ambria-accent);
+}
+
+.lms-picker {
+  border: 1px solid var(--ambria-border);
+  border-radius: 10px;
+  background: var(--ambria-card);
+  overflow: hidden;
+  box-shadow: var(--ambria-shadow-dropdown);
+}
+.lms-picker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--ambria-border);
+}
+.lms-picker-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--ambria-ink);
+}
+.lms-picker-close {
+  appearance: none;
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  color: var(--ambria-muted);
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 2px;
+}
+.lms-picker-empty {
+  padding: 14px 12px;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--ambria-muted);
+}
+.lms-picker-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 200px;
+  overflow-y: auto;
+}
+.lms-picker-item {
+  appearance: none;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--ambria-border);
+  width: 100%;
+  text-align: left;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  color: var(--ambria-ink);
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background .1s;
+}
+.lms-picker-item:hover {
+  background: var(--ambria-hover);
+}
+.lms-picker-list li:last-child .lms-picker-item {
+  border-bottom: none;
+}
+.lms-picker-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lms-picker-mismatch {
+  background: #fffbeb;
+}
+[data-theme="dark"] .lms-picker-mismatch {
+  background: rgba(212, 160, 23, 0.1);
+}
+.lms-picker-warn {
+  flex-shrink: 0;
+  font-size: 0.85rem;
+}
+
 /* ---------- Season badges ---------- */
 
 .day-cell {

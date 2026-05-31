@@ -14,6 +14,7 @@ import { useDirectory } from '../contexts/DirectoryContext.jsx'
 import { getEditableSections, getLockedFieldKeys, canDeleteBooking } from '../lib/sectionPermissions.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 import Field from './Field.jsx'
+import { getLmsDepartment, contractLabel, contractVenueMatch, mapContractToForm } from '../lib/lms.js'
 
 const SLOT_CATEGORIES = new Set(['add', 'ac', 'aee'])
 const MAX_SLOTS = 5
@@ -106,6 +107,11 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
     return [emptySlot(venueId)]
   })
 
+  // ── LMS contract fetch state ──
+  const [lmsLoading, setLmsLoading] = useState(false)
+  const [lmsContracts, setLmsContracts] = useState(null) // null=not fetched, []=empty
+  const [lmsError, setLmsError] = useState(null)
+
   // Derive dropdown data from DirectoryContext (cached, stale-while-revalidate)
   const dynamicEventTypes = useMemo(
     () => dirEventTypes.length > 0 ? dirEventTypes.map((t) => ({ name: t.name, abbreviation: t.abbreviation || '' })) : null,
@@ -179,6 +185,8 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
       notes: prev.notes,
     }))
     setErrors({})
+    setLmsContracts(null)
+    setLmsError(null)
     if (SLOT_CATEGORIES.has(venueId)) setEventSlots([emptySlot(venueId)])
     else setEventSlots([])
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -254,6 +262,55 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
 
   const onTitleChange = (e) => setManualTitle(e.target.value)
   const resetTitle = () => setManualTitle(null)
+
+  // ── LMS contract fetch ──
+  const lmsDepartment = getLmsDepartment(venueId)
+  const canFetchLms = !!lmsDepartment && !!form.date
+
+  const fetchLmsContracts = async () => {
+    if (!canFetchLms) return
+    setLmsLoading(true)
+    setLmsError(null)
+    setLmsContracts(null)
+    try {
+      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/lms-proxy`
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({
+          department: lmsDepartment,
+          from_date: form.date,
+          to_date: form.date,
+        }),
+      })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const data = await res.json()
+      if (!data.success) throw new Error(data.error || 'LMS fetch failed')
+      setLmsContracts(data.contracts || [])
+    } catch (err) {
+      setLmsError(err.message || 'Failed to fetch from LMS')
+      setTimeout(() => setLmsError(null), 4000)
+    } finally {
+      setLmsLoading(false)
+    }
+  }
+
+  const selectLmsContract = (contract) => {
+    const venue = VENUE_BY_ID[venueId]
+    const mapped = mapContractToForm(contract, lmsDepartment, venueId, venue?.subVenues)
+    setForm((prev) => {
+      const next = { ...prev }
+      for (const [key, val] of Object.entries(mapped)) {
+        if (val !== '' && val != null) next[key] = val
+      }
+      return next
+    })
+    setManualTitle(null) // reset to auto-title so it regenerates
+    setLmsContracts(null) // close picker
+  }
 
   const validate = () => {
     const all = getAllFields(venueId, dynamicEventTypes, dynamicElements)
@@ -707,6 +764,58 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
               style={{ background: VENUE_BY_ID[venueId]?.color }}
             />
             <span>{t(VENUE_BY_ID[venueId]?.name)}</span>
+          </div>
+        )}
+
+        {canFetchLms && !readOnly && (
+          <div className="lms-fetch-section">
+            <button
+              type="button"
+              className="lms-fetch-btn"
+              onClick={fetchLmsContracts}
+              disabled={lmsLoading}
+            >
+              {lmsLoading ? (
+                <span className="lms-spinner" />
+              ) : (
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="23 4 23 10 17 10" />
+                  <polyline points="1 20 1 14 7 14" />
+                  <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+                </svg>
+              )}
+              {lmsLoading ? t('Fetching…') : t('Fetch from LMS')}
+            </button>
+            {lmsError && <span className="lms-error">{lmsError}</span>}
+            {lmsContracts !== null && (
+              <div className="lms-picker">
+                <div className="lms-picker-header">
+                  <span className="lms-picker-title">{t('LMS Contracts')}</span>
+                  <button type="button" className="lms-picker-close" onClick={() => setLmsContracts(null)} aria-label="Close">×</button>
+                </div>
+                {lmsContracts.length === 0 ? (
+                  <div className="lms-picker-empty">{t('No LMS contracts found for this date')}</div>
+                ) : (
+                  <ul className="lms-picker-list">
+                    {lmsContracts.map((c, i) => {
+                      const mismatch = lmsDepartment === 'venue' && !contractVenueMatch(c, venueId)
+                      return (
+                        <li key={i}>
+                          <button
+                            type="button"
+                            className={`lms-picker-item${mismatch ? ' lms-picker-mismatch' : ''}`}
+                            onClick={() => selectLmsContract(c)}
+                          >
+                            <span className="lms-picker-label">{contractLabel(c, lmsDepartment)}</span>
+                            {mismatch && <span className="lms-picker-warn" title="Different venue">⚠</span>}
+                          </button>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                )}
+              </div>
+            )}
           </div>
         )}
 
