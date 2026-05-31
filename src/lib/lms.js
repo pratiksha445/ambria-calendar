@@ -240,39 +240,75 @@ function mapEventType(funcTypeId, funcName) {
   return { event_type: '', event_type_other: '' }
 }
 
-// ── Build display label for contract picker ──
-export function contractLabel(contract, department) {
-  const funcType = resolveFuncName(contract, department)
-  let guest = '', session = '', entryNo = '', venueName = ''
+// ── Entry number field per department ──
+const ENTRY_NO_FIELDS = {
+  venue: 'fisc_entryno',
+  decor: 'dhc_entry_no',
+  catering: 'chc_entry_no',
+  entertainment: 'ehc_entry_no',
+}
 
-  if (department === 'venue') {
-    guest = contract.fisc_guest_name || ''
-    session = contract.fiscd_session || ''
-    entryNo = contract.fisc_entryno || ''
-  } else if (department === 'decor') {
-    guest = contract.dhc_guest_name || ''
-    session = contract.dhcd_session || ''
-    entryNo = contract.dhc_entry_no || ''
-    venueName = contract.dhcd_venue2 || ''
-  } else if (department === 'catering') {
-    guest = contract.chc_guest_name || ''
-    session = contract.chcd_session || ''
-    entryNo = contract.chc_entry_no || ''
-    venueName = contract.chcd_venue2 || ''
-  } else if (department === 'entertainment') {
-    guest = contract.ehc_guest_name || ''
-    session = contract.ehcd_session || ''
-    entryNo = contract.ehc_entry_no || ''
-    venueName = contract.ehcd_venue2 || ''
+// ── Time field per department (for sorting functions within a group) ──
+const TIME_FIELDS = {
+  venue: 'fiscd_function_timings',
+  decor: 'dhcd_time',
+  catering: 'chcd_time',
+  entertainment: 'ehcd_time',
+}
+
+/** Group flat contract rows by entry number. Returns array of { entryNo, guest, venueName, rows[] } */
+export function groupContractsByEntry(contracts, department) {
+  const entryField = ENTRY_NO_FIELDS[department]
+  const timeField = TIME_FIELDS[department]
+  const groups = new Map()
+
+  for (const c of contracts) {
+    const entryNo = String(c[entryField] || '').trim() || `_no_entry_${groups.size}`
+    if (!groups.has(entryNo)) {
+      let guest = '', venueName = ''
+      if (department === 'venue') {
+        guest = c.fisc_guest_name || ''
+      } else if (department === 'decor') {
+        guest = c.dhc_guest_name || ''
+        venueName = c.dhcd_venue2 || ''
+      } else if (department === 'catering') {
+        guest = c.chc_guest_name || ''
+        venueName = c.chcd_venue2 || ''
+      } else if (department === 'entertainment') {
+        guest = c.ehc_guest_name || ''
+        venueName = c.ehcd_venue2 || ''
+      }
+      groups.set(entryNo, { entryNo, guest, venueName, rows: [] })
+    }
+    groups.get(entryNo).rows.push(c)
   }
 
-  // Venue (in-house): "Guest | EVENT_TYPE | Shift — #Entry"
-  // Outdoor (decor/catering/ent): "Guest | EVENT_TYPE | VenueName | Shift — #Entry"
+  // Sort rows within each group by time (earliest first)
+  for (const g of groups.values()) {
+    g.rows.sort((a, b) => {
+      const ta = String(a[timeField] || '').replace(/[^0-9:]/g, '')
+      const tb = String(b[timeField] || '').replace(/[^0-9:]/g, '')
+      return ta.localeCompare(tb)
+    })
+  }
+
+  return [...groups.values()]
+}
+
+/** Build grouped picker label: "Guest | VenueName — #Entry (N functions)" */
+export function groupLabel(group, department) {
   const parts = department === 'venue'
-    ? [guest, funcType, session]
-    : [guest, funcType, venueName, session]
+    ? [group.guest]
+    : [group.guest, group.venueName]
   const label = parts.filter(Boolean).join(' | ')
-  return entryNo ? `${label} — #${entryNo}` : label
+  const entryPart = group.entryNo.startsWith('_no_entry_') ? '' : ` — #${group.entryNo}`
+  const countPart = group.rows.length > 1 ? ` (${group.rows.length} functions)` : ''
+  return `${label}${entryPart}${countPart}`
+}
+
+/** Get list of function type display names for a group's rows */
+export function groupFuncNames(group, department) {
+  return group.rows.map((c) => resolveFuncName(c, department)).filter(Boolean)
 }
 
 // ── Check if venue contract matches selected category ──
@@ -283,151 +319,128 @@ export function contractVenueMatch(contract, venueId) {
   return mappedCat === venueId
 }
 
-// Keys that live on eventSlots[0] for slot-based categories (ADD/AC/AEE)
+// Keys that live on eventSlots for slot-based categories (ADD/AC/AEE)
 const SLOT_FIELD_KEYS = new Set([
   'event_type', 'event_type_other', 'shift', 'time', 'pax',
   'decor_type', 'color_theme', 'menu_type', 'menu_cat', 'elements',
 ])
 
-// ── Map contract fields to form state ──
-// Returns { formFields: {...}, slotFields: {...} }
-// For venue (AP/AM/AE/AR), everything goes into formFields.
-// For slot-based categories (ADD/AC/AEE), per-event fields go into slotFields.
-export function mapContractToForm(contract, department, venueId, subVenues) {
-  const raw = {}
+/** Extract per-function (slot-level) fields from a single contract row */
+function extractSlotFields(row, department) {
+  const slot = {}
+
+  const funcIdField = FUNC_ID_FIELDS[department]
+  const funcId = funcIdField ? (row[funcIdField] || '') : ''
+  const funcName = resolveFuncName(row, department)
+  const et = mapEventType(funcId, funcName)
+  if (et.event_type) slot.event_type = et.event_type
+  if (et.event_type_other) slot.event_type_other = et.event_type_other
 
   if (department === 'venue') {
-    const funcId = contract.fiscd_function_type || ''
-    const funcName = resolveFuncName(contract, department)
-    const et = mapEventType(funcId, funcName)
-    if (et.event_type) raw.event_type = et.event_type
-    if (et.event_type_other) raw.event_type_other = et.event_type_other
-
-    if (contract.fisc_guest_name) raw.guest_name = contract.fisc_guest_name
-    if (contract.fisc_client_mobile) raw.phone = contract.fisc_client_mobile
-
-    const shift = mapSession(contract.fiscd_session, contract.fiscd_function_timings)
-    if (shift) raw.shift = shift
-    if (contract.fiscd_function_timings) raw.time = contract.fiscd_function_timings
-
-    const pax = contract.fiscd_pax_no
-    if (pax) raw.pax = String(pax)
-
-    // Menu
-    const menuId = contract.fiscd_menu || ''
-    const menuName = contract.menuname || ''
+    const shift = mapSession(row.fiscd_session, row.fiscd_function_timings)
+    if (shift) slot.shift = shift
+    if (row.fiscd_function_timings) slot.time = row.fiscd_function_timings
+    if (row.fiscd_pax_no) slot.pax = String(row.fiscd_pax_no)
+    const menuId = row.fiscd_menu || ''
+    const menuName = row.menuname || ''
     if (menuId) {
       const { menuType, menuCat } = mapMenuFromId(menuId, menuName)
-      if (menuType) raw.menu_type = menuType
-      if (menuCat) raw.menu_cat = menuCat
-      raw.booking_status = 'VMD'
+      if (menuType) slot.menu_type = menuType
+      if (menuCat) slot.menu_cat = menuCat
     }
-
-    // Sub-venue
-    const location = contract.address1 || ''
-    if (location && subVenues) {
-      const sv = fuzzySubVenue(location, subVenues)
-      if (sv) raw.sub_venue = sv
-    }
-
-    // Store LMS identifiers
-    raw._lms_entry_no = contract.fisc_entryno || ''
-    raw._lms_head_id = contract.fisc_id || ''
-  }
-
-  if (department === 'decor') {
-    const funcId = contract.dhcd_function || ''
-    const funcName = resolveFuncName(contract, department)
-    const et = mapEventType(funcId, funcName)
-    if (et.event_type) raw.event_type = et.event_type
-    if (et.event_type_other) raw.event_type_other = et.event_type_other
-
-    if (contract.dhc_guest_name) raw.guest_name = contract.dhc_guest_name
-    if (contract.dhc_contact_no) raw.phone = contract.dhc_contact_no
-
-    const shift = mapSession(contract.dhcd_session, contract.dhcd_time)
-    if (shift) raw.shift = shift
-    if (contract.dhcd_time) raw.time = contract.dhcd_time
-    if (contract.dhcd_venue2) raw.venue_name = contract.dhcd_venue2
-    if (contract.dhcd_address2) raw.location = contract.dhcd_address2
-
-    const pax = contract.dhcd_pax
-    if (pax) raw.pax = String(pax)
-
-    const decorType = mapDecorType(contract.dhc_priority)
-    if (decorType) raw.decor_type = decorType
-
-    raw._lms_entry_no = contract.dhc_entry_no || ''
-    raw._lms_head_id = contract.dhc_id || ''
-  }
-
-  if (department === 'catering') {
-    const funcId = contract.chcd_function || ''
-    const funcName = resolveFuncName(contract, department)
-    const et = mapEventType(funcId, funcName)
-    if (et.event_type) raw.event_type = et.event_type
-    if (et.event_type_other) raw.event_type_other = et.event_type_other
-
-    if (contract.chc_guest_name) raw.guest_name = contract.chc_guest_name
-    if (contract.chc_contact_no) raw.phone = contract.chc_contact_no
-
-    const shift = mapSession(contract.chcd_session, contract.chcd_time)
-    if (shift) raw.shift = shift
-    if (contract.chcd_time) raw.time = contract.chcd_time
-    if (contract.chcd_venue2) raw.venue_name = contract.chcd_venue2
-    if (contract.chcd_address2) raw.location = contract.chcd_address2
-
-    const pax = contract.chcd_pax
-    if (pax) raw.pax = String(pax)
-
-    // Catering menu
-    const cateringType = contract.chcd_catering || ''
-    const menuId = contract.chcd_menu || ''
-    const menuName = contract.menuname || ''
+  } else if (department === 'decor') {
+    const shift = mapSession(row.dhcd_session, row.dhcd_time)
+    if (shift) slot.shift = shift
+    if (row.dhcd_time) slot.time = row.dhcd_time
+    if (row.dhcd_pax) slot.pax = String(row.dhcd_pax)
+    const decorType = mapDecorType(row.dhc_priority)
+    if (decorType) slot.decor_type = decorType
+  } else if (department === 'catering') {
+    const shift = mapSession(row.chcd_session, row.chcd_time)
+    if (shift) slot.shift = shift
+    if (row.chcd_time) slot.time = row.chcd_time
+    if (row.chcd_pax) slot.pax = String(row.chcd_pax)
+    const cateringType = row.chcd_catering || ''
+    const menuId = row.chcd_menu || ''
+    const menuName = row.menuname || ''
     if (cateringType || menuId) {
       const { menuType, menuCat } = mapCateringMenu(cateringType, menuId, menuName)
-      if (menuType) raw.menu_type = menuType
-      if (menuCat) raw.menu_cat = menuCat
+      if (menuType) slot.menu_type = menuType
+      if (menuCat) slot.menu_cat = menuCat
     }
-
-    raw._lms_entry_no = contract.chc_entry_no || ''
-    raw._lms_head_id = contract.chc_id || ''
+  } else if (department === 'entertainment') {
+    const shift = mapSession(row.ehcd_session, row.ehcd_time)
+    if (shift) slot.shift = shift
+    if (row.ehcd_time) slot.time = row.ehcd_time
   }
 
-  if (department === 'entertainment') {
-    const funcId = contract.ehcd_function || ''
-    const funcName = resolveFuncName(contract, department)
-    const et = mapEventType(funcId, funcName)
-    if (et.event_type) raw.event_type = et.event_type
-    if (et.event_type_other) raw.event_type_other = et.event_type_other
+  return slot
+}
 
-    if (contract.ehc_guest_name) raw.guest_name = contract.ehc_guest_name
-    if (contract.ehc_contact_no) raw.phone = contract.ehc_contact_no
+/** Extract header-level (form-level) fields from the first contract row */
+function extractFormFields(row, department, subVenues) {
+  const fields = {}
 
-    const shift = mapSession(contract.ehcd_session, contract.ehcd_time)
-    if (shift) raw.shift = shift
-    if (contract.ehcd_time) raw.time = contract.ehcd_time
-    if (contract.ehcd_venue2) raw.venue_name = contract.ehcd_venue2
-    if (contract.ehcd_address2) raw.location = contract.ehcd_address2
-
-    raw._lms_entry_no = contract.ehc_entry_no || ''
-    raw._lms_head_id = contract.ehc_id || ''
-  }
-
-  // Split into form-level fields and slot-level fields
-  // For venue categories (AP/AM/AE/AR), all fields are form-level.
-  // For slot categories (ADD/AC/AEE), event-specific fields go to slotFields.
-  const isSlotCategory = department !== 'venue'
-  const formFields = {}
-  const slotFields = {}
-
-  for (const [key, val] of Object.entries(raw)) {
-    if (isSlotCategory && SLOT_FIELD_KEYS.has(key)) {
-      slotFields[key] = val
-    } else {
-      formFields[key] = val
+  if (department === 'venue') {
+    if (row.fisc_guest_name) fields.guest_name = row.fisc_guest_name
+    if (row.fisc_client_mobile) fields.phone = row.fisc_client_mobile
+    const location = row.address1 || ''
+    if (location && subVenues) {
+      const sv = fuzzySubVenue(location, subVenues)
+      if (sv) fields.sub_venue = sv
     }
+    // If any menu data present, set booking_status
+    if (row.fiscd_menu) fields.booking_status = 'VMD'
+    fields._lms_entry_no = row.fisc_entryno || ''
+    fields._lms_head_id = row.fisc_id || ''
+  } else if (department === 'decor') {
+    if (row.dhc_guest_name) fields.guest_name = row.dhc_guest_name
+    if (row.dhc_contact_no) fields.phone = row.dhc_contact_no
+    if (row.dhcd_venue2) fields.venue_name = row.dhcd_venue2
+    if (row.dhcd_address2) fields.location = row.dhcd_address2
+    fields._lms_entry_no = row.dhc_entry_no || ''
+    fields._lms_head_id = row.dhc_id || ''
+  } else if (department === 'catering') {
+    if (row.chc_guest_name) fields.guest_name = row.chc_guest_name
+    if (row.chc_contact_no) fields.phone = row.chc_contact_no
+    if (row.chcd_venue2) fields.venue_name = row.chcd_venue2
+    if (row.chcd_address2) fields.location = row.chcd_address2
+    fields._lms_entry_no = row.chc_entry_no || ''
+    fields._lms_head_id = row.chc_id || ''
+  } else if (department === 'entertainment') {
+    if (row.ehc_guest_name) fields.guest_name = row.ehc_guest_name
+    if (row.ehc_contact_no) fields.phone = row.ehc_contact_no
+    if (row.ehcd_venue2) fields.venue_name = row.ehcd_venue2
+    if (row.ehcd_address2) fields.location = row.ehcd_address2
+    fields._lms_entry_no = row.ehc_entry_no || ''
+    fields._lms_head_id = row.ehc_id || ''
   }
 
-  return { formFields, slotFields }
+  return fields
+}
+
+// ── Map a grouped contract (multiple rows) to form + slots ──
+// Returns { formFields, slots: [{...}, ...], extraFuncNames: string[] | null }
+// - formFields: header-level fields for the form state
+// - slots: array of slot field objects (one per function row)
+// - extraFuncNames: for venue categories with >1 function, names of functions 2..N
+//                   (venue doesn't support multi-slot, so only first is applied)
+export function mapGroupToForm(group, department, venueId, subVenues) {
+  const firstRow = group.rows[0]
+  const formFields = extractFormFields(firstRow, department, subVenues)
+
+  // For venue (AP/AM/AE/AR): no multi-slot support — merge first row's event
+  // fields directly into formFields, report extras
+  if (department === 'venue') {
+    const firstSlot = extractSlotFields(firstRow, department)
+    Object.assign(formFields, firstSlot)
+    const extraFuncNames = group.rows.length > 1
+      ? group.rows.slice(1).map((r) => resolveFuncName(r, department)).filter(Boolean)
+      : null
+    return { formFields, slots: [], extraFuncNames }
+  }
+
+  // For slot-based categories (ADD/AC/AEE): build one slot per row
+  const slots = group.rows.map((row) => extractSlotFields(row, department))
+  return { formFields, slots, extraFuncNames: null }
 }

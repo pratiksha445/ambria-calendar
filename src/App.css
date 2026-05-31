@@ -6233,7 +6233,7 @@ input, select, textarea {
   cursor: pointer;
   font-family: inherit;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 6px;
   transition: background .1s;
 }
@@ -6246,6 +6246,18 @@ input, select, textarea {
 .lms-picker-label {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.lms-picker-main {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lms-picker-funcs {
+  font-size: 0.7rem;
+  color: var(--ambria-muted);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -6255,6 +6267,14 @@ input, select, textarea {
 }
 [data-theme="dark"] .lms-picker-mismatch {
   background: rgba(212, 160, 23, 0.1);
+}
+.lms-extra-note {
+  font-size: 0.75rem;
+  color: var(--ambria-muted);
+  background: var(--ambria-outside);
+  border-radius: 8px;
+  padding: 8px 10px;
+  line-height: 1.4;
 }
 .lms-picker-warn {
   flex-shrink: 0;

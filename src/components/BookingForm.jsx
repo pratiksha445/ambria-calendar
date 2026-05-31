@@ -14,7 +14,7 @@ import { useDirectory } from '../contexts/DirectoryContext.jsx'
 import { getEditableSections, getLockedFieldKeys, canDeleteBooking } from '../lib/sectionPermissions.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 import Field from './Field.jsx'
-import { getLmsDepartment, contractLabel, contractVenueMatch, mapContractToForm, isContractCancelled } from '../lib/lms.js'
+import { getLmsDepartment, groupContractsByEntry, groupLabel, groupFuncNames, contractVenueMatch, mapGroupToForm, isContractCancelled } from '../lib/lms.js'
 
 const SLOT_CATEGORIES = new Set(['add', 'ac', 'aee'])
 const MAX_SLOTS = 5
@@ -109,8 +109,9 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
 
   // ── LMS contract fetch state ──
   const [lmsLoading, setLmsLoading] = useState(false)
-  const [lmsContracts, setLmsContracts] = useState(null) // null=not fetched, []=empty
+  const [lmsGroups, setLmsGroups] = useState(null) // null=not fetched, []=empty (grouped by entry)
   const [lmsError, setLmsError] = useState(null)
+  const [lmsExtraNote, setLmsExtraNote] = useState(null) // info note for venue multi-function
 
   // Derive dropdown data from DirectoryContext (cached, stale-while-revalidate)
   const dynamicEventTypes = useMemo(
@@ -185,8 +186,9 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
       notes: prev.notes,
     }))
     setErrors({})
-    setLmsContracts(null)
+    setLmsGroups(null)
     setLmsError(null)
+    setLmsExtraNote(null)
     if (SLOT_CATEGORIES.has(venueId)) setEventSlots([emptySlot(venueId)])
     else setEventSlots([])
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -271,7 +273,8 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
     if (!canFetchLms) return
     setLmsLoading(true)
     setLmsError(null)
-    setLmsContracts(null)
+    setLmsGroups(null)
+    setLmsExtraNote(null)
     try {
       const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/lms-proxy`
       const res = await fetch(url, {
@@ -289,9 +292,10 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const data = await res.json()
       if (!data.success) throw new Error(data.error || 'LMS fetch failed')
-      // Secondary client-side cancel filter
+      // Secondary client-side cancel filter, then group by entry number
       const contracts = (data.contracts || []).filter((c) => !isContractCancelled(c, lmsDepartment))
-      setLmsContracts(contracts)
+      const groups = groupContractsByEntry(contracts, lmsDepartment)
+      setLmsGroups(groups)
     } catch (err) {
       setLmsError(err.message || 'Failed to fetch from LMS')
       setTimeout(() => setLmsError(null), 4000)
@@ -300,13 +304,14 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
     }
   }
 
-  const selectLmsContract = (contract) => {
+  const selectLmsGroup = (group) => {
     const venue = VENUE_BY_ID[venueId]
-    const { formFields, slotFields } = mapContractToForm(contract, lmsDepartment, venueId, venue?.subVenues)
+    const { formFields, slots, extraFuncNames } = mapGroupToForm(group, lmsDepartment, venueId, venue?.subVenues)
     if (import.meta.env.DEV) {
-      console.log('[LMS] raw contract:', contract)
+      console.log('[LMS] group:', group)
       console.log('[LMS] mapped formFields:', formFields)
-      console.log('[LMS] mapped slotFields:', slotFields)
+      console.log('[LMS] mapped slots:', slots)
+      console.log('[LMS] extraFuncNames:', extraFuncNames)
     }
     // Apply form-level fields (guest_name, phone, venue_name, location, etc.)
     setForm((prev) => {
@@ -316,20 +321,25 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
       }
       return next
     })
-    // Apply slot-level fields (event_type, shift, time, pax, etc.) for ADD/AC/AEE
-    if (Object.keys(slotFields).length > 0 && SLOT_CATEGORIES.has(venueId)) {
-      setEventSlots((prev) => {
-        const slots = prev.length > 0 ? [...prev] : [emptySlot(venueId)]
-        const slot0 = { ...slots[0] }
-        for (const [key, val] of Object.entries(slotFields)) {
-          if (val !== '' && val != null) slot0[key] = val
+    // Apply slot-level fields for ADD/AC/AEE — one slot per function
+    if (slots.length > 0 && SLOT_CATEGORIES.has(venueId)) {
+      const newSlots = slots.slice(0, MAX_SLOTS).map((slotData) => {
+        const base = emptySlot(venueId)
+        for (const [key, val] of Object.entries(slotData)) {
+          if (val !== '' && val != null) base[key] = val
         }
-        slots[0] = slot0
-        return slots
+        return base
       })
+      setEventSlots(newSlots)
+    }
+    // Show info note for venue multi-function contracts
+    if (extraFuncNames && extraFuncNames.length > 0) {
+      setLmsExtraNote(`This contract has ${extraFuncNames.length + 1} functions on this date. Additional: ${extraFuncNames.join(', ')}. Create separate bookings for each.`)
+    } else {
+      setLmsExtraNote(null)
     }
     setManualTitle(null) // reset to auto-title so it regenerates
-    setLmsContracts(null) // close picker
+    setLmsGroups(null) // close picker
   }
 
   const validate = () => {
@@ -807,26 +817,33 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
               {lmsLoading ? t('Fetching…') : t('Fetch from LMS')}
             </button>
             {lmsError && <span className="lms-error">{lmsError}</span>}
-            {lmsContracts !== null && (
+            {lmsExtraNote && <div className="lms-extra-note">{lmsExtraNote}</div>}
+            {lmsGroups !== null && (
               <div className="lms-picker">
                 <div className="lms-picker-header">
                   <span className="lms-picker-title">{t('LMS Contracts')}</span>
-                  <button type="button" className="lms-picker-close" onClick={() => setLmsContracts(null)} aria-label="Close">×</button>
+                  <button type="button" className="lms-picker-close" onClick={() => setLmsGroups(null)} aria-label="Close">×</button>
                 </div>
-                {lmsContracts.length === 0 ? (
+                {lmsGroups.length === 0 ? (
                   <div className="lms-picker-empty">{t('No LMS contracts found for this date')}</div>
                 ) : (
                   <ul className="lms-picker-list">
-                    {lmsContracts.map((c, i) => {
-                      const mismatch = lmsDepartment === 'venue' && !contractVenueMatch(c, venueId)
+                    {lmsGroups.map((g, i) => {
+                      const mismatch = lmsDepartment === 'venue' && g.rows.some((c) => !contractVenueMatch(c, venueId))
+                      const funcNames = groupFuncNames(g, lmsDepartment)
                       return (
                         <li key={i}>
                           <button
                             type="button"
                             className={`lms-picker-item${mismatch ? ' lms-picker-mismatch' : ''}`}
-                            onClick={() => selectLmsContract(c)}
+                            onClick={() => selectLmsGroup(g)}
                           >
-                            <span className="lms-picker-label">{contractLabel(c, lmsDepartment)}</span>
+                            <div className="lms-picker-label">
+                              <span className="lms-picker-main">{groupLabel(g, lmsDepartment)}</span>
+                              {funcNames.length > 0 && (
+                                <span className="lms-picker-funcs">{funcNames.join(', ')}</span>
+                              )}
+                            </div>
                             {mismatch && <span className="lms-picker-warn" title="Different venue">⚠</span>}
                           </button>
                         </li>
