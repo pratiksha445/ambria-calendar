@@ -36,6 +36,15 @@ import './App.css'
 
 const ALL_SOURCES = ['crm', 'manual']
 
+function getSeasonCategory(dateStr, seasonData) {
+  if (!seasonData || !seasonData.dates) return null
+  const parts = dateStr.split('-')
+  const mmdd = parts[1] + '-' + parts[2]
+  const category = seasonData.dates[mmdd]
+  if (category) return category
+  return seasonData.default_category || null
+}
+
 // ── Month-level fetch tracking ──
 function mKey(d) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
@@ -85,6 +94,7 @@ export default function App() {
   const [reviewModal, setReviewModal] = useState(null) // null | event
   const [reviewMap, setReviewMap] = useState(() => new Map())
   const [paymentModal, setPaymentModal] = useState(null) // null | event
+  const [seasonData, setSeasonData] = useState(null)
   const { eventTypes, eventTypeAbbrByName, refresh: refreshDirectory, clear: clearDirectory } = useDirectory()
   const calendarBodyRef = useRef(null)
   const fetchedMonthsRef = useRef(new Set())
@@ -92,6 +102,18 @@ export default function App() {
   const [fetchedMonths, setFetchedMonths] = useState(() => new Set())
   const seeded = useRef(false)
   const searchFetchedRef = useRef(false)
+
+  // Fetch season calendar data (once on login, non-critical)
+  useEffect(() => {
+    if (!user) return
+    const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/season-proxy`
+    fetch(url, {
+      headers: { Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}` },
+    })
+      .then((r) => r.ok ? r.json() : null)
+      .then((d) => { if (d) setSeasonData(d) })
+      .catch(() => {/* season badges non-critical */})
+  }, [user])
 
   // Load dynamic categories from Supabase — falls back to hardcoded defaults on failure
   useEffect(() => {
@@ -554,6 +576,8 @@ export default function App() {
                   events={visibleEvents}
                   eventTypes={eventTypes}
                   skeleton={!monthCached && !loading}
+                  seasonData={seasonData}
+                  getSeasonCategory={getSeasonCategory}
                 />
               )}
               {view === 'week' && (
@@ -563,6 +587,8 @@ export default function App() {
                     selectedDate={selectedDate}
                     onSelectDate={handleSelectDate}
                     events={visibleEvents}
+                    seasonData={seasonData}
+                    getSeasonCategory={getSeasonCategory}
                   />
                   <div className="week-day-divider" />
                   <DayView
@@ -575,6 +601,8 @@ export default function App() {
                     reviewMap={reviewMap}
                     onReview={openReview}
                     onPayment={openPayment}
+                    seasonData={seasonData}
+                    getSeasonCategory={getSeasonCategory}
                   />
                 </>
               )}
@@ -589,6 +617,8 @@ export default function App() {
                   reviewMap={reviewMap}
                   onReview={openReview}
                   onPayment={openPayment}
+                  seasonData={seasonData}
+                  getSeasonCategory={getSeasonCategory}
                 />
               )}
             </main>

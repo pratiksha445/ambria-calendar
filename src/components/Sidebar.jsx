@@ -418,6 +418,20 @@ export default function Sidebar({
                   : t('{count} events this month', { count: totalCount }))
                 : t('{shown} of {total} events shown', { shown: shownCount, total: totalCount })}
             </div>
+
+            <div className="sidebar-section-head">
+              <span className="sidebar-section-title">{t('Season')}</span>
+            </div>
+            <div className="season-legend">
+              <div className="season-legend-item">
+                <span className="season-legend-dot" style={{ background: '#D4A017' }} />
+                <span className="season-legend-label">King's</span>
+              </div>
+              <div className="season-legend-item">
+                <span className="season-legend-dot" style={{ background: '#2AAA8A' }} />
+                <span className="season-legend-label">Perfect</span>
+              </div>
+            </div>
           </>
         )}
 

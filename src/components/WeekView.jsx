@@ -2,7 +2,9 @@ import { useMemo } from 'react'
 import { startOfWeek, addDays, isSameDay, toIsoDate } from '../lib/dates.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 
-export default function WeekView({ currentDate, selectedDate, onSelectDate, events }) {
+const SEASON_COLORS = { "King's": '#D4A017', 'Perfect': '#2AAA8A' }
+
+export default function WeekView({ currentDate, selectedDate, onSelectDate, events, seasonData, getSeasonCategory }) {
   const { dayLabel } = useLanguage()
   const weekStart = startOfWeek(currentDate)
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
@@ -54,6 +56,7 @@ export default function WeekView({ currentDate, selectedDate, onSelectDate, even
               className={`week-chip ${isSelected ? 'selected' : ''}`}
               onClick={() => onSelectDate(d)}
             >
+              {(() => { const s = getSeasonCategory ? getSeasonCategory(iso, seasonData) : null; const c = s ? SEASON_COLORS[s] : null; return c ? <span className="season-badge" style={{ background: c }} title={s} /> : null })()}
               <span className="week-chip-day">{dayLabel(d)}</span>
               <span className="week-chip-date">{d.getDate()}</span>
               {count > 0 && <span className="week-chip-count">{count}</span>}

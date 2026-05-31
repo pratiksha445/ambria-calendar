@@ -20,7 +20,9 @@ function getSectionClass(ev) {
   return ' pill-sec-amber'
 }
 
-export default function MonthView({ currentDate, selectedDate, onSelectDate, onEventClick, events, eventTypes = [], skeleton = false }) {
+const SEASON_COLORS = { "King's": '#D4A017', 'Perfect': '#2AAA8A' }
+
+export default function MonthView({ currentDate, selectedDate, onSelectDate, onEventClick, events, eventTypes = [], skeleton = false, seasonData, getSeasonCategory }) {
   const { dowHeaders } = useLanguage()
   const today = new Date()
   const days = buildMonthGrid(currentDate)
@@ -69,6 +71,8 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, onE
           const extra = totalOnDay - visibleTotal
 
           const isToday = isSameDay(d, today)
+          const season = getSeasonCategory ? getSeasonCategory(iso, seasonData) : null
+          const seasonColor = season ? SEASON_COLORS[season] : null
           const classes = [
             'day-cell',
             d.getMonth() !== monthIndex ? 'outside' : '',
@@ -83,6 +87,7 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, onE
               onClick={() => onSelectDate(d)}
               aria-label={`${iso}, ${totalOnDay} bookings`}
             >
+              {seasonColor && <span className="season-badge" style={{ background: seasonColor }} title={season} />}
               <span className={`day-num${isToday ? ' today-circle' : ''}`}>
                 {d.getDate()}
               </span>
