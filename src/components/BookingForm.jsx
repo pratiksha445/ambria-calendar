@@ -14,7 +14,7 @@ import { useDirectory } from '../contexts/DirectoryContext.jsx'
 import { getEditableSections, getLockedFieldKeys, canDeleteBooking } from '../lib/sectionPermissions.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 import Field from './Field.jsx'
-import { getLmsDepartment, contractLabel, contractVenueMatch, mapContractToForm } from '../lib/lms.js'
+import { getLmsDepartment, contractLabel, contractVenueMatch, mapContractToForm, isContractCancelled } from '../lib/lms.js'
 
 const SLOT_CATEGORIES = new Set(['add', 'ac', 'aee'])
 const MAX_SLOTS = 5
@@ -289,7 +289,9 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const data = await res.json()
       if (!data.success) throw new Error(data.error || 'LMS fetch failed')
-      setLmsContracts(data.contracts || [])
+      // Secondary client-side cancel filter
+      const contracts = (data.contracts || []).filter((c) => !isContractCancelled(c, lmsDepartment))
+      setLmsContracts(contracts)
     } catch (err) {
       setLmsError(err.message || 'Failed to fetch from LMS')
       setTimeout(() => setLmsError(null), 4000)

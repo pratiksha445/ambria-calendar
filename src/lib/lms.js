@@ -16,6 +16,54 @@ export function getLmsDepartment(venueId) {
 // ── LMS venue_id → app category ──
 const LMS_VENUE_TO_CAT = { '3': 'ap', '6': 'am', '19': 'ae', '16': 'ar' }
 
+// ── Function type ID → display name (for picker labels) ──
+const FUNCTION_TYPE_NAMES = {
+  '1': 'Ring Ceremony', '2': 'Birthday', '3': 'Wedding', '4': 'Reception',
+  '5': 'Kua Poojan', '6': 'Anniversary', '7': 'Lagan', '8': 'Sagan',
+  '9': 'Cocktail', '10': 'Religious', '11': 'Corporate', '12': 'Proposal Ceremony',
+  '14': 'Haldi', '15': 'Mehendi', '16': 'Roka Ceremony', '17': 'Residential Wedding',
+  '18': 'Destination Wedding', '19': 'Kothi Booking', '20': 'Sangeet',
+  '21': 'Baby Shower', '22': 'Engagement', '23': 'Tender', '24': 'Barat Assembly',
+  '25': 'House Party', '26': 'Lunch Function', '27': 'Breakfast Function',
+  '28': 'Dinner Function', '29': 'Breakfast', '30': 'Lunch', '31': 'Kitty Party',
+  '32': 'Restaurant Sale', '33': 'Lohri', '34': 'Diwali Party',
+  '35': 'Get Together', '36': 'Mata Ki Chowki',
+}
+
+// ── Cancel-remarks field per department (for client-side filtering) ──
+const CANCEL_FIELDS = {
+  venue: 'fisc_cancel_remarks',
+  decor: 'dhc_cancel_remarks',
+  catering: 'chc_cancel_remarks',
+  entertainment: 'ehc_cancel_remarks',
+}
+
+// ── Function type ID field per department ──
+const FUNC_ID_FIELDS = {
+  venue: 'fiscd_function_type',
+  decor: 'dhcd_function',
+  catering: 'chcd_function',
+  entertainment: 'ehcd_function',
+}
+
+/** Resolve display name for a contract's event/function type */
+function resolveFuncName(contract, department) {
+  const name = contract.functionname
+  if (name && String(name).trim()) return String(name).trim()
+  const idField = FUNC_ID_FIELDS[department]
+  const id = idField ? String(contract[idField] || '') : ''
+  return FUNCTION_TYPE_NAMES[id] || ''
+}
+
+/** Check if a contract is cancelled (client-side secondary filter) */
+export function isContractCancelled(contract, department) {
+  const field = CANCEL_FIELDS[department]
+  if (!field) return false
+  const val = contract[field]
+  if (val && typeof val === 'string' && val.trim() !== '') return true
+  return false
+}
+
 // ── Function type ID → event type ──
 const FUNC_TYPE_MAP = {
   '1':  { type: 'Other', other: 'Ring Ceremony' },
@@ -167,32 +215,36 @@ function mapEventType(funcTypeId, funcName) {
 
 // ── Build display label for contract picker ──
 export function contractLabel(contract, department) {
-  let guest = '', funcType = '', session = '', entryNo = ''
+  const funcType = resolveFuncName(contract, department)
+  let guest = '', session = '', entryNo = '', venueName = ''
 
   if (department === 'venue') {
     guest = contract.fisc_guest_name || ''
-    funcType = contract.functionname || ''
-    session = contract.Contractinfo?.[0]?.fiscd_session || contract.fiscd_session || ''
+    session = contract.fiscd_session || ''
     entryNo = contract.fisc_entryno || ''
   } else if (department === 'decor') {
     guest = contract.dhc_guest_name || ''
-    funcType = contract.functionname || ''
     session = contract.dhcd_session || ''
     entryNo = contract.dhc_entry_no || ''
+    venueName = contract.dhcd_venue2 || ''
   } else if (department === 'catering') {
     guest = contract.chc_guest_name || ''
-    funcType = contract.functionname || ''
     session = contract.chcd_session || ''
     entryNo = contract.chc_entry_no || ''
+    venueName = contract.chcd_venue2 || ''
   } else if (department === 'entertainment') {
     guest = contract.ehc_guest_name || ''
-    funcType = contract.functionname || ''
     session = contract.ehcd_session || ''
     entryNo = contract.ehc_entry_no || ''
+    venueName = contract.ehcd_venue2 || ''
   }
 
-  const parts = [guest, funcType, session].filter(Boolean)
-  const label = parts.join(' | ')
+  // Venue (in-house): "Guest | EVENT_TYPE | Shift — #Entry"
+  // Outdoor (decor/catering/ent): "Guest | EVENT_TYPE | VenueName | Shift — #Entry"
+  const parts = department === 'venue'
+    ? [guest, funcType, session]
+    : [guest, funcType, venueName, session]
+  const label = parts.filter(Boolean).join(' | ')
   return entryNo ? `${label} — #${entryNo}` : label
 }
 
@@ -210,7 +262,7 @@ export function mapContractToForm(contract, department, venueId, subVenues) {
 
   if (department === 'venue') {
     const funcId = contract.fiscd_function_type || ''
-    const funcName = contract.functionname || ''
+    const funcName = resolveFuncName(contract, department)
     const et = mapEventType(funcId, funcName)
     if (et.event_type) fields.event_type = et.event_type
     if (et.event_type_other) fields.event_type_other = et.event_type_other
@@ -249,7 +301,7 @@ export function mapContractToForm(contract, department, venueId, subVenues) {
 
   if (department === 'decor') {
     const funcId = contract.dhcd_function || ''
-    const funcName = contract.functionname || ''
+    const funcName = resolveFuncName(contract, department)
     const et = mapEventType(funcId, funcName)
     if (et.event_type) fields.event_type = et.event_type
     if (et.event_type_other) fields.event_type_other = et.event_type_other
@@ -272,7 +324,7 @@ export function mapContractToForm(contract, department, venueId, subVenues) {
 
   if (department === 'catering') {
     const funcId = contract.chcd_function || ''
-    const funcName = contract.functionname || ''
+    const funcName = resolveFuncName(contract, department)
     const et = mapEventType(funcId, funcName)
     if (et.event_type) fields.event_type = et.event_type
     if (et.event_type_other) fields.event_type_other = et.event_type_other
@@ -305,7 +357,7 @@ export function mapContractToForm(contract, department, venueId, subVenues) {
 
   if (department === 'entertainment') {
     const funcId = contract.ehcd_function || ''
-    const funcName = contract.functionname || ''
+    const funcName = resolveFuncName(contract, department)
     const et = mapEventType(funcId, funcName)
     if (et.event_type) fields.event_type = et.event_type
     if (et.event_type_other) fields.event_type_other = et.event_type_other

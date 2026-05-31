@@ -183,10 +183,11 @@ serve(async (req) => {
       }
     }
 
-    // Filter out cancelled contracts
+    // Filter out cancelled contracts (cancel_remarks non-empty after trim = cancelled)
     const active = allContracts.filter((c) => {
       const cancelValue = c[cancelField];
-      return !cancelValue || (typeof cancelValue === "string" && cancelValue.trim() === "");
+      if (cancelValue != null && String(cancelValue).trim() !== "") return false;
+      return true;
     });
 
     // Apply date filtering if from_date/to_date provided
