@@ -302,14 +302,32 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
 
   const selectLmsContract = (contract) => {
     const venue = VENUE_BY_ID[venueId]
-    const mapped = mapContractToForm(contract, lmsDepartment, venueId, venue?.subVenues)
+    const { formFields, slotFields } = mapContractToForm(contract, lmsDepartment, venueId, venue?.subVenues)
+    if (import.meta.env.DEV) {
+      console.log('[LMS] raw contract:', contract)
+      console.log('[LMS] mapped formFields:', formFields)
+      console.log('[LMS] mapped slotFields:', slotFields)
+    }
+    // Apply form-level fields (guest_name, phone, venue_name, location, etc.)
     setForm((prev) => {
       const next = { ...prev }
-      for (const [key, val] of Object.entries(mapped)) {
+      for (const [key, val] of Object.entries(formFields)) {
         if (val !== '' && val != null) next[key] = val
       }
       return next
     })
+    // Apply slot-level fields (event_type, shift, time, pax, etc.) for ADD/AC/AEE
+    if (Object.keys(slotFields).length > 0 && SLOT_CATEGORIES.has(venueId)) {
+      setEventSlots((prev) => {
+        const slots = prev.length > 0 ? [...prev] : [emptySlot(venueId)]
+        const slot0 = { ...slots[0] }
+        for (const [key, val] of Object.entries(slotFields)) {
+          if (val !== '' && val != null) slot0[key] = val
+        }
+        slots[0] = slot0
+        return slots
+      })
+    }
     setManualTitle(null) // reset to auto-title so it regenerates
     setLmsContracts(null) // close picker
   }

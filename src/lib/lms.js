@@ -197,18 +197,45 @@ function fuzzySubVenue(locationStr, subVenues) {
   return ''
 }
 
+// ── Title-case a string (e.g. "MEHENDI" → "Mehendi") ──
+function titleCase(s) {
+  if (!s) return ''
+  return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase()
+}
+
+// ── Known event type dropdown values (must match formFields.js EVENT_TYPES exactly) ──
+const KNOWN_EVENT_TYPES = new Set([
+  'Anand Karaj', 'Anniversary', 'Baby Shower', 'Birthday', 'Cocktail',
+  'Conference', 'Corporate', 'Engagement', 'Exhibition', 'Haldi',
+  'Intimate Gathering', 'Kirtan', 'Mehendi', 'Nikah', 'Proposal',
+  'Reception', 'Religious Event', 'Sagan', 'Social Gathering', 'Wedding',
+  'Other',
+])
+
+/** Try to match a raw LMS function name to a known dropdown value (case-insensitive) */
+function matchKnownType(name) {
+  if (!name) return null
+  const lower = name.trim().toLowerCase()
+  for (const t of KNOWN_EVENT_TYPES) {
+    if (t.toLowerCase() === lower) return t
+  }
+  return null
+}
+
 // ── Map event type from function ID / name ──
 function mapEventType(funcTypeId, funcName) {
   const mapped = FUNC_TYPE_MAP[String(funcTypeId)]
   if (mapped) {
     return {
       event_type: mapped.type,
-      event_type_other: mapped.other || (mapped.type === 'Other' && funcName ? funcName : ''),
+      event_type_other: mapped.other || (mapped.type === 'Other' && funcName ? titleCase(funcName) : ''),
     }
   }
-  // If we have a function name from the API, try to use it
+  // If we have a function name from the API, try to match to a known dropdown value
   if (funcName) {
-    return { event_type: 'Other', event_type_other: funcName }
+    const known = matchKnownType(funcName)
+    if (known) return { event_type: known, event_type_other: '' }
+    return { event_type: 'Other', event_type_other: titleCase(funcName) }
   }
   return { event_type: '', event_type_other: '' }
 }
@@ -256,90 +283,102 @@ export function contractVenueMatch(contract, venueId) {
   return mappedCat === venueId
 }
 
+// Keys that live on eventSlots[0] for slot-based categories (ADD/AC/AEE)
+const SLOT_FIELD_KEYS = new Set([
+  'event_type', 'event_type_other', 'shift', 'time', 'pax',
+  'decor_type', 'color_theme', 'menu_type', 'menu_cat', 'elements',
+])
+
 // ── Map contract fields to form state ──
+// Returns { formFields: {...}, slotFields: {...} }
+// For venue (AP/AM/AE/AR), everything goes into formFields.
+// For slot-based categories (ADD/AC/AEE), per-event fields go into slotFields.
 export function mapContractToForm(contract, department, venueId, subVenues) {
-  const fields = {}
+  const raw = {}
 
   if (department === 'venue') {
     const funcId = contract.fiscd_function_type || ''
     const funcName = resolveFuncName(contract, department)
     const et = mapEventType(funcId, funcName)
-    if (et.event_type) fields.event_type = et.event_type
-    if (et.event_type_other) fields.event_type_other = et.event_type_other
+    if (et.event_type) raw.event_type = et.event_type
+    if (et.event_type_other) raw.event_type_other = et.event_type_other
 
-    if (contract.fisc_guest_name) fields.guest_name = contract.fisc_guest_name
-    if (contract.fisc_client_mobile) fields.phone = contract.fisc_client_mobile
+    if (contract.fisc_guest_name) raw.guest_name = contract.fisc_guest_name
+    if (contract.fisc_client_mobile) raw.phone = contract.fisc_client_mobile
 
     const shift = mapSession(contract.fiscd_session, contract.fiscd_function_timings)
-    if (shift) fields.shift = shift
-    if (contract.fiscd_function_timings) fields.time = contract.fiscd_function_timings
+    if (shift) raw.shift = shift
+    if (contract.fiscd_function_timings) raw.time = contract.fiscd_function_timings
 
     const pax = contract.fiscd_pax_no
-    if (pax) fields.pax = String(pax)
+    if (pax) raw.pax = String(pax)
 
     // Menu
     const menuId = contract.fiscd_menu || ''
     const menuName = contract.menuname || ''
     if (menuId) {
       const { menuType, menuCat } = mapMenuFromId(menuId, menuName)
-      if (menuType) fields.menu_type = menuType
-      if (menuCat) fields.menu_cat = menuCat
-      fields.booking_status = 'VMD'
+      if (menuType) raw.menu_type = menuType
+      if (menuCat) raw.menu_cat = menuCat
+      raw.booking_status = 'VMD'
     }
 
     // Sub-venue
     const location = contract.address1 || ''
     if (location && subVenues) {
       const sv = fuzzySubVenue(location, subVenues)
-      if (sv) fields.sub_venue = sv
+      if (sv) raw.sub_venue = sv
     }
 
     // Store LMS identifiers
-    fields._lms_entry_no = contract.fisc_entryno || ''
-    fields._lms_head_id = contract.fisc_id || ''
+    raw._lms_entry_no = contract.fisc_entryno || ''
+    raw._lms_head_id = contract.fisc_id || ''
   }
 
   if (department === 'decor') {
     const funcId = contract.dhcd_function || ''
     const funcName = resolveFuncName(contract, department)
     const et = mapEventType(funcId, funcName)
-    if (et.event_type) fields.event_type = et.event_type
-    if (et.event_type_other) fields.event_type_other = et.event_type_other
+    if (et.event_type) raw.event_type = et.event_type
+    if (et.event_type_other) raw.event_type_other = et.event_type_other
 
-    if (contract.dhc_guest_name) fields.guest_name = contract.dhc_guest_name
-    if (contract.dhc_contact_no) fields.phone = contract.dhc_contact_no
+    if (contract.dhc_guest_name) raw.guest_name = contract.dhc_guest_name
+    if (contract.dhc_contact_no) raw.phone = contract.dhc_contact_no
 
     const shift = mapSession(contract.dhcd_session, contract.dhcd_time)
-    if (shift) fields.shift = shift
-    if (contract.dhcd_time) fields.time = contract.dhcd_time
-    if (contract.dhcd_venue2) fields.venue_name = contract.dhcd_venue2
-    if (contract.dhcd_address2) fields.location = contract.dhcd_address2
+    if (shift) raw.shift = shift
+    if (contract.dhcd_time) raw.time = contract.dhcd_time
+    if (contract.dhcd_venue2) raw.venue_name = contract.dhcd_venue2
+    if (contract.dhcd_address2) raw.location = contract.dhcd_address2
+
+    const pax = contract.dhcd_pax
+    if (pax) raw.pax = String(pax)
 
     const decorType = mapDecorType(contract.dhc_priority)
-    if (decorType) fields.decor_type = decorType
+    if (decorType) raw.decor_type = decorType
 
-    fields._lms_entry_no = contract.dhc_entry_no || ''
-    fields._lms_head_id = contract.dhc_id || ''
+    raw._lms_entry_no = contract.dhc_entry_no || ''
+    raw._lms_head_id = contract.dhc_id || ''
   }
 
   if (department === 'catering') {
     const funcId = contract.chcd_function || ''
     const funcName = resolveFuncName(contract, department)
     const et = mapEventType(funcId, funcName)
-    if (et.event_type) fields.event_type = et.event_type
-    if (et.event_type_other) fields.event_type_other = et.event_type_other
+    if (et.event_type) raw.event_type = et.event_type
+    if (et.event_type_other) raw.event_type_other = et.event_type_other
 
-    if (contract.chc_guest_name) fields.guest_name = contract.chc_guest_name
-    if (contract.chc_contact_no) fields.phone = contract.chc_contact_no
+    if (contract.chc_guest_name) raw.guest_name = contract.chc_guest_name
+    if (contract.chc_contact_no) raw.phone = contract.chc_contact_no
 
     const shift = mapSession(contract.chcd_session, contract.chcd_time)
-    if (shift) fields.shift = shift
-    if (contract.chcd_time) fields.time = contract.chcd_time
-    if (contract.chcd_venue2) fields.venue_name = contract.chcd_venue2
-    if (contract.chcd_address2) fields.location = contract.chcd_address2
+    if (shift) raw.shift = shift
+    if (contract.chcd_time) raw.time = contract.chcd_time
+    if (contract.chcd_venue2) raw.venue_name = contract.chcd_venue2
+    if (contract.chcd_address2) raw.location = contract.chcd_address2
 
     const pax = contract.chcd_pax
-    if (pax) fields.pax = String(pax)
+    if (pax) raw.pax = String(pax)
 
     // Catering menu
     const cateringType = contract.chcd_catering || ''
@@ -347,33 +386,48 @@ export function mapContractToForm(contract, department, venueId, subVenues) {
     const menuName = contract.menuname || ''
     if (cateringType || menuId) {
       const { menuType, menuCat } = mapCateringMenu(cateringType, menuId, menuName)
-      if (menuType) fields.menu_type = menuType
-      if (menuCat) fields.menu_cat = menuCat
+      if (menuType) raw.menu_type = menuType
+      if (menuCat) raw.menu_cat = menuCat
     }
 
-    fields._lms_entry_no = contract.chc_entry_no || ''
-    fields._lms_head_id = contract.chc_id || ''
+    raw._lms_entry_no = contract.chc_entry_no || ''
+    raw._lms_head_id = contract.chc_id || ''
   }
 
   if (department === 'entertainment') {
     const funcId = contract.ehcd_function || ''
     const funcName = resolveFuncName(contract, department)
     const et = mapEventType(funcId, funcName)
-    if (et.event_type) fields.event_type = et.event_type
-    if (et.event_type_other) fields.event_type_other = et.event_type_other
+    if (et.event_type) raw.event_type = et.event_type
+    if (et.event_type_other) raw.event_type_other = et.event_type_other
 
-    if (contract.ehc_guest_name) fields.guest_name = contract.ehc_guest_name
-    if (contract.ehc_contact_no) fields.phone = contract.ehc_contact_no
+    if (contract.ehc_guest_name) raw.guest_name = contract.ehc_guest_name
+    if (contract.ehc_contact_no) raw.phone = contract.ehc_contact_no
 
     const shift = mapSession(contract.ehcd_session, contract.ehcd_time)
-    if (shift) fields.shift = shift
-    if (contract.ehcd_time) fields.time = contract.ehcd_time
-    if (contract.ehcd_venue2) fields.venue_name = contract.ehcd_venue2
-    if (contract.ehcd_address2) fields.location = contract.ehcd_address2
+    if (shift) raw.shift = shift
+    if (contract.ehcd_time) raw.time = contract.ehcd_time
+    if (contract.ehcd_venue2) raw.venue_name = contract.ehcd_venue2
+    if (contract.ehcd_address2) raw.location = contract.ehcd_address2
 
-    fields._lms_entry_no = contract.ehc_entry_no || ''
-    fields._lms_head_id = contract.ehc_id || ''
+    raw._lms_entry_no = contract.ehc_entry_no || ''
+    raw._lms_head_id = contract.ehc_id || ''
   }
 
-  return fields
+  // Split into form-level fields and slot-level fields
+  // For venue categories (AP/AM/AE/AR), all fields are form-level.
+  // For slot categories (ADD/AC/AEE), event-specific fields go to slotFields.
+  const isSlotCategory = department !== 'venue'
+  const formFields = {}
+  const slotFields = {}
+
+  for (const [key, val] of Object.entries(raw)) {
+    if (isSlotCategory && SLOT_FIELD_KEYS.has(key)) {
+      slotFields[key] = val
+    } else {
+      formFields[key] = val
+    }
+  }
+
+  return { formFields, slotFields }
 }
