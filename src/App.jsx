@@ -145,7 +145,7 @@ export default function App() {
       .then((rows) => {
         if (rows.length > 0) {
           applyDynamic(rows)
-          setActiveFilters(new Set(VENUES.map((v) => v.id)))
+          setActiveFilters(initCategoryFilters(user.saved_filters))
           setVenueKey((k) => k + 1)
         }
       })
