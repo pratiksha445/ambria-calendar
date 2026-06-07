@@ -387,22 +387,59 @@ export default function App() {
   const filterSaveTimer = useRef(null)
   const activeFiltersRef = useRef(activeFilters)
   activeFiltersRef.current = activeFilters
-
+  const filtersRestoredRef = useRef(false)
+  // Arm after the initial render so the restore-from-localStorage doesn't trigger a save
   useEffect(() => {
+    const t = setTimeout(() => { filtersRestoredRef.current = true }, 100)
+    return () => clearTimeout(t)
+  }, [])
+
+  const flushFiltersToDisk = useCallback(() => {
+    if (!user?.id) return
+    const filters = { categories: [...activeFiltersRef.current] }
+    saveUserFilters(user.id, filters).catch(() => {})
+    try {
+      const stored = JSON.parse(localStorage.getItem('ambria_user') || '{}')
+      stored.saved_filters = filters
+      localStorage.setItem('ambria_user', JSON.stringify(stored))
+    } catch { /* ignore */ }
+  }, [user?.id])
+
+  // Debounced save on every filter change (skips the initial restoration)
+  useEffect(() => {
+    if (!filtersRestoredRef.current) return
     if (!user?.id) return
     clearTimeout(filterSaveTimer.current)
-    filterSaveTimer.current = setTimeout(() => {
-      const filters = { categories: [...activeFiltersRef.current] }
-      saveUserFilters(user.id, filters).catch(() => {})
-      // Keep localStorage user record in sync so next reload sees it
+    filterSaveTimer.current = setTimeout(flushFiltersToDisk, 1000)
+    return () => clearTimeout(filterSaveTimer.current)
+  }, [activeFilters, user?.id, flushFiltersToDisk])
+
+  // Immediate save when tab is hidden (covers app-close before debounce fires)
+  useEffect(() => {
+    const onHidden = () => {
+      if (document.visibilityState === 'hidden' && filtersRestoredRef.current) {
+        clearTimeout(filterSaveTimer.current)
+        flushFiltersToDisk()
+      }
+    }
+    document.addEventListener('visibilitychange', onHidden)
+    return () => document.removeEventListener('visibilitychange', onHidden)
+  }, [flushFiltersToDisk])
+
+  // Fallback: sync localStorage on beforeunload (async DB call can't reliably finish here)
+  useEffect(() => {
+    const onUnload = () => {
+      if (!user?.id || !filtersRestoredRef.current) return
       try {
+        const filters = { categories: [...activeFiltersRef.current] }
         const stored = JSON.parse(localStorage.getItem('ambria_user') || '{}')
         stored.saved_filters = filters
         localStorage.setItem('ambria_user', JSON.stringify(stored))
       } catch { /* ignore */ }
-    }, 1000)
-    return () => clearTimeout(filterSaveTimer.current)
-  }, [activeFilters, user?.id])
+    }
+    window.addEventListener('beforeunload', onUnload)
+    return () => window.removeEventListener('beforeunload', onUnload)
+  }, [user?.id])
 
   const handleSelectDate = (d) => {
     setSelectedDate(d)
@@ -529,7 +566,9 @@ export default function App() {
   // Auth handlers
   const handleLogin = (u, pinChange) => {
     setUser(u)
+    filtersRestoredRef.current = false
     setActiveFilters(initCategoryFilters(u?.saved_filters))
+    setTimeout(() => { filtersRestoredRef.current = true }, 100)
     setNeedsPinChange(!!pinChange)
     refreshDirectory(true)
   }
