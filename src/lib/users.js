@@ -37,7 +37,7 @@ export async function fetchFilteredUsers(filter) {
 export async function loginUser(phone, pin) {
   const { data: row, error } = await supabase
     .from('users')
-    .select('id, name, phone, role, pin, is_active, approval_status, rejection_reason, department, sales_type')
+    .select('id, name, phone, role, pin, is_active, approval_status, rejection_reason, department, sales_type, saved_filters')
     .eq('phone', phone)
     .maybeSingle()
   if (error) throw error
@@ -48,8 +48,16 @@ export async function loginUser(phone, pin) {
   if (!row.is_active) return { status: 'deactivated', user: null }
   if (row.pin !== pin) return { status: 'wrong_pin', user: null }
 
-  const user = { id: row.id, name: row.name, phone: row.phone, role: row.role, department: row.department, sales_type: row.sales_type }
+  const user = { id: row.id, name: row.name, phone: row.phone, role: row.role, department: row.department, sales_type: row.sales_type, saved_filters: row.saved_filters ?? null }
   return { status: 'ok', user, needsPinChange: row.pin === DEFAULT_PIN }
+}
+
+/** Fire-and-forget: persist filter selections to the user's DB record. */
+export async function saveUserFilters(userId, savedFilters) {
+  await supabase
+    .from('users')
+    .update({ saved_filters: savedFilters })
+    .eq('id', userId)
 }
 
 export async function fetchUsers() {

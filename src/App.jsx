@@ -21,6 +21,7 @@ import Reviews from './components/Reviews.jsx'
 import ReviewModal from './components/ReviewModal.jsx'
 import PaymentModal from './components/PaymentModal.jsx'
 import { fetchEvents, deleteEvent, bulkDeleteMonth } from './lib/events.js'
+import { saveUserFilters } from './lib/users.js'
 import { fetchReviewsByEventIds, isReviewable } from './lib/reviews.js'
 import { getEventTypeAbbr } from './lib/eventTypes.js'
 import { seedIfEmpty } from './lib/seedEvents.js'
@@ -36,25 +37,16 @@ import { readDraft, clearDraft } from './hooks/useFormDraft.js'
 import './App.css'
 
 const ALL_SOURCES = ['crm', 'manual']
-const FILTER_STORAGE_KEY = 'ambria-category-filters'
 const ALL_VENUE_IDS = new Set(VENUES.map((v) => v.id))
 
-function loadSavedFilters() {
-  try {
-    const raw = localStorage.getItem(FILTER_STORAGE_KEY)
-    if (!raw) return null
-    return JSON.parse(raw)
-  } catch { return null }
-}
-
-function saveFilters(categories, sources, sectionStatus) {
-  try {
-    localStorage.setItem(FILTER_STORAGE_KEY, JSON.stringify({
-      categories: [...categories],
-      sources: [...sources],
-      sectionStatus,
-    }))
-  } catch { /* quota exceeded */ }
+function initCategoryFilters(savedFilters) {
+  const cats = savedFilters?.categories
+  if (!Array.isArray(cats)) return new Set(VENUES.map((v) => v.id)) // never saved → all on
+  // Restore saved, drop unknown IDs, auto-include any newly-added venues
+  const savedSet = new Set(cats)
+  const restored = new Set(cats.filter((id) => ALL_VENUE_IDS.has(id)))
+  for (const id of ALL_VENUE_IDS) { if (!savedSet.has(id)) restored.add(id) }
+  return restored
 }
 
 function getSeasonCategory(dateStr, seasonData) {
@@ -98,25 +90,9 @@ export default function App() {
   const [view, setView] = useState('month')
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [allEvents, setAllEvents] = useState([])
-  const [activeFilters, setActiveFilters] = useState(() => {
-    const saved = loadSavedFilters()
-    if (saved?.categories) {
-      // Keep only IDs that still exist, add any new venues not in saved data
-      const restored = new Set(saved.categories.filter((id) => ALL_VENUE_IDS.has(id)))
-      for (const id of ALL_VENUE_IDS) { if (!saved.categories.includes(id)) restored.add(id) }
-      return restored
-    }
-    return new Set(VENUES.map((v) => v.id))
-  })
-  const [activeSources, setActiveSources] = useState(() => {
-    const saved = loadSavedFilters()
-    if (saved?.sources) return new Set(saved.sources.filter((s) => ALL_SOURCES.includes(s)))
-    return new Set(ALL_SOURCES)
-  })
-  const [sectionFilter, setSectionFilter] = useState(() => {
-    const saved = loadSavedFilters()
-    return saved?.sectionStatus ?? null
-  }) // null | 'decor_pending' | 'ent_pending' | 'all_filled'
+  const [activeFilters, setActiveFilters] = useState(() => initCategoryFilters(getStoredUser()?.saved_filters))
+  const [activeSources, setActiveSources] = useState(() => new Set(ALL_SOURCES))
+  const [sectionFilter, setSectionFilter] = useState(null) // null | 'decor_pending' | 'ent_pending' | 'all_filled'
   const [venueKey, setVenueKey] = useState(0)
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(false)
@@ -407,10 +383,26 @@ export default function App() {
   const selectAllVenues = () => setActiveFilters(new Set(VENUES.map((v) => v.id)))
   const selectNoVenues = () => setActiveFilters(new Set())
 
-  // Persist filter selections to localStorage
+  // Persist category filters to DB (debounced, fire-and-forget)
+  const filterSaveTimer = useRef(null)
+  const activeFiltersRef = useRef(activeFilters)
+  activeFiltersRef.current = activeFilters
+
   useEffect(() => {
-    saveFilters(activeFilters, activeSources, sectionFilter)
-  }, [activeFilters, activeSources, sectionFilter])
+    if (!user?.id) return
+    clearTimeout(filterSaveTimer.current)
+    filterSaveTimer.current = setTimeout(() => {
+      const filters = { categories: [...activeFiltersRef.current] }
+      saveUserFilters(user.id, filters).catch(() => {})
+      // Keep localStorage user record in sync so next reload sees it
+      try {
+        const stored = JSON.parse(localStorage.getItem('ambria_user') || '{}')
+        stored.saved_filters = filters
+        localStorage.setItem('ambria_user', JSON.stringify(stored))
+      } catch { /* ignore */ }
+    }, 1000)
+    return () => clearTimeout(filterSaveTimer.current)
+  }, [activeFilters, user?.id])
 
   const handleSelectDate = (d) => {
     setSelectedDate(d)
@@ -537,6 +529,7 @@ export default function App() {
   // Auth handlers
   const handleLogin = (u, pinChange) => {
     setUser(u)
+    setActiveFilters(initCategoryFilters(u?.saved_filters))
     setNeedsPinChange(!!pinChange)
     refreshDirectory(true)
   }
