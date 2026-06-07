@@ -42,11 +42,8 @@ const ALL_VENUE_IDS = new Set(VENUES.map((v) => v.id))
 function initCategoryFilters(savedFilters) {
   const cats = savedFilters?.categories
   if (!Array.isArray(cats)) return new Set(VENUES.map((v) => v.id)) // never saved → all on
-  // Restore saved, drop unknown IDs, auto-include any newly-added venues
-  const savedSet = new Set(cats)
-  const restored = new Set(cats.filter((id) => ALL_VENUE_IDS.has(id)))
-  for (const id of ALL_VENUE_IDS) { if (!savedSet.has(id)) restored.add(id) }
-  return restored
+  // Restore only the saved categories (dropping any that no longer exist)
+  return new Set(cats.filter((id) => ALL_VENUE_IDS.has(id)))
 }
 
 function getSeasonCategory(dateStr, seasonData) {
