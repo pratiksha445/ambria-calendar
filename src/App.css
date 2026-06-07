@@ -2182,6 +2182,19 @@
   white-space: nowrap;
 }
 
+/* Draft restored toast */
+.draft-restored-toast {
+  background: #e8f5e9;
+  color: #2e7d32;
+  text-align: center;
+  padding: 6px 12px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  border-radius: 6px;
+  margin: 0 16px 4px;
+  animation: fadeIn 180ms ease;
+}
+
 .form-grid-collapsed {
   display: none !important;
 }

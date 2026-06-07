@@ -32,6 +32,7 @@ import { logAction } from './lib/audit.js'
 import { useKillSwitch } from './contexts/KillSwitchContext.jsx'
 import { useLanguage } from './i18n/LanguageContext.jsx'
 import useSwipeNav from './hooks/useSwipeNav.js'
+import { readDraft, clearDraft } from './hooks/useFormDraft.js'
 import './App.css'
 
 const ALL_SOURCES = ['crm', 'manual']
@@ -84,7 +85,20 @@ export default function App() {
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
-  const [modal, setModal] = useState(null) // null | { mode: 'new'|'edit', event? }
+  const [modal, setModal] = useState(() => {
+    const draft = readDraft()
+    if (draft?.isOpen && draft.formState) {
+      const event = {
+        ...draft.formState,
+        venue_id: draft.venueId,
+        event_slots: draft.slots || [],
+        _draftManualTitle: draft.manualTitle ?? null,
+      }
+      if (draft.isEditing && draft.eventId) event.id = draft.eventId
+      return { mode: draft.isEditing ? 'edit' : 'new', event, _fromDraft: true }
+    }
+    return null
+  }) // null | { mode: 'new'|'edit', event? }
   const [toast, setToast] = useState(null)
   const [confirmBulk, setConfirmBulk] = useState(false)
   const [needsPinChange, setNeedsPinChange] = useState(false)
@@ -392,8 +406,9 @@ export default function App() {
     if (!ev) return
     setModal({ mode: 'edit', event: ev })
   }, [])
-  const closeModal = () => setModal(null)
+  const closeModal = () => { clearDraft(); setModal(null) }
   const handleSaved = (row) => {
+    clearDraft()
     setModal(null)
     showToast(t('Booking saved'))
     if (row) {
@@ -413,6 +428,7 @@ export default function App() {
     }
   }
   const handleDeleted = () => {
+    clearDraft()
     const deletedId = modal?.event?.id
     setModal(null)
     showToast(t('Booking deleted'))
@@ -665,6 +681,7 @@ export default function App() {
       <BookingModal
         open={!!modal}
         initial={modal?.event}
+        restoredFromDraft={!!modal?._fromDraft}
         onClose={closeModal}
         onSaved={handleSaved}
         onDeleted={handleDeleted}

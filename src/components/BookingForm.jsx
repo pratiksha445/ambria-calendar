@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { VENUES, VENUE_BY_ID } from '../config/venues.js'
 import {
   getFormConfig, getAllFields, getSlotFields, isFieldRequired,
@@ -14,6 +14,7 @@ import { useDirectory } from '../contexts/DirectoryContext.jsx'
 import { getEditableSections, getLockedFieldKeys, canDeleteBooking } from '../lib/sectionPermissions.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 import Field from './Field.jsx'
+import { useFormDraft, clearDraft } from '../hooks/useFormDraft.js'
 import { getLmsDepartment, groupContractsByEntry, groupLabel, groupFuncNames, contractVenueMatch, mapGroupToForm, isContractCancelled } from '../lib/lms.js'
 
 const SLOT_CATEGORIES = new Set(['add', 'ac', 'aee'])
@@ -55,7 +56,7 @@ function blankForm(venueId, defaults = {}) {
   }
 }
 
-export default function BookingForm({ initial, onSaved, onDeleted, onClose, user }) {
+export default function BookingForm({ initial, restoredFromDraft, onSaved, onDeleted, onClose, user }) {
   const { t, lang } = useLanguage()
   const { eventTypes: dirEventTypes, users: dirUsers, elements: dirElements } = useDirectory()
   const editing = !!(initial && initial.id)
@@ -78,11 +79,16 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
       const parsed = parsePhoneCode(initial.phone)
       return { ...initial, phone: parsed.number, phone_code: parsed.value }
     }
+    if (restoredFromDraft && initial) {
+      const parsed = parsePhoneCode(initial.phone)
+      return { ...blankForm(venueId, { date: initial.date }), ...initial, phone: parsed.number, phone_code: parsed.value || '+91' }
+    }
     return blankForm(venueId, { date: initial?.date })
   })
-  const [manualTitle, setManualTitle] = useState(() =>
-    editing && initial.title && initial.title !== autoTitle(initial) ? initial.title : null
-  )
+  const [manualTitle, setManualTitle] = useState(() => {
+    if (restoredFromDraft && initial?._draftManualTitle != null) return initial._draftManualTitle
+    return editing && initial.title && initial.title !== autoTitle(initial) ? initial.title : null
+  })
   const [errors, setErrors] = useState({})
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -99,6 +105,9 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
   const [cancelMode, setCancelMode] = useState('entire')
   const [cancelFromDate, setCancelFromDate] = useState('')
   const [eventSlots, setEventSlots] = useState(() => {
+    if (restoredFromDraft && Array.isArray(initial?.event_slots) && initial.event_slots.length > 0) {
+      return initial.event_slots
+    }
     if (!SLOT_CATEGORIES.has(venueId)) return []
     if (editing && Array.isArray(initial.event_slots) && initial.event_slots.length > 0) {
       return initial.event_slots
@@ -106,6 +115,32 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
     if (editing) return buildSlotsFromTopLevel(initial, venueId)
     return [emptySlot(venueId)]
   })
+
+  // ── Draft persistence (survives mobile tab suspension) ──
+  const [draftToast, setDraftToast] = useState(!!restoredFromDraft)
+  const draftToastTimer = useRef(null)
+
+  useEffect(() => {
+    if (draftToast) {
+      draftToastTimer.current = setTimeout(() => setDraftToast(false), 3000)
+      return () => clearTimeout(draftToastTimer.current)
+    }
+  }, [draftToast])
+
+  const getFormDraftState = useCallback(() => ({
+    isOpen: true,
+    isEditing: editing,
+    eventId: editing ? initial?.id : null,
+    venueId,
+    formState: { ...form, phone: form.phone, phone_code: form.phone_code },
+    manualTitle,
+    slots: eventSlots,
+  }), [editing, initial?.id, venueId, form, manualTitle, eventSlots])
+
+  const saveDraft = useFormDraft(true, getFormDraftState)
+
+  // Save draft whenever form data changes
+  useEffect(() => { saveDraft() }, [form, venueId, eventSlots, manualTitle, saveDraft])
 
   // ── LMS contract fetch state ──
   const [lmsLoading, setLmsLoading] = useState(false)
@@ -881,6 +916,10 @@ export default function BookingForm({ initial, onSaved, onDeleted, onClose, user
           </div>
         </div>
       </div>
+
+      {draftToast && (
+        <div className="draft-restored-toast">{t('Draft restored')}</div>
+      )}
 
       <div className={`form-body${isTentative ? ' form-body-tentative' : ''}`}>
         {sections.map((section, si) => {
