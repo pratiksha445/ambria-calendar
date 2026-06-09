@@ -10,14 +10,19 @@ const OWN_VENUES = new Set(['ap', 'am', 'ae', 'ar'])
 
 function isSectionFilled(val) { return val != null && val !== '' }
 
-/** Returns CSS class for the pill's section-status bottom border */
-function getSectionClass(ev) {
-  if (!OWN_VENUES.has(ev.venue_id)) return ''
-  const dFilled = isSectionFilled(ev.decor_status)
-  const eFilled = isSectionFilled(ev.entertainment_status)
-  if (dFilled && eFilled) return ''
-  if (!dFilled && !eFilled) return ' pill-sec-red'
-  return ' pill-sec-amber'
+const SEC_GREEN = '#076938'
+const SEC_RED = '#b32a27'
+
+function SectionBar({ ev }) {
+  if (!OWN_VENUES.has(ev.venue_id)) return null
+  const dColor = isSectionFilled(ev.decor_status) ? SEC_GREEN : SEC_RED
+  const eColor = isSectionFilled(ev.entertainment_status) ? SEC_GREEN : SEC_RED
+  return (
+    <div className="pill-sec-bar">
+      <div style={{ flex: 1, background: dColor }} />
+      <div style={{ flex: 1, background: eColor }} />
+    </div>
+  )
 }
 
 export default function MonthView({ currentDate, selectedDate, onSelectDate, onEventClick, events, eventTypes = [], skeleton = false, seasonData, getSeasonCategory }) {
@@ -131,11 +136,10 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, onE
                   const venue = VENUE_BY_ID[ev.venue_id]
                   const aeStyle = getSubVenueStyle(ev)
                   const statusClass = ev.status === 'Cancelled' ? ' pill-cancelled' : ev.status === 'Postponed' ? ' pill-postponed' : ''
-                  const secClass = getSectionClass(ev)
                   return (
                     <div
                       key={`${ev.id}-${ev.updated_at}`}
-                      className={`day-pill${statusClass}${secClass}`}
+                      className={`day-pill${statusClass}`}
                       style={{
                         background: aeStyle?.background ?? venue?.color ?? '#ccc',
                         color: aeStyle?.color ?? venue?.textColor ?? '#fff',
@@ -143,6 +147,7 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, onE
                       title={buildPillTooltip(ev, eventTypes)}
                     >
                       {buildPillLabel(ev, eventTypes)}{ev.status === 'Postponed' && <span className="pill-pp">PP</span>}
+                      <SectionBar ev={ev} />
                     </div>
                   )
                 })}
