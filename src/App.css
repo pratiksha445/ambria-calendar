@@ -6322,7 +6322,7 @@ input, select, textarea {
   z-index: 1;
   flex-shrink: 0;
 }
-.season-badge-crown {
+.season-badge-icon {
   width: auto;
   height: auto;
   border-radius: 0;
@@ -6337,7 +6337,7 @@ input, select, textarea {
   top: 3px;
   right: 3px;
 }
-.week-chip .season-badge-crown {
+.week-chip .season-badge-icon {
   top: 2px;
   right: 2px;
 }

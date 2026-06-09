@@ -49,7 +49,7 @@ export default function DayView({ selectedDate, events, onEdit, onDelete, onAdd,
     <div className="day-view">
       <div className="day-header">
         {formatDayHeader(selectedDate)}
-        {(() => { const s = getSeasonCategory ? getSeasonCategory(iso, seasonData) : null; const c = s ? SEASON_COLORS[s] : null; if (s === "King's") return <span className="season-pill-tag season-pill-crown" style={{ background: c }}><svg width="12" height="10" viewBox="0 0 24 20" fill="#fff" style={{ marginRight: 3, verticalAlign: 'middle' }}><path d="M2 17h20v3H2zM2 15l3-9 5 4 4-7 4 7 5-4 3 9z"/></svg>{s}</span>; return c ? <span className="season-pill-tag" style={{ background: c }}>{s}</span> : null })()}
+        {(() => { const s = getSeasonCategory ? getSeasonCategory(iso, seasonData) : null; const c = s ? SEASON_COLORS[s] : null; if (s === "King's") return <span className="season-pill-tag" style={{ background: c }}><svg width="12" height="10" viewBox="0 0 24 20" fill="#fff" style={{ marginRight: 3, verticalAlign: 'middle' }}><path d="M2 17h20v3H2zM2 15l3-9 5 4 4-7 4 7 5-4 3 9z"/></svg>{s}</span>; if (s === 'Perfect') return <span className="season-pill-tag" style={{ background: c }}><svg width="10" height="10" viewBox="0 0 24 24" fill="#fff" style={{ marginRight: 3, verticalAlign: 'middle' }}><path d="M12 2L2 9l10 13L22 9z"/></svg>{s}</span>; return null })()}
       </div>
 
       {onAdd && (

@@ -20,8 +20,6 @@ function getSectionClass(ev) {
   return ' pill-sec-amber'
 }
 
-const SEASON_COLORS = { "King's": '#D4A017', 'Perfect': '#2AAA8A' }
-
 export default function MonthView({ currentDate, selectedDate, onSelectDate, onEventClick, events, eventTypes = [], skeleton = false, seasonData, getSeasonCategory }) {
   const { dowHeaders } = useLanguage()
   const today = new Date()
@@ -72,7 +70,6 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, onE
 
           const isToday = isSameDay(d, today)
           const season = getSeasonCategory ? getSeasonCategory(iso, seasonData) : null
-          const seasonColor = season ? SEASON_COLORS[season] : null
           const classes = [
             'day-cell',
             d.getMonth() !== monthIndex ? 'outside' : '',
@@ -88,11 +85,13 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, onE
               aria-label={`${iso}, ${totalOnDay} bookings`}
             >
               {season === "King's" ? (
-                <span className="season-badge season-badge-crown" title={season}>
+                <span className="season-badge season-badge-icon" title={season}>
                   <svg width="12" height="10" viewBox="0 0 24 20" fill="#D4A017"><path d="M2 17h20v3H2zM2 15l3-9 5 4 4-7 4 7 5-4 3 9z"/></svg>
                 </span>
-              ) : seasonColor ? (
-                <span className="season-badge" style={{ background: seasonColor }} title={season} />
+              ) : season === 'Perfect' ? (
+                <span className="season-badge season-badge-icon" title={season}>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="#2AAA8A"><path d="M12 2L2 9l10 13L22 9z"/></svg>
+                </span>
               ) : null}
               <span className={`day-num${isToday ? ' today-circle' : ''}`}>
                 {d.getDate()}
