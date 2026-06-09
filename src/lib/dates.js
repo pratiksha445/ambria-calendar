@@ -74,6 +74,27 @@ export function formatTimestampIST(ts) {
   return `${day} ${month} ${year}, ${h}:${m} ${ampm}`
 }
 
+const IST_OFFSET = 5.5 * 60 * 60 * 1000
+
+/** Format a created_at timestamp as "Added 2:30 PM" (today) or "Added 9 Jun 2:30 PM" */
+export function formatAddedTime(ts) {
+  if (!ts) return ''
+  const d = new Date(ts)
+  const ist = new Date(d.getTime() + IST_OFFSET)
+  const now = new Date(Date.now() + IST_OFFSET)
+  let h = ist.getUTCHours()
+  const m = String(ist.getUTCMinutes()).padStart(2, '0')
+  const ampm = h >= 12 ? 'PM' : 'AM'
+  if (h === 0) h = 12
+  else if (h > 12) h -= 12
+  const time = `${h}:${m} ${ampm}`
+  const sameDay = ist.getUTCFullYear() === now.getUTCFullYear()
+    && ist.getUTCMonth() === now.getUTCMonth()
+    && ist.getUTCDate() === now.getUTCDate()
+  if (sameDay) return `Added ${time}`
+  return `Added ${ist.getUTCDate()} ${SHORT_MONTHS[ist.getUTCMonth()]} ${time}`
+}
+
 export function startOfMonth(d) {
   return new Date(d.getFullYear(), d.getMonth(), 1)
 }

@@ -1,7 +1,7 @@
 import { memo, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { VENUE_BY_ID, SHIFT_BADGE, getSubVenueStyle } from '../config/venues.js'
-import { formatTime12 } from '../lib/dates.js'
+import { formatTime12, formatAddedTime } from '../lib/dates.js'
 import { canAccessBooking, canDeleteBooking } from '../lib/sectionPermissions.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 import { loadElementLabels, getElementLabel } from '../lib/elements.js'
@@ -197,6 +197,12 @@ export default memo(function EventCard({ event, expanded = false, onToggle, onEd
                 )}
                 {event.sales_person && (
                   <span className="event-sales">{event.sales_person}</span>
+                )}
+                {event.rooms != null && event.rooms !== '' && String(event.rooms) !== '0' && (
+                  <span className="event-meta-extra"><span className="meta-dot">•</span> Rooms: {event.rooms}</span>
+                )}
+                {event.created_at && (
+                  <span className="event-meta-extra"><span className="meta-dot">•</span> {formatAddedTime(event.created_at)}</span>
                 )}
                 <span
                   className={`source-dot ${event.source}`}

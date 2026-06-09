@@ -1051,7 +1051,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   overflow: hidden;
   color: var(--ambria-meta);
   font-size: 11px;
@@ -1100,6 +1100,18 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   min-width: 0;
+}
+
+.event-meta-extra {
+  flex-shrink: 0;
+  white-space: nowrap;
+  opacity: 0.7;
+  font-weight: 400;
+}
+
+.meta-dot {
+  opacity: 0.5;
+  margin-right: 2px;
 }
 
 .shift-badge {
