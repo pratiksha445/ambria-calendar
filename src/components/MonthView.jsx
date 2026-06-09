@@ -90,7 +90,7 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, onE
                 </span>
               ) : season === 'Perfect' ? (
                 <span className="season-badge season-badge-icon" title={season}>
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="#2AAA8A"><path d="M12 2L2 9l10 13L22 9z"/></svg>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="#29B6F6"><path d="M12 2L2 9l10 13L22 9z"/></svg>
                 </span>
               ) : null}
               <span className={`day-num${isToday ? ' today-circle' : ''}`}>

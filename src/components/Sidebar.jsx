@@ -428,7 +428,7 @@ export default function Sidebar({
                 <span className="season-legend-label">King's</span>
               </div>
               <div className="season-legend-item">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="#2AAA8A" style={{ flexShrink: 0 }}><path d="M12 2L2 9l10 13L22 9z"/></svg>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="#29B6F6" style={{ flexShrink: 0 }}><path d="M12 2L2 9l10 13L22 9z"/></svg>
                 <span className="season-legend-label">Perfect</span>
               </div>
             </div>

@@ -4,7 +4,7 @@ import { VENUES } from '../config/venues.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 import EventCard from './EventCard.jsx'
 
-const SEASON_COLORS = { "King's": '#D4A017', 'Perfect': '#2AAA8A' }
+const SEASON_COLORS = { "King's": '#D4A017', 'Perfect': '#29B6F6' }
 
 export default function DayView({ selectedDate, events, onEdit, onDelete, onAdd, user, reviewMap, onReview, onPayment, seasonData, getSeasonCategory }) {
   const [expandedId, setExpandedId] = useState(null)
