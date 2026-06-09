@@ -1,7 +1,11 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 
 const VIEWS = ['day', 'week', 'month']
+const WEDDING_CALENDARS = [
+  { year: 2026, label: '2026 Wedding Calendar', src: import.meta.env.BASE_URL + 'wedding-calendar-2026.jpg' },
+  { year: 2027, label: '2027 Wedding Calendar', src: import.meta.env.BASE_URL + 'wedding-calendar-2027.png' },
+]
 
 export default function Header({
   currentDate,
@@ -23,8 +27,22 @@ export default function Header({
   const [pickerOpen, setPickerOpen] = useState(false)
   const [ksConfirm, setKsConfirm] = useState(false)
   const [pickerYear, setPickerYear] = useState(currentDate.getFullYear())
+  const [wcDropdown, setWcDropdown] = useState(false)
+  const [wcImage, setWcImage] = useState(null)
   const { t, formatMonthYear, shortMonths } = useLanguage()
   const pickerRef = useRef(null)
+
+  // Lightbox: ESC to close + body scroll lock
+  useEffect(() => {
+    if (!wcImage) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const onKey = (e) => { if (e.key === 'Escape') setWcImage(null) }
+    window.addEventListener('keydown', onKey)
+    return () => { document.body.style.overflow = prev; window.removeEventListener('keydown', onKey) }
+  }, [wcImage])
+
+  const openCalendar = useCallback((cal) => { setWcDropdown(false); setWcImage(cal) }, [])
 
   // Sync picker year when currentDate changes externally
   useEffect(() => {
@@ -130,6 +148,24 @@ export default function Header({
           <button className="icon-btn sm" onClick={onExport} aria-label={t('Export Bookings')}>
             <ExportIcon />
           </button>
+          <div className="header-more-wrap">
+            <button className="icon-btn sm" onClick={() => setWcDropdown((p) => !p)} aria-label="Wedding Calendar">
+              <CalendarHeartIcon />
+            </button>
+            {wcDropdown && (
+              <>
+                <div className="header-menu-backdrop" onClick={() => setWcDropdown(false)} />
+                <div className="header-menu-dropdown">
+                  {WEDDING_CALENDARS.map((cal) => (
+                    <button key={cal.year} className="header-menu-item" onClick={() => openCalendar(cal)}>
+                      <CrownMiniIcon />
+                      {cal.label}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
           <button className="book-btn" onClick={onAdd}>+<span className="book-btn-label"> {t('Book')}</span></button>
           {onClearMonth && (
             <div className="header-more-wrap">
@@ -208,6 +244,18 @@ export default function Header({
           </div>
         </div>
       )}
+
+      {wcImage && (
+        <div className="wc-lightbox" onClick={() => setWcImage(null)}>
+          <button className="wc-lightbox-close" onClick={() => setWcImage(null)} aria-label="Close">&times;</button>
+          <img
+            src={wcImage.src}
+            alt={wcImage.label}
+            className="wc-lightbox-img"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </header>
   )
 }
@@ -268,6 +316,26 @@ function PowerIcon() {
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M18.36 6.64a9 9 0 1 1-12.73 0" />
       <line x1="12" y1="2" x2="12" y2="12" />
+    </svg>
+  )
+}
+
+function CalendarHeartIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D4A017" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="4" width="18" height="18" rx="2" />
+      <line x1="16" y1="2" x2="16" y2="6" />
+      <line x1="8" y1="2" x2="8" y2="6" />
+      <line x1="3" y1="10" x2="21" y2="10" />
+      <path d="M12 18.5s-3.5-2.5-3.5-4.5a2 2 0 0 1 3.5-1.5 2 2 0 0 1 3.5 1.5c0 2-3.5 4.5-3.5 4.5z" fill="#D4A017" stroke="none" />
+    </svg>
+  )
+}
+
+function CrownMiniIcon() {
+  return (
+    <svg width="16" height="14" viewBox="0 0 24 20" fill="#D4A017" style={{ flexShrink: 0 }}>
+      <path d="M2 17h20v3H2zM2 15l3-9 5 4 4-7 4 7 5-4 3 9z"/>
     </svg>
   )
 }
