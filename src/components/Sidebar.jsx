@@ -424,7 +424,7 @@ export default function Sidebar({
             </div>
             <div className="season-legend">
               <div className="season-legend-item">
-                <span className="season-legend-dot" style={{ background: '#D4A017' }} />
+                <svg width="14" height="12" viewBox="0 0 24 20" fill="#D4A017" style={{ flexShrink: 0 }}><path d="M2 17h20v3H2zM2 15l3-9 5 4 4-7 4 7 5-4 3 9z"/></svg>
                 <span className="season-legend-label">King's</span>
               </div>
               <div className="season-legend-item">

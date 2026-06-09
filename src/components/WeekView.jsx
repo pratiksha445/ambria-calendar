@@ -56,7 +56,7 @@ export default function WeekView({ currentDate, selectedDate, onSelectDate, even
               className={`week-chip ${isSelected ? 'selected' : ''}`}
               onClick={() => onSelectDate(d)}
             >
-              {(() => { const s = getSeasonCategory ? getSeasonCategory(iso, seasonData) : null; const c = s ? SEASON_COLORS[s] : null; return c ? <span className="season-badge" style={{ background: c }} title={s} /> : null })()}
+              {(() => { const s = getSeasonCategory ? getSeasonCategory(iso, seasonData) : null; const c = s ? SEASON_COLORS[s] : null; if (s === "King's") return <span className="season-badge season-badge-crown" title={s}><svg width="12" height="10" viewBox="0 0 24 20" fill="#D4A017"><path d="M2 17h20v3H2zM2 15l3-9 5 4 4-7 4 7 5-4 3 9z"/></svg></span>; return c ? <span className="season-badge" style={{ background: c }} title={s} /> : null })()}
               <span className="week-chip-day">{dayLabel(d)}</span>
               <span className="week-chip-date">{d.getDate()}</span>
               {count > 0 && <span className="week-chip-count">{count}</span>}

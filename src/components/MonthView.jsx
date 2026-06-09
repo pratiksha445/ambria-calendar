@@ -87,7 +87,13 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, onE
               onClick={() => onSelectDate(d)}
               aria-label={`${iso}, ${totalOnDay} bookings`}
             >
-              {seasonColor && <span className="season-badge" style={{ background: seasonColor }} title={season} />}
+              {season === "King's" ? (
+                <span className="season-badge season-badge-crown" title={season}>
+                  <svg width="12" height="10" viewBox="0 0 24 20" fill="#D4A017"><path d="M2 17h20v3H2zM2 15l3-9 5 4 4-7 4 7 5-4 3 9z"/></svg>
+                </span>
+              ) : seasonColor ? (
+                <span className="season-badge" style={{ background: seasonColor }} title={season} />
+              ) : null}
               <span className={`day-num${isToday ? ' today-circle' : ''}`}>
                 {d.getDate()}
               </span>

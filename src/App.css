@@ -6322,11 +6322,24 @@ input, select, textarea {
   z-index: 1;
   flex-shrink: 0;
 }
+.season-badge-crown {
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  background: none !important;
+  top: 1px;
+  right: 1px;
+  line-height: 0;
+}
 
 /* Week chip already has position: relative */
 .week-chip .season-badge {
   top: 3px;
   right: 3px;
+}
+.week-chip .season-badge-crown {
+  top: 2px;
+  right: 2px;
 }
 
 /* Day view season pill tag */
