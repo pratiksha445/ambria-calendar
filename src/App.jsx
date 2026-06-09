@@ -713,7 +713,7 @@ export default function App() {
         {currentView === 'users' && user.role === 'admin' && (
           <UserManagement currentUser={user} showToast={showToast} onMenu={() => setSidebarOpen(true)} killSwitch={killSwitch} />
         )}
-        {currentView === 'audit' && user.role === 'admin' && (
+        {currentView === 'audit' && (user.role === 'admin' || user.role === 'gm') && (
           <AuditLog onMenu={() => setSidebarOpen(true)} killSwitch={killSwitch} />
         )}
         {currentView === 'event-types' && user.role === 'admin' && (

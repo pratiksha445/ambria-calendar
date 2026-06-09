@@ -240,7 +240,7 @@ export default function Sidebar({
               {t('Reviews')}
             </button>
           )}
-          {user?.role === 'admin' && (
+          {(user?.role === 'admin' || user?.role === 'gm') && (
             <button
               className={`nav-item ${currentView === 'audit' ? 'active' : ''}`}
               onClick={() => onNavigate('audit')}
