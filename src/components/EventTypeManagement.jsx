@@ -73,8 +73,7 @@ export default function EventTypeManagement({ currentUser, showToast, onMenu, ki
     e.preventDefault()
     const name = newName.trim()
     const abbr = newAbbr.trim().toUpperCase()
-    if (!name) return
-    if (!abbr) { setError(t('Abbreviation is required')); return }
+    if (!name || !abbr) { setError(t('Please enter event type name and abbreviation')); return }
     if (abbr.length > 5) { setError(t('Abbreviation must be 5 characters or less')); return }
     if (items.some((it) => it.name.toLowerCase() === name.toLowerCase())) {
       setError(t('Event type already exists'))

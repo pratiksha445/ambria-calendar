@@ -154,6 +154,7 @@ export default function UserManagement({ currentUser, showToast, onMenu, killSwi
     if (!form.firstName.trim()) { setFormError(t('First name is required')); return }
     if (!form.lastName.trim()) { setFormError(t('Last name is required')); return }
     if (!form.phone.trim()) { setFormError(t('Phone is required')); return }
+    if (!form.role || !form.department) { setFormError(t('Please select Role and Department')); return }
 
     const code = getCodeFromValue(form.phone_code || '+91')
     const fullPhone = code + ' ' + form.phone.replace(/[^\d\s]/g, '').trim()
@@ -373,8 +374,8 @@ export default function UserManagement({ currentUser, showToast, onMenu, killSwi
         )}
       </div>
       <div className="user-actions">
-        {/* PIN actions — single Reset PIN with inline options */}
-        {confirmResetPin === u.id ? (
+        {/* PIN actions — hidden for deactivated users */}
+        {u.is_active && (confirmResetPin === u.id ? (
           <div className="reset-pin-panel">
             <button className="btn-outline btn-sm" onClick={() => handleResetPin(u)}>{t('Reset to default (0000)')}</button>
             <div className="reset-pin-or">{t('or set custom:')}</div>
@@ -387,7 +388,7 @@ export default function UserManagement({ currentUser, showToast, onMenu, killSwi
           <div className="pin-action-row">
             <button className="btn-outline btn-sm" onClick={() => { setConfirmResetPin(u.id); setSettingPinFor(null) }}>{t('Reset PIN')}</button>
           </div>
-        )}
+        ))}
 
         {/* Section-specific actions */}
         {section === 'pending' && (
@@ -413,35 +414,39 @@ export default function UserManagement({ currentUser, showToast, onMenu, killSwi
         )}
         {section === 'approved' && (
           <>
-            {/* Inline role change */}
-            {isChangingRole ? (
-              <div className="role-change-row">
-                <select
-                  className="role-change-select"
-                  value={pendingRole}
-                  onChange={(e) => handleRoleSelect(u, e.target.value)}
-                >
-                  {ROLES.map((r) => (
-                    <option key={r} value={r}>{ROLE_LABELS[r]}</option>
-                  ))}
-                </select>
-                <button className="btn-xs btn-ghost" onClick={cancelRoleChange}>{t('Cancel')}</button>
-              </div>
-            ) : (
-              <button
-                className="btn-ghost btn-sm"
-                onClick={() => startRoleChange(u)}
-                disabled={isSelf}
-                title={isSelf ? t('You cannot change your own role') : ''}
-              >
-                {t('Change Role')}
-              </button>
+            {u.is_active && (
+              <>
+                {/* Inline role change */}
+                {isChangingRole ? (
+                  <div className="role-change-row">
+                    <select
+                      className="role-change-select"
+                      value={pendingRole}
+                      onChange={(e) => handleRoleSelect(u, e.target.value)}
+                    >
+                      {ROLES.map((r) => (
+                        <option key={r} value={r}>{ROLE_LABELS[r]}</option>
+                      ))}
+                    </select>
+                    <button className="btn-xs btn-ghost" onClick={cancelRoleChange}>{t('Cancel')}</button>
+                  </div>
+                ) : (
+                  <button
+                    className="btn-ghost btn-sm"
+                    onClick={() => startRoleChange(u)}
+                    disabled={isSelf}
+                    title={isSelf ? t('You cannot change your own role') : ''}
+                  >
+                    {t('Change Role')}
+                  </button>
+                )}
+                <button className="btn-ghost btn-sm" onClick={() => openEdit(u)}>{t('Edit')}</button>
+              </>
             )}
-            <button className="btn-ghost btn-sm" onClick={() => openEdit(u)}>{t('Edit')}</button>
             <button className="btn-ghost btn-sm" onClick={() => handleToggle(u)}>
               {t(u.is_active ? 'Deactivate' : 'Activate')}
             </button>
-            {confirmDelete === u.id ? (
+            {u.is_active && (confirmDelete === u.id ? (
               <div className="inline-confirm">
                 <span>{t('Remove {name}?', { name: u.name })}</span>
                 <button className="btn-danger btn-sm" onClick={() => handleDelete(u)}>{t('Yes')}</button>
@@ -456,7 +461,7 @@ export default function UserManagement({ currentUser, showToast, onMenu, killSwi
               >
                 {t('Delete')}
               </button>
-            )}
+            ))}
           </>
         )}
         {section === 'rejected' && (

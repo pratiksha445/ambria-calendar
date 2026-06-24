@@ -27,7 +27,7 @@ import { getEventTypeAbbr } from './lib/eventTypes.js'
 import { seedIfEmpty } from './lib/seedEvents.js'
 import { useDirectory } from './contexts/DirectoryContext.jsx'
 import { startOfMonth, endOfMonth, toIsoDate, addDays } from './lib/dates.js'
-import { VENUES, applyDynamic } from './config/venues.js'
+import { VENUES, VENUE_BY_ID, applyDynamic } from './config/venues.js'
 import { fetchActiveCategories } from './lib/categories.js'
 import { logAction } from './lib/audit.js'
 import { useKillSwitch } from './contexts/KillSwitchContext.jsx'
@@ -295,6 +295,7 @@ export default function App() {
       const hay = [
         ev.guest_name, ev.tender_name, ev.title, ev.venue_name,
         ev.sales_person, ev.event_type, ev.sub_venue,
+        VENUE_BY_ID[ev.venue_id]?.short,
         ev.event_type && ev.event_type !== 'Other' ? eventTypeAbbrByName[ev.event_type] : null,
         ev.event_type === 'Other' && ev.event_type_other ? getEventTypeAbbr('Other', ev.event_type_other, []) : null,
       ].filter(Boolean).join(' ').toLowerCase()

@@ -20,7 +20,7 @@ export default function LoginScreen({ onLogin }) {
   const pinRefs = [useRef(), useRef(), useRef(), useRef()]
 
   const handlePhone = (e) => {
-    setPhone(e.target.value.replace(/[^\d\s]/g, ''))
+    setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))
   }
 
   const handlePin = (index, val) => {

@@ -43,7 +43,8 @@ export default function ManageElements({ currentUser, showToast, onMenu, killSwi
   const handleAdd = async (e) => {
     e.preventDefault()
     const name = newName.trim()
-    if (!name) return
+    const nameHi = newNameHi.trim()
+    if (!name || !nameHi) { setError(t('Please enter element name')); return }
     if (items.some((it) => it.name.toLowerCase() === name.toLowerCase())) {
       setError(t('Element already exists'))
       return

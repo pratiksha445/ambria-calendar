@@ -20,6 +20,7 @@ const ACTION_LABEL_KEYS = {
 }
 
 const ROLE_COLORS = { admin: '#E85D75', gm: '#D4A24E', staff: '#95A5A6' }
+const ROLE_LABELS = { admin: 'Admin', gm: 'GM', division_head: 'Division Head', staff: 'Staff' }
 
 function MenuIcon() {
   return (
@@ -233,6 +234,10 @@ export default function AuditLog({ onMenu, killSwitch }) {
   }
 
   async function handleExport() {
+    if (exportFormat === 'pdf' && !exportFrom) {
+      alert(t("Please select 'From' date"))
+      return
+    }
     setExporting(true)
     try {
       const rows = await fetchExportData()
@@ -434,7 +439,30 @@ export default function AuditLog({ onMenu, killSwitch }) {
                 </div>
               )}
               {expanded === entry.id && !hasChanges && entry.details && (
-                <pre className="audit-details">{JSON.stringify(entry.details, null, 2)}</pre>
+                entry.entity_type === 'user' ? (
+                  <div className="audit-user-details">
+                    {entry.details.name && (
+                      <div className="audit-detail-row"><span className="audit-detail-label">Name:</span> <span>{entry.details.name}</span></div>
+                    )}
+                    {entry.details.role && (
+                      <div className="audit-detail-row"><span className="audit-detail-label">Role:</span> <span>{ROLE_LABELS[entry.details.role] || entry.details.role}</span></div>
+                    )}
+                    {entry.details.department && (
+                      <div className="audit-detail-row"><span className="audit-detail-label">Department:</span> <span>{entry.details.department}</span></div>
+                    )}
+                    {entry.details.is_active !== undefined && (
+                      <div className="audit-detail-row"><span className="audit-detail-label">Status:</span> <span>{entry.details.is_active ? 'Active' : 'Inactive'}</span></div>
+                    )}
+                    {entry.details.action && (
+                      <div className="audit-detail-row"><span className="audit-detail-label">Action:</span> <span>{entry.details.action}</span></div>
+                    )}
+                    {entry.details.reason && (
+                      <div className="audit-detail-row"><span className="audit-detail-label">Reason:</span> <span>{entry.details.reason}</span></div>
+                    )}
+                  </div>
+                ) : (
+                  <pre className="audit-details">{JSON.stringify(entry.details, null, 2)}</pre>
+                )
               )}
             </div>
           )
