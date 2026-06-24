@@ -7,7 +7,7 @@ import {
 } from '../config/formFields.js'
 import { autoTitle } from '../lib/autoTitle.js'
 import { sanitizeText, sanitizePhone, sanitizePax } from '../lib/sanitize.js'
-import { createEvent, updateEvent, deleteEvent, fetchDistinctGuestNames } from '../lib/events.js'
+import { createEvent, updateEvent, deleteEvent, fetchDistinctGuestNames, checkDuplicateBooking } from '../lib/events.js'
 import { fetchFilteredUsers } from '../lib/users.js'
 import { getElementLabel } from '../lib/elements.js'
 import { useDirectory } from '../contexts/DirectoryContext.jsx'
@@ -104,6 +104,8 @@ export default function BookingForm({ initial, restoredFromDraft, onSaved, onDel
   const [showCancelModal, setShowCancelModal] = useState(false)
   const [cancelMode, setCancelMode] = useState('entire')
   const [cancelFromDate, setCancelFromDate] = useState('')
+  const [dupWarning, setDupWarning] = useState(null) // { id, title, date, guest_name, shift, check_in_date, tender_name }
+  const [pendingDupPayload, setPendingDupPayload] = useState(null)
   const [eventSlots, setEventSlots] = useState(() => {
     if (restoredFromDraft && Array.isArray(initial?.event_slots) && initial.event_slots.length > 0) {
       return initial.event_slots
@@ -629,6 +631,28 @@ export default function BookingForm({ initial, restoredFromDraft, onSaved, onDel
       }
     }
 
+    // Duplicate detection for new bookings only
+    if (!editing) {
+      try {
+        const dup = await checkDuplicateBooking({
+          venueId,
+          date: form.date,
+          guestName: form.guest_name,
+          shift: form.shift,
+          checkInDate: form.check_in_date,
+          checkOutDate: form.check_out_date,
+          tenderName: form.tender_name,
+        })
+        if (dup) {
+          setPendingDupPayload(payload)
+          setDupWarning(dup)
+          return
+        }
+      } catch {
+        // Non-blocking — proceed with save on check failure
+      }
+    }
+
     setSaving(true)
     try {
       const row = editing
@@ -641,6 +665,27 @@ export default function BookingForm({ initial, restoredFromDraft, onSaved, onDel
     } finally {
       setSaving(false)
     }
+  }
+
+  const confirmDupSave = async () => {
+    const payload = pendingDupPayload
+    setDupWarning(null)
+    setPendingDupPayload(null)
+    setSaving(true)
+    try {
+      const row = await createEvent(payload, user)
+      onSaved?.(row)
+    } catch (err) {
+      console.error('[ambria] save failed', err)
+      setSubmitError(err?.message ?? String(err))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const dismissDupWarning = () => {
+    setDupWarning(null)
+    setPendingDupPayload(null)
   }
 
   const isoFromDate = (d) => {
@@ -1171,6 +1216,28 @@ export default function BookingForm({ initial, restoredFromDraft, onSaved, onDel
                 onClick={confirmPostpone}
               >
                 {t('Confirm Postpone')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {dupWarning && (
+        <div className="postpone-overlay" onClick={dismissDupWarning}>
+          <div className="postpone-modal" onClick={(e) => e.stopPropagation()}>
+            <h3>{t('Duplicate Booking')}</h3>
+            <p>
+              {t('A similar booking already exists for')}{' '}
+              <strong>{dupWarning.guest_name || dupWarning.tender_name || t('this guest')}</strong>
+              {' '}{t('on')}{' '}
+              <strong>{dupWarning.date || dupWarning.check_in_date}</strong>
+              {dupWarning.shift ? ` (${dupWarning.shift})` : ''}.
+              {' '}{t('Do you want to save anyway?')}
+            </p>
+            <div className="postpone-actions">
+              <button type="button" className="btn-ghost" onClick={dismissDupWarning}>{t('Cancel')}</button>
+              <button type="button" className="btn-save" onClick={confirmDupSave} disabled={saving}>
+                {saving ? t('Saving…') : t('Save Anyway')}
               </button>
             </div>
           </div>

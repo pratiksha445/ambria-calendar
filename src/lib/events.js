@@ -215,6 +215,38 @@ export async function deleteEvent(id, user) {
 }
 
 /**
+ * Check for an existing booking that matches the key identifiers of a new booking.
+ * Returns the matching row or null if no duplicate is found.
+ * Only queries non-deleted rows.
+ */
+export async function checkDuplicateBooking({ venueId, date, guestName, shift, checkInDate, checkOutDate, tenderName }) {
+  let q = supabase
+    .from('events')
+    .select('id, title, date, guest_name, shift, check_in_date, check_out_date, tender_name')
+    .is('deleted_at', null)
+    .eq('venue_id', venueId)
+
+  if (venueId === 'villa') {
+    const ciDate = checkInDate || date
+    const coDate = checkOutDate || ciDate
+    if (!ciDate) return null
+    if (guestName?.trim()) q = q.ilike('guest_name', guestName.trim())
+    q = q.lte('check_in_date', coDate).gte('check_out_date', ciDate)
+  } else if (venueId === 'tender') {
+    if (!date && !tenderName?.trim()) return null
+    if (date) q = q.eq('date', date)
+    if (tenderName?.trim()) q = q.ilike('tender_name', tenderName.trim())
+  } else {
+    if (!date || !guestName?.trim()) return null
+    q = q.eq('date', date).ilike('guest_name', guestName.trim())
+    if (shift) q = q.eq('shift', shift)
+  }
+
+  const { data } = await q.limit(1)
+  return data?.[0] ?? null
+}
+
+/**
  * Fetch distinct guest names for autocomplete.
  */
 export async function fetchDistinctGuestNames() {

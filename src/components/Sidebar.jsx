@@ -90,7 +90,10 @@ export default function Sidebar({
       >
         <div className="sidebar-header">
           <div className="brand">
-            <img src={import.meta.env.BASE_URL + (theme === 'dark' ? 'logo-dark.png' : 'logo.png')} alt="Ambria" className="sidebar-logo" />
+            <div style={{ textAlign: 'center', lineHeight: 1.2, userSelect: 'none' }}>
+              <div style={{ fontWeight: 700, fontSize: '20px', color: 'var(--ambria-accent)', fontFamily: 'inherit' }}>Ambria</div>
+              <div style={{ fontWeight: 400, fontSize: '13px', color: 'var(--ambria-muted)', fontFamily: 'inherit' }}>Calendar</div>
+            </div>
             <div className="lang-toggle">
               <button className={`lang-btn ${lang === 'en' ? 'active' : ''}`} onClick={() => setLang('en')}>EN</button>
               <span className="lang-sep">|</span>

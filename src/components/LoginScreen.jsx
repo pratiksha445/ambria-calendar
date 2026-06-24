@@ -167,6 +167,9 @@ export default function LoginScreen({ onLogin }) {
           <p className="success-text">
             {t("Your access request has been sent. An admin will review and approve your account. You'll be able to sign in once approved.")}
           </p>
+          <p className="success-text" style={{ marginTop: '10px', fontSize: '14px' }}>
+            {t('Your default PIN is')} <strong>0000</strong>. {t('You can change it after logging in.')}
+          </p>
           <button type="button" className="btn-save login-btn" onClick={switchToLogin}>
             {t('Back to Sign In')}
           </button>
@@ -183,7 +186,10 @@ export default function LoginScreen({ onLogin }) {
         noValidate
       >
         <div className="login-brand">
-          <img src={import.meta.env.BASE_URL + (theme === 'dark' ? 'logo-dark.png' : 'logo.png')} alt="Ambria" className="login-logo" />
+          <div style={{ textAlign: 'center', lineHeight: 1.2, marginBottom: '4px', userSelect: 'none' }}>
+            <div style={{ fontWeight: 700, fontSize: '22px', color: 'var(--ambria-accent)', fontFamily: 'inherit' }}>Ambria</div>
+            <div style={{ fontWeight: 400, fontSize: '14px', color: 'var(--ambria-muted)', fontFamily: 'inherit' }}>Calendar</div>
+          </div>
           <div className="lang-toggle">
             <button className={`lang-btn ${lang === 'en' ? 'active' : ''}`} onClick={() => setLang('en')}>EN</button>
             <span className="lang-sep">|</span>

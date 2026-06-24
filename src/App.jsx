@@ -296,6 +296,7 @@ export default function App() {
         ev.guest_name, ev.tender_name, ev.title, ev.venue_name,
         ev.sales_person, ev.event_type, ev.sub_venue,
         VENUE_BY_ID[ev.venue_id]?.short,
+        VENUE_BY_ID[ev.venue_id]?.name,
         ev.event_type && ev.event_type !== 'Other' ? eventTypeAbbrByName[ev.event_type] : null,
         ev.event_type === 'Other' && ev.event_type_other ? getEventTypeAbbr('Other', ev.event_type_other, []) : null,
       ].filter(Boolean).join(' ').toLowerCase()
