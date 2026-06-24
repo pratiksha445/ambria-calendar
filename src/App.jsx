@@ -34,6 +34,7 @@ import { useKillSwitch } from './contexts/KillSwitchContext.jsx'
 import { useLanguage } from './i18n/LanguageContext.jsx'
 import useSwipeNav from './hooks/useSwipeNav.js'
 import { readDraft, clearDraft } from './hooks/useFormDraft.js'
+import { isPushSupported, subscribeToPush } from './lib/pushNotifications.js'
 import './App.css'
 
 const ALL_SOURCES = ['crm', 'manual']
@@ -109,6 +110,7 @@ export default function App() {
     return null
   }) // null | { mode: 'new'|'edit', event? }
   const [toast, setToast] = useState(null)
+  const [showPushAsk, setShowPushAsk] = useState(false)
   const [confirmBulk, setConfirmBulk] = useState(false)
   const [needsPinChange, setNeedsPinChange] = useState(false)
   const [changePinOpen, setChangePinOpen] = useState(false)
@@ -562,6 +564,25 @@ export default function App() {
     }
   }
 
+  // Show soft push-notification ask after login (once per session)
+  useEffect(() => {
+    if (!user) return
+    if (sessionStorage.getItem('ambria_push_dismissed')) return
+    if (!isPushSupported()) return
+    if (typeof Notification === 'undefined' || Notification.permission !== 'default') return
+    setShowPushAsk(true)
+  }, [user?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handlePushAllow = async () => {
+    setShowPushAsk(false)
+    if (user?.phone) await subscribeToPush(user.phone)
+  }
+
+  const handlePushDismiss = () => {
+    setShowPushAsk(false)
+    sessionStorage.setItem('ambria_push_dismissed', '1')
+  }
+
   // Auth handlers
   const handleLogin = (u, pinChange) => {
     setUser(u)
@@ -801,6 +822,31 @@ export default function App() {
           onClose={() => setChangePinOpen(false)}
           showToast={showToast}
         />
+      )}
+      {showPushAsk && (
+        <div style={{
+          position: 'fixed', bottom: toast ? '56px' : '16px', left: '50%', transform: 'translateX(-50%)',
+          background: 'var(--ambria-card)', border: '1px solid var(--ambria-border)',
+          borderRadius: '10px', padding: '10px 14px', boxShadow: 'var(--ambria-shadow-dropdown)',
+          display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', zIndex: 300,
+          maxWidth: 'calc(100vw - 32px)',
+        }}>
+          <span style={{ color: 'var(--ambria-ink)', flex: 1 }}>
+            {t('Enable notifications for booking updates?')}
+          </span>
+          <button
+            onClick={handlePushAllow}
+            style={{ background: 'var(--ambria-accent)', color: '#fff', border: 'none', borderRadius: '6px', padding: '4px 12px', fontSize: '13px', cursor: 'pointer', whiteSpace: 'nowrap' }}
+          >
+            {t('Allow')}
+          </button>
+          <button
+            onClick={handlePushDismiss}
+            style={{ background: 'none', border: '1px solid var(--ambria-border)', borderRadius: '6px', padding: '4px 10px', fontSize: '13px', cursor: 'pointer', color: 'var(--ambria-muted)', whiteSpace: 'nowrap' }}
+          >
+            {t('Dismiss')}
+          </button>
+        </div>
       )}
       {toast && <div className="toast">{toast}</div>}
     </div>

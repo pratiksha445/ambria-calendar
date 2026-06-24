@@ -7,6 +7,17 @@ import { logAction } from '../lib/audit.js'
 import { COUNTRY_CODES, getCodeFromValue, parsePhoneCode, DEPARTMENTS, SALES_TYPES, SALES_DEPARTMENTS } from '../config/formFields.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 
+function sendPushNotification(phone, title, body) {
+  fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/push-notify`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+    },
+    body: JSON.stringify({ phone, title, body, action_url: '/' }),
+  }).catch(() => {})
+}
+
 const ROLES = ['admin', 'gm', 'division_head', 'staff']
 const ROLE_COLORS = { admin: '#E85D75', gm: '#7C3AED', division_head: '#D97706', staff: '#95A5A6' }
 const ROLE_LABELS = { admin: 'Admin', gm: 'GM', division_head: 'Division Head', staff: 'Staff' }
@@ -218,6 +229,11 @@ export default function UserManagement({ currentUser, showToast, onMenu, killSwi
     try {
       const row = await approveUser(user.id, currentUser.id)
       await logAction(currentUser.id, currentUser.name, 'approve', 'user', row.id, { summary: `Approved user: ${row.name}`, name: row.name })
+      sendPushNotification(
+        user.phone,
+        'Access Approved ✓',
+        'Your Ambria Calendar access has been approved. Log in with your default PIN 0000.',
+      )
       showToast?.(t('{name} approved', { name: user.name }))
       await loadUsers()
     } catch (err) { console.error(err) }
@@ -230,6 +246,11 @@ export default function UserManagement({ currentUser, showToast, onMenu, killSwi
         summary: `Rejected user: ${row.name}${rejectReason.trim() ? ` (reason: ${rejectReason.trim()})` : ''}`,
         name: row.name, reason: rejectReason.trim() || null,
       })
+      sendPushNotification(
+        user.phone,
+        'Access Request Update',
+        'Your Ambria Calendar access request was not approved. Contact admin for details.',
+      )
       setRejectingId(null)
       setRejectReason('')
       showToast?.(t('{name} rejected', { name: user.name }))

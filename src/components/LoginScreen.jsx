@@ -3,6 +3,7 @@ import { COUNTRY_CODES, getCodeFromValue, DEPARTMENTS, SALES_TYPES, SALES_DEPART
 import { loginUser, checkPhoneStatus, requestAccess } from '../lib/users.js'
 import { logAction } from '../lib/audit.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
+import { isPushSupported, subscribeToPush } from '../lib/pushNotifications.js'
 
 export default function LoginScreen({ onLogin }) {
   const { t, lang, setLang, theme } = useLanguage()
@@ -17,6 +18,8 @@ export default function LoginScreen({ onLogin }) {
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
   const [shake, setShake] = useState(false)
+  const [notifEnabled, setNotifEnabled] = useState(true)
+  const [notifSubscribed, setNotifSubscribed] = useState(false)
   const pinRefs = [useRef(), useRef(), useRef(), useRef()]
 
   const handlePhone = (e) => {
@@ -125,6 +128,10 @@ export default function LoginScreen({ onLogin }) {
       }
 
       await requestAccess(firstName.trim() + ' ' + lastName.trim(), fullPhone, department, isSalesDept ? salesType : null)
+      if (notifEnabled && isPushSupported()) {
+        const result = await subscribeToPush(fullPhone)
+        setNotifSubscribed(result.success)
+      }
       setMode('success')
     } catch (err) {
       const msg = err?.message ?? String(err)
@@ -169,6 +176,11 @@ export default function LoginScreen({ onLogin }) {
           </p>
           <p className="success-text" style={{ marginTop: '10px', fontSize: '14px' }}>
             {t('Your default PIN is')} <strong>0000</strong>. {t('You can change it after logging in.')}
+          </p>
+          <p className="success-text" style={{ marginTop: '8px', fontSize: '13px', color: 'var(--ambria-muted)' }}>
+            {notifSubscribed
+              ? t("We'll notify you when your request is reviewed.")
+              : t('Check back later to see if your request has been approved.')}
           </p>
           <button type="button" className="btn-save login-btn" onClick={switchToLogin}>
             {t('Back to Sign In')}
@@ -300,6 +312,23 @@ export default function LoginScreen({ onLogin }) {
                 />
               ))}
             </div>
+          </div>
+        )}
+
+        {mode === 'signup' && isPushSupported() && (
+          <div style={{ marginBottom: '8px', padding: '10px 12px', background: 'var(--ambria-chip)', borderRadius: '8px', fontSize: '13px' }}>
+            <p style={{ margin: '0 0 6px', color: 'var(--ambria-ink)' }}>
+              {t('Enable notifications to know when your request is approved')}
+            </p>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', color: 'var(--ambria-ink)' }}>
+              <input
+                type="checkbox"
+                checked={notifEnabled}
+                onChange={(e) => setNotifEnabled(e.target.checked)}
+                style={{ width: '16px', height: '16px', accentColor: 'var(--ambria-accent)' }}
+              />
+              {t('Enable push notifications')}
+            </label>
           </div>
         )}
 
