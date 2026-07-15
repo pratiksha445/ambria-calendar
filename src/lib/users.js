@@ -52,6 +52,17 @@ export async function loginUser(phone, pin) {
   return { status: 'ok', user, needsPinChange: row.pin === DEFAULT_PIN }
 }
 
+/** Re-check whether a logged-in user is still active & approved (session-kill on deactivation). */
+export async function fetchUserStatus(userId) {
+  const { data, error } = await supabase
+    .from('users')
+    .select('is_active, approval_status')
+    .eq('id', userId)
+    .maybeSingle()
+  if (error) throw error
+  return data
+}
+
 /** Fire-and-forget: persist filter selections to the user's DB record. */
 export async function saveUserFilters(userId, savedFilters) {
   await supabase

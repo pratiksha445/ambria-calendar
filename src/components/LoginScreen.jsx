@@ -5,7 +5,7 @@ import { logAction } from '../lib/audit.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 import { isPushSupported, subscribeToPush } from '../lib/pushNotifications.js'
 
-export default function LoginScreen({ onLogin }) {
+export default function LoginScreen({ onLogin, initialNotice }) {
   const { t, lang, setLang, theme } = useLanguage()
   const [mode, setMode] = useState('login') // 'login' | 'signup' | 'success'
   const [phoneCode, setPhoneCode] = useState('+91')
@@ -15,7 +15,7 @@ export default function LoginScreen({ onLogin }) {
   const [lastName, setLastName] = useState('')
   const [department, setDepartment] = useState('')
   const [salesType, setSalesType] = useState('')
-  const [error, setError] = useState(null)
+  const [error, setError] = useState(initialNotice || null)
   const [loading, setLoading] = useState(false)
   const [shake, setShake] = useState(false)
   const [notifEnabled, setNotifEnabled] = useState(true)

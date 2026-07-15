@@ -21,7 +21,7 @@ import Reviews from './components/Reviews.jsx'
 import ReviewModal from './components/ReviewModal.jsx'
 import PaymentModal from './components/PaymentModal.jsx'
 import { fetchEvents, deleteEvent, bulkDeleteMonth } from './lib/events.js'
-import { saveUserFilters } from './lib/users.js'
+import { saveUserFilters, fetchUserStatus } from './lib/users.js'
 import { fetchReviewsByEventIds, isReviewable } from './lib/reviews.js'
 import { getEventTypeAbbr } from './lib/eventTypes.js'
 import { seedIfEmpty } from './lib/seedEvents.js'
@@ -110,6 +110,7 @@ export default function App() {
     return null
   }) // null | { mode: 'new'|'edit', event? }
   const [toast, setToast] = useState(null)
+  const [loginNotice, setLoginNotice] = useState(null)
   const [showPushAsk, setShowPushAsk] = useState(false)
   const [confirmBulk, setConfirmBulk] = useState(false)
   const [needsPinChange, setNeedsPinChange] = useState(false)
@@ -127,6 +128,41 @@ export default function App() {
   const [fetchedMonths, setFetchedMonths] = useState(() => new Set())
   const seeded = useRef(false)
   const searchFetchedRef = useRef(false)
+
+  // Clear the local session/cache — shared by explicit logout and forced
+  // session-kill (e.g. when a still-logged-in user gets deactivated).
+  const clearSession = useCallback(() => {
+    localStorage.removeItem('ambria_user')
+    setUser(null)
+    setCurrentView('calendar')
+    setAllEvents([])
+    fetchedMonthsRef.current = new Set()
+    fetchingRef.current = new Set()
+    setFetchedMonths(new Set())
+    searchFetchedRef.current = false
+    seeded.current = false
+    clearDirectory()
+  }, [clearDirectory])
+
+  // Periodically re-check that the logged-in user hasn't been deactivated/rejected
+  // elsewhere — otherwise a cached localStorage session stays valid forever.
+  useEffect(() => {
+    if (!user) return
+    let cancelled = false
+    const check = async () => {
+      try {
+        const status = await fetchUserStatus(user.id)
+        if (cancelled || !status) return
+        if (!status.is_active || status.approval_status !== 'approved') {
+          clearSession()
+          setLoginNotice(t('Your account has been deactivated. Contact an admin.'))
+        }
+      } catch {/* offline — don't force logout on a network error */}
+    }
+    check()
+    const interval = setInterval(check, 60000)
+    return () => { cancelled = true; clearInterval(interval) }
+  }, [user?.id, clearSession, t])
 
   // Fetch season calendar data (once on login, non-critical)
   useEffect(() => {
@@ -597,16 +633,7 @@ export default function App() {
     if (user) {
       await logAction(user.id, user.name, 'logout', 'session', null, { summary: 'Logged out' })
     }
-    localStorage.removeItem('ambria_user')
-    setUser(null)
-    setCurrentView('calendar')
-    setAllEvents([])
-    fetchedMonthsRef.current = new Set()
-    fetchingRef.current = new Set()
-    setFetchedMonths(new Set())
-    searchFetchedRef.current = false
-    seeded.current = false
-    clearDirectory()
+    clearSession()
   }
 
   const handleNavigate = (v) => {
@@ -615,7 +642,7 @@ export default function App() {
   }
 
   // Show login screen if not authenticated
-  if (!user) return <LoginScreen onLogin={handleLogin} />
+  if (!user) return <LoginScreen onLogin={handleLogin} initialNotice={loginNotice} />
 
   // Forced PIN change on first login with default PIN
   if (needsPinChange) {
