@@ -10,7 +10,9 @@ const VENUE_RATING_FIELDS = [
   { key: 'rating_housekeeping', label: 'Housekeeping' },
   { key: 'rating_valet', label: 'Valet' },
   { key: 'rating_overall', label: 'Overall' },
-  { key: 'rating_poc_availability', label: 'POC Availability' },
+  { key: 'rating_client_feedback', label: 'Client Feedback' },
+  { key: 'rating_presentation_hygiene', label: 'Presentation & Hygiene' },
+  { key: 'rating_poc_availability', label: 'Decor POC Availability' },
 ]
 
 const ADD_RATING_FIELDS = [
@@ -166,6 +168,8 @@ function buildPayload(reviewData, user) {
     base.rating_housekeeping = reviewData.rating_housekeeping
     base.rating_valet = reviewData.rating_valet
     base.rating_overall = reviewData.rating_overall
+    base.rating_client_feedback = reviewData.rating_client_feedback
+    base.rating_presentation_hygiene = reviewData.rating_presentation_hygiene
   }
 
   return base
