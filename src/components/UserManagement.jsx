@@ -165,7 +165,8 @@ export default function UserManagement({ currentUser, showToast, onMenu, killSwi
     if (!form.firstName.trim()) { setFormError(t('First name is required')); return }
     if (!form.lastName.trim()) { setFormError(t('Last name is required')); return }
     if (!form.phone.trim()) { setFormError(t('Phone is required')); return }
-    if (!form.role || !form.department) { setFormError(t('Please select Role and Department')); return }
+    if (!form.role) { setFormError(t('Role is required')); return }
+    if (!form.department) { setFormError(t('Department is required')); return }
 
     const code = getCodeFromValue(form.phone_code || '+91')
     const fullPhone = code + ' ' + form.phone.replace(/[^\d\s]/g, '').trim()
@@ -734,7 +735,7 @@ export default function UserManagement({ currentUser, showToast, onMenu, killSwi
               )}
 
               <div className="pf-field">
-                <label className="field-label">{t('Role')}</label>
+                <label className="field-label">{t('Role')} <span className="required-star">*</span></label>
                 <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}>
                   {ROLES.map((r) => (
                     <option key={r} value={r}>{t(ROLE_LABELS[r])}</option>
@@ -742,7 +743,7 @@ export default function UserManagement({ currentUser, showToast, onMenu, killSwi
                 </select>
               </div>
               <div className="pf-field">
-                <label className="field-label">{t('Department')}</label>
+                <label className="field-label">{t('Department')} <span className="required-star">*</span></label>
                 <select value={form.department} onChange={(e) => {
                   const dept = e.target.value
                   const isSales = SALES_DEPARTMENTS.includes(dept)

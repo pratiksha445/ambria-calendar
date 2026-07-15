@@ -406,6 +406,7 @@ const hi = {
   // ── विभाग ──
   'Department': 'विभाग',
   'Department is required': 'विभाग आवश्यक है',
+  'Role is required': 'भूमिका आवश्यक है',
   'All Departments': 'सभी विभाग',
   'Venue Sales': 'वेन्यू सेल्स',
   'Decor Sales': 'डेकोर सेल्स',

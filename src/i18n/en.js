@@ -406,6 +406,7 @@ const en = {
   // ── Departments ──
   'Department': 'Department',
   'Department is required': 'Department is required',
+  'Role is required': 'Role is required',
   'All Departments': 'All Departments',
   'Venue Sales': 'Venue Sales',
   'Decor Sales': 'Decor Sales',
