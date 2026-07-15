@@ -9,7 +9,7 @@ export const VENUES = [
   { id: 'am',     name: 'Ambria Manaktala',      short: 'AM',    color: '#f28a3a', textColor: '#fff', subVenues: ['Emerald Lawn', 'Emerald + Glass House', 'Emerald + Banana Tree', 'Emerald + Glass House + Banana', 'Alstonia Lawn', 'Alstonia + Banana Tree', 'Alstonia + Banana Tree + Emerald', 'Glass House', 'Banana Tree Lawn', 'Full Venue'] },
   { id: 'ae',     name: 'Ambria Exotica',        short: 'AE',    color: '#7d3639', textColor: '#fff', subVenues: ['Aura Lawn', 'Aura Glass House + Lawn', 'Aura Glasshouse', 'Aura Porch', 'Valencia Glass House', 'Valencia Glass House + Lawn', 'Valencia Glass House + Lawn + Poolside', 'Valencia Lawn + Poolside', 'Valencia Porch', 'Full Venue'] },
   { id: 'ar',     name: 'Ambria Restro',         short: 'AR',    color: '#222da3', textColor: '#fff', subVenues: ['Restro-Lawn', 'Restro Glass House', 'Rooftop', 'Cafe', 'Restro Lawn + Glass House', 'Restro Lawn + Rooftop', 'Full Venue'] },
-  { id: 'villa',  name: 'Villa',                 short: 'Villa', color: '#855b7a', textColor: '#fff', subVenues: ['AP Kothi', 'AM Kothi', 'AE Kothi', 'Sukoon'] },
+  { id: 'villa',  name: 'Villa',                 short: 'Villa', color: '#C0392B', textColor: '#fff', subVenues: ['AP Kothi', 'AM Kothi', 'AE Kothi', 'Sukoon'] },
   { id: 'add',    name: 'Ambria Design & Decor', short: 'ADD',   color: '#51c6fc', textColor: '#1A1A1A', subVenues: [] },
   { id: 'ac',     name: 'Ambria Cuisine',        short: 'AC',    color: '#fa6eb2', textColor: '#fff', subVenues: [] },
   { id: 'aee',    name: 'Ambria Events',         short: 'AEE',   color: '#5a1a96', textColor: '#fff', subVenues: [] },
@@ -48,7 +48,7 @@ export function applyDynamic(dbRows) {
 
 // ── Sub-venue color variants (AE + AM) ──
 // Returns { background, color } override or null for default venue color.
-export const AE_VALENCIA = '#b56064'
+export const AE_VALENCIA = '#D3D3D3'
 export const AM_ALSTONIA = '#f4c58a'
 
 export function stripeGradient(a, b) {
@@ -56,7 +56,7 @@ export function stripeGradient(a, b) {
 }
 
 function aeSubVenue(sv) {
-  if (sv.startsWith('Valencia')) return { background: AE_VALENCIA, color: '#fff' }
+  if (sv.startsWith('Valencia')) return { background: AE_VALENCIA, color: '#1A1A1A' }
   if (sv === 'Full Venue') return { background: stripeGradient(VENUE_BY_ID.ae?.color ?? '#7d3639', AE_VALENCIA), color: '#fff' }
   return null
 }
