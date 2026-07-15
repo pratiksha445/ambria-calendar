@@ -120,7 +120,8 @@ export async function updateEvent(id, eventData, user) {
 
 /**
  * Bulk-delete all events in a date range.
- * Manual events are hard-deleted; CRM events are soft-deleted (deleted_at).
+ * All events are soft-deleted (deleted_at) so linked reviews survive
+ * (a hard delete would cascade-delete the review row via the events FK).
  */
 export async function bulkDeleteMonth(startDate, endDate, user) {
   // Count before deleting for audit
@@ -128,7 +129,7 @@ export async function bulkDeleteMonth(startDate, endDate, user) {
   if (user) {
     const { count: mc } = await supabase
       .from('events').select('*', { count: 'exact', head: true })
-      .eq('source', 'manual').gte('date', startDate).lte('date', endDate)
+      .eq('source', 'manual').gte('date', startDate).lte('date', endDate).is('deleted_at', null)
     const { count: cc } = await supabase
       .from('events').select('*', { count: 'exact', head: true })
       .neq('source', 'manual').gte('date', startDate).lte('date', endDate).is('deleted_at', null)
@@ -136,13 +137,14 @@ export async function bulkDeleteMonth(startDate, endDate, user) {
     crmCount = cc || 0
   }
 
-  // Hard delete manual events
+  // Soft delete manual events
   const { error: manualErr } = await supabase
     .from('events')
-    .delete()
+    .update({ deleted_at: new Date().toISOString() })
     .eq('source', 'manual')
     .gte('date', startDate)
     .lte('date', endDate)
+    .is('deleted_at', null)
 
   if (manualErr) throw manualErr
 
