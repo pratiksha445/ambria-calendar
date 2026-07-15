@@ -230,7 +230,7 @@ export default function Sidebar({
               {t('Event List')}
             </button>
           )}
-          {user?.role === 'admin' && (
+          {(user?.role === 'admin' || user?.role === 'gm') && (
             <button
               className={`nav-item ${currentView === 'reviews' ? 'active' : ''}`}
               onClick={() => onNavigate('reviews')}

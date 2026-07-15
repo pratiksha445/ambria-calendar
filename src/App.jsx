@@ -754,7 +754,7 @@ export default function App() {
         {currentView === 'event-list' && user.role === 'admin' && (
           <EventList currentUser={user} showToast={showToast} onMenu={() => setSidebarOpen(true)} killSwitch={killSwitch} />
         )}
-        {currentView === 'reviews' && user.role === 'admin' && (
+        {currentView === 'reviews' && (user.role === 'admin' || user.role === 'gm') && (
           <Reviews currentUser={user} showToast={showToast} onMenu={() => setSidebarOpen(true)} killSwitch={killSwitch} />
         )}
       </div>
