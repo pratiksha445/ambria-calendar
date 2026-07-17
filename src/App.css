@@ -2830,12 +2830,11 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  transition: opacity .15s ease;
 }
 .user-row:hover { box-shadow: var(--ambria-shadow-card); }
-.user-row.inactive { opacity: 0.5; }
+.user-row.inactive .user-info { opacity: 0.5; }
 
-.user-info { display: flex; flex-direction: column; gap: 4px; }
+.user-info { display: flex; flex-direction: column; gap: 4px; transition: opacity .15s ease; }
 
 .user-name-line {
   display: flex;
