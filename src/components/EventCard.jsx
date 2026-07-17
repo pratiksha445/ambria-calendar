@@ -750,8 +750,8 @@ function buildPrimary(event, formatShortDate, t) {
   }
   return joinPipes([
     event.guest_name,
-    event.event_type === 'Other' ? event.event_type_other : (event.event_type ? t(event.event_type) : null),
     event.pax ? `${event.pax}pax` : null,
+    event.event_type === 'Other' ? event.event_type_other : (event.event_type ? t(event.event_type) : null),
     event.menu_cat,
     event.venue_name,
   ])

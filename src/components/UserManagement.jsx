@@ -147,7 +147,7 @@ export default function UserManagement({ currentUser, showToast, onMenu, killSwi
 
   const openNew = () => {
     setEditing('new')
-    setForm({ firstName: '', lastName: '', phone_code: '+91', phone: '', role: 'staff', department: '', sales_type: '' })
+    setForm({ firstName: '', lastName: '', phone_code: '+91', phone: '', role: '', department: '', sales_type: '' })
     setFormError(null)
   }
 
@@ -737,6 +737,7 @@ export default function UserManagement({ currentUser, showToast, onMenu, killSwi
               <div className="pf-field">
                 <label className="field-label">{t('Role')} <span className="required-star">*</span></label>
                 <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}>
+                  <option value="">{t('— Select —')}</option>
                   {ROLES.map((r) => (
                     <option key={r} value={r}>{t(ROLE_LABELS[r])}</option>
                   ))}
