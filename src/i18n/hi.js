@@ -354,6 +354,8 @@ const hi = {
   'MCNV': 'MCNV',
   'LV': 'LV',
   'LNV': 'LNV',
+  'XV': 'XV',
+  'XNV': 'XNV',
   'Customised': 'कस्टमाइज़्ड',
   'Released': 'जारी',
   'Delayed by guest': 'अतिथि द्वारा देरी',

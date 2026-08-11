@@ -26,9 +26,9 @@ export const BOOKING_STATUSES = [
   'Only Rental', 'VM', 'VD', 'VE', 'VDE', 'VME', 'VMD', 'VMDE',
 ]
 export const MENU_TYPES = ['Veg', 'Non-Veg', 'Jain', 'Only Chaat', 'Only Fruit']
-export const MENU_CATS = ['MV', 'MNV', 'DMV', 'DMNV', 'MCV', 'MCNV', 'LV', 'LNV', 'Customised']
-export const VEG_CATS = ['MV', 'DMV', 'MCV', 'LV']
-export const NON_VEG_CATS = ['MNV', 'DMNV', 'MCNV', 'LNV']
+export const MENU_CATS = ['MV', 'MNV', 'DMV', 'DMNV', 'MCV', 'MCNV', 'LV', 'LNV', 'XV', 'XNV', 'Customised']
+export const VEG_CATS = ['MV', 'DMV', 'MCV', 'LV', 'XV']
+export const NON_VEG_CATS = ['MNV', 'DMNV', 'MCNV', 'LNV', 'XNV']
 export const FP_STATUSES = ['Released', 'Delayed by guest', 'Not Released']
 export const DECOR_TYPES = ['Silver', 'Gold', 'Premium']
 export const DECOR_STATUSES = ['Open', 'Meeting', 'Closure', 'Outdoor']

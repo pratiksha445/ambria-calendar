@@ -354,6 +354,8 @@ const en = {
   'MCNV': 'MCNV',
   'LV': 'LV',
   'LNV': 'LNV',
+  'XV': 'XV',
+  'XNV': 'XNV',
   'Customised': 'Customised',
   'Released': 'Released',
   'Delayed by guest': 'Delayed by guest',
