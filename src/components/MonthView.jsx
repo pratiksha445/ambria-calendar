@@ -8,19 +8,30 @@ const MAX_PILLS = 3
 const MAX_PILLS_DESKTOP = 5
 const OWN_VENUES = new Set(['ap', 'am', 'ae', 'ar'])
 
-function isSectionFilled(val) { return val != null && val !== '' }
-
 const SEC_GREEN = '#076938'
 const SEC_RED = '#b32a27'
 
-function SectionBar({ ev }) {
+// Closure / Outdoor → green, Meeting → red, Open or nothing selected → no line
+function sectionColor(val) {
+  if (val === 'Closure' || val === 'Outdoor') return SEC_GREEN
+  if (val === 'Meeting') return SEC_RED
+  return null
+}
+
+/** Bar colors for a pill, or null when no bar should render at all. */
+function sectionColors(ev) {
   if (!OWN_VENUES.has(ev.venue_id)) return null
-  const dColor = isSectionFilled(ev.decor_status) ? SEC_GREEN : SEC_RED
-  const eColor = isSectionFilled(ev.entertainment_status) ? SEC_GREEN : SEC_RED
+  const decor = sectionColor(ev.decor_status)
+  const ent = sectionColor(ev.entertainment_status)
+  if (!decor && !ent) return null
+  return { decor, ent }
+}
+
+function SectionBar({ colors }) {
   return (
     <div className="pill-sec-bar">
-      <div style={{ flex: 1, background: dColor }} />
-      <div style={{ flex: 1, background: eColor }} />
+      <span style={{ background: colors.decor ?? 'transparent' }} />
+      <span style={{ background: colors.ent ?? 'transparent' }} />
     </div>
   )
 }
@@ -136,10 +147,11 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, onE
                   const venue = VENUE_BY_ID[ev.venue_id]
                   const aeStyle = getSubVenueStyle(ev)
                   const statusClass = ev.status === 'Cancelled' ? ' pill-cancelled' : ev.status === 'Postponed' ? ' pill-postponed' : ''
+                  const secColors = sectionColors(ev)
                   return (
                     <div
                       key={`${ev.id}-${ev.updated_at}`}
-                      className={`day-pill${statusClass}`}
+                      className={`day-pill${statusClass}${secColors ? ' day-pill-sec' : ''}`}
                       style={{
                         background: aeStyle?.background ?? venue?.color ?? '#ccc',
                         color: aeStyle?.color ?? venue?.textColor ?? '#fff',
@@ -147,7 +159,7 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, onE
                       title={buildPillTooltip(ev, eventTypes)}
                     >
                       {buildPillLabel(ev, eventTypes)}{ev.status === 'Postponed' && <span className="pill-pp">PP</span>}
-                      <SectionBar ev={ev} />
+                      {secColors && <SectionBar colors={secColors} />}
                     </div>
                   )
                 })}
