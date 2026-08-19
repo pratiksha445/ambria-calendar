@@ -132,6 +132,9 @@ export default function Sidebar({
           </button>
         </div>
 
+        {/* Scroll region: header stays put, footer stays pinned, this bit scrolls */}
+        <div className="sidebar-scroll">
+
         {/* Navigation */}
         <div className="sidebar-nav">
           <button
@@ -437,6 +440,8 @@ export default function Sidebar({
             </div>
           </>
         )}
+
+        </div>{/* /sidebar-scroll */}
 
         {/* User info + Change PIN + Logout — pinned to bottom */}
         <div className="sidebar-user">
