@@ -1,15 +1,63 @@
-import { useState, useRef } from 'react'
-import { COUNTRY_CODES, getCodeFromValue, DEPARTMENTS, SALES_TYPES, SALES_DEPARTMENTS } from '../config/formFields.js'
-import { loginUser, checkPhoneStatus, requestAccess } from '../lib/users.js'
+// ============================================================
+// LoginScreen.jsx
+//
+// WHAT THIS FILE IS
+//   Everything a logged-out person sees, as one small state machine:
+//
+//     signup  --submit-->  waiting  --admin approves-->  setpin  --> app
+//                             |
+//                             +--rejected--> "declined" card (Start over)
+//     login  (Phone + PIN, for staff who already have a PIN)
+//
+// WHY IT EXISTS
+//   A brand-new person should land on Request Access, not on a PIN box they
+//   can't use. After submitting, this device remembers the request
+//   (signupSession.js), so reopening the app shows the waiting screen again.
+//   It checks the status every 15s and whenever the app comes back to the
+//   foreground, then moves on to Set PIN by itself. There is no default
+//   0000 PIN any more.
+//
+//   Which screen opens first:
+//     pending request on this device  -> waiting
+//     otherwise, always               -> signup (Request Access)
+//   Existing staff tap "Sign In" under the form. The phone box there is
+//   pre-filled with the last number that signed in on this device.
+//
+// USED BY
+//   src/App.jsx (rendered whenever there is no logged-in user)
+//
+// DEPENDS ON
+//   src/lib/users.js, src/lib/signupSession.js, src/components/SetPinScreen.jsx,
+//   src/lib/pushNotifications.js, src/lib/audit.js, i18n context
+// ============================================================
+
+import { useState, useRef, useEffect } from 'react'
+import { COUNTRY_CODES, getCodeFromValue, parsePhoneCode, DEPARTMENTS, SALES_TYPES, SALES_DEPARTMENTS } from '../config/formFields.js'
+import { loginUser, checkPhoneStatus, requestAccess, getSignupStatus, completeSignup } from '../lib/users.js'
+import { readPendingSignup, savePendingSignup, clearPendingSignup, readLastPhone, rememberPhone, forgetPhone } from '../lib/signupSession.js'
 import { logAction } from '../lib/audit.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 import { isPushSupported, subscribeToPush } from '../lib/pushNotifications.js'
+import SetPinScreen from './SetPinScreen.jsx'
+
+const STATUS_POLL_MS = 5000
+
+function pickInitialMode() {
+  return readPendingSignup() ? 'waiting' : 'signup'
+}
 
 export default function LoginScreen({ onLogin, initialNotice }) {
   const { t, lang, setLang, theme } = useLanguage()
-  const [mode, setMode] = useState('login') // 'login' | 'signup' | 'success'
-  const [phoneCode, setPhoneCode] = useState('+91')
-  const [phone, setPhone] = useState('')
+  // Read once on mount. These decide the first screen and pre-fill the phone box.
+  const [pending, setPending] = useState(readPendingSignup) // { phone, token, name } | null
+  const [initialPhone] = useState(() => parsePhoneCode(readPendingSignup()?.phone || readLastPhone()))
+  const [mode, setMode] = useState(pickInitialMode) // 'signup' | 'login' | 'waiting' | 'setpin'
+  const [signupStatus, setSignupStatus] = useState(null) // { status, name, rejection_reason } from the RPC
+  const [checkNonce, setCheckNonce] = useState(0) // bump to force an immediate status check
+  const [checking, setChecking] = useState(false)
+  const [statusError, setStatusError] = useState(null) // last failed status check, shown on the waiting card
+  const [phoneCode, setPhoneCode] = useState(initialPhone.value)
+  const [phone, setPhone] = useState(initialPhone.number.replace(/\D/g, '').slice(0, 10))
   const [pin, setPin] = useState(['', '', '', ''])
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
@@ -66,6 +114,8 @@ export default function LoginScreen({ onLogin, initialNotice }) {
         case 'ok':
           await logAction(result.user.id, result.user.name, 'login', 'session', null, { summary: 'Logged in' })
           localStorage.setItem('ambria_user', JSON.stringify(result.user))
+          rememberPhone(fullPhone)
+          clearPendingSignup()
           onLogin(result.user, result.needsPinChange)
           return
         case 'pending':
@@ -84,6 +134,13 @@ export default function LoginScreen({ onLogin, initialNotice }) {
           setError(t('Your account has been deactivated. Contact an admin.'))
           break
         case 'not_found':
+          // The remembered number no longer has an account (e.g. it was deleted):
+          // stop opening this device on Sign In for it.
+          if (readLastPhone() === fullPhone) forgetPhone()
+          setShake(true)
+          setTimeout(() => setShake(false), 500)
+          setError(t('Invalid phone or PIN'))
+          break
         case 'wrong_pin':
         default:
           setShake(true)
@@ -117,6 +174,14 @@ export default function LoginScreen({ onLogin, initialNotice }) {
       // Check if phone already exists
       const existing = await checkPhoneStatus(fullPhone)
       if (existing) {
+        // This device already sent this request (e.g. the page was reloaded
+        // mid-submit), so resume waiting instead of showing an error.
+        const mine = readPendingSignup()
+        if (existing.approval_status === 'pending' && mine?.phone === fullPhone) {
+          setPending(mine)
+          setMode('waiting')
+          return
+        }
         if (existing.approval_status === 'pending') {
           setError(t('A request with this phone number is already pending.'))
         } else if (existing.approval_status === 'rejected') {
@@ -127,12 +192,21 @@ export default function LoginScreen({ onLogin, initialNotice }) {
         return
       }
 
-      await requestAccess(firstName.trim() + ' ' + lastName.trim(), fullPhone, department, isSalesDept ? salesType : null)
+      const name = firstName.trim() + ' ' + lastName.trim()
+      const { token } = await requestAccess(name, fullPhone, department, isSalesDept ? salesType : null)
+      // Save the token before anything else can fail. Losing it strands the
+      // request, and only an admin PIN reset could recover it.
+      const next = { phone: fullPhone, token, name }
+      savePendingSignup(next)
+      // Not awaited: the permission prompt and service-worker wait can take
+      // forever (the SW never registers in `npm run dev`), and they must never
+      // hold the user on "Submitting…". The waiting screen polls anyway.
       if (notifEnabled && isPushSupported()) {
-        const result = await subscribeToPush(fullPhone)
-        setNotifSubscribed(result.success)
+        subscribeToPush(fullPhone).then((r) => setNotifSubscribed(r.success))
       }
-      setMode('success')
+      setPending(next)
+      setSignupStatus({ status: 'pending', name, rejection_reason: null })
+      setMode('waiting')
     } catch (err) {
       const msg = err?.message ?? String(err)
       if (msg.includes('duplicate') || msg.includes('unique')) {
@@ -160,31 +234,148 @@ export default function LoginScreen({ onLogin, initialNotice }) {
     setSalesType('')
   }
 
-  if (mode === 'success') {
+  // Leave the waiting flow for good: forget the request on this device.
+  const startOver = () => {
+    clearPendingSignup()
+    setPending(null)
+    setSignupStatus(null)
+    setError(null)
+    setMode('signup')
+  }
+
+  // Poll the request status while waiting: every 5s, on foregrounding, and
+  // on "Check now". A network error just keeps the waiting screen up.
+  useEffect(() => {
+    if (mode !== 'waiting' || !pending) return
+    let cancelled = false
+    const check = async () => {
+      setChecking(true)
+      try {
+        const res = await getSignupStatus(pending.phone, pending.token)
+        if (cancelled) return
+        setStatusError(null)
+        if (res.status === 'approved') {
+          setSignupStatus(res)
+          setMode('setpin')
+        } else if (res.status === 'token_invalid') {
+          // The PIN was already set (another tab, or via an admin reset). Sign in normally.
+          clearPendingSignup()
+          setPending(null)
+          rememberPhone(pending.phone)
+          setError(t('Your PIN is already set. Please sign in.'))
+          setMode('login')
+        } else if (res.status === 'not_found') {
+          clearPendingSignup()
+          setPending(null)
+          setError(t('Your request was removed. Please submit a new one.'))
+          setMode('signup')
+        } else {
+          setSignupStatus(res)
+        }
+      } catch (err) {
+        // Keep waiting, but say why. A missing get_signup_status function
+        // means migration 028 has not been run.
+        if (!cancelled) setStatusError(err?.message ?? String(err))
+      }
+      finally { if (!cancelled) setChecking(false) }
+    }
+    check()
+    const iv = setInterval(check, STATUS_POLL_MS)
+    const onVisible = () => { if (document.visibilityState === 'visible') check() }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => {
+      cancelled = true
+      clearInterval(iv)
+      document.removeEventListener('visibilitychange', onVisible)
+    }
+  }, [mode, pending, checkNonce, t])
+
+  // Approved: set the first PIN (proved by the token), then sign straight in.
+  const handleFirstPin = async (newPin) => {
+    const result = await completeSignup(pending.phone, pending.token, newPin)
+    if (result === 'invalid_pin') throw new Error(t('Enter a 4-digit PIN'))
+    if (result === 'not_approved') { setMode('waiting'); throw new Error(t('Your request is not approved yet.')) }
+    if (result !== 'ok') throw new Error(t('This request can no longer set a PIN. Please sign in or contact an admin.'))
+
+    const login = await loginUser(pending.phone, newPin)
+    if (login.status !== 'ok') throw new Error(t('PIN saved. Please sign in.'))
+    await logAction(login.user.id, login.user.name, 'set_pin', 'user', login.user.id, { summary: 'Set initial PIN', initial: true })
+    await logAction(login.user.id, login.user.name, 'login', 'session', null, { summary: 'Logged in' })
+    localStorage.setItem('ambria_user', JSON.stringify(login.user))
+    rememberPhone(pending.phone)
+    clearPendingSignup()
+    onLogin(login.user, false)
+  }
+
+  if (mode === 'setpin' && pending) {
+    return (
+      <SetPinScreen
+        user={{ name: signupStatus?.name || pending.name, phone: pending.phone }}
+        onSave={handleFirstPin}
+      />
+    )
+  }
+
+  if (mode === 'waiting' && pending) {
+    const rejected = signupStatus?.status === 'rejected'
+    const deactivated = signupStatus?.status === 'deactivated'
+    const blocked = rejected || deactivated
     return (
       <div className="login-screen">
         <div className="login-card signup-success">
           <div className="success-icon" aria-hidden="true">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10" />
-              <polyline points="9 12 11.5 14.5 16 9.5" />
-            </svg>
+            {blocked ? (
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="15" y1="9" x2="9" y2="15" />
+                <line x1="9" y1="9" x2="15" y2="15" />
+              </svg>
+            ) : (
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--ambria-accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+            )}
           </div>
-          <h2>{t('Request Submitted')}</h2>
+          <h2>
+            {rejected ? t('Request Declined')
+              : deactivated ? t('Account Deactivated')
+              : t('Waiting for Approval')}
+          </h2>
+          <div className="set-pin-phone">{pending.phone}</div>
           <p className="success-text">
-            {t("Your access request has been sent. An admin will review and approve your account. You'll be able to sign in once approved.")}
+            {rejected
+              ? t('Your access request was declined.') + (signupStatus.rejection_reason ? ' ' + t('Reason:') + ' ' + signupStatus.rejection_reason : '')
+              : deactivated
+                ? t('Your account has been deactivated. Contact an admin.')
+                : t('Your request has been sent to an admin. You can close the app and come back later. Once approved, you will set your PIN here.')}
           </p>
-          <p className="success-text" style={{ marginTop: '10px', fontSize: '14px' }}>
-            {t('Your default PIN is')} <strong>0000</strong>. {t('You can change it after logging in.')}
-          </p>
-          <p className="success-text" style={{ marginTop: '8px', fontSize: '13px', color: 'var(--ambria-muted)' }}>
-            {notifSubscribed
-              ? t("We'll notify you when your request is reviewed.")
-              : t('Check back later to see if your request has been approved.')}
-          </p>
-          <button type="button" className="btn-save login-btn" onClick={switchToLogin}>
-            {t('Back to Sign In')}
-          </button>
+          {!blocked && (
+            <>
+              <p className="success-text" style={{ marginTop: '-12px', fontSize: '13px' }}>
+                {notifSubscribed
+                  ? t("We'll notify you when your request is reviewed.")
+                  : t('This page checks for approval automatically.')}
+              </p>
+              {statusError && <div className="login-error">{t('Could not check status:')} {statusError}</div>}
+              <button type="button" className="btn-save login-btn" disabled={checking} onClick={() => setCheckNonce((n) => n + 1)}>
+                {checking ? t('Checking…') : t('Check now')}
+              </button>
+            </>
+          )}
+          {blocked && (
+            <button type="button" className="btn-save login-btn" onClick={startOver}>
+              {t('Start over')}
+            </button>
+          )}
+          <div className="login-link">
+            <span>
+              {t('Already have an account?')}{' '}
+              <button type="button" className="link-btn" onClick={switchToLogin}>
+                {t('Sign In')}
+              </button>
+            </span>
+          </div>
         </div>
       </div>
     )

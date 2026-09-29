@@ -3641,6 +3641,17 @@
 .set-pin-card {
   text-align: center;
 }
+.set-pin-phone {
+  display: inline-block;
+  margin: 0 auto 12px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--ambria-chip);
+  color: var(--ambria-ink);
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+}
 .set-pin-message {
   font-size: 0.92rem;
   color: var(--ambria-muted);

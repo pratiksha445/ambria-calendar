@@ -1,3 +1,25 @@
+// ============================================================
+// SetPinScreen.jsx
+//
+// WHAT THIS FILE IS
+//   The "choose your 4-digit PIN" screen, with the user's phone number shown
+//   at the top so they know which account they are setting it for.
+//
+// WHY IT EXISTS
+//   Two paths reach it:
+//     1. A newly approved user, straight from the "waiting for approval"
+//        screen. LoginScreen passes `onSave`, which proves the device owns
+//        the sign-up token.
+//     2. A user who signed in with the admin-reset PIN 0000. App.jsx renders
+//        it without `onSave`, so it falls back to setInitialPin.
+//
+// USED BY
+//   src/components/LoginScreen.jsx, src/App.jsx
+//
+// DEPENDS ON
+//   src/lib/users.js (setInitialPin), src/lib/audit.js, i18n context
+// ============================================================
+
 import { useState, useRef } from 'react'
 import { setInitialPin } from '../lib/users.js'
 import { logAction } from '../lib/audit.js'
@@ -54,7 +76,12 @@ function PinBoxes({ value, onChange, shake, label }) {
   )
 }
 
-export default function SetPinScreen({ user, onComplete }) {
+/**
+ * @param user        { id?, name, phone }
+ * @param onSave      optional async (pin) => void; replaces the default setInitialPin save
+ * @param onComplete  called after the PIN is saved
+ */
+export default function SetPinScreen({ user, onSave, onComplete }) {
   const { t, theme } = useLanguage()
   const [newPin, setNewPin] = useState(['', '', '', ''])
   const [confirmPin, setConfirmPin] = useState(['', '', '', ''])
@@ -85,9 +112,13 @@ export default function SetPinScreen({ user, onComplete }) {
 
     setSaving(true)
     try {
-      await setInitialPin(user.id, pin)
-      await logAction(user.id, user.name, 'set_pin', 'user', user.id, { summary: 'Set initial PIN', initial: true })
-      onComplete()
+      if (onSave) {
+        await onSave(pin)
+      } else {
+        await setInitialPin(user.id, pin)
+        await logAction(user.id, user.name, 'set_pin', 'user', user.id, { summary: 'Set initial PIN', initial: true })
+      }
+      onComplete?.()
     } catch (err) {
       setError(err?.message ?? String(err))
     } finally {
@@ -101,6 +132,8 @@ export default function SetPinScreen({ user, onComplete }) {
         <div className="login-brand">
           <img src={import.meta.env.BASE_URL + (theme === 'dark' ? 'logo-dark.png' : 'logo.png')} alt="Ambria" className="login-logo" />
         </div>
+
+        {user.phone && <div className="set-pin-phone">{user.phone}</div>}
 
         <div className="set-pin-message">
           {t('Welcome, {name}! Please set a 4-digit PIN for your account.', { name: (user.name || '').split(/\s+/)[0] })}

@@ -1,6 +1,11 @@
 import { supabase } from './supabase.js'
+import { generateSignupToken, hashSignupToken } from './signupSession.js'
 
 const DEFAULT_PIN = '0000'
+// Stored as the PIN of a self-signed-up user until they set their own.
+// It is not 4 digits, so nobody can sign in with it. Only the device holding
+// the sign-up token can replace it (see completeSignup / 028_signup_token.sql).
+export const PIN_UNSET = 'UNSET'
 
 /** Fetch active approved users for dropdowns (Sales Person, etc.) — returns [{id, name}] */
 export async function fetchActiveUsers() {
@@ -136,23 +141,50 @@ export async function checkPhoneStatus(phone) {
   return data
 }
 
-/** Request access — creates a pending user with default PIN 0000 */
+/**
+ * Request access — creates a pending user with no usable PIN.
+ * Returns { token } — the caller must keep it on this device (signupSession.js);
+ * only its SHA-256 hash is stored in the database.
+ */
 export async function requestAccess(name, phone, department, salesType) {
-  const { data, error } = await supabase
+  const token = generateSignupToken()
+  const { error } = await supabase
     .from('users')
     .insert({
       name,
       phone,
       department: department || null,
       sales_type: salesType || null,
-      pin: DEFAULT_PIN,
+      pin: PIN_UNSET,
+      signup_token_hash: await hashSignupToken(token),
       role: 'staff',
       is_active: true,
       approval_status: 'pending',
       requested_at: new Date().toISOString(),
     })
-    .select()
-    .single()
+  if (error) throw error
+  return { token }
+}
+
+/**
+ * Where is this device's sign-up request? Goes through an RPC rather than a
+ * table read so it keeps working after RLS is locked down.
+ * Returns { status, name, rejection_reason }.
+ * status: 'pending' | 'approved' | 'rejected' | 'deactivated' | 'not_found' | 'token_invalid'
+ */
+export async function getSignupStatus(phone, token) {
+  const { data, error } = await supabase.rpc('get_signup_status', { p_phone: phone, p_token: token })
+  if (error) throw error
+  const row = Array.isArray(data) ? data[0] : data
+  return row ?? { status: 'not_found', name: null, rejection_reason: null }
+}
+
+/**
+ * Set the first PIN after approval, proving ownership with the sign-up token.
+ * Returns 'ok' | 'invalid_pin' | 'token_invalid' | 'not_approved'.
+ */
+export async function completeSignup(phone, token, pin) {
+  const { data, error } = await supabase.rpc('complete_signup', { p_phone: phone, p_token: token, p_pin: pin })
   if (error) throw error
   return data
 }
@@ -215,9 +247,10 @@ export async function adminSetPin(id, newPin) {
 
 /** Set PIN on first login (forced change from 0000) */
 export async function setInitialPin(userId, newPin) {
+  // Also burn any leftover sign-up token, so an old device can't re-set the PIN later.
   const { error } = await supabase
     .from('users')
-    .update({ pin: newPin })
+    .update({ pin: newPin, signup_token_hash: null })
     .eq('id', userId)
   if (error) throw error
 }

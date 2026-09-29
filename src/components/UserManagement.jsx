@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import {
   fetchUsers, createUser, updateUser, deleteUser,
-  toggleUserActive, approveUser, rejectUser, resetPin, adminSetPin,
+  toggleUserActive, approveUser, rejectUser, resetPin, adminSetPin, PIN_UNSET,
 } from '../lib/users.js'
 import { logAction } from '../lib/audit.js'
 import { COUNTRY_CODES, getCodeFromValue, parsePhoneCode, DEPARTMENTS, SALES_TYPES, SALES_DEPARTMENTS } from '../config/formFields.js'
@@ -233,7 +233,7 @@ export default function UserManagement({ currentUser, showToast, onMenu, killSwi
       sendPushNotification(
         user.phone,
         'Access Approved ✓',
-        'Your Ambria Calendar access has been approved. Log in with your default PIN 0000.',
+        'Your Ambria Calendar access has been approved. Open the app to set your PIN.',
       )
       showToast?.(t('{name} approved', { name: user.name }))
       await loadUsers()
@@ -384,7 +384,7 @@ export default function UserManagement({ currentUser, showToast, onMenu, killSwi
         )}
         <div className="pin-display-box">
           <span className="pin-display-label">{t('PIN:')}</span>
-          <span className="pin-display-value">{u.pin}</span>
+          <span className="pin-display-value">{u.pin === PIN_UNSET ? t('Not set yet') : u.pin}</span>
         </div>
         <div className="user-date">
           {u.approval_status === 'pending' && u.requested_at
@@ -703,7 +703,7 @@ export default function UserManagement({ currentUser, showToast, onMenu, killSwi
                   <div className="edit-pin-section">
                     <div className="pin-display-box">
                       <span className="pin-display-label">{t('Current:')}</span>
-                      <span className="pin-display-value">{editing.pin}</span>
+                      <span className="pin-display-value">{editing.pin === PIN_UNSET ? t('Not set yet') : editing.pin}</span>
                     </div>
                     {form._resetPinOpen ? (
                       <div className="reset-pin-panel">

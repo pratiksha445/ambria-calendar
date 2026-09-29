@@ -27,7 +27,12 @@ export async function subscribeToPush(phone) {
     const permission = await Notification.requestPermission()
     if (permission !== 'granted') return { success: false, reason: 'denied' }
 
-    const registration = await navigator.serviceWorker.ready
+    // `ready` never resolves when no service worker is registered (e.g. in
+    // `npm run dev`), so give up after 10s instead of hanging the caller.
+    const registration = await Promise.race([
+      navigator.serviceWorker.ready,
+      new Promise((_, reject) => setTimeout(() => reject(new Error('service worker not ready')), 10000)),
+    ])
     const applicationServerKey = urlBase64ToUint8Array(import.meta.env.VITE_VAPID_PUBLIC_KEY)
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,

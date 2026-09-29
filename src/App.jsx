@@ -35,6 +35,7 @@ import { useLanguage } from './i18n/LanguageContext.jsx'
 import useSwipeNav from './hooks/useSwipeNav.js'
 import { readDraft, clearDraft } from './hooks/useFormDraft.js'
 import { isPushSupported, subscribeToPush } from './lib/pushNotifications.js'
+import { forgetPhone } from './lib/signupSession.js'
 import './App.css'
 
 const ALL_SOURCES = ['crm', 'manual']
@@ -144,15 +145,23 @@ export default function App() {
     clearDirectory()
   }, [clearDirectory])
 
-  // Periodically re-check that the logged-in user hasn't been deactivated/rejected
-  // elsewhere — otherwise a cached localStorage session stays valid forever.
+  // Periodically re-check that the logged-in user hasn't been deleted, deactivated
+  // or rejected elsewhere — otherwise a cached localStorage session stays valid forever.
   useEffect(() => {
     if (!user) return
     let cancelled = false
     const check = async () => {
       try {
         const status = await fetchUserStatus(user.id)
-        if (cancelled || !status) return
+        if (cancelled) return
+        if (!status) {
+          // No row = an admin deleted this user. Log out, and forget the phone
+          // so the Sign In box isn't pre-filled with a dead number.
+          forgetPhone()
+          clearSession()
+          setLoginNotice(t('Your account was removed. Please request access again.'))
+          return
+        }
         if (!status.is_active || status.approval_status !== 'approved') {
           clearSession()
           setLoginNotice(t('Your account has been deactivated. Contact an admin.'))
@@ -161,7 +170,14 @@ export default function App() {
     }
     check()
     const interval = setInterval(check, 60000)
-    return () => { cancelled = true; clearInterval(interval) }
+    // Also re-check the moment the app comes back to the foreground.
+    const onVisible = () => { if (document.visibilityState === 'visible') check() }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => {
+      cancelled = true
+      clearInterval(interval)
+      document.removeEventListener('visibilitychange', onVisible)
+    }
   }, [user?.id, clearSession, t])
 
   // Fetch season calendar data (once on login, non-critical)
@@ -621,6 +637,7 @@ export default function App() {
 
   // Auth handlers
   const handleLogin = (u, pinChange) => {
+    setLoginNotice(null)
     setUser(u)
     filtersRestoredRef.current = false
     setActiveFilters(initCategoryFilters(u?.saved_filters))
