@@ -422,6 +422,7 @@ const en = {
   'Social/Tech': 'Social/Tech',
   'Decor Operations': 'Decor Operations',
   'Accounts': 'Accounts',
+  'Crockery': 'Crockery',
 
   // ── Wedding Services ──
   'Service Type': 'Service Type',

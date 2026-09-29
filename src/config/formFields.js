@@ -59,7 +59,7 @@ export const SALES_DEPARTMENTS = ['Venue Sales', 'Decor Sales', 'Entertainment S
 export const DEPARTMENTS = [
   'Venue Sales', 'Decor Sales', 'Entertainment Sales', 'Catering Sales',
   'Wedding Services', 'Kitchen', 'F&B Service', 'Housekeeping', 'Admin', 'Management',
-  'Social/Tech', 'Decor Operations', 'Tender', 'Accounts',
+  'Social/Tech', 'Decor Operations', 'Tender', 'Accounts', 'Crockery',
 ]
 export const VENUE_TYPES = ['Lawn', 'Banquet', 'Lawn + Bqt', 'Poolside', 'Terrace', 'Courtyard', 'Restaurant', 'Private Villa', 'Home']
 export const SITE_AVAILABILITIES = ['1 day', '-2 day', 'Morning', '+2 hr bandwidth', 'Same day', 'Others']

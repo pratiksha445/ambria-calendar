@@ -422,6 +422,7 @@ const hi = {
   'Social/Tech': 'सोशल/टेक',
   'Decor Operations': 'डेकोर ऑपरेशंस',
   'Accounts': 'अकाउंट्स',
+  'Crockery': 'क्रॉकरी',
 
   // ── वेडिंग सर्विसेज ──
   'Service Type': 'सर्विस प्रकार',
