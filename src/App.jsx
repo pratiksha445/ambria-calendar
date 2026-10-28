@@ -50,6 +50,8 @@ function initCategoryFilters(savedFilters) {
 
 function getSeasonCategory(dateStr, seasonData) {
   if (!seasonData || !seasonData.dates) return null
+  // Year-specific overrides ("2026-11-25") win over the recurring "MM-DD" entry
+  if (seasonData.dates[dateStr]) return seasonData.dates[dateStr]
   const parts = dateStr.split('-')
   const mmdd = parts[1] + '-' + parts[2]
   const category = seasonData.dates[mmdd]
