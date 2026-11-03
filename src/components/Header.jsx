@@ -22,6 +22,8 @@ export default function Header({
   killSwitch,
   onToggleKillSwitch,
   user,
+  onSyncLms,
+  lmsSyncing = false,
 }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [pickerOpen, setPickerOpen] = useState(false)
@@ -219,7 +221,19 @@ export default function Header({
             </button>
           ))}
         </div>
-        <button className="today-pill" onClick={onToday}>{t('Today')}</button>
+        <div className="header-sub-actions">
+          {onSyncLms && (
+            <button className="today-pill sync-pill" onClick={onSyncLms} disabled={lmsSyncing} title={t('Sync LMS Now')}>
+              <svg className={lmsSyncing ? 'spin' : undefined} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="23 4 23 10 17 10" />
+                <polyline points="1 20 1 14 7 14" />
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+              </svg>
+              <span className="sync-pill-label">{lmsSyncing ? t('Syncing LMS…') : t('Sync LMS Now')}</span>
+            </button>
+          )}
+          <button className="today-pill" onClick={onToday}>{t('Today')}</button>
+        </div>
       </div>
 
       {ksConfirm && (

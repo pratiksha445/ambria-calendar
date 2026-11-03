@@ -592,6 +592,11 @@ const hi = {
   // ── टोस्ट ──
   'Booking saved': 'बुकिंग सहेजी गई',
   'Booking deleted': 'बुकिंग हटाई गई',
+  'Sync LMS Now': 'LMS अभी सिंक करें',
+  'Syncing LMS…': 'LMS सिंक हो रहा है…',
+  'LMS synced: {n} new, {u} updated, {d} removed': 'LMS सिंक हुआ: {n} नई, {u} अपडेट, {d} हटाई गई',
+  'LMS sync already running, try in a minute': 'LMS सिंक पहले से चल रहा है, एक मिनट में फिर कोशिश करें',
+  'LMS sync failed': 'LMS सिंक नहीं हो पाया',
   'Event deleted': 'इवेंट हटाया गया',
 
   // ── उपयोगकर्ता प्रबंधन ──

@@ -592,6 +592,11 @@ const en = {
   // ── Toasts ──
   'Booking saved': 'Booking saved',
   'Booking deleted': 'Booking deleted',
+  'Sync LMS Now': 'Sync LMS Now',
+  'Syncing LMS…': 'Syncing LMS…',
+  'LMS synced: {n} new, {u} updated, {d} removed': 'LMS synced: {n} new, {u} updated, {d} removed',
+  'LMS sync already running, try in a minute': 'LMS sync already running, try in a minute',
+  'LMS sync failed': 'LMS sync failed',
   'Event deleted': 'Event deleted',
 
   // ── User management ──

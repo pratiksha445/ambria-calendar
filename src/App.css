@@ -271,6 +271,14 @@
   font-weight: 700;
 }
 
+/* "Sync LMS Now" sits left of Today, same pill look */
+.header-sub-actions { display: flex; align-items: center; gap: 8px; }
+.sync-pill { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+.sync-pill:disabled { opacity: 0.6; cursor: default; }
+.sync-pill svg.spin { animation: sync-spin 1s linear infinite; }
+@keyframes sync-spin { to { transform: rotate(360deg); } }
+@media (max-width: 480px) { .sync-pill-label { display: none; } }
+
 /* ---------- Error / loading ---------- */
 
 .error-banner {

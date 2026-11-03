@@ -444,3 +444,28 @@ export function mapGroupToForm(group, department, venueId, subVenues) {
   const slots = group.rows.map((row) => extractSlotFields(row, department))
   return { formFields, slots, extraFuncNames: null }
 }
+
+/**
+ * "Sync LMS Now" button: runs a fresh pass of the same lms-sync edge function
+ * the 5-minute cron job runs. If the cron pass is mid-run, waits for it to
+ * finish and then runs its own, so a contract saved a moment ago is never
+ * missed. Returns that run's summary, or { skipped: 'running' } after ~3 min.
+ */
+export async function syncLmsNow() {
+  for (let attempt = 0; attempt < 36; attempt++) {
+    const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/lms-sync`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+      },
+      body: '{}',
+    })
+    const data = await res.json().catch(() => ({}))
+    if (!res.ok || data.error) throw new Error(data.error || `LMS sync failed (${res.status})`)
+    if (!(data.skipped && data.reason === 'running')) return data
+    await new Promise((r) => setTimeout(r, 5000))
+  }
+  return { skipped: true, reason: 'running' }
+}

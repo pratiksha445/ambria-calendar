@@ -36,6 +36,8 @@ import useSwipeNav from './hooks/useSwipeNav.js'
 import { readDraft, clearDraft } from './hooks/useFormDraft.js'
 import { isPushSupported, subscribeToPush } from './lib/pushNotifications.js'
 import { forgetPhone } from './lib/signupSession.js'
+import { SEASON_DATA } from './config/seasonDates.js'
+import { syncLmsNow } from './lib/lms.js'
 import './App.css'
 
 const ALL_SOURCES = ['crm', 'manual']
@@ -123,7 +125,8 @@ export default function App() {
   const [reviewModal, setReviewModal] = useState(null) // null | event
   const [reviewMap, setReviewMap] = useState(() => new Map())
   const [paymentModal, setPaymentModal] = useState(null) // null | event
-  const [seasonData, setSeasonData] = useState(null)
+  // Static season dates (no live sync from Ops) — see config/seasonDates.js
+  const seasonData = SEASON_DATA
   const { eventTypes, eventTypeAbbrByName, refresh: refreshDirectory, clear: clearDirectory } = useDirectory()
   const calendarBodyRef = useRef(null)
   const fetchedMonthsRef = useRef(new Set())
@@ -181,18 +184,6 @@ export default function App() {
       document.removeEventListener('visibilitychange', onVisible)
     }
   }, [user?.id, clearSession, t])
-
-  // Fetch season calendar data (once on login, non-critical)
-  useEffect(() => {
-    if (!user) return
-    const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/season-proxy`
-    fetch(url, {
-      headers: { Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}` },
-    })
-      .then((r) => r.ok ? r.json() : null)
-      .then((d) => { if (d) setSeasonData(d) })
-      .catch(() => {/* season badges non-critical */})
-  }, [user])
 
   // Load dynamic categories from Supabase — falls back to hardcoded defaults on failure
   useEffect(() => {
@@ -518,6 +509,32 @@ export default function App() {
     setTimeout(() => setToast(null), 2000)
   }, [])
 
+  // "Sync LMS Now": run the LMS sync immediately, then reload the open months
+  const [lmsSyncing, setLmsSyncing] = useState(false)
+  const handleSyncLms = useCallback(async () => {
+    setLmsSyncing(true)
+    try {
+      const r = await syncLmsNow()
+      if (r.skipped && r.reason === 'running') {
+        showToast(t('LMS sync already running, try in a minute'))
+      } else {
+        const s = r.skipped ? (r.last_result || {}) : r
+        showToast(t('LMS synced: {n} new, {u} updated, {d} removed', {
+          n: s.insert ?? 0, u: (s.update ?? 0) + (s.adopt ?? 0), d: s.delete ?? 0,
+        }))
+        const from = toIsoDate(startOfMonth(currentDate))
+        const to = toIsoDate(endOfMonth(new Date(currentDate.getFullYear(), currentDate.getMonth() + 3, 1)))
+        const rows = await fetchEvents(from, to)
+        setAllEvents((prev) => mergeEvents(prev, rows, from, to))
+      }
+    } catch (err) {
+      console.error('[ambria] LMS sync failed', err)
+      showToast(t('LMS sync failed'))
+    } finally {
+      setLmsSyncing(false)
+    }
+  }, [currentDate, showToast, t])
+
   const openNew = () => {
     const iso = toIsoDate(selectedDate)
     setModal({ mode: 'new', event: { date: iso } })
@@ -715,6 +732,8 @@ export default function App() {
               killSwitch={killSwitch}
               onToggleKillSwitch={() => toggleKillSwitch(user)}
               user={user}
+              onSyncLms={handleSyncLms}
+              lmsSyncing={lmsSyncing}
             />
             <main className="app-body" ref={calendarBodyRef}>
               {error && <div className="error-banner">{error}</div>}
