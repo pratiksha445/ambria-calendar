@@ -22,7 +22,8 @@
 //   deleted: LMS's list endpoint is known to drop live contracts.
 // - A booking staff deleted in the calendar is never resurrected.
 // - Sales person: LMS only sends the id of who entered the contract; the
-//   name is learnt from bookings staff already filled, and set only if blank.
+//   name comes from LMS's user list (else learnt from bookings staff already
+//   filled), and is set only if blank.
 //
 // Call: POST. The cron job (every 5 min) and the calendar's "Sync Now"
 // button both land here; lms_sync_claim() lets only one run at a time.
@@ -406,6 +407,47 @@ function withTitle(e: Ev, patch: Ev) {
   return patch
 }
 
+// LMS user id → their calendar name, where the two systems name them differently
+const LMS_USER_ALIASES: Record<string, string> = {
+  "6": "Harsh Sharma", // "Harsh Pachouri" in LMS
+}
+
+/**
+ * LMS id → calendar sales person. First from LMS's own user list (get_user_list):
+ * same phone + similar first name, else a unique name match (some LMS users
+ * carry a colleague's phone). Ids still unresolved fall back to votes.
+ */
+export function resolveSalesPeople(desiredMap: Map<string, Desired>, byKey: Map<string, Ev>, lmsUsers: Row[], calUsers: Ev[]) {
+  const votes = learnSalesPeople(desiredMap, byKey)
+  const out = new Map(votes)
+  const uses = new Map<string, number>()
+  for (const e of byKey.values()) if (e.sales_person_id) uses.set(e.sales_person_id, (uses.get(e.sales_person_id) || 0) + 1)
+  const words = (s: any) => String(s || "").toLowerCase().split(/[^a-z]+/).filter(Boolean)
+  for (const u of lmsUsers) {
+    const lw = words(LMS_USER_ALIASES[String(u.id)] || (u.firstname + " " + u.lastname))
+    if (!lw.length) continue
+    const first = lw[0]
+    const p = phone10(u.phonenumber)
+    const byPhone = calUsers.filter((c) => {
+      const cf = words(c.name)[0] || ""
+      return p && phone10(c.phone) === p && (cf.startsWith(first) || first.startsWith(cf) || editDistance(cf, first) <= 2)
+    })
+    // Every LMS word must start a word of the calendar name: "Rajesh V" ≠ "Rajesh Aswal"
+    const byName = calUsers.filter((c) => { const cw = words(c.name); return lw.every((w) => cw.some((x) => x.startsWith(w))) })
+    const voted = votes.get(String(u.id))
+    let pick: Ev | undefined
+    if (byPhone.length === 1) pick = byPhone[0]
+    else if (byName.length === 1) pick = byName[0]
+    else if (byName.length > 1 && byName.every((c) => c.name.toLowerCase() === byName[0].name.toLowerCase())) {
+      // Same person signed up twice: take the account staff actually pick
+      pick = byName.sort((x, y) => (uses.get(y.id) || 0) - (uses.get(x.id) || 0))[0]
+    }
+    else if (voted && byName.some((c) => c.id === voted.sales_person_id)) continue // two same-name users: votes decide
+    if (pick) out.set(String(u.id), { sales_person: pick.name, sales_person_id: pick.id })
+  }
+  return out
+}
+
 /**
  * LMS id → calendar sales person, learnt from linked bookings where staff
  * picked the sales person. An id is trusted only with 3+ bookings and 80%+
@@ -456,7 +498,7 @@ function findCandidate(d: Desired, pool: Ev[]): { match?: Ev; ambiguous?: Ev[] }
   return {}
 }
 
-export function plan(desiredMap: Map<string, Desired>, cancelled: Map<string, { venue_id: string; date: string; phone: string }>, existing: Ev[], folded: Set<string> = new Set()) {
+export function plan(desiredMap: Map<string, Desired>, cancelled: Map<string, { venue_id: string; date: string; phone: string }>, existing: Ev[], folded: Set<string> = new Set(), people: { lmsUsers: Row[]; calUsers: Ev[] } = { lmsUsers: [], calUsers: [] }) {
   const byKey = new Map<string, Ev>()
   for (const e of existing) if (e.crm_id) byKey.set(e.crm_id, e)
   const claimed = new Set<string>()
@@ -465,7 +507,7 @@ export function plan(desiredMap: Map<string, Desired>, cancelled: Map<string, { 
   const ambiguous: string[] = [], skippedDeleted: string[] = []
   const unclaimed = () => existing.filter((e) => !e.crm_id && !e.deleted_at && !claimed.has(e.id))
   // Sales person is only ever filled where blank, never overwritten
-  const salesBy = learnSalesPeople(desiredMap, byKey)
+  const salesBy = resolveSalesPeople(desiredMap, byKey, people.lmsUsers, people.calUsers)
   const fillSales = (e: Ev, d: Desired, patch: Ev) => {
     const s = salesBy.get(d.by)
     if (s && !e.sales_person && !e.sales_person_id) Object.assign(patch, s)
@@ -568,6 +610,17 @@ export async function fetchDept(dept: string) {
   return rows
 }
 
+/** LMS login list (id → name, phone). Optional: on failure sales person falls back to votes. */
+export async function fetchLmsUsers(): Promise<Row[]> {
+  const res = await fetchJson("https://gyv.inqcrm.in/api/v1/createcommon_api/get_user_list", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ search_byuserid: "" }),
+  }).catch(() => null)
+  if (!res || !res.ok) return []
+  return (await res.json().catch(() => ({}))).userdata || []
+}
+
 function db(path: string, init: RequestInit = {}) {
   const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
   return fetch(Deno.env.get("SUPABASE_URL") + "/rest/v1/" + path, {
@@ -641,7 +694,14 @@ Deno.serve(async (req) => {
     await dbOk(evRes, "load events")
     const existing = await evRes.json()
 
-    const p = plan(desired, cancelled, existing, folded)
+    const [lmsUsers, usersRes] = await Promise.all([
+      fetchLmsUsers(),
+      db("users?select=id,name,phone&is_active=eq.true&approval_status=eq.approved", { headers: { Prefer: "" } }),
+    ])
+    await dbOk(usersRes, "load users")
+    const calUsers = await usersRes.json()
+
+    const p = plan(desired, cancelled, existing, folded, { lmsUsers, calUsers })
     const summary = {
       dry, today,
       lms_rows: { venue: venue.length, decor: decor.length, catering: catering.length, entertainment: entertainment.length },
