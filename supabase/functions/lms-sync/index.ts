@@ -21,6 +21,8 @@
 //   (cancel_remarks). A contract merely missing from LMS's list is never
 //   deleted: LMS's list endpoint is known to drop live contracts.
 // - A booking staff deleted in the calendar is never resurrected.
+// - Sales person: LMS only sends the id of who entered the contract; the
+//   name is learnt from bookings staff already filled, and set only if blank.
 //
 // Call: POST. The cron job (every 5 min) and the calendar's "Sync Now"
 // button both land here; lms_sync_claim() lets only one run at a time.
@@ -37,26 +39,26 @@ const PAGES_AT_ONCE = 4
 type Row = Record<string, any>
 type Ev = Record<string, any>
 
-const DEPTS: Record<string, { endpoint: string; body: Record<string, string>; p: string; d: string; entry: string; date: string; func: string; time: string; contact: string }> = {
+const DEPTS: Record<string, { endpoint: string; body: Record<string, string>; p: string; d: string; entry: string; date: string; func: string; time: string; contact: string; by: string }> = {
   venue: {
     endpoint: "get_venue_contract_information_list",
     body: { search_venue_contract: "", priority_search: "", venue_datetype: "", source_search: "", venue_search: "", balance_pending: "", contract_venue_search: "", contract_assginee_search: "", leadtype_search: "", report_fac: "", fromdate: "", uptodated: "" },
-    p: "fisc_", d: "fiscd_", entry: "fisc_entryno", date: "fiscd_function_date", func: "fiscd_function_type", time: "fiscd_function_timings", contact: "fisc_client_mobile",
+    p: "fisc_", d: "fiscd_", entry: "fisc_entryno", date: "fiscd_function_date", func: "fiscd_function_type", time: "fiscd_function_timings", contact: "fisc_client_mobile", by: "fisc_entryby",
   },
   decor: {
     endpoint: "get_decor_contract_information_list",
     body: { decor_search: "", source_search: "", lead_type_search: "", decor_venue_search: "", priority_search: "", fromdate: "", uptodated: "", decor_assginee_search: "", decor_status_search: "", search_date_type: "", visited_search: "", follow_dated: "" },
-    p: "dhc_", d: "dhcd_", entry: "dhc_entry_no", date: "dhcd_date", func: "dhcd_function", time: "dhcd_time", contact: "dhc_contact_no",
+    p: "dhc_", d: "dhcd_", entry: "dhc_entry_no", date: "dhcd_date", func: "dhcd_function", time: "dhcd_time", contact: "dhc_contact_no", by: "dhc_decor_entryby",
   },
   catering: {
     endpoint: "get_catering_contract_information_list",
     body: { search_catering_contract: "", priority_search: "", cater_datetype: "", source_search: "", balance_pending: "", contract_catering_search: "", contract_assginee_search: "", leadtype_search: "", report_fac: "", fromdate: "", uptodated: "" },
-    p: "chc_", d: "chcd_", entry: "chc_entry_no", date: "chcd_date", func: "chcd_function", time: "chcd_time", contact: "chc_contact_no",
+    p: "chc_", d: "chcd_", entry: "chc_entry_no", date: "chcd_date", func: "chcd_function", time: "chcd_time", contact: "chc_contact_no", by: "chc_cater_entryby",
   },
   entertainment: {
     endpoint: "get_entertain_contract_information_list",
     body: { fromdate: "", uptodated: "", search_entertain_contract: "", source_search: "", contract_venue_searche: "", balance_pending: "", contract_assginee_search: "", entertain_datetype: "", leadtype_search: "", report_fac: "" },
-    p: "ehc_", d: "ehcd_", entry: "ehc_entry_no", date: "ehcd_date", func: "ehcd_function", time: "ehcd_time", contact: "ehc_contact_no",
+    p: "ehc_", d: "ehcd_", entry: "ehc_entry_no", date: "ehcd_date", func: "ehcd_function", time: "ehcd_time", contact: "ehc_contact_no", by: "ehc_entertain_entryby",
   },
 }
 
@@ -267,7 +269,8 @@ function ownVenueCat(row: Row) {
 
 // ── Build the desired bookings from LMS rows ──
 
-type Desired = { key: string; fields: Ev; label: string }
+// by = LMS id of the user who entered the contract (LMS sends no name)
+type Desired = { key: string; fields: Ev; label: string; by: string }
 
 export function buildDesired(lms: Record<string, Row[]>, today: string) {
   const desired = new Map<string, Desired>()
@@ -295,7 +298,7 @@ export function buildDesired(lms: Record<string, Row[]>, today: string) {
       booking_status: row.fiscd_menu ? "VMD" : "",
       ...slotFields(row, "venue"),
     })
-    desired.set(key, { key, fields, label: fields.guest_name + " " + date + " " + cat })
+    desired.set(key, { key, fields, label: fields.guest_name + " " + date + " " + cat, by: String(row.fisc_entryby || "").trim() })
     const pd = phone10(row.fisc_client_mobile) + "|" + date
     if (phone10(row.fisc_client_mobile)) venueByPhoneDate.set(pd, [...(venueByPhoneDate.get(pd) || []), key])
   }
@@ -368,7 +371,7 @@ export function buildDesired(lms: Record<string, Row[]>, today: string) {
       menu_type: g.dept === "catering" ? s0.menu_type : "",
       menu_cat: g.dept === "catering" ? s0.menu_cat : "",
     })
-    desired.set(key, { key, fields, label: fields.guest_name + " " + fields.date + " " + fields.venue_id + " (" + g.rows.map((r) => funcName(r, g.dept)).filter(Boolean).join(", ") + ")" })
+    desired.set(key, { key, fields, label: fields.guest_name + " " + fields.date + " " + fields.venue_id + " (" + g.rows.map((r) => funcName(r, g.dept)).filter(Boolean).join(", ") + ")", by: String(first[cfg.by] || "").trim() })
   }
 
   for (const k of desired.keys()) { cancelled.delete(k); folded.delete(k) }
@@ -404,6 +407,32 @@ function withTitle(e: Ev, patch: Ev) {
 }
 
 /**
+ * LMS id → calendar sales person, learnt from linked bookings where staff
+ * picked the sales person. An id is trusted only with 3+ bookings and 80%+
+ * of them agreeing (some LMS logins are shared by two people).
+ */
+function learnSalesPeople(desiredMap: Map<string, Desired>, byKey: Map<string, Ev>) {
+  const votes = new Map<string, Map<string, { name: string; n: number }>>()
+  for (const d of desiredMap.values()) {
+    const e = byKey.get(d.key)
+    if (!d.by || !e || !e.sales_person_id || !e.sales_person) continue
+    const forId = votes.get(d.by) || new Map()
+    const v = forId.get(e.sales_person_id) || { name: e.sales_person, n: 0 }
+    v.n++
+    forId.set(e.sales_person_id, v)
+    votes.set(d.by, forId)
+  }
+  const out = new Map<string, Ev>()
+  for (const [by, forId] of votes) {
+    const all = [...forId.entries()]
+    const total = all.reduce((t, [, v]) => t + v.n, 0)
+    const [id, top] = all.sort((a, b) => b[1].n - a[1].n)[0]
+    if (top.n >= 3 && top.n / total >= 0.8) out.set(by, { sales_person: top.name, sales_person_id: id })
+  }
+  return out
+}
+
+/**
  * Find the hand-entered booking this LMS function already is. Tiers, strongest
  * first: same phone → spelling-tolerant name → same shift + pax. Within a tier
  * a shift match breaks ties; anything still ambiguous is never guessed.
@@ -435,6 +464,13 @@ export function plan(desiredMap: Map<string, Desired>, cancelled: Map<string, { 
   const inserts: Ev[] = [], updates: { id: string; patch: Ev; label: string; adopted: boolean }[] = []
   const ambiguous: string[] = [], skippedDeleted: string[] = []
   const unclaimed = () => existing.filter((e) => !e.crm_id && !e.deleted_at && !claimed.has(e.id))
+  // Sales person is only ever filled where blank, never overwritten
+  const salesBy = learnSalesPeople(desiredMap, byKey)
+  const fillSales = (e: Ev, d: Desired, patch: Ev) => {
+    const s = salesBy.get(d.by)
+    if (s && !e.sales_person && !e.sales_person_id) Object.assign(patch, s)
+    return patch
+  }
 
   for (const d of desiredMap.values()) {
     const linked = byKey.get(d.key)
@@ -449,6 +485,7 @@ export function plan(desiredMap: Map<string, Desired>, cancelled: Map<string, { 
       for (const [k, v] of Object.entries(d.fields)) {
         if (!sameValue(v, snap[k]) && !sameValue(v, linked[k])) patch[k] = v
       }
+      fillSales(linked, d, patch)
       const snapChanged = stableJson(snap) !== stableJson(d.fields)
       if (Object.keys(patch).length || snapChanged) {
         updates.push({ id: linked.id, patch: { ...withTitle(linked, patch), lms_snapshot: d.fields, synced_at: now }, label: d.label, adopted: false })
@@ -469,11 +506,12 @@ export function plan(desiredMap: Map<string, Desired>, cancelled: Map<string, { 
           (Array.isArray(match[k]) && match[k].length === 0)
         if (blank || ((k === "decor_status" || k === "entertainment_status") && match[k] !== v)) patch[k] = v
       }
+      fillSales(match, d, patch)
       updates.push({ id: match.id, patch: { ...withTitle(match, patch), crm_id: d.key, lms_snapshot: d.fields, synced_at: now }, label: d.label, adopted: true })
       continue
     }
     inserts.push({
-      ...d.fields, title: buildTitle(d.fields), status: "Confirmed", source: "manual",
+      ...fillSales({}, d, { ...d.fields }), title: buildTitle(d.fields), status: "Confirmed", source: "manual",
       crm_id: d.key, lms_snapshot: d.fields, synced_at: now,
     })
   }
