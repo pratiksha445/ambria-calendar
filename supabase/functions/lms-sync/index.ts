@@ -85,6 +85,11 @@ const LOCATION_TO_SUB_VENUE: Record<string, string> = {
   "48": "Restro Lawn + Glass House", "49": "Restro Glass House", "50": "Restro Glass House",
 }
 
+// Kothi stays are Villa bookings, not venue events. LMS marks them by the
+// villa location, or (at any location) by function type 19 "Kothi Booking".
+const VILLA_LOCATIONS: Record<string, string> = { "25": "AP Kothi", "32": "AM Kothi", "40": "AE Kothi" }
+const KOTHI_BY_VENUE: Record<string, string> = { "3": "AP Kothi", "6": "AM Kothi", "19": "AE Kothi" }
+
 // ── Field mapping (mirrors src/lib/lms.js so sync and the manual button agree) ──
 
 const FUNC_TYPE_MAP: Record<string, { type: string; other?: string }> = {
@@ -240,6 +245,10 @@ function buildTitle(ev: Ev) {
   const et = ev.event_type === "Other" ? (ev.event_type_other || "") : (ev.event_type || "")
   const pax = ev.pax ? ev.pax + "pax" : ""
   const join = (a: any[]) => a.map((x) => String(x ?? "").trim()).filter(Boolean).join(" | ")
+  if (ev.venue_id === "villa") {
+    // Same as autoTitle in src/lib/autoTitle.js
+    return [firstName(ev.guest_name) || "—", ev.sub_venue, pax].filter(Boolean).join(" | ")
+  }
   if (["ap", "am", "ae", "ar"].includes(ev.venue_id)) {
     return join([firstName(ev.guest_name), et, pax, ev.shift ? ev.shift.charAt(0) : "", ev.menu_cat]) || "Untitled"
   }
@@ -279,6 +288,10 @@ export function buildDesired(lms: Record<string, Row[]>, today: string) {
   const cancelled = new Map<string, { venue_id: string; date: string; phone: string }>()
   const isCancelled = (row: Row, dept: string) => String(row[DEPTS[dept].p + "cancel_remarks"] || "").trim() !== ""
 
+  // Keys of contracts now merged into another booking; a separate entry an
+  // earlier run made for one of them is removed
+  const folded = new Set<string>()
+
   // 1. Venue contracts: one booking per function
   const venueByPhoneDate = new Map<string, string[]>()
   for (const row of lms.venue || []) {
@@ -287,6 +300,28 @@ export function buildDesired(lms: Record<string, Row[]>, today: string) {
     if (!cat || !date || date < today) continue
     const key = "lms:venue:" + String(row.fisc_entryno || row.headid || "").trim() + ":" +
       String(row.fiscd_function_type || "").trim() + "-" + date + "-" + String(row.fiscd_session || "").trim()
+
+    const kothi = VILLA_LOCATIONS[String(row.fiscd_location_id || "").trim()] ||
+      (String(row.fiscd_function_type || "").trim() === "19" ? KOTHI_BY_VENUE[String(row.fiscd_venue_id || "")] : "")
+    if (kothi) {
+      // Own key: a venue booking an earlier run made for this stay is removed
+      const villaKey = key.replace("lms:venue:", "lms:villa:")
+      folded.add(key)
+      if (isCancelled(row, "venue")) {
+        cancelled.set(villaKey, { venue_id: "villa", date, phone: phone10(row.fisc_client_mobile) })
+        continue
+      }
+      const s = slotFields(row, "venue")
+      const fields = compact({
+        venue_id: "villa", date, check_in_date: date, check_in_time: s.time, sub_venue: kothi,
+        guest_name: String(row.fisc_guest_name || "").trim(),
+        phone: formatPhone(row.fisc_client_mobile),
+        pax: s.pax, event_type: s.event_type, event_type_other: s.event_type_other,
+      })
+      desired.set(villaKey, { key: villaKey, fields, label: fields.guest_name + " " + date + " villa " + kothi, by: String(row.fisc_entryby || "").trim() })
+      continue
+    }
+
     if (isCancelled(row, "venue")) {
       cancelled.set(key, { venue_id: cat, date, phone: phone10(row.fisc_client_mobile) })
       continue
@@ -306,9 +341,6 @@ export function buildDesired(lms: Record<string, Row[]>, today: string) {
 
   // 2. Decor / Catering / Entertainment
   const outdoor = new Map<string, { dept: string; rows: Row[]; cancelledRows: Row[] }>()
-  // Keys of contracts now merged into a venue booking; a separate entry an
-  // earlier run made for one of them is removed
-  const folded = new Set<string>()
   for (const dept of ["decor", "catering", "entertainment"]) {
     const cfg = DEPTS[dept]
     for (const row of lms[dept] || []) {
