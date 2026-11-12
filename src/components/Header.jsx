@@ -37,11 +37,11 @@ export default function Header({
   // Lightbox: ESC to close + body scroll lock
   useEffect(() => {
     if (!wcImage) return
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
+    const prev = document.documentElement.style.overflow
+    document.documentElement.style.overflow = 'hidden'
     const onKey = (e) => { if (e.key === 'Escape') setWcImage(null) }
     window.addEventListener('keydown', onKey)
-    return () => { document.body.style.overflow = prev; window.removeEventListener('keydown', onKey) }
+    return () => { document.documentElement.style.overflow = prev; window.removeEventListener('keydown', onKey) }
   }, [wcImage])
 
   const openCalendar = useCallback((cal) => { setWcDropdown(false); setWcImage(cal) }, [])

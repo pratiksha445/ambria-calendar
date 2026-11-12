@@ -131,7 +131,8 @@ html, body, #root {
   /* 'hidden' turns these into scroll containers, which silently kills
      position:sticky on descendants (the desktop sidebar). 'clip' blocks the
      same sideways scroll without creating a scroll container. The 'hidden'
-     line stays first as a fallback for browsers without clip support. */
+     line stays first as a fallback for browsers without clip support.
+     Same reason modals lock scrolling on <html>, never on <body>. */
   overflow-x: hidden;
   overflow-x: clip;
 }

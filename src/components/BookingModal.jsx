@@ -20,9 +20,9 @@ export default function BookingModal({ open, initial, restoredFromDraft, onClose
   // Lock body scroll while modal is open
   useEffect(() => {
     if (!open) return
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => { document.body.style.overflow = prev }
+    const prev = document.documentElement.style.overflow
+    document.documentElement.style.overflow = 'hidden'
+    return () => { document.documentElement.style.overflow = prev }
   }, [open])
 
   // Reset drag offset whenever we open/close

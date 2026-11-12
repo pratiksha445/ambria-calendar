@@ -42,9 +42,9 @@ export default function DayModal({ date, events, onClose, onAdd, onEdit, onDelet
   // Lock body scroll
   useEffect(() => {
     if (!date) return
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => { document.body.style.overflow = prev }
+    const prev = document.documentElement.style.overflow
+    document.documentElement.style.overflow = 'hidden'
+    return () => { document.documentElement.style.overflow = prev }
   }, [date])
 
   if (!date) return null
