@@ -825,7 +825,8 @@ export default function App() {
       </div>
       <DayModal
         date={dayModalDate}
-        events={killSwitch ? [] : allEvents}
+        // Same sidebar filters (categories, sources, search) as the grid
+        events={visibleEvents}
         onClose={() => setDayModalDate(null)}
         onAdd={openNewFromDate}
         onEdit={(ev) => { setDayModalDate(null); openEdit(ev) }}
