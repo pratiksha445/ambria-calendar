@@ -91,6 +91,9 @@ export default function BookingForm({ initial, restoredFromDraft, onSaved, onDel
   })
   const [errors, setErrors] = useState({})
   const [saving, setSaving] = useState(false)
+  // Set the instant Save is pressed. `saving` only turns on after the
+  // duplicate check, so a double click used to create the booking twice.
+  const submittingRef = useRef(false)
   const [deleting, setDeleting] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [submitError, setSubmitError] = useState(null)
@@ -602,6 +605,16 @@ export default function BookingForm({ initial, restoredFromDraft, onSaved, onDel
 
   const onSave = async (e) => {
     e.preventDefault()
+    if (submittingRef.current) return
+    submittingRef.current = true
+    try {
+      await saveBooking()
+    } finally {
+      submittingRef.current = false
+    }
+  }
+
+  const saveBooking = async () => {
     if (readOnly) return
     setSubmitError(null)
     if (!venueId) { setSubmitError(t('Please select a category')); return }
@@ -668,6 +681,8 @@ export default function BookingForm({ initial, restoredFromDraft, onSaved, onDel
   }
 
   const confirmDupSave = async () => {
+    if (submittingRef.current) return
+    submittingRef.current = true
     const payload = pendingDupPayload
     setDupWarning(null)
     setPendingDupPayload(null)
@@ -680,6 +695,7 @@ export default function BookingForm({ initial, restoredFromDraft, onSaved, onDel
       setSubmitError(err?.message ?? String(err))
     } finally {
       setSaving(false)
+      submittingRef.current = false
     }
   }
 
