@@ -14,12 +14,20 @@
 // - Linked by crm_id ("lms:..."); bookings stay source='manual' so staff can
 //   still edit them. LMS-owned fields are refreshed from LMS on every run;
 //   blank LMS values never wipe what staff typed.
-// - A booking someone already entered by hand (same venue + date + phone or
-//   name) is adopted instead of duplicated. Ambiguous matches are skipped and
-//   reported, never guessed.
+// - A booking someone already entered by hand (same date + phone or name,
+//   even under the wrong Ambria venue given a second clue; else same venue +
+//   shift + pax)
+//   is adopted instead of duplicated. Ambiguous matches are skipped and
+//   reported, never guessed. Own-venue Decor / Entertainment / Catering
+//   folds into a hand-entered venue booking the same way.
+// - A function LMS moved (new shift, date or function type → new key)
+//   re-links the booking that contract already has instead of adding a
+//   second one. If that day already had a booking, the old one is left
+//   for staff to remove (it can't be told apart from a function LMS's list
+//   dropped).
 // - Deleted (soft, deleted_at) ONLY when LMS marks the contract cancelled
-//   (cancel_remarks). A contract merely missing from LMS's list is never
-//   deleted: LMS's list endpoint is known to drop live contracts.
+//   (cancel_remarks). A contract or function merely missing from LMS's list
+//   is never deleted: LMS's list endpoint is known to drop live ones.
 // - A booking staff deleted in the calendar is never resurrected.
 // - Sales person: LMS only sends the id of who entered the contract; the
 //   name comes from LMS's user list (else learnt from bookings staff already
@@ -280,12 +288,13 @@ function ownVenueCat(row: Row) {
 // ── Build the desired bookings from LMS rows ──
 
 // by = LMS id of the user who entered the contract (LMS sends no name)
-type Desired = { key: string; fields: Ev; label: string; by: string }
+// own / dept: Decor, Catering, Entertainment held at one of our own venues
+type Desired = { key: string; fields: Ev; label: string; by: string; own?: string; dept?: string }
 
 export function buildDesired(lms: Record<string, Row[]>, today: string) {
   const desired = new Map<string, Desired>()
   // key → where the cancelled booking would sit, for matching hand-entered ones
-  const cancelled = new Map<string, { venue_id: string; date: string; phone: string }>()
+  const cancelled = new Map<string, { venue_id: string; date: string; phone: string; name: string }>()
   const isCancelled = (row: Row, dept: string) => String(row[DEPTS[dept].p + "cancel_remarks"] || "").trim() !== ""
 
   // Keys of contracts now merged into another booking; a separate entry an
@@ -308,7 +317,7 @@ export function buildDesired(lms: Record<string, Row[]>, today: string) {
       const villaKey = key.replace("lms:venue:", "lms:villa:")
       folded.add(key)
       if (isCancelled(row, "venue")) {
-        cancelled.set(villaKey, { venue_id: "villa", date, phone: phone10(row.fisc_client_mobile) })
+        cancelled.set(villaKey, { venue_id: "villa", date, phone: phone10(row.fisc_client_mobile), name: String(row.fisc_guest_name || "") })
         continue
       }
       const s = slotFields(row, "venue")
@@ -323,7 +332,7 @@ export function buildDesired(lms: Record<string, Row[]>, today: string) {
     }
 
     if (isCancelled(row, "venue")) {
-      cancelled.set(key, { venue_id: cat, date, phone: phone10(row.fisc_client_mobile) })
+      cancelled.set(key, { venue_id: cat, date, phone: phone10(row.fisc_client_mobile), name: String(row.fisc_guest_name || "") })
       continue
     }
     const fields = compact({
@@ -343,7 +352,10 @@ export function buildDesired(lms: Record<string, Row[]>, today: string) {
   const outdoor = new Map<string, { dept: string; rows: Row[]; cancelledRows: Row[] }>()
   for (const dept of ["decor", "catering", "entertainment"]) {
     const cfg = DEPTS[dept]
+    const seen = new Set()
     for (const row of lms[dept] || []) {
+      // LMS's list repeats some function rows (same id twice)
+      if (row.id != null) { if (seen.has(row.id)) continue; seen.add(row.id) }
       const date = String(row[cfg.date] || "").slice(0, 10)
       if (!date || date < today) continue
       const cancelledRow = isCancelled(row, dept)
@@ -381,7 +393,7 @@ export function buildDesired(lms: Record<string, Row[]>, today: string) {
   for (const [key, g] of outdoor) {
     if (g.rows.length === 0) {
       const r = g.cancelledRows[0], cfg = DEPTS[g.dept]
-      cancelled.set(key, { venue_id: OUTDOOR_CAT[g.dept], date: String(r[cfg.date]).slice(0, 10), phone: phone10(r[cfg.contact]) })
+      cancelled.set(key, { venue_id: OUTDOOR_CAT[g.dept], date: String(r[cfg.date]).slice(0, 10), phone: phone10(r[cfg.contact]), name: String(r[cfg.p + "guest_name"] || "") })
       continue
     }
     const cfg = DEPTS[g.dept]
@@ -404,7 +416,7 @@ export function buildDesired(lms: Record<string, Row[]>, today: string) {
       menu_type: g.dept === "catering" ? s0.menu_type : "",
       menu_cat: g.dept === "catering" ? s0.menu_cat : "",
     })
-    desired.set(key, { key, fields, label: fields.guest_name + " " + fields.date + " " + fields.venue_id + " (" + g.rows.map((r) => funcName(r, g.dept)).filter(Boolean).join(", ") + ")", by: String(first[cfg.by] || "").trim() })
+    desired.set(key, { key, fields, label: fields.guest_name + " " + fields.date + " " + fields.venue_id + " (" + g.rows.map((r) => funcName(r, g.dept)).filter(Boolean).join(", ") + ")", by: String(first[cfg.by] || "").trim(), own: ownVenueCat(first) || "", dept: g.dept })
   }
 
   for (const k of desired.keys()) { cancelled.delete(k); folded.delete(k) }
@@ -506,19 +518,108 @@ function learnSalesPeople(desiredMap: Map<string, Desired>, byKey: Map<string, E
   return out
 }
 
+const OWN_CATS = new Set(["ap", "am", "ae", "ar"])
+
+/** A usable 10-digit phone; placeholders like 0000000000 never match anyone */
+function realPhone(v: any) {
+  const p = phone10(v)
+  return p.length === 10 && !/^(\d)\1+$/.test(p) ? p : ""
+}
+
+/** Both sides carry a name and the names don't match */
+function namesConflict(tokens: string[], e: Ev) {
+  const other = eventNameTokens(e)
+  return tokens.length > 0 && other.length > 0 && !namesMatch(tokens, other)
+}
+
 /**
- * Find the hand-entered booking this LMS function already is. Tiers, strongest
- * first: same phone → spelling-tolerant name → same shift + pax. Within a tier
- * a shift match breaks ties; anything still ambiguous is never guessed.
+ * Phones on 3+ different guests (an office / planner number sits on 10
+ * bookings). There a phone alone never ties "Sweta" to "Sarthak"; anywhere
+ * else it does, even when LMS has a company name ("Glocal Holiday Pvt Ltd")
+ * and the calendar the guest's ("Dharmender").
  */
-function findCandidate(d: Desired, pool: Ev[]): { match?: Ev; ambiguous?: Ev[] } {
-  const p = phone10(d.fields.phone)
-  const tokens = nameTokens(d.fields.guest_name)
-  const tiers = [
-    pool.filter((e) => p && phone10(e.phone) === p),
-    pool.filter((e) => namesMatch(tokens, eventNameTokens(e))),
-    pool.filter((e) => d.fields.shift && d.fields.pax && e.shift === d.fields.shift && String(e.pax || "") === d.fields.pax),
-  ]
+export function sharedPhones(desiredMap: Map<string, Desired>, existing: Ev[]) {
+  const names = new Map<string, Set<string>>()
+  const add = (phone: any, name: any) => {
+    const p = realPhone(phone), first = nameTokens(name)[0]
+    if (!p || !first) return
+    if (!names.has(p)) names.set(p, new Set())
+    names.get(p)!.add(first)
+  }
+  for (const d of desiredMap.values()) add(d.fields.phone, d.fields.guest_name)
+  for (const e of existing) if (!e.deleted_at) add(e.phone, e.guest_name)
+  return new Set([...names].filter(([, s]) => s.size >= 3).map(([p]) => p))
+}
+
+/**
+ * Find the hand-entered booking (same date) this LMS function already is.
+ * strong: same phone, else spelling-tolerant name (at our own venues also
+ * under another Ambria venue, when staff picked the wrong one, given a
+ * second clue). weak (run only after every strong match is taken): same
+ * venue + shift + pax (sub-venue names differ too much between LMS and
+ * the calendar to compare). Candidates
+ * are ranked same venue → same name → same function → same outside venue
+ * name → same shift; a tie at the top is ambiguous and never guessed.
+ */
+function findCandidate(d: Desired, pool: Ev[], strong: boolean, shared: Set<string> = new Set()): { match?: Ev; ambiguous?: Ev[] } {
+  const f = d.fields
+  const p = realPhone(f.phone)
+  const tokens = nameTokens(f.guest_name)
+  const sameVenue = (e: Ev) => e.venue_id === f.venue_id
+  const venueOk = (e: Ev) => sameVenue(e) || (OWN_CATS.has(e.venue_id) && OWN_CATS.has(f.venue_id))
+  const nameHit = (e: Ev) => tokens.length > 0 && namesMatch(tokens, eventNameTokens(e))
+  const sameType = (e: Ev) => !!f.event_type && e.event_type === f.event_type && (e.event_type_other || "") === (f.event_type_other || "")
+  const sameShift = (e: Ev) => !!f.shift && e.shift === f.shift
+  const samePax = (e: Ev) => !!f.pax && String(e.pax || "") === String(f.pax)
+  const samePlace = (e: Ev) => !!f.venue_name && String(e.venue_name || "").trim().toLowerCase() === String(f.venue_name).trim().toLowerCase()
+  const phoneHit = (e: Ev) => !!p && realPhone(e.phone) === p && !(shared.has(p) && namesConflict(tokens, e))
+  // Under another Ambria venue one clue is not proof (two Pankajs on one day,
+  // a planner's phone on two weddings): phone + name, or one of them plus
+  // the same shift and the same pax or function.
+  const otherVenueOk = (e: Ev) => (phoneHit(e) && nameHit(e)) || (sameShift(e) && (samePax(e) || sameType(e)))
+  const placeOk = (e: Ev) => sameVenue(e) || (venueOk(e) && otherVenueOk(e))
+  const tiers = strong
+    ? [pool.filter((e) => placeOk(e) && phoneHit(e)), pool.filter((e) => placeOk(e) && nameHit(e))]
+    // Two weddings can share a venue and night (different lawns), so the
+    // weak tier wants shift and pax both
+    : [pool.filter((e) => sameVenue(e) && sameShift(e) && samePax(e))]
+  const score = (e: Ev) => (sameVenue(e) ? 16 : 0) + (nameHit(e) ? 8 : 0) + (sameType(e) ? 4 : 0) + (samePlace(e) ? 2 : 0) + (sameShift(e) ? 1 : 0)
+  for (const cands of tiers) {
+    if (!cands.length) continue
+    const top = Math.max(...cands.map(score))
+    const best = cands.filter((e) => score(e) === top)
+    return best.length === 1 ? { match: best[0] } : { ambiguous: best }
+  }
+  return {}
+}
+
+/** "lms:venue:00522:3-2026-11-23-Dinner" → contract "lms:venue:00522", function type "3", date */
+function parseKey(key: string) {
+  const m = /^(lms:\w+:[^:]+):(?:([^-]*)-)?(\d{4}-\d{2}-\d{2})/.exec(key || "")
+  return m ? { contract: m[1], type: m[2] || "", date: m[3] } : null
+}
+
+/**
+ * When LMS moves a function (new shift, date or function type) its key
+ * changes. Find the calendar booking still linked to that contract under a
+ * key LMS no longer sends, so it is re-linked instead of a second booking
+ * being made. Tiers: same date + type (shift moved) → same date (type
+ * changed) → same type (date moved); a shift match breaks ties; still
+ * several → ambiguous. Nothing in common → not taken: LMS's list drops
+ * live functions, so an unrelated one may just be missing for now.
+ */
+function findMoved(d: Desired, orphans: Ev[]): { match?: Ev; ambiguous?: Ev[] } {
+  const k = parseKey(d.key)
+  if (!k) return {}
+  const mine = orphans.filter((e) => parseKey(e.crm_id)?.contract === k.contract)
+  const sameDate = (e: Ev) => parseKey(e.crm_id)!.date === k.date
+  // Venue keys carry the function type; Decor / Catering / Entertainment
+  // keys don't, so their last-synced function name stands in.
+  const sameType = (e: Ev) => k.type
+    ? parseKey(e.crm_id)!.type === k.type
+    : !!d.fields.event_type && (e.lms_snapshot || {}).event_type === d.fields.event_type &&
+      ((e.lms_snapshot || {}).event_type_other || "") === (d.fields.event_type_other || "")
+  const tiers = [mine.filter((e) => sameDate(e) && sameType(e)), mine.filter(sameDate), mine.filter(sameType)]
   for (let cands of tiers) {
     if (cands.length > 1 && d.fields.shift) {
       const sameShift = cands.filter((e) => e.shift === d.fields.shift)
@@ -530,13 +631,29 @@ function findCandidate(d: Desired, pool: Ev[]): { match?: Ev; ambiguous?: Ev[] }
   return {}
 }
 
-export function plan(desiredMap: Map<string, Desired>, cancelled: Map<string, { venue_id: string; date: string; phone: string }>, existing: Ev[], folded: Set<string> = new Set(), people: { lmsUsers: Row[]; calUsers: Ev[] } = { lmsUsers: [], calUsers: [] }) {
+export function plan(desiredMap: Map<string, Desired>, cancelled: Map<string, { venue_id: string; date: string; phone: string; name: string }>, existing: Ev[], folded: Set<string> = new Set(), people: { lmsUsers: Row[]; calUsers: Ev[] } = { lmsUsers: [], calUsers: [] }) {
   const byKey = new Map<string, Ev>()
   for (const e of existing) if (e.crm_id) byKey.set(e.crm_id, e)
   const claimed = new Set<string>()
   const now = new Date().toISOString()
-  const inserts: Ev[] = [], updates: { id: string; patch: Ev; label: string; adopted: boolean }[] = []
+  const inserts: Ev[] = [], updates: { id: string; patch: Ev; label: string; adopted: boolean; moved?: boolean }[] = []
+  // Live bookings linked to a key LMS no longer sends (function moved)
+  const orphans = existing.filter((e) => e.crm_id && !e.deleted_at && !desiredMap.has(e.crm_id) &&
+    !cancelled.has(e.crm_id) && !folded.has(e.crm_id))
+  // Only fields LMS itself changed since the last sync are written, so a
+  // value staff corrected (VMDE, Jain menu, exact time...) is never
+  // reverted just because LMS still holds its rougher version.
+  const lmsChanges = (e: Ev, d: Desired) => {
+    const snap: Ev = e.lms_snapshot || {}
+    const patch: Ev = {}
+    for (const [k, v] of Object.entries(d.fields)) {
+      if (!sameValue(v, snap[k]) && !sameValue(v, e[k])) patch[k] = v
+    }
+    return patch
+  }
   const ambiguous: string[] = [], skippedDeleted: string[] = []
+  const pending: Desired[] = []
+  const shared = sharedPhones(desiredMap, existing)
   const unclaimed = () => existing.filter((e) => !e.crm_id && !e.deleted_at && !claimed.has(e.id))
   // Sales person is only ever filled where blank, never overwritten
   const salesBy = resolveSalesPeople(desiredMap, byKey, people.lmsUsers, people.calUsers)
@@ -551,38 +668,84 @@ export function plan(desiredMap: Map<string, Desired>, cancelled: Map<string, { 
     if (linked) {
       if (linked.deleted_at) { skippedDeleted.push(d.label); continue }
       claimed.add(linked.id)
-      // Only fields LMS itself changed since the last sync are written, so a
-      // value staff corrected (VMDE, Jain menu, exact time...) is never
-      // reverted just because LMS still holds its rougher version.
-      const snap: Ev = linked.lms_snapshot || {}
-      const patch: Ev = {}
-      for (const [k, v] of Object.entries(d.fields)) {
-        if (!sameValue(v, snap[k]) && !sameValue(v, linked[k])) patch[k] = v
-      }
-      fillSales(linked, d, patch)
-      const snapChanged = stableJson(snap) !== stableJson(d.fields)
+      const patch = fillSales(linked, d, lmsChanges(linked, d))
+      const snapChanged = stableJson(linked.lms_snapshot || {}) !== stableJson(d.fields)
       if (Object.keys(patch).length || snapChanged) {
         updates.push({ id: linked.id, patch: { ...withTitle(linked, patch), lms_snapshot: d.fields, synced_at: now }, label: d.label, adopted: false })
       }
       continue
     }
 
-    const pool = unclaimed().filter((e) => e.venue_id === d.fields.venue_id && e.date === d.fields.date)
-    const { match, ambiguous: amb } = findCandidate(d, pool)
-    if (amb) { ambiguous.push(d.label + " → " + amb.map((e) => e.title).join(" / ")); continue }
-    if (match) {
-      // Adopting a hand-entered booking: fill only what staff left blank,
-      // except a signed decor / entertainment contract, which is news.
-      claimed.add(match.id)
+    // Function moved in LMS (shift / date / type): re-link the booking that
+    // contract already has, carrying LMS's changes, instead of a duplicate.
+    const moved = findMoved(d, orphans.filter((e) => !claimed.has(e.id)))
+    if (moved.ambiguous) { ambiguous.push(d.label + " (moved) → " + moved.ambiguous.map((e) => e.title).join(" / ")); continue }
+    if (moved.match) {
+      const e = moved.match
+      claimed.add(e.id)
+      const patch = fillSales(e, d, lmsChanges(e, d))
+      updates.push({ id: e.id, patch: { ...withTitle(e, patch), crm_id: d.key, lms_snapshot: d.fields, synced_at: now }, label: d.label, adopted: false, moved: true })
+      continue
+    }
+    pending.push(d)
+  }
+
+  // Booking made by hand before the LMS contract: adopt it instead of adding
+  // a second one. Every strong (phone / name) match is taken before any weak
+  // one, so a loose match can't steal the booking another function owns.
+  for (const strong of [true, false]) {
+    for (const d of [...pending]) {
+      const pool = unclaimed().filter((e) => e.date === d.fields.date)
+      const { match, ambiguous: amb } = findCandidate(d, pool, strong, shared)
+      if (!match && !amb) continue
+      pending.splice(pending.indexOf(d), 1)
+      // Unsure which booking it is → nothing is adopted or added
+      if (amb) { ambiguous.push(d.label + " → " + amb.map((e) => e.title).join(" / ")); continue }
+      // Fill only what staff left blank, except a signed decor /
+      // entertainment contract, which is news.
+      claimed.add(match!.id)
       const patch: Ev = {}
       for (const [k, v] of Object.entries(d.fields)) {
-        const blank = match[k] === null || match[k] === undefined || match[k] === "" ||
-          (Array.isArray(match[k]) && match[k].length === 0)
-        if (blank || ((k === "decor_status" || k === "entertainment_status") && match[k] !== v)) patch[k] = v
+        const cur = match![k]
+        const blank = cur === null || cur === undefined || cur === "" || (Array.isArray(cur) && cur.length === 0)
+        if (blank || ((k === "decor_status" || k === "entertainment_status") && cur !== v)) patch[k] = v
       }
-      fillSales(match, d, patch)
-      updates.push({ id: match.id, patch: { ...withTitle(match, patch), crm_id: d.key, lms_snapshot: d.fields, synced_at: now }, label: d.label, adopted: true })
-      continue
+      // Entered under the wrong Ambria venue: LMS's venue wins
+      if (match!.venue_id !== d.fields.venue_id) {
+        patch.venue_id = d.fields.venue_id
+        patch.sub_venue = d.fields.sub_venue || null
+      }
+      fillSales(match!, d, patch)
+      updates.push({ id: match!.id, patch: { ...withTitle(match!, patch), crm_id: d.key, lms_snapshot: d.fields, synced_at: now }, label: d.label, adopted: true })
+    }
+  }
+
+  for (const d of pending) {
+    // Decor / Entertainment / Catering at our own venue whose venue booking
+    // was entered by hand (no LMS venue contract to fold into): fold into
+    // that booking, as buildDesired does for LMS venue contracts.
+    if (d.own) {
+      const p = realPhone(d.fields.phone), tokens = nameTokens(d.fields.guest_name)
+      // Phone or name at the venue LMS names; phone and name at another one
+      const hosts = existing.filter((e) => {
+        if (e.deleted_at || !OWN_CATS.has(e.venue_id) || e.date !== d.fields.date) return false
+        const ph = !!p && realPhone(e.phone) === p && !(shared.has(p) && namesConflict(tokens, e))
+        const nm = tokens.length > 0 && namesMatch(tokens, eventNameTokens(e))
+        return e.venue_id === d.own ? ph || nm : ph && nm
+      })
+      if (hosts.length) {
+        for (const h of hosts) {
+          const patch: Ev = {}
+          if (d.dept === "decor" && h.decor_status !== "Closure") patch.decor_status = "Closure"
+          if (d.dept === "entertainment" && h.entertainment_status !== "Closure") patch.entertainment_status = "Closure"
+          if (d.dept === "catering") {
+            if (!h.menu_type && d.fields.menu_type) patch.menu_type = d.fields.menu_type
+            if (!h.menu_cat && d.fields.menu_cat) patch.menu_cat = d.fields.menu_cat
+          }
+          if (Object.keys(patch).length) updates.push({ id: h.id, patch: withTitle(h, patch), label: d.label + " (folded)", adopted: false })
+        }
+        continue
+      }
     }
     inserts.push({
       ...fillSales({}, d, { ...d.fields }), title: buildTitle(d.fields), status: "Confirmed", source: "manual",
@@ -591,12 +754,16 @@ export function plan(desiredMap: Map<string, Desired>, cancelled: Map<string, { 
   }
 
   // Cancelled in LMS: linked bookings, plus a hand-entered one only on the
-  // strictest match (same venue + date + phone), never on a fuzzy name.
+  // strictest match (same venue + date + phone, name not contradicting),
+  // never on a fuzzy name.
+  // A booking whose function LMS stopped sending is never deleted, even when
+  // the rest of its contract still comes through: LMS's list drops single
+  // functions too (decor 00522 shows 2 functions in LMS, 1 in the API).
   const deletes = existing.filter((e) => e.crm_id && !e.deleted_at && (cancelled.has(e.crm_id) || folded.has(e.crm_id)))
   for (const [key, info] of cancelled) {
     if (byKey.has(key)) continue
     const hits = unclaimed().filter((e) => e.venue_id === info.venue_id && e.date === info.date &&
-      info.phone && phone10(e.phone) === info.phone)
+      !!realPhone(info.phone) && realPhone(e.phone) === realPhone(info.phone) && !namesConflict(nameTokens(info.name), e))
     if (hits.length === 1) { deletes.push(hits[0]); claimed.add(hits[0].id) }
   }
   return { inserts, updates, deletes, ambiguous, skippedDeleted }
@@ -739,7 +906,8 @@ Deno.serve(async (req) => {
       lms_rows: { venue: venue.length, decor: decor.length, catering: catering.length, entertainment: entertainment.length },
       insert: p.inserts.length,
       adopt: p.updates.filter((u) => u.adopted).length,
-      update: p.updates.filter((u) => !u.adopted).length,
+      update: p.updates.filter((u) => !u.adopted && !u.moved).length,
+      moved: p.updates.filter((u) => u.moved).length,
       delete: p.deletes.length,
       ambiguous: p.ambiguous.length,
       skipped_deleted_in_calendar: p.skippedDeleted.length,
@@ -750,7 +918,8 @@ Deno.serve(async (req) => {
         ambiguous: p.ambiguous,
         inserts: p.inserts.map((e) => e.title + " — " + e.date + " " + e.venue_id),
         adopts: p.updates.filter((u) => u.adopted).map((u) => u.label + " ← " + Object.keys(u.patch).join(",")),
-        updates: p.updates.filter((u) => !u.adopted).map((u) => u.label + " ← " + Object.keys(u.patch).join(",")),
+        moved: p.updates.filter((u) => u.moved).map((u) => u.label + " ← " + Object.keys(u.patch).join(",")),
+        updates: p.updates.filter((u) => !u.adopted && !u.moved).map((u) => u.label + " ← " + Object.keys(u.patch).join(",")),
         deletes: p.deletes.map((e) => e.title + " — " + e.date),
       })
     }

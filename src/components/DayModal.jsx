@@ -3,6 +3,8 @@ import { toIsoDate } from '../lib/dates.js'
 import { VENUES } from '../config/venues.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 import EventCard from './EventCard.jsx'
+import MultiEventCard from './MultiEventCard.jsx'
+import { groupMultiEvents } from '../lib/multiEvent.js'
 
 export default function DayModal({ date, events, onClose, onAdd, onEdit, onDelete, onExport, user, reviewMap, onReview, onPayment }) {
   const { t } = useLanguage()
@@ -182,20 +184,14 @@ export default function DayModal({ date, events, onClose, onAdd, onEdit, onDelet
           {filtered.length === 0 ? (
             <div className="empty-state">{t('No bookings')}</div>
           ) : (
-            filtered.map((ev) => (
-              <EventCard
-                key={ev.id}
-                event={ev}
-                expanded={expandedId === ev.id}
-                onToggle={() => toggle(ev.id)}
-                onEdit={onEdit}
-                onDelete={onDelete}
-                user={user}
-                reviewMap={reviewMap}
-                onReview={onReview}
-                onPayment={onPayment}
-              />
-            ))
+            // One guest's functions at our venue → one Multi-Event card
+            groupMultiEvents(filtered).map((item) => {
+              const id = item.group ? 'g-' + item.events[0].id : item.event.id
+              const shared = { expanded: expandedId === id, onToggle: () => toggle(id), onEdit, onDelete, user, reviewMap, onReview, onPayment }
+              return item.group
+                ? <MultiEventCard key={id} events={item.events} {...shared} />
+                : <EventCard key={id} event={item.event} {...shared} />
+            })
           )}
         </div>
       </div>

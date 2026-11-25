@@ -652,6 +652,7 @@ export default function BookingForm({ initial, restoredFromDraft, onSaved, onDel
           date: form.date,
           guestName: form.guest_name,
           shift: form.shift,
+          phone: form.phone,
           checkInDate: form.check_in_date,
           checkOutDate: form.check_out_date,
           tenderName: form.tender_name,

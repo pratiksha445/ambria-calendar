@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { addDays, buildMonthGrid, isSameDay, toIsoDate } from '../lib/dates.js'
 import { VENUE_BY_ID, getSubVenueStyle } from '../config/venues.js'
 import { getEventTypeAbbr } from '../lib/eventTypes.js'
+import { groupMultiEvents } from '../lib/multiEvent.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 
 const MAX_PILLS = 3
@@ -66,9 +67,10 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, onE
           const iso = toIsoDate(d)
           const allDayEvents = eventsByDay[iso] ?? []
           // Separate span events from normal events
-          const regularEvents = spanIds.size > 0
+          // One guest's functions at our venue → one Multi-Event pill
+          const regularEvents = groupMultiEvents(spanIds.size > 0
             ? allDayEvents.filter((ev) => !spanIds.has(ev.id))
-            : allDayEvents
+            : allDayEvents)
           const spanSegs = spanMap[iso] ?? []
 
           const scSegs = scMap[iso] ?? []
@@ -143,7 +145,23 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, onE
                   )
                 })}
                 {/* Regular pills */}
-                {visibleRegular.map((ev) => {
+                {visibleRegular.map((item) => {
+                  if (item.group) {
+                    const g = item.events, venue = VENUE_BY_ID[g[0].venue_id]
+                    const secColors = sectionColors(g[0])
+                    return (
+                      <div
+                        key={`g-${g.map((e) => e.id + e.updated_at).join('-')}`}
+                        className={`day-pill${secColors ? ' day-pill-sec' : ''}`}
+                        style={{ background: venue?.color ?? '#ccc', color: venue?.textColor ?? '#fff' }}
+                        title={buildGroupTooltip(g)}
+                      >
+                        {buildGroupLabel(g)}
+                        {secColors && <SectionBar colors={secColors} />}
+                      </div>
+                    )
+                  }
+                  const ev = item.event
                   const venue = VENUE_BY_ID[ev.venue_id]
                   const aeStyle = getSubVenueStyle(ev)
                   const statusClass = ev.status === 'Cancelled' ? ' pill-cancelled' : ev.status === 'Postponed' ? ' pill-postponed' : ''
@@ -346,6 +364,21 @@ function buildPillLabel(ev, eventTypes) {
     default:
       return '—'
   }
+}
+
+/** Multi-Event pill: "Vikram (2)" — guest's first name + number of functions */
+function buildGroupLabel(events) {
+  const name = (events.map((e) => e.guest_name).find(Boolean) || '').replace(/^(mr|mrs|ms|dr)\.?\s*/i, '').split(/\s+/)[0]
+  return `${name || 'Multi'} (${events.length})`
+}
+
+function buildGroupTooltip(events) {
+  const totalPax = events.reduce((sum, e) => sum + (Number(e.pax) || 0), 0)
+  const parts = events.map((e) => {
+    const t = e.event_type === 'Other' ? (e.event_type_other || '') : (e.event_type || '')
+    return [e.shift, t].filter(Boolean).join(' ')
+  }).filter(Boolean)
+  return `Multi-Event (${events.length})${totalPax ? ` · ${totalPax} pax` : ''} · ${parts.join(', ')}`
 }
 
 function buildPillTooltip(ev, eventTypes) {

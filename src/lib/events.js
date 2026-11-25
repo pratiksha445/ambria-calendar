@@ -216,12 +216,64 @@ export async function deleteEvent(id, user) {
   return event
 }
 
+// ── Duplicate matching (same rules as the LMS sync's adoption) ──
+const SALUTATIONS = new Set(['mr', 'mrs', 'ms', 'dr', 'shri', 'smt', 'miss'])
+const OWN_VENUES = new Set(['ap', 'am', 'ae', 'ar'])
+
+function phone10(v) {
+  const p = String(v || '').replace(/\D/g, '').slice(-10)
+  return p.length === 10 && !/^(\d)\1+$/.test(p) ? p : ''
+}
+
+function nameTokens(name) {
+  return String(name || '').toLowerCase().split(/[^a-z]+/).filter((w) => w.length >= 3 && !SALUTATIONS.has(w))
+}
+
+function editDistance(a, b) {
+  const dp = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)])
+  for (let j = 1; j <= b.length; j++) dp[0][j] = j
+  for (let i = 1; i <= a.length; i++) {
+    for (let j = 1; j <= b.length; j++) {
+      dp[i][j] = Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1))
+    }
+  }
+  return dp[a.length][b.length]
+}
+
+/** Spelling-tolerant: "Ajay" ~ "Ajay singh", "Mr. Pankaj Prasad" ~ "Pankaj", Jaswinder ~ Jasvinder */
+function namesMatch(a, b) {
+  return a.some((x) => b.some((y) =>
+    x === y || x.startsWith(y) || y.startsWith(x) ||
+    (Math.min(x.length, y.length) >= 4 && editDistance(x, y) <= 1)))
+}
+
 /**
  * Check for an existing booking that matches the key identifiers of a new booking.
  * Returns the matching row or null if no duplicate is found.
  * Only queries non-deleted rows.
+ * Same venue + date, and the same phone or a similar name ("Ajay" vs the
+ * LMS's "Ajay singh"). At our own venues a guest can have one booking per
+ * function, so a different shift there is not a duplicate; ADD / AC / AEE
+ * hold one card per guest per day, so shift is ignored.
  */
-export async function checkDuplicateBooking({ venueId, date, guestName, shift, checkInDate, checkOutDate, tenderName }) {
+export async function checkDuplicateBooking({ venueId, date, guestName, shift, phone, checkInDate, checkOutDate, tenderName }) {
+  if (venueId !== 'villa' && venueId !== 'tender') {
+    const p = phone10(phone)
+    const tokens = nameTokens(guestName)
+    if (!date || (!p && !tokens.length)) return null
+    const { data } = await supabase
+      .from('events')
+      .select('id, title, date, guest_name, phone, shift, check_in_date, check_out_date, tender_name')
+      .is('deleted_at', null)
+      .eq('venue_id', venueId)
+      .eq('date', date)
+    // Only a warning ("Save anyway?"), so a shared office number giving an
+    // extra prompt is cheaper than a missed duplicate
+    return (data || []).find((e) =>
+      ((p && phone10(e.phone) === p) || (tokens.length && namesMatch(tokens, nameTokens(e.guest_name || String(e.title || '').split('|')[0])))) &&
+      !(OWN_VENUES.has(venueId) && shift && e.shift && e.shift !== shift)) ?? null
+  }
+
   let q = supabase
     .from('events')
     .select('id, title, date, guest_name, shift, check_in_date, check_out_date, tender_name')
@@ -238,10 +290,6 @@ export async function checkDuplicateBooking({ venueId, date, guestName, shift, c
     if (!date && !tenderName?.trim()) return null
     if (date) q = q.eq('date', date)
     if (tenderName?.trim()) q = q.ilike('tender_name', tenderName.trim())
-  } else {
-    if (!date || !guestName?.trim()) return null
-    q = q.eq('date', date).ilike('guest_name', guestName.trim())
-    if (shift) q = q.eq('shift', shift)
   }
 
   const { data } = await q.limit(1)
