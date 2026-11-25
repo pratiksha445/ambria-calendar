@@ -148,12 +148,13 @@ export default function MonthView({ currentDate, selectedDate, onSelectDate, onE
                 {visibleRegular.map((item) => {
                   if (item.group) {
                     const g = item.events, venue = VENUE_BY_ID[g[0].venue_id]
+                    const gStyle = getSubVenueStyle(g[0]) // lawn colour; the group shares one lawn
                     const secColors = sectionColors(g[0])
                     return (
                       <div
                         key={`g-${g.map((e) => e.id + e.updated_at).join('-')}`}
                         className={`day-pill${secColors ? ' day-pill-sec' : ''}`}
-                        style={{ background: venue?.color ?? '#ccc', color: venue?.textColor ?? '#fff' }}
+                        style={{ background: gStyle?.background ?? venue?.color ?? '#ccc', color: gStyle?.color ?? venue?.textColor ?? '#fff' }}
                         title={buildGroupTooltip(g)}
                       >
                         {buildGroupLabel(g)}

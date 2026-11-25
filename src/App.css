@@ -1159,19 +1159,19 @@
   border: 1.5px solid var(--ambria-accent);
 }
 
-/* Multi-Event (one guest's functions at our venue on one day): the inner
-   per-function cards sit indented under the group header */
-.multi-event-children {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 8px 10px 10px 18px;
-  border-top: 1px dashed var(--ambria-border);
+/* Multi-Event (one guest's functions at our venue, same day + lawn):
+   a value that differs per function is listed one per line */
+.multi-event-split {
+  display: block;
 }
-.multi-event-chevron {
-  flex-shrink: 0;
-  font-size: 12px;
-  color: var(--ambria-muted);
+.multi-event-actions {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.multi-event-action-group {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 /* Expanded details — hidden when collapsed, fully visible when expanded */
