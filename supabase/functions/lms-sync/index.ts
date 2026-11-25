@@ -19,7 +19,9 @@
 //   shift + pax)
 //   is adopted instead of duplicated. Ambiguous matches are skipped and
 //   reported, never guessed. Own-venue Decor / Entertainment / Catering
-//   folds into a hand-entered venue booking the same way.
+//   folds into a hand-entered venue booking the same way; a separate ADD /
+//   AEE / AC card an earlier run made for it is then removed (never one
+//   staff made).
 // - A function LMS moved (new shift, date or function type → new key)
 //   re-links the booking that contract already has instead of adding a
 //   second one. If that day already had a booking, the old one is left
@@ -519,6 +521,7 @@ function learnSalesPeople(desiredMap: Map<string, Desired>, byKey: Map<string, E
 }
 
 const OWN_CATS = new Set(["ap", "am", "ae", "ar"])
+const OUTDOOR_CATS = new Set(["add", "aee", "ac"])
 
 /** A usable 10-digit phone; placeholders like 0000000000 never match anyone */
 function realPhone(v: any) {
@@ -653,6 +656,35 @@ export function plan(desiredMap: Map<string, Desired>, cancelled: Map<string, { 
   }
   const ambiguous: string[] = [], skippedDeleted: string[] = []
   const pending: Desired[] = []
+  const foldedAway: Ev[] = []
+  /**
+   * Decor / Entertainment / Catering at our own venue whose venue booking is
+   * in the calendar but had no LMS venue contract to fold into (entered by
+   * hand, or LMS's list dropped it): fold into that booking, as buildDesired
+   * does for LMS venue contracts. Same phone or name at the venue LMS names;
+   * phone and name at another Ambria venue. True when folded.
+   */
+  const foldIntoVenue = (d: Desired) => {
+    if (!d.own) return false
+    const p = realPhone(d.fields.phone), tokens = nameTokens(d.fields.guest_name)
+    const hosts = existing.filter((e) => {
+      if (e.deleted_at || !OWN_CATS.has(e.venue_id) || e.date !== d.fields.date) return false
+      const ph = !!p && realPhone(e.phone) === p && !(shared.has(p) && namesConflict(tokens, e))
+      const nm = tokens.length > 0 && namesMatch(tokens, eventNameTokens(e))
+      return e.venue_id === d.own ? ph || nm : ph && nm
+    })
+    for (const h of hosts) {
+      const patch: Ev = {}
+      if (d.dept === "decor" && h.decor_status !== "Closure") patch.decor_status = "Closure"
+      if (d.dept === "entertainment" && h.entertainment_status !== "Closure") patch.entertainment_status = "Closure"
+      if (d.dept === "catering") {
+        if (!h.menu_type && d.fields.menu_type) patch.menu_type = d.fields.menu_type
+        if (!h.menu_cat && d.fields.menu_cat) patch.menu_cat = d.fields.menu_cat
+      }
+      if (Object.keys(patch).length) updates.push({ id: h.id, patch: withTitle(h, patch), label: d.label + " (folded)", adopted: false })
+    }
+    return hosts.length > 0
+  }
   const shared = sharedPhones(desiredMap, existing)
   const unclaimed = () => existing.filter((e) => !e.crm_id && !e.deleted_at && !claimed.has(e.id))
   // Sales person is only ever filled where blank, never overwritten
@@ -668,6 +700,14 @@ export function plan(desiredMap: Map<string, Desired>, cancelled: Map<string, { 
     if (linked) {
       if (linked.deleted_at) { skippedDeleted.push(d.label); continue }
       claimed.add(linked.id)
+      // A separate ADD / AEE / AC card an earlier run made (LMS's list was
+      // missing the venue contract) while the guest's venue booking is in the
+      // calendar: fold into the venue booking and remove the extra card.
+      // A card staff made themselves (created_by set) is never removed.
+      if (!linked.created_by && OUTDOOR_CATS.has(linked.venue_id) && foldIntoVenue(d)) {
+        foldedAway.push(linked)
+        continue
+      }
       const patch = fillSales(linked, d, lmsChanges(linked, d))
       const snapChanged = stableJson(linked.lms_snapshot || {}) !== stableJson(d.fields)
       if (Object.keys(patch).length || snapChanged) {
@@ -721,32 +761,7 @@ export function plan(desiredMap: Map<string, Desired>, cancelled: Map<string, { 
   }
 
   for (const d of pending) {
-    // Decor / Entertainment / Catering at our own venue whose venue booking
-    // was entered by hand (no LMS venue contract to fold into): fold into
-    // that booking, as buildDesired does for LMS venue contracts.
-    if (d.own) {
-      const p = realPhone(d.fields.phone), tokens = nameTokens(d.fields.guest_name)
-      // Phone or name at the venue LMS names; phone and name at another one
-      const hosts = existing.filter((e) => {
-        if (e.deleted_at || !OWN_CATS.has(e.venue_id) || e.date !== d.fields.date) return false
-        const ph = !!p && realPhone(e.phone) === p && !(shared.has(p) && namesConflict(tokens, e))
-        const nm = tokens.length > 0 && namesMatch(tokens, eventNameTokens(e))
-        return e.venue_id === d.own ? ph || nm : ph && nm
-      })
-      if (hosts.length) {
-        for (const h of hosts) {
-          const patch: Ev = {}
-          if (d.dept === "decor" && h.decor_status !== "Closure") patch.decor_status = "Closure"
-          if (d.dept === "entertainment" && h.entertainment_status !== "Closure") patch.entertainment_status = "Closure"
-          if (d.dept === "catering") {
-            if (!h.menu_type && d.fields.menu_type) patch.menu_type = d.fields.menu_type
-            if (!h.menu_cat && d.fields.menu_cat) patch.menu_cat = d.fields.menu_cat
-          }
-          if (Object.keys(patch).length) updates.push({ id: h.id, patch: withTitle(h, patch), label: d.label + " (folded)", adopted: false })
-        }
-        continue
-      }
-    }
+    if (foldIntoVenue(d)) continue
     inserts.push({
       ...fillSales({}, d, { ...d.fields }), title: buildTitle(d.fields), status: "Confirmed", source: "manual",
       crm_id: d.key, lms_snapshot: d.fields, synced_at: now,
@@ -760,6 +775,7 @@ export function plan(desiredMap: Map<string, Desired>, cancelled: Map<string, { 
   // the rest of its contract still comes through: LMS's list drops single
   // functions too (decor 00522 shows 2 functions in LMS, 1 in the API).
   const deletes = existing.filter((e) => e.crm_id && !e.deleted_at && (cancelled.has(e.crm_id) || folded.has(e.crm_id)))
+  deletes.push(...foldedAway)
   for (const [key, info] of cancelled) {
     if (byKey.has(key)) continue
     const hits = unclaimed().filter((e) => e.venue_id === info.venue_id && e.date === info.date &&
